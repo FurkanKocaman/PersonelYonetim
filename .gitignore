@@ -1,0 +1,39 @@
+# .NET Core ve C# ile ilgili dosyalar
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.vs/
+.vscode/
+*.user
+*.suo
+*.plist
+
+# Paket bağımlılıkları
+node_modules/
+npm-debug.log*
+yarn.lock
+package-lock.json
+
+# Çıktı dosyaları ve geçici dosyalar
+dist/
+coverage/
+temp/
+logs/
+.DS_Store
+Thumbs.db
+
+# Çevresel yapılandırmalar ve gizli dosyalar
+.env
+.env.local
+.env.*.local
+secrets.json
+
+# Vue.js ile ilgili dosyalar
+.vuepress/dist/
+.vite/
+.vitepress/cache/
+.idea/
