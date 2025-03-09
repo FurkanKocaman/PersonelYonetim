@@ -1,0 +1,17 @@
+﻿using PersonelYonetim.Server.Domain.Abstractions;
+
+namespace PersonelYonetim.Server.Domain.Personeller;
+
+public sealed class Personel : Entity
+{
+    public string Ad { get; set; } = default!;
+    public string Soyad { get; set; } = default!;
+    public string FullName => string.Join(" ", Ad, Soyad);
+    public DateTimeOffset DogumTarihi { get; set; }
+    public bool? Cinsiyet { get; set; }
+    public string? ProfilResimUrl { get; set; }
+    public Iletisim Iletisim { get; set; } = default!;
+    public Adres Adres { get; set; } = default!;
+    public Guid DepartmanId { get; set; } = default!;
+    public Guid PozisyonId { get; set; } = default!;
+}
