@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+	  <TreatWatningsAsErrors>true</TreatWatningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.23" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PersonelYonetim.Server.Application\PersonelYonetim.Server.Application.csproj" />
+    <ProjectReference Include="..\PersonelYonetim.Server.Infrastructure\PersonelYonetim.Server.Infrastructure.csproj" />
+    <ProjectReference Include="..\PersonelYonetim.Server.ServiceDefaults\PersonelYonetim.Server.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
