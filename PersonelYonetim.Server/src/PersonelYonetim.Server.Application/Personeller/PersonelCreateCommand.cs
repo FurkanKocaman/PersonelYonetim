@@ -3,8 +3,9 @@ using FluentValidation;
 using GenericRepository;
 using Mapster;
 using MediatR;
-
 using TS.Result;
+using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.Pozisyonlar;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
@@ -38,10 +39,23 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
 }
 internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository,
+    IDepartmanRepository departmanRepository,
+    IPozisyonRepository pozisyonRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelCreateCommand request, CancellationToken cancellationToken)
     {
+        var personelVarMi = await personelRepository.AnyAsync(p => p.Iletisim.Eposta == request.Iletisim.Eposta);
+        if (personelVarMi)
+            return Result<string>.Failure("Personel zaten mevcut");
+
+        var departman = await departmanRepository.FirstOrDefaultAsync(p => p.Id == request.DepartmanId);
+        if (departman is null)
+            return Result<string>.Failure("Departman bulunamadı");
+        var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
+        if (pozisyon is null)
+            return Result<string>.Failure("Pozisyon bulunamadı");
+
         Personel personel = request.Adapt<Personel>();
 
         personelRepository.Add(personel);

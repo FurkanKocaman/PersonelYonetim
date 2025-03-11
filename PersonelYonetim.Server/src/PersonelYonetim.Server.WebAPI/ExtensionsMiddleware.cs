@@ -9,10 +9,10 @@ public static class ExtensionsMiddleware
     {
         using(var scoped = app.Services.CreateScope())
         {
-            var userManager = scoped.ServiceProvider.GetRequiredService<UserManager<Appuser>>();
+            var userManager = scoped.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             if(!userManager.Users.Any(p => p.UserName == "admin"))
             {
-                Appuser user = new()
+                AppUser user = new()
                 {
                     Id = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13"),
                     UserName = "admin",

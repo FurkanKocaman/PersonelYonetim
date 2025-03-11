@@ -25,11 +25,11 @@ public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCom
     }
 }
 internal sealed class UserCreateCommandHadler(
-    UserManager<Appuser> usermanager) : IRequestHandler<UserCreateCommand, Result<string>>
+    UserManager<AppUser> usermanager) : IRequestHandler<UserCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
     {
-        Appuser user = request.Adapt<Appuser>();
+        AppUser user = request.Adapt<AppUser>();
         user.UserName = user.Email;
         user.EmailConfirmed = true;
         IdentityResult result = await usermanager.CreateAsync(user, request.Password);

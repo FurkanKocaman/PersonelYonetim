@@ -6,9 +6,10 @@ using PersonelYonetim.Server.Domain.Users;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
-public sealed record PersonelGetAllQuery() : IRequest<IQueryable<PersonelGetAllQueryResponse>> ;
+public sealed record PersonelGetQuery(
+    Guid Id) : IRequest<IQueryable<PersonelGetQueryResponse>> ;
 
-public sealed class PersonelGetAllQueryResponse : EntityDto
+public sealed class PersonelGetQueryResponse : EntityDto
 {
     public string FullName { get; set; } = default!;
     public DateTimeOffset DogumTarihi { get; set; }
@@ -23,18 +24,19 @@ public sealed class PersonelGetAllQueryResponse : EntityDto
     public string TamAdres { get; set; } = default!;
 }
 
-internal sealed class PersonelGetAllQueryHandler(
+internal sealed class PersonelGetQueryHandler(
     IPersonelRepository personelRepository,
-    UserManager<AppUser> userManager) : IRequestHandler<PersonelGetAllQuery, IQueryable<PersonelGetAllQueryResponse>>
+    UserManager<AppUser> userManager) : IRequestHandler<PersonelGetQuery, IQueryable<PersonelGetQueryResponse>>
 {
-    public Task<IQueryable<PersonelGetAllQueryResponse>> Handle(PersonelGetAllQuery request, CancellationToken cancellationToken)
+    public Task<IQueryable<PersonelGetQueryResponse>> Handle(PersonelGetQuery request, CancellationToken cancellationToken)
     {
         var response = (from entity in personelRepository.GetAll()
+                        where entity.Id == request.Id
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
                         join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
                         into update_user
                         from update_users in update_user.DefaultIfEmpty()
-                        select new PersonelGetAllQueryResponse
+                        select new PersonelGetQueryResponse
                         {
                             Id = entity.Id,
                             FullName = entity.FullName,
@@ -49,7 +51,7 @@ internal sealed class PersonelGetAllQueryHandler(
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,
                             CreateUserId = create_user.Id,
-                            CreateUserName = create_user.FirstName + " " + create_user.LastName + " ("+ create_user.Email + ")",
+                            CreateUserName = create_user.FirstName + " " + create_user.LastName + " (" + create_user.Email + ")",
                             UpdateAt = entity.UpdateAt,
                             UpdateUserId = update_users.Id,
                             UpdateUserName = entity.UpdateUserId == null ? null : update_users.FirstName + " " + update_users.LastName + " (" + update_users.Email + ")",

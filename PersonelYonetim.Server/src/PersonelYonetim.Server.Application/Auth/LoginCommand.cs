@@ -18,13 +18,13 @@ public sealed record LoginCommandResponse
 }
 
 internal sealed class LoginCommandHandler(
-    UserManager<Appuser> userManager, 
-    SignInManager<Appuser> signInManager,
+    UserManager<AppUser> userManager, 
+    SignInManager<AppUser> signInManager,
     IJwtProvider jwtProvider) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
 {
     public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        Appuser? user = await userManager.Users.FirstOrDefaultAsync(p => p.Email == request.UsernameOrEmail || p.UserName == request.UsernameOrEmail, cancellationToken);
+        AppUser? user = await userManager.Users.FirstOrDefaultAsync(p => p.Email == request.UsernameOrEmail || p.UserName == request.UsernameOrEmail, cancellationToken);
 
         if (user is null)
         {
