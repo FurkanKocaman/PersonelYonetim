@@ -8,7 +8,7 @@ public static class PozisyonModule
 {
     public static void RegisterPozisyonRoutes(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/pozisyonlar").WithTags("Pozisyonlar").RequireAuthorization();
+        RouteGroupBuilder group = app.MapGroup("/pozisyonlar").WithTags("Pozisyonlar").RequireAuthorization("manager");
         group.MapPost(string.Empty,
             async (ISender sender, PozisyonCreateCommand request, CancellationToken cancellationToken) =>
             {

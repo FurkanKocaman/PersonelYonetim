@@ -5,15 +5,17 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.IzinTalepleri;
+using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Infrastructure.Context;
 
-internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, IdentityRole<Guid>,Guid>, IUnitOfWork
+internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, Guid>, IUnitOfWork
 {
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {
@@ -30,8 +32,23 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, IdentityR
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
-        modelBuilder.Ignore<IdentityUserRole<Guid>>();
 
+        modelBuilder.Entity<IdentityUserRole<Guid>>()
+            .HasKey(i => new { i.UserId, i.RoleId });
+
+        modelBuilder.Entity<PersonelDepartman>()
+            .HasOne(p => p.Personel)
+            .WithMany(p => p.PersonelDepartmanlar)
+            .HasForeignKey(p => p.PersonelId);
+
+        modelBuilder.Entity<PersonelDepartman>()
+            .HasOne(p => p.Departman)
+            .WithMany(p => p.PersonelDepartmanlar)
+            .HasForeignKey(p => p.DepartmanId);
+        modelBuilder.Entity<PersonelDepartman>()
+            .HasOne(p => p.Pozisyon)
+            .WithMany(p => p.PersonelDepartmanlar)
+            .HasForeignKey(p => p.PozisyonId);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
@@ -41,10 +58,11 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, IdentityR
 
         HttpContextAccessor httpContextAccessor = new();
         string? userIdString = httpContextAccessor.HttpContext!.User.Claims.FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
+        
+        //string userIdString = "3023f17b-df7f-4720-83b1-5334ec87cd13";
         if (userIdString != null)
         {
             Guid userId = Guid.Parse(userIdString);
-            //string userIdString = "3023f17b-df7f-4720-83b1-5334ec87cd13";
             foreach (var entry in entries)
             {
                 if (entry.State == EntityState.Added)

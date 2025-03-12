@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace PersonelYonetim.Server.Domain.IzinTalepleri;
+namespace PersonelYonetim.Server.Domain.IzinTalepler;
 
 public sealed class IzinTalep
 {

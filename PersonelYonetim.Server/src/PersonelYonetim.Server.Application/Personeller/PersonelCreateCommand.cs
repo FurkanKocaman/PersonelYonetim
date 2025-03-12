@@ -6,6 +6,8 @@ using MediatR;
 using TS.Result;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using PersonelYonetim.Server.Application.Users;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
@@ -41,7 +43,9 @@ internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository,
     IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<PersonelCreateCommand, Result<string>>
+    IPersonelDepartmanRepository personelDepartmanRepository,
+    IUnitOfWork unitOfWork,
+    ISender sender) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelCreateCommand request, CancellationToken cancellationToken)
     {
@@ -57,11 +61,25 @@ internal sealed class PersonelCreateCommandHandler(
             return Result<string>.Failure("Pozisyon bulunamadı");
 
         Personel personel = request.Adapt<Personel>();
+        PersonelDepartman personelDepartman = new()
+        {
+            PersonelId = personel.Id,
+            DepartmanId = departman.Id,
+            PozisyonId = pozisyon.Id
+        };
 
         personelRepository.Add(personel);
+        personelDepartmanRepository.Add(personelDepartman);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return "Personel başarıyla oluşturuldu";
+        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, personel.Ad);
+        var userResult = await sender.Send(userCreateCommand, cancellationToken);
+        if (!userResult.IsSuccessful)
+        {
+            return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
+        }
+
+        return $"Personel başarıyla oluşturuldu. Giriş bilgileri Eposta:{personel.Iletisim.Eposta} Şifre:{personel.Ad}";
     }
 }
 

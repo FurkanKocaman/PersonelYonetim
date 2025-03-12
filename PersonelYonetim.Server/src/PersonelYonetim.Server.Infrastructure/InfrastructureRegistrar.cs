@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scrutor;
+using PersonelYonetim.Server.Domain.Rols;
 
 namespace PersonelYonetim.Server.Infrastructure;
 
@@ -24,7 +25,7 @@ public static class InfrastructureRegistrar
         services.AddScoped<IUnitOfWork>(srv => srv.GetRequiredService<ApplicationDbContext>());
 
         services
-            .AddIdentity<AppUser, IdentityRole<Guid>>(opt =>
+            .AddIdentity<AppUser, AppRole>(opt =>
             {
                 opt.Password.RequiredLength = 1;
                 opt.Password.RequireNonAlphanumeric = false;
@@ -46,7 +47,13 @@ public static class InfrastructureRegistrar
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer();
-        services.AddAuthorization();
+        services.AddAuthorization(opt =>
+        {
+            opt.AddPolicy("admin", policy => policy.RequireRole("admin"));
+            opt.AddPolicy("manager", policy => policy.RequireRole("admin","manager"));
+            opt.AddPolicy("user", policy => policy.RequireRole("admin","user"));
+
+        });
 
         services.Scan(opt => opt
         .FromAssemblies(typeof(InfrastructureRegistrar).Assembly)

@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Departmanlar;
+using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 
@@ -52,6 +54,13 @@ public class AppODataController(
     public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid Id,CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PozisyonGetAllQuery(Id), cancellationToken);
+        return response;
+    }
+    [HttpGet("IzinTalepler/{Id}")]
+    [Authorize("manager")]
+    public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid Id, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinTalepGetAllQuery(Id), cancellationToken);
         return response;
     }
 }
