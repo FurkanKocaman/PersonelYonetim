@@ -8,7 +8,12 @@ const router = createRouter({
       path: "/",
       name: "Home",
       component: () => import("@/views/HomeView.vue"),
-      //AuthGuard
+    },
+    {
+      path: "/dashboard",
+      name: "Dashboard",
+      component: () => import("@/views/DashboardView.vue"),
+      // Auth guard can be added here when authentication is implemented
       // beforeEnter: (to, from, next) => {
       //   if (!AuthService.isAuthenticated()) {
       //     next({ name: "Login" });
@@ -21,6 +26,11 @@ const router = createRouter({
       path: "/login",
       name: "Login",
       component: () => import("@/views/LoginView.vue"),
+    },
+    {
+      path: "/register",
+      name: "Register",
+      component: () => import("@/views/LoginView.vue"), // You can create a separate RegisterView later
     },
   ],
 });
