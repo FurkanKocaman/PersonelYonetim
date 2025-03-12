@@ -24,7 +24,7 @@ public static class InfrastructureRegistrar
         services.AddScoped<IUnitOfWork>(srv => srv.GetRequiredService<ApplicationDbContext>());
 
         services
-            .AddIdentity<Appuser, IdentityRole<Guid>>(opt =>
+            .AddIdentity<AppUser, IdentityRole<Guid>>(opt =>
             {
                 opt.Password.RequiredLength = 1;
                 opt.Password.RequireNonAlphanumeric = false;

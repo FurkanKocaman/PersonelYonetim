@@ -13,7 +13,7 @@ namespace PersonelYonetim.Server.Infrastructure.Service;
 internal sealed class JwtProvider(
     IOptions<JwtOptions> options) : IJwtProvider
 {
-    public Task<string> CreateTokenAsync(Appuser user, CancellationToken cancellationToken = default)
+    public Task<string> CreateTokenAsync(AppUser user, CancellationToken cancellationToken = default)
     {
         List<Claim> claims = new()
         {

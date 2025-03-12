@@ -1,8 +1,8 @@
 ﻿using PersonelYonetim.Server.Domain.Abstractions;
 
-namespace PersonelYonetim.Server.Domain.Pozisyon;
+namespace PersonelYonetim.Server.Domain.Departmanlar;
 
-public sealed class Pozisyon : Entity
+public sealed class Departman : Entity
 {
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }

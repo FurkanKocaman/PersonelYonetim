@@ -26,9 +26,9 @@ public abstract class Entity
     private string GetCreateUserName()
     {
         HttpContextAccessor httpContextAccessor = new();
-        var userManager = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<UserManager<Appuser>>();
+        var userManager = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
 
-        Appuser user  = userManager.Users.First(p => p.Id == CreateUserId);
+        AppUser user  = userManager.Users.First(p => p.Id == CreateUserId);
         
         return user.FirstName + " " + user.LastName + " (" + user.Email + ")";
     }
@@ -37,9 +37,9 @@ public abstract class Entity
         if (UpdateUserId is null) return null;
 
         HttpContextAccessor httpContextAccessor = new();
-        var userManager = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<UserManager<Appuser>>();
+        var userManager = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
 
-        Appuser user = userManager.Users.First(p => p.Id == UpdateUserId);
+        AppUser user = userManager.Users.First(p => p.Id == UpdateUserId);
 
         return user.FirstName + " " + user.LastName + " (" + user.Email + ")";
     }

@@ -8,7 +8,6 @@ public static class PersonelModule
     public static void RegisterPersonelRoutes(this IEndpointRouteBuilder app)
     {
         RouteGroupBuilder group = app.MapGroup("/personeller").WithTags("Personeller").RequireAuthorization();
-        //.RequireAuthorization();
 
         group.MapPost(string.Empty,
             async (ISender sender, PersonelCreateCommand request, CancellationToken cancellationToken) =>
