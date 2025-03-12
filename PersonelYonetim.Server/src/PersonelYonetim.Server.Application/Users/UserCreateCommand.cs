@@ -25,7 +25,8 @@ public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCom
     }
 }
 internal sealed class UserCreateCommandHadler(
-    UserManager<AppUser> usermanager) : IRequestHandler<UserCreateCommand, Result<string>>
+    UserManager<AppUser> usermanager,
+    ISender sender) : IRequestHandler<UserCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
     {
@@ -33,6 +34,7 @@ internal sealed class UserCreateCommandHadler(
         user.UserName = user.Email;
         user.EmailConfirmed = true;
         IdentityResult result = await usermanager.CreateAsync(user, request.Password);
+        await sender.Send(new UserAddRolesCommand(user.Id, ["user"]), cancellationToken);
 
         if (!result.Succeeded)
         {

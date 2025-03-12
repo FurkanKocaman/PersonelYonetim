@@ -9,5 +9,6 @@ public static class RouteRegistrar
         app.RegisterUserRoutes();
         app.RegisterDepartmanRoutes();
         app.RegisterPozisyonRoutes();
+        app.RegisterIzinTalepRoutes();
     }
 }
