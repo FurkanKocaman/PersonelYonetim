@@ -8,7 +8,7 @@ using TS.Result;
 namespace PersonelYonetim.Server.Application.Auth;
 
 public sealed record LoginCommand(
-    string Email,
+    string UsernameOrEmail,
     string Password) : IRequest<Result<LoginCommandResponse>>;
 
 public sealed record LoginCommandResponse
@@ -23,7 +23,7 @@ internal sealed class LoginCommandHandler(
     IJwtProvider jwtProvider) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
 {
     public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
-    {AppUser? user = await userManager.Users.FirstOrDefaultAsync(p => p.Email == request.Email || p.Email == request.UsernameOrEmail || p.UserName == request.UsernameOrEmail, cancellationToken);
+    {AppUser? user = await userManager.Users.FirstOrDefaultAsync(p => p.Email == request.UsernameOrEmail || p.Email == request.UsernameOrEmail || p.UserName == request.UsernameOrEmail, cancellationToken);
 
         if (user is null)
         {

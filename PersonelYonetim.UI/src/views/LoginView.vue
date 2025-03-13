@@ -11,7 +11,7 @@ const loginResponse = ref("");
 const handleLogin = async () => {
   try {
     isLoading.value = true;
-    const loginData: LoginRequest = { emailOrPassword: email.value, password: password.value };
+    const loginData: LoginRequest = { usernameOrEmail: email.value, password: password.value };
     const response = await AuthService.login(loginData);
     console.log("Response", response);
     loginResponse.value = response;
