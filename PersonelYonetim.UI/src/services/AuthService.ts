@@ -3,7 +3,7 @@ import axios from "axios";
 import type { LoginResponse } from "@/models/LoginResponse";
 
 class AuthService {
-  async login(data: LoginRequest) {
+  async login(data: LoginRequest): Promise<string> {
     try {
       const response = await axios.post("https://localhost:7063/auth/login", data);
       const loginResponse: LoginResponse = response.data.data;
@@ -21,7 +21,7 @@ class AuthService {
         }
         return "Sunucuya bağlanılırken hata oluştu";
       }
-      return error;
+      return "Beklenmeyen bir hata oluştu";
     }
   }
   isAuthenticated = (): boolean => {
