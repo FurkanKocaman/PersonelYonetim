@@ -22,27 +22,20 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("UserId", "RoleId");
 
-                    b.Property<string>("NormalizedName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
+                    b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departman.Departman", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,6 +115,32 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.ToTable("IzinTalepleri");
                 });
 
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DepartmanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PozisyonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmanId");
+
+                    b.HasIndex("PersonelId");
+
+                    b.HasIndex("PozisyonId");
+
+                    b.ToTable("PersonelDepartman");
+                });
+
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -147,9 +166,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid?>("DeleteUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("DepartmanId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTimeOffset>("DogumTarihi")
                         .HasColumnType("datetimeoffset");
 
@@ -158,9 +174,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid>("PozisyonId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ProfilResimUrl")
                         .HasColumnType("nvarchar(max)");
@@ -180,7 +193,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.ToTable("Personeller");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyon.Pozisyon", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -205,6 +218,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid?>("DeleteUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("DepartmanId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -222,7 +238,48 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.ToTable("Pozisyonlar");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.Users.Appuser", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Rols.AppRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeleteAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeleteUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("UpdateAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Users.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -308,6 +365,33 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
+                {
+                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", "Departman")
+                        .WithMany("PersonelDepartmanlar")
+                        .HasForeignKey("DepartmanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Personel")
+                        .WithMany("PersonelDepartmanlar")
+                        .HasForeignKey("PersonelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", "Pozisyon")
+                        .WithMany("PersonelDepartmanlar")
+                        .HasForeignKey("PozisyonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Departman");
+
+                    b.Navigation("Personel");
+
+                    b.Navigation("Pozisyon");
+                });
+
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
                 {
                     b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Adres", "Adres", b1 =>
@@ -350,7 +434,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                             b1.Property<string>("Eposta")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)")
+                                .HasColumnType("nvarchar(450)")
                                 .HasColumnName("Eposta");
 
                             b1.Property<string>("Telefon")
@@ -359,6 +443,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                                 .HasColumnName("Telefon");
 
                             b1.HasKey("PersonelId");
+
+                            b1.HasIndex("Eposta")
+                                .IsUnique();
 
                             b1.ToTable("Personeller");
 
@@ -371,6 +458,21 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.Navigation("Iletisim")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
+                {
+                    b.Navigation("PersonelDepartmanlar");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
+                {
+                    b.Navigation("PersonelDepartmanlar");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", b =>
+                {
+                    b.Navigation("PersonelDepartmanlar");
                 });
 #pragma warning restore 612, 618
         }

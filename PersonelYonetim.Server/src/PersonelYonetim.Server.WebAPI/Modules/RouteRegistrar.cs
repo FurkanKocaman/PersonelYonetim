@@ -7,5 +7,8 @@ public static class RouteRegistrar
         app.RegisterPersonelRoutes();
         app.RegisterAuthRoutes();
         app.RegisterUserRoutes();
+        app.RegisterDepartmanRoutes();
+        app.RegisterPozisyonRoutes();
+        app.RegisterIzinTalepRoutes();
     }
 }

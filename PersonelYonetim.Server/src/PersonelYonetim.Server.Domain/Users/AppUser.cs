@@ -2,9 +2,9 @@
 
 namespace PersonelYonetim.Server.Domain.Users;
 
-public sealed class Appuser : IdentityUser<Guid>
+public sealed class AppUser : IdentityUser<Guid>
 {
-    public Appuser()
+    public AppUser()
     {
         Id = Guid.CreateVersion7();
     }

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace PersonelYonetim.Server.Infrastructure.Configurations;
 
-internal sealed class AppUserConfiguration : IEntityTypeConfiguration<Appuser>
+internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
 {
-    public void Configure(EntityTypeBuilder<Appuser> builder)
+    public void Configure(EntityTypeBuilder<AppUser> builder)
     {
         builder.HasIndex(i => i.UserName).IsUnique();
         builder.Property(p => p.FirstName).HasColumnType("varchar(50)");
