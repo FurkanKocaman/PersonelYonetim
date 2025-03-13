@@ -12,7 +12,20 @@ const router = createRouter({
     {
       path: "/dashboard",
       name: "Dashboard",
-      component: () => import("@/views/DashboardView.vue"),
+      // component: () => import("@/views/DashboardView.vue"),
+      component: () => import("../layouts/DashBoardLayout.vue"),
+      children: [
+        {
+          path: "",
+          name: "DashboardHome",
+          component: () => import("@/views/DashboardView.vue"),
+        },
+        {
+          path: "personel",
+          name: "Personel",
+          component: () => import("@/views/PersonelView.vue"),
+        },
+      ],
       // Auth guard can be added here when authentication is implemented
       // beforeEnter: (to, from, next) => {
       //   if (!AuthService.isAuthenticated()) {
