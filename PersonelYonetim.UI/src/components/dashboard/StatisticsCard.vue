@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps } from "vue";
 
 // İstatistik öğesi için tip tanımı
 interface StatItem {
@@ -13,24 +13,27 @@ interface StatItem {
 const props = defineProps({
   stats: {
     type: Array as () => StatItem[],
-    required: true
-  }
+    required: true,
+  },
 });
 </script>
 
 <template>
   <!-- İstatistik Kartları -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-    <div v-for="stat in stats" :key="stat.title" 
-         class="bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden hover-scale">
-      <div class="flex items-center p-4">
-        <div :class="`${stat.color} text-white p-3 rounded-lg`">
-          <i :class="`fas fa-${stat.icon} text-xl`"></i>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.title }}</h2>
-          <p class="text-2xl font-semibold text-gray-800 dark:text-white">{{ stat.value }}</p>
-        </div>
+  <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <div
+      v-for="stat in props.stats"
+      :key="stat.title"
+      class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-4 flex items-center"
+    >
+      <div class="rounded-full w-12 h-12 flex items-center justify-center mr-4" :class="stat.color">
+        <i class="fas text-white text-xl" :class="'fa-' + stat.icon"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          {{ stat.value }}
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ stat.title }}</p>
       </div>
     </div>
   </div>
