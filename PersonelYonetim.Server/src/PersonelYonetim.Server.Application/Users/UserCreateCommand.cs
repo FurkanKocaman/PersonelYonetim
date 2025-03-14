@@ -31,7 +31,16 @@ internal sealed class UserCreateCommandHadler(
     public async Task<Result<string>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
     {
         AppUser user = request.Adapt<AppUser>();
-        user.UserName = user.Email;
+        string baseUserName = $"{request.FirstName}.{request.LastName}".ToLower().Replace(" ", "");
+        string userName = baseUserName;
+        int counter = 1;
+
+        while (await usermanager.FindByNameAsync(userName) != null)
+        {
+            userName = $"{baseUserName}{counter}";
+            counter++;
+        }
+        user.UserName = userName;
         user.EmailConfirmed = true;
         IdentityResult result = await usermanager.CreateAsync(user, request.Password);
         await sender.Send(new UserAddRolesCommand(user.Id, ["user"]), cancellationToken);

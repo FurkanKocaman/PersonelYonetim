@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonelYonetim.Server.Infrastructure.Context;
 
@@ -11,9 +12,11 @@ using PersonelYonetim.Server.Infrastructure.Context;
 namespace PersonelYonetim.Server.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250313072541_username_lenght_500")]
+    partial class username_lenght_500
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("UserId", "RoleId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
@@ -74,7 +77,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departmanlar", (string)null);
+                    b.ToTable("Departmanlar");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.IzinTalepler.IzinTalep", b =>
@@ -112,7 +115,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IzinTalepleri", (string)null);
+                    b.ToTable("IzinTalepleri");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
@@ -138,7 +141,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasIndex("PozisyonId");
 
-                    b.ToTable("PersonelDepartman", (string)null);
+                    b.ToTable("PersonelDepartman");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
@@ -190,7 +193,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personeller", (string)null);
+                    b.ToTable("Personeller");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", b =>
@@ -235,7 +238,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pozisyonlar", (string)null);
+                    b.ToTable("Pozisyonlar");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Rols.AppRole", b =>
@@ -276,7 +279,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Users.AppUser", b =>
@@ -363,7 +366,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[UserName] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
@@ -422,7 +425,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                             b1.HasKey("PersonelId");
 
-                            b1.ToTable("Personeller", (string)null);
+                            b1.ToTable("Personeller");
 
                             b1.WithOwner()
                                 .HasForeignKey("PersonelId");
@@ -448,7 +451,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                             b1.HasIndex("Eposta")
                                 .IsUnique();
 
-                            b1.ToTable("Personeller", (string)null);
+                            b1.ToTable("Personeller");
 
                             b1.WithOwner()
                                 .HasForeignKey("PersonelId");

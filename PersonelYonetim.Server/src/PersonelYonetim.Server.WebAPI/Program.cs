@@ -51,7 +51,12 @@ app.MapDefaultEndpoints();
 
 app.UseHttpsRedirection();
 
-app.UseCors(x=> x.AllowAnyHeader().AllowCredentials().AllowAnyMethod().SetIsOriginAllowed(t=>true));
+app.UseCors(x=> x
+.AllowAnyHeader()
+.AllowCredentials()
+.AllowAnyMethod()
+.SetIsOriginAllowed(t=>true)
+.SetPreflightMaxAge(TimeSpan.FromMinutes(10)));
 
 app.RegisterRoutes();
 

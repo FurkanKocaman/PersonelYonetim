@@ -20,7 +20,8 @@ public sealed record LoginCommandResponse
 internal sealed class LoginCommandHandler(
     UserManager<AppUser> userManager, 
     SignInManager<AppUser> signInManager,
-    IJwtProvider jwtProvider) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
+    IJwtProvider jwtProvider,
+    IEmailService emailService) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
 {
     public async Task<Result<LoginCommandResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -53,6 +54,7 @@ internal sealed class LoginCommandHandler(
         //Token üret
 
         var token = await jwtProvider.CreateTokenAsync(user);
+        await emailService.SendAsync(user.Email!, "Login", $"Login successful. AccessToken: {token}",cancellationToken);
 
         var response = new LoginCommandResponse()
         {
