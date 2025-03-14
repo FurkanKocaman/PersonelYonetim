@@ -1,83 +1,138 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import SidebarMenu from "../components/dashboard/SidebarMenu.vue";
-import { RouterView } from "vue-router";
+import SidebarMenu from "@/components/dashboard/SidebarMenu.vue";
+import TopBar from "../components/dashboard/TopBar.vue";
+import type { MenuItem } from "@/types/menu";
 
-// Yönlendirme için router tanımlama
+// Router
 const router = useRouter();
 const route = useRoute();
 
-// Kullanıcı bilgileri için örnek veri
-const user = ref({
-  name: "Ahmet Yılmaz",
-  role: "İnsan Kaynakları Yöneticisi",
-  avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-});
-
-// Sidebar menüsü için örnek veriler
-const menuItems = ref([
-  { name: "Ana Sayfa", icon: "home", active: false, path: "/dashboard" },
-  { name: "Personel", icon: "users", active: false, path: "/dashboard/personel" },
-  { name: "Bordro", icon: "file-invoice-dollar", active: false, path: "/bordro" },
-  { name: "İzin Yönetimi", icon: "calendar-alt", active: false, path: "/izin" },
-  { name: "Raporlar", icon: "chart-bar", active: false, path: "/raporlar" },
-  { name: "Ayarlar", icon: "cog", active: false, path: "/ayarlar" },
-]);
-interface MenuItem {
-  name: string;
-  icon: string;
-  active: boolean;
-  path: string;
-}
-
-// Sayfa yükleme durumu
-const isPageLoaded = ref(false);
-
-// Sidebar durumu
+// Kenar çubuğu durumu
 const sidebarOpen = ref(true);
 
-// Sayfa yüklendiğinde
-onMounted(() => {
-  // Sayfa yüklendi olarak işaretle
-  setTimeout(() => {
-    isPageLoaded.value = true;
-  }, 100);
+// Yükleniyor durumu
+const isLoading = ref(false);
 
-  menuItems.value
-    .filter((item) => item.path === route.path || item.path + "/" === route.path)
-    .forEach((item) => {
-      item.active = true;
-    });
-  console.log(route.path);
-});
+// Menü öğeleri
+const menuItems = ref<MenuItem[]>([
+  {
+    name: "Ana Sayfa",
+    icon: "home",
+    active: false,
+    path: "/dashboard",
+  },
+  {
+    name: "Personel",
+    icon: "users",
+    active: false,
+    path: "/dashboard/personel",
+  },
+  {
+    name: "İzin Yönetimi",
+    icon: "calendar-alt",
+    active: false,
+    path: "/dashboard/izin",
+  },
+  {
+    name: "Maaş Yönetimi",
+    icon: "money-bill-wave",
+    active: false,
+    path: "/dashboard/maas",
+  },
+  {
+    name: "Ayarlar",
+    icon: "cog",
+    active: false,
+    path: "/dashboard/ayarlar",
+  },
+]);
 
-// Sidebar toggle fonksiyonu
+// Örnek kullanıcı verileri
+const user = {
+  name: "Ahmet Yılmaz",
+  role: "Yönetici",
+  avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+};
+
+// Kenar çubuğunu aç/kapat
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
 };
 
-// Menü öğesi tıklama işlevi
+// Menü öğesi tıklamasını işle
 const handleMenuClick = (item: MenuItem) => {
-  // Tüm menü öğelerini pasif yap
-  menuItems.value.forEach((menuItem) => {
-    menuItem.active = false;
+  // Sadece zaten bu rotada değilsek gezinme işlemi yap
+  if (route.path !== item.path) {
+    isLoading.value = true;
+    router.push(item.path);
+  }
+};
+
+// Mevcut rotaya göre aktif menü öğesini güncelle
+const updateActiveMenuItem = () => {
+  // Tüm öğeleri sıfırla
+  menuItems.value.forEach(item => {
+    item.active = false;
   });
 
-  // Tıklanan öğeyi aktif yap
-  item.active = true;
+  // En spesifik eşleşen rotayı bul
+  let bestMatch: MenuItem | null = null;
+  let bestMatchLength = 0;
 
-  // Yönlendirme yap
-  router.push(item.path);
+  menuItems.value.forEach(item => {
+    if (route.path.startsWith(item.path) && item.path.length > bestMatchLength) {
+      bestMatch = item;
+      bestMatchLength = item.path.length;
+    }
+  });
+
+  // En iyi eşleşmeyi aktif olarak ayarla
+  if (bestMatch) {
+    (bestMatch as MenuItem).active = true;
+  }
+  // Eşleşme bulunamazsa ve dashboard kökündeysek, dashboard öğesini etkinleştir
+  else if (route.path === '/dashboard') {
+    const dashboardItem = menuItems.value.find(item => item.path === '/dashboard');
+    if (dashboardItem) {
+      (dashboardItem as MenuItem).active = true;
+    }
+  }
 };
+
+// Aktif menü öğesini güncellemek için rota değişikliklerini izle
+watch(
+  () => route.path,
+  () => {
+    updateActiveMenuItem();
+  },
+  { immediate: true }
+);
+
+// Bileşen bağlandığında başlat
+onMounted(() => {
+  updateActiveMenuItem();
+  
+  // Gezinme olay dinleyicilerini ekle
+  router.beforeEach(() => {
+    isLoading.value = true;
+    return true;
+  });
+  
+  router.afterEach(async () => {
+    // Yükleme göstergesini gizlemeden önce DOM'un güncellenmesini bekle
+    await nextTick();
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 300);
+  });
+});
 </script>
 
 <template>
-  <div
-    class="flex h-screen overflow-hidden transition-all duration-100"
-    :class="{ 'opacity-100': isPageLoaded, 'opacity-0': !isPageLoaded }"
-  >
-    <!-- Sidebar Bileşeni -->
+  <div class="flex h-screen bg-gray-100 dark:bg-neutral-900">
+    <!-- Kenar Çubuğu -->
     <SidebarMenu
       :menuItems="menuItems"
       :user="user"
@@ -86,7 +141,46 @@ const handleMenuClick = (item: MenuItem) => {
       @toggle-sidebar="toggleSidebar"
     />
 
-    <!-- Ana İçerik Alanı -->
-    <RouterView class="overflow-auto"></RouterView>
+    <!-- Ana İçerik -->
+    <div
+      class="flex-1 flex flex-col transition-all duration-300"
+      :class="{
+        'lg:ml-64': sidebarOpen,
+        'lg:ml-20': !sidebarOpen,
+      }"
+    >
+      <!-- Üst Çubuk -->
+      <TopBar :sidebarOpen="sidebarOpen" @toggle-sidebar="toggleSidebar" />
+
+      <!-- İçerik Alanı -->
+      <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-900 relative">
+        <!-- Yükleme Göstergesi -->
+        <div 
+          v-if="isLoading" 
+          class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 dark:bg-neutral-900 dark:bg-opacity-80 z-50"
+        >
+          <div class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+          <p class="mt-4 text-gray-700 dark:text-gray-300 font-medium">Yükleniyor...</p>
+        </div>
+        
+        <!-- Ana İçerik -->
+        <router-view v-slot="{ Component }">
+          <component :is="Component" :key="route.fullPath" />
+        </router-view>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* Sayfa değişimleri için geçişler */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+</style>

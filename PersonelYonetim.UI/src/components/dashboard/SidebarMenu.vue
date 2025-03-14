@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, onMounted } from "vue";
+import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 
 // Menü öğesi için tip tanımı
 interface MenuItem {
@@ -35,6 +36,9 @@ const props = defineProps({
 // Komponent event'leri
 const emit = defineEmits(["menu-click", "toggle-sidebar"]);
 
+// Mevcut rota
+const route = useRoute();
+
 // Menü öğesi tıklama işlevi
 const handleMenuClick = (item: MenuItem) => {
   emit("menu-click", item);
@@ -50,9 +54,8 @@ const isMobile = ref(false);
 
 // Komponent yüklendiğinde
 onMounted(() => {
-  // İlk yüklemede ekran genişliğini kontrol et
+  // Ekran genişliğini kontrol et
   checkScreenWidth();
-
   // Ekran boyutu değiştiğinde kontrol et
   window.addEventListener("resize", checkScreenWidth);
 });
@@ -60,6 +63,21 @@ onMounted(() => {
 // Ekran genişliğini kontrol et
 const checkScreenWidth = () => {
   isMobile.value = window.innerWidth < 1024;
+};
+
+// Bir menü öğesinin aktif olup olmadığını mevcut rotaya göre kontrol et
+const isMenuItemActive = (itemPath: string): boolean => {
+  // Tam eşleşmeler için (örneğin dashboard ana sayfası)
+  if (itemPath === route.path) {
+    return true;
+  }
+  
+  // İç içe rotalar için (örneğin /dashboard/personel)
+  if (itemPath !== '/dashboard' && route.path.startsWith(itemPath)) {
+    return true;
+  }
+  
+  return false;
 };
 </script>
 
@@ -72,44 +90,33 @@ const checkScreenWidth = () => {
       @click="toggleSidebar"
     ></div>
 
-    <!-- Sidebar Toggle Button (Outside sidebar) -->
-    <button
-      @click="toggleSidebar"
-      class="fixed z-50 flex items-center justify-center p-2 rounded-md bg-sky-600 dark:bg-sky-700 shadow-md text-white hover:bg-sky-700 dark:hover:bg-sky-800 transition-all duration-200"
-      :class="{ 'left-[16rem]': sidebarOpen, 'left-[4rem]': !sidebarOpen }"
-      style="top: 4rem"
-    >
-      <i v-if="sidebarOpen" class="fas fa-angle-left text-lg"></i>
-      <i v-else class="fas fa-angle-right text-lg"></i>
-    </button>
-
-    <!-- Sidebar Container -->
-    <div
-      class="inset-y-0 left-0 z-30 bg-white dark:bg-neutral-800 shadow-lg transition-all duration-300 transform h-screen overflow-hidden"
+    <!-- Sidebar -->
+    <aside
+      class="fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-neutral-800 shadow-lg transition-all duration-300 ease-in-out"
       :class="{
         'w-64': sidebarOpen,
-        'w-16': !sidebarOpen,
-        '-translate-x-full lg:translate-x-0': !sidebarOpen && isMobile,
+        'w-20': !sidebarOpen,
         'translate-x-0': sidebarOpen || !isMobile,
+        '-translate-x-full': !sidebarOpen && isMobile,
       }"
     >
       <div class="h-full flex flex-col overflow-y-auto overflow-x-hidden">
         <!-- Logo ve Başlık -->
         <div class="flex items-center justify-between h-16 bg-sky-600 dark:bg-sky-700 px-4">
           <span
-            class="text-white text-xl font-bold whitespace-nowrap overflow-hidden transition-all duration-300"
+            class="text-white font-bold text-lg transition-all duration-300 whitespace-nowrap overflow-hidden"
             :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
           >
             Personel Yönetim
           </span>
-          <!-- Logo Icon for Collapsed State -->
+          <!-- Daraltılmış Durum için Logo İkonu -->
           <div
             class="flex items-center justify-center"
             :class="{ hidden: sidebarOpen, block: !sidebarOpen }"
           >
             <i class="fas fa-users-cog text-white text-xl"></i>
           </div>
-          <!-- Removed redundant toggle button as requested -->
+          <!-- İstek üzerine gereksiz toggle butonu kaldırıldı -->
         </div>
 
         <!-- Kullanıcı Profili -->
@@ -138,64 +145,47 @@ const checkScreenWidth = () => {
             :class="{
               'px-4 py-3 mx-3': sidebarOpen,
               'px-0 py-3 justify-center mx-3': !sidebarOpen,
-              'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': item.active,
+              'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': isMenuItemActive(item.path),
             }"
           >
-            <!-- Icon Container - Always Visible -->
+            <!-- İkon Konteyneri - Her Zaman Görünür -->
             <div
               class="w-8 h-8 flex items-center justify-center text-lg"
               :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
             >
               <i :class="`fas fa-${item.icon}`"></i>
             </div>
-            <!-- Text - Only Visible When Sidebar is Open -->
+            <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
             <span
-              class="font-medium transition-all duration-300 whitespace-nowrap overflow-hidden"
-              :class="{ 'opacity-100 w-auto': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
+              class="whitespace-nowrap overflow-hidden transition-all duration-300"
+              :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
             >
               {{ item.name }}
             </span>
-            <!-- Tooltip for Collapsed State -->
+            <!-- Daraltılmış Durum için Araç İpuçları -->
             <div
               v-if="!sidebarOpen"
-              class="absolute left-16 bg-gray-800 text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50"
+              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-50"
             >
               {{ item.name }}
             </div>
           </div>
         </div>
 
-        <!-- Çıkış Butonu -->
-        <div class="w-full py-4">
-          <div
-            class="flex items-center text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700 relative group"
-            :class="{ 'px-7': sidebarOpen, 'justify-center': !sidebarOpen }"
+        <!-- Sidebar Toggle Butonu - Sidebar'ın Ortasında Pozisyonlandırılmış -->
+        <div class="absolute inset-y-1/2 -right-3 flex items-center justify-center">
+          <button
+            @click="toggleSidebar"
+            class="w-6 h-16 flex items-center justify-center bg-white dark:bg-neutral-800 text-gray-600 dark:text-gray-300 rounded-r-md shadow-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-200 focus:outline-none"
           >
-            <!-- Icon Container - Always Visible -->
-            <div
-              class="w-8 h-8 flex items-center justify-center text-lg"
-              :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
-            >
-              <i class="fas fa-sign-out-alt"></i>
-            </div>
-            <!-- Text - Only Visible When Sidebar is Open -->
-            <span
-              class="font-medium transition-all duration-300 whitespace-nowrap overflow-hidden"
-              :class="{ 'opacity-100 w-auto': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
-            >
-              Çıkış Yap
-            </span>
-            <!-- Tooltip for Collapsed State -->
-            <div
-              v-if="!sidebarOpen"
-              class="absolute left-16 bg-gray-800 text-white text-sm px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50"
-            >
-              Çıkış Yap
-            </div>
-          </div>
+            <i
+              class="fas"
+              :class="{ 'fa-chevron-left': sidebarOpen, 'fa-chevron-right': !sidebarOpen }"
+            ></i>
+          </button>
         </div>
       </div>
-    </div>
+    </aside>
   </div>
 </template>
 
@@ -203,15 +193,11 @@ const checkScreenWidth = () => {
 /* Mobil görünüm için ek stiller */
 @media (max-width: 1024px) {
   .sidebar-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
     position: fixed;
-    inset: 0;
-    z-index: 20;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
-}
-
-/* Tooltip Styles */
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
 }
 </style>

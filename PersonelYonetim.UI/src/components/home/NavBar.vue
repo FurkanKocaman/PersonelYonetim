@@ -60,7 +60,7 @@ const handleScroll = () => {
 };
 
 // Dropdown menüyü aç/kapat
-const toggleDropdown = (menu, event) => {
+const toggleDropdown = (menu: string, event: Event) => {
   event.stopPropagation();
   if (activeDropdown.value === menu) {
     activeDropdown.value = '';
@@ -70,12 +70,12 @@ const toggleDropdown = (menu, event) => {
 };
 
 // Dropdown dışına tıklandığında kapat
-const handleClickOutside = (event) => {
+const handleClickOutside = (event: Event) => {
   const dropdownMenus = document.querySelectorAll('.dropdown-menu');
   let isClickInside = false;
 
   dropdownMenus.forEach(menu => {
-    if (menu.contains(event.target)) {
+    if (menu.contains(event.target as HTMLElement)) {
       isClickInside = true;
     }
   });
@@ -100,7 +100,7 @@ const handleRegister = () => {
   router.push('/register');
 };
 
-// Navbar background class
+// Navbar arka plan sınıfı
 const navbarClass = computed(() => {
   if (props.transparent) {
     return isScrolled.value
@@ -110,7 +110,7 @@ const navbarClass = computed(() => {
   return 'bg-white dark:bg-neutral-800 shadow-md';
 });
 
-// Text color class
+// Metin rengi sınıfı
 const textColorClass = computed(() => {
   if (props.transparent && !isScrolled.value) {
     return 'text-white';
@@ -118,7 +118,7 @@ const textColorClass = computed(() => {
   return 'text-gray-800 dark:text-gray-200';
 });
 
-// Link color class
+// Link rengi sınıfı
 const linkColorClass = computed(() => {
   if (props.transparent && !isScrolled.value) {
     return 'text-white hover:text-gray-200';
@@ -137,12 +137,12 @@ const linkColorClass = computed(() => {
           <h1 :class="[textColorClass, 'text-xl font-bold']">Personel Yönetim</h1>
         </div>
 
-        <!-- Desktop Navigation -->
+        <!-- Masaüstü Navigasyon -->
         <nav class="hidden lg:flex items-center space-x-8">
-          <!-- Regular Links -->
+          <!-- Normal Linkler -->
           <a href="#features" :class="linkColorClass">Özellikler</a>
 
-          <!-- Dropdown Menus -->
+          <!-- Açılır Menüler -->
           <div v-for="dropdown in dropdowns" :key="dropdown.id" class="relative dropdown-menu">
             <button
               @click="(e) => toggleDropdown(dropdown.id, e)"
@@ -153,7 +153,7 @@ const linkColorClass = computed(() => {
                  :class="{'transform rotate-180': activeDropdown === dropdown.id}"></i>
             </button>
 
-            <!-- Dropdown Content -->
+            <!-- Açılır Menü İçeriği -->
             <div
               v-show="activeDropdown === dropdown.id"
               class="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-neutral-700 rounded-lg shadow-lg overflow-hidden transition-all duration-200 ease-in-out"
@@ -178,7 +178,7 @@ const linkColorClass = computed(() => {
           <a href="#contact" :class="linkColorClass">İletişim</a>
         </nav>
 
-        <!-- Action Buttons -->
+        <!-- İşlem Butonları -->
         <div class="hidden md:flex items-center space-x-4">
           <button @click="handleLogin" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center">
             <i class="fas fa-sign-in-alt mr-2"></i>
@@ -190,13 +190,13 @@ const linkColorClass = computed(() => {
           </button>
         </div>
 
-        <!-- Mobile Menu Button -->
+        <!-- Mobil Menü Butonu -->
         <button @click="toggleMobileMenu" class="lg:hidden text-gray-800 dark:text-gray-200 focus:outline-none">
           <i class="fas" :class="isMobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
         </button>
       </div>
 
-      <!-- Mobile Menu -->
+      <!-- Mobil Menü -->
       <div
         v-show="isMobileMenuOpen"
         class="lg:hidden mt-4 py-4 border-t border-gray-200 dark:border-neutral-700"
@@ -204,7 +204,7 @@ const linkColorClass = computed(() => {
         <nav class="flex flex-col space-y-4">
           <a href="#features" class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400">Özellikler</a>
 
-          <!-- Mobile Dropdown Accordions -->
+          <!-- Mobil Açılır Menüler -->
           <div v-for="dropdown in dropdowns" :key="`mobile-${dropdown.id}`" class="space-y-2">
             <button
               @click="(e) => toggleDropdown(dropdown.id + '-mobile', e)"
