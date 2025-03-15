@@ -42,6 +42,12 @@ const menuItems = ref<MenuItem[]>([
     path: "/dashboard/maas",
   },
   {
+    name: "Takvim",
+    icon: "calendar-alt",
+    active: false,
+    path: "/dashboard/takvim",
+  },
+  {
     name: "Ayarlar",
     icon: "cog",
     active: false,

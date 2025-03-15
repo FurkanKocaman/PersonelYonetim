@@ -43,6 +43,12 @@ const router = createRouter({
           meta: { title: 'Maaş Yönetimi' }
         },
         {
+          path: 'takvim',
+          name: 'Takvim',
+          component: () => import('../views/TakvimView.vue'),
+          meta: { title: 'Takvim' }
+        },
+        {
           path: 'ayarlar',
           name: 'Ayarlar',
           component: () => import('../views/AyarlarView.vue'),

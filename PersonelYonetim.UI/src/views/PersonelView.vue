@@ -72,7 +72,7 @@ const addPerson = () => {
     <main class="flex-1 p-6">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Personel Listesi</h2>
-        <button @click="showForm = true" class="bg-blue-500 text-white px-4 py-2 rounded">Ekle</button>
+        <button @click="showForm = true" class="bg-blue-500 text-white px-4 py-2 rounded" id="btnEkle">Ekle</button>
       </div>
 
      
@@ -123,7 +123,7 @@ body {
   
 }
 button:hover {
-  background-color: #2544cc; 
+  
   transition:  0.5s ease;
   cursor: pointer;
 }

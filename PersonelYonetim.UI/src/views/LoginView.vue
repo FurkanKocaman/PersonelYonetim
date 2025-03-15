@@ -36,7 +36,7 @@ const prevImage = () => {
 
 
 onMounted(() => {
-  setInterval(changeImage, 4000); 
+  setInterval(changeImage, 5000); 
 });
 
 const handleLogin = async () => {
@@ -80,7 +80,6 @@ const handleLogin = async () => {
 
       
     </div>
-    <div class="flex flex-col items-center justify-center md:w-1/2 h-full dark:bg-neutral-700">
 
     <div class="flex flex-col items-center justify-center md:w-1/2 h-full dark:bg-neutral-700 ">
 
@@ -148,7 +147,7 @@ const handleLogin = async () => {
         </div>
 
         <button
-          type="submit" style="cursor:pointer"
+          type="submit"
           class="flex items-center justify-center w-full bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white p-2 rounded hover:from-purple-700 hover:via-purple-800 hover:to-purple-900"
           :disabled="isLoading"
         >
@@ -178,7 +177,6 @@ const handleLogin = async () => {
 <style>
 body{
   background: linear-gradient(135deg, #c7d6df, #2e1588);
-
 }
 .formDisi{
   background: rgba(255, 255, 255, 0.1);
