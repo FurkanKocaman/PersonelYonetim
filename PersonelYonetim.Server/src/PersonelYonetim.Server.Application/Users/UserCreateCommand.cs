@@ -41,7 +41,7 @@ internal sealed class UserCreateCommandHadler(
             counter++;
         }
         user.UserName = userName;
-        user.EmailConfirmed = true;
+        //user.EmailConfirmed = true;
         IdentityResult result = await usermanager.CreateAsync(user, request.Password);
         await sender.Send(new UserAddRolesCommand(user.Id, ["user"]), cancellationToken);
 

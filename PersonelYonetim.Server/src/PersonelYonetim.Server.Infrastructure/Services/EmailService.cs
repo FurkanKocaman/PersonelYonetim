@@ -8,12 +8,13 @@ namespace PersonelYonetim.Server.Infrastructure.Services;
 public class EmailService : IEmailService
 {
     private readonly IConfiguration configuration;
+
     public EmailService(IConfiguration configuration)
     {
         this.configuration = configuration;
     }
 
-    public Task SendAsync(string to, string subject, string body, CancellationToken cancellationToken = default)
+    public async Task SendAsync(string to, string subject, string content, CancellationToken cancellationToken = default)
     {
         var email = configuration["EmailSettings:Email"];
         var password = configuration["EmailSettings:Password"];
@@ -26,17 +27,15 @@ public class EmailService : IEmailService
             Credentials = new NetworkCredential(email, password),
             EnableSsl = true,
         };
-        
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(email!),
+            From = new MailAddress(email!, "Personel Yönetim Sistemi"),
             Subject = subject,
-            Body = body,
+            Body = content,
             IsBodyHtml = true,
         };
-        mailMessage.To.Add(to);
-        smtpClient.SendMailAsync(mailMessage);
 
-        return Task.CompletedTask;
+        mailMessage.To.Add(to);
+        await smtpClient.SendMailAsync(mailMessage, cancellationToken);
     }
 }

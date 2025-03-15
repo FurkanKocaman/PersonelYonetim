@@ -10,6 +10,7 @@ using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.Tokenler;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
 
@@ -20,16 +21,18 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public ApplicationDbContext(DbContextOptions options) : base(options)
     {
     }
-    public DbSet<Personel> Personeller { get; set; }
+    public DbSet<Personel> Personeller { get; set; }    
     public DbSet<Departman> Departmanlar { get; set; }
     public DbSet<Pozisyon> Pozisyonlar { get; set; }
     public DbSet<IzinTalep> IzinTalepleri { get; set; }
+    public DbSet<IdentityUserClaim<Guid>> IdentityUserClaims { get; set; }
+    public DbSet<Token> Tokenler { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         modelBuilder.Ignore<IdentityRoleClaim<Guid>>();
-        modelBuilder.Ignore<IdentityUserClaim<Guid>>();
+        //modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
 
@@ -49,6 +52,8 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.Pozisyon)
             .WithMany(p => p.PersonelDepartmanlar)
             .HasForeignKey(p => p.PozisyonId);
+        modelBuilder.Entity<IdentityUserClaim<Guid>>()
+            .ToTable("UserClaims");
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
