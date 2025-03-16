@@ -7,9 +7,9 @@ public static class DepartmanModule
 {
     public static void RegisterDepartmanRoutes(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/departmanlar").WithTags("Departmanlar").RequireAuthorization("manager");
+        RouteGroupBuilder group = app.MapGroup("/departmanlar").WithTags("Departmanlar").RequireAuthorization("");
 
-        group.MapPost(string.Empty,
+        group.MapPost("create",
             async (ISender sender, DepartmanCreateCommand request, CancellationToken cancellationToken) =>
             {
                 var response = await sender.Send(request, cancellationToken);

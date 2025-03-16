@@ -1,12 +1,13 @@
 ﻿using PersonelYonetim.Server.Domain.Users;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Rols;
+using System.Threading.Tasks;
 
 namespace PersonelYonetim.Server.WebAPI;
 
 public static class ExtensionsMiddleware
 {
-    public static void CreateFirstUser(WebApplication app)
+    public static async Task CreateFirstUser(WebApplication app)
     {
         using(var scoped = app.Services.CreateScope())
         {
@@ -37,21 +38,31 @@ public static class ExtensionsMiddleware
                 };
                 roleManager.CreateAsync(role).Wait();
             }
-            if (!roleManager.Roles.Any(p => p.Name == "manager"))
+            if (!roleManager.Roles.Any(p => p.Name == "yönetici"))
             {
                 AppRole role = new()
                 {
-                    Name = "manager",
+                    Name = "yönetici",
                     CreatedAt = DateTimeOffset.Now,
                     CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13"),
                 };
                 roleManager.CreateAsync(role).Wait();
             }
-            if (!roleManager.Roles.Any(p => p.Name == "user"))
+            if (!roleManager.Roles.Any(p => p.Name == "çalışan"))
             {
                 AppRole role = new()
                 {
-                    Name = "user",
+                    Name = "çalışan",
+                    CreatedAt = DateTimeOffset.Now,
+                    CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13"),
+                };
+                roleManager.CreateAsync(role).Wait();
+            }
+            if (!roleManager.Roles.Any(p => p.Name == "şirketSahibi"))
+            {
+                AppRole role = new()
+                {
+                    Name = "şirketSahibi",
                     CreatedAt = DateTimeOffset.Now,
                     CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13"),
                 };

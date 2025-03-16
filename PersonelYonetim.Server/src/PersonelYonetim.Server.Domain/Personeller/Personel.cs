@@ -13,5 +13,6 @@ public sealed class Personel : Entity
     public string? ProfilResimUrl { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
     public Adres Adres { get; set; } = default!;
+    public DateTimeOffset IseGirisTarihi { get; set; } = default!;
     public ICollection<PersonelDepartman> PersonelDepartmanlar { get; set; } = default!;
 }

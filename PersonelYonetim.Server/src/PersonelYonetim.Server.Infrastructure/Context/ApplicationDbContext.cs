@@ -10,6 +10,7 @@ using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.Subeler;
 using PersonelYonetim.Server.Domain.Tokenler;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
@@ -47,13 +48,32 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Entity<PersonelDepartman>()
             .HasOne(p => p.Departman)
             .WithMany(p => p.PersonelDepartmanlar)
-            .HasForeignKey(p => p.DepartmanId);
+            .HasForeignKey(p => p.DepartmanId)
+            .OnDelete(DeleteBehavior.NoAction);
+       
         modelBuilder.Entity<PersonelDepartman>()
             .HasOne(p => p.Pozisyon)
             .WithMany(p => p.PersonelDepartmanlar)
             .HasForeignKey(p => p.PozisyonId);
+
         modelBuilder.Entity<IdentityUserClaim<Guid>>()
             .ToTable("UserClaims");
+
+        modelBuilder.Entity<Sube>()
+            .HasOne(p => p.Sirket)
+            .WithMany(s => s.Subeler)
+            .HasForeignKey(s => s.SirketId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Departman>()
+            .HasOne(p => p.Sube)
+            .WithMany(s => s.Departmanlar)
+            .HasForeignKey(s => s.SubeId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Pozisyon>()
+            .HasOne(p => p.Departman)
+            .WithMany(s => s.Pozisyonlar)
+            .HasForeignKey(s => s.DepartmanId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
@@ -62,9 +82,9 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         var userEntries = ChangeTracker.Entries<AppUser>();
 
         HttpContextAccessor httpContextAccessor = new();
-        string? userIdString = httpContextAccessor.HttpContext!.User.Claims.FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
+        //string? userIdString = httpContextAccessor.HttpContext!.User.Claims.FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
         
-        //string userIdString = "3023f17b-df7f-4720-83b1-5334ec87cd13";
+        string userIdString = "3023f17b-df7f-4720-83b1-5334ec87cd13";
         if (userIdString != null)
         {
             Guid userId = Guid.Parse(userIdString);
