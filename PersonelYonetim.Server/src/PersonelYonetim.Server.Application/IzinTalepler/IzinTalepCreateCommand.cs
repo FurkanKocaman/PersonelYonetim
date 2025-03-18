@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.IzinTalepler;
-using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
@@ -29,11 +29,12 @@ public sealed class IzinTalepCreateCommandValidator : AbstractValidator<IzinTale
 }
 
 internal sealed class IzinTalepCreateCommandHandler(
-    IIzinTalepRepository izinTalepRepository,
-    IPersonelDepartmanRepository personelDepartmanRepository,
+    //IIzinTalepRepository izinTalepRepository,
+    //IPersonelAtamaRepository personelDepartmanRepository,
     UserManager<AppUser> userManager,
-    IPersonelRepository personelRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<IzinTalepCreateCommand, Result<string>>
+    IPersonelRepository personelRepository
+    //IUnitOfWork unitOfWork
+    ) : IRequestHandler<IzinTalepCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(IzinTalepCreateCommand request, CancellationToken cancellationToken)
     {
@@ -44,18 +45,18 @@ internal sealed class IzinTalepCreateCommandHandler(
         var user = await userManager.FindByIdAsync(userIdString);
         var personel = await personelRepository.FirstOrDefaultAsync(p => p.Iletisim.Eposta == user!.Email);
 
-        var personelDepartman = await personelDepartmanRepository.FirstOrDefaultAsync(p => p.PersonelId ==personel.Id);
-        if (personelDepartman is null)
-            return Result<string>.Failure("Personel departmanı bulunamadı");
+        //var personelAtama = await personelDepartmanRepository.FirstOrDefaultAsync(p => p.PersonelId ==personel.Id);
+        //if (personelDepartman is null)
+        //    return Result<string>.Failure("Personel departmanı bulunamadı");
 
-        IzinTalep izinTalep = request.Adapt<IzinTalep>();
-        izinTalep.PersonelId = Guid.Parse(userIdString);
-        izinTalep.DepartmanId = personelDepartman.DepartmanId;
-        izinTalep.IzinTipi = IzinTipiEnum.FromValue(request.IzinTipiValue);
-        izinTalep.OnayDurumu = OnayDurumEnum.FromValue(2);
+        //IzinTalep izinTalep = request.Adapt<IzinTalep>();
+        //izinTalep.PersonelId = Guid.Parse(userIdString);
+        //izinTalep.DepartmanId = personelDepartman.DepartmanId;
+        //izinTalep.IzinTipi = IzinTipiEnum.FromValue(request.IzinTipiValue);
+        //izinTalep.OnayDurumu = OnayDurumEnum.FromValue(2);
 
-        izinTalepRepository.Add(izinTalep);
-        await unitOfWork.SaveChangesAsync();
+        //izinTalepRepository.Add(izinTalep);
+        //await unitOfWork.SaveChangesAsync();
 
         return Result<string>.Succeed("İzin talebi oluşturuldu");
     }

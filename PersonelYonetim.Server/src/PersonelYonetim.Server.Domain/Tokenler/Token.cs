@@ -10,7 +10,7 @@ public sealed class Token
         Id = Guid.CreateVersion7();
     }
     public Guid Id { get; set; }
-    public Guid userId { get; set; } = default!;
+    public Guid UserId { get; set; } = default!;
     public string TokenString { get; set; } = default!;
     public DateTimeOffset Expires { get; set; } = default!;
     public TokenTypeEnum TokenType { get; set; } = default!;

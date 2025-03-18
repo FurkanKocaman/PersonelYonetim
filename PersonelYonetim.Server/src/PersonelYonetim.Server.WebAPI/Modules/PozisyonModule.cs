@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using PersonelYonetim.Server.Application.Pozisyonlar;
+using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;
@@ -15,6 +16,6 @@ public static class PozisyonModule
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
-            .Produces<Result<string>>().WithName("PozisyonCreate");
+            .RequireAuthorization(Permissions.CreatePozisyon).Produces<Result<string>>().WithName("PozisyonCreate");
     }
 }

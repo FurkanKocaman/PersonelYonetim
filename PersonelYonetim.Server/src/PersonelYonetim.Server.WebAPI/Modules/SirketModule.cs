@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using MediatR;
-using PersonelYonetim.Server.Application.Departmanlar;
+﻿using MediatR;
 using PersonelYonetim.Server.Application.Sirketler;
-using System.Threading;
+using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;
@@ -17,6 +15,6 @@ public static class SirketModule
         {
             var response = await sender.Send(request, cancellationToken);
             return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        }).Produces<Result<string>>().WithName("SirketCreate");
+        }).RequireAuthorization(Permissions.CreateSirket).Produces<Result<string>>().WithName("SirketCreate");
     }
 }

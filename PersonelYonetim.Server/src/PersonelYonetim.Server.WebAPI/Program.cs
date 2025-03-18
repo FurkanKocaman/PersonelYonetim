@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.RateLimiting;
 using Scalar.AspNetCore;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ x.AddFixedWindowLimiter("fixed",cfg =>
 }));
 
 builder.Services.AddExceptionHandler<ExceptionHandler>().AddProblemDetails();
+builder.Services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>();
 
 var app = builder.Build();
 

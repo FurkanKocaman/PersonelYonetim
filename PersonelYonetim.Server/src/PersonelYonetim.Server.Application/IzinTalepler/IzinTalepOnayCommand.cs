@@ -26,9 +26,9 @@ internal sealed class IzinTalepOnayCommandHandler(
         if (izinTalep is null)
             return Result<string>.Failure("İzin talebi bulunamadı");
 
-        izinTalep.OnayDurumu = OnayDurumEnum.FromValue(request.OnayDurum);
-        izinTalep.OnaylanmaTarihi = DateTimeOffset.Now;
-        izinTalep.OnaylayanId = Guid.Parse(userIdString);
+        izinTalep.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
+        izinTalep.DegerlendirilmeTarihi = DateTimeOffset.Now;
+        izinTalep.DegerlendirenId = Guid.Parse(userIdString);
         await unitOfWork.SaveChangesAsync();
         if(request.OnayDurum == 0)
             return Result<string>.Succeed("İzin talebi onaylandı.");

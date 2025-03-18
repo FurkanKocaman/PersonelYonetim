@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using PersonelYonetim.Server.Application.Sirketler;
 using PersonelYonetim.Server.Application.Subeler;
+using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;
@@ -15,6 +16,6 @@ public static class SubeModule
         {
             var response = await sender.Send(request, cancellationToken);
             return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        }).Produces<Result<string>>().WithName("SubeCreate");
+        }).RequireAuthorization(Permissions.CreateSube).Produces<Result<string>>().WithName("SubeCreate");
     }
 }

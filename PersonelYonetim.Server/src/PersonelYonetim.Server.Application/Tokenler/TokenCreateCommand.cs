@@ -1,6 +1,4 @@
-﻿using GenericRepository;
-using Mapster;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Tokenler;
@@ -27,11 +25,11 @@ internal sealed class TokenCreateCommandHandler(
             return Result<string>.Failure("Kullanıcı bulunamadı.");
 
         Token token = new();
-        token.userId = user.Id;
+        token.UserId = user.Id;
         token.TokenString = await userManager.GenerateEmailConfirmationTokenAsync(user);
         token.TokenType = request.TokenTypeEnum;
         token.Expires = DateTimeOffset.UtcNow.AddHours(1);
-        token.userId = user.Id;
+        token.UserId = user.Id;
 
 
         //tokenRepository.Add(token);

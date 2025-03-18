@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
+using GenericRepository;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
@@ -9,6 +11,7 @@ namespace PersonelYonetim.Server.Application.Users;
 
 public sealed record UserAddRolesCommand(
     Guid Id,
+    Guid SirketId,
     IEnumerable<string> Roles) : IRequest<Result<string>>;
 
 public sealed class UserAddRolesCommandValidator : AbstractValidator<UserAddRolesCommand>
@@ -21,7 +24,9 @@ public sealed class UserAddRolesCommandValidator : AbstractValidator<UserAddRole
 
 internal sealed class UserAddRolesCommandHandler(
     UserManager<AppUser> userManager,
-    RoleManager<AppRole> roleManager) : IRequestHandler<UserAddRolesCommand, Result<string>>
+    RoleManager<AppRole> roleManager,
+    IUserRoleRepository userRoleRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UserAddRolesCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(UserAddRolesCommand request, CancellationToken cancellationToken)
     {
@@ -34,18 +39,21 @@ internal sealed class UserAddRolesCommandHandler(
             {
                 return Result<string>.Failure($"Rol:{role} bulunamadı");
             }
-            if(await userManager.IsInRoleAsync(user, role))
+            var roleInDb = await roleManager.FindByNameAsync(role);
+            if(await userRoleRepository.AnyAsync(p => p.UserId == request.Id && p.RoleId == roleInDb!.Id && p.SirketId == request.SirketId))
             {
-                return Result<string>.Failure($"Kullanıcı zaten {role} rolüne sahip");
+                return Result<string>.Failure($"Kullanıcı belirtilen şirkette {role} rolüne sahip");
             }
+            AppUserRole appUserRole = new()
+            {
+                UserId = request.Id,
+                SirketId = request.SirketId,
+                RoleId = roleInDb!.Id,
+            };
+            userRoleRepository.Add(appUserRole);
         }
-
-        var result = await userManager.AddToRolesAsync(user, request.Roles);
-        if (!result.Succeeded)
-        {
-            return Result<string>.Failure("Kullanıcıya rol eklenirken hata oluştu.");
-            
-        }
+        await unitOfWork.SaveChangesAsync();
+    
         return Result<string>.Succeed("Kullanıcıya rol başarıyla eklendi");
 
     }

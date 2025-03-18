@@ -17,7 +17,6 @@ internal sealed class JwtProvider(
     public Task<string> CreateTokenAsync(AppUser user, CancellationToken cancellationToken = default)
     {
         var roles =  userManager.GetRolesAsync(user).Result;
-        var userClaims = userManager.GetClaimsAsync(user).Result;
         List<Claim> claims = new()
         {
             new Claim(ClaimTypes.NameIdentifier,user.Id.ToString())
@@ -25,10 +24,6 @@ internal sealed class JwtProvider(
         foreach(var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-        foreach(var userClaim  in userClaims)
-        {
-            claims.Add(new Claim(userClaim.Type, userClaim.Value));
         }
 
         var expires = DateTime.Now.AddDays(1);

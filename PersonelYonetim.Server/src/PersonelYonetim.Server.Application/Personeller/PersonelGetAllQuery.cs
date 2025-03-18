@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Users;
@@ -30,13 +30,13 @@ internal sealed class PersonelGetAllQueryHandler(
     IPersonelRepository personelRepository,
     IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
-    IPersonelDepartmanRepository personelDepartmanRepository,
+    IPersonelAtamaRepository personelAtamaRepository,
     UserManager<AppUser> userManager) : IRequestHandler<PersonelGetAllQuery, IQueryable<PersonelGetAllQueryResponse>>
 {
     public Task<IQueryable<PersonelGetAllQueryResponse>> Handle(PersonelGetAllQuery request, CancellationToken cancellationToken)
     {
         var response = (from entity in personelRepository.GetAll()
-                        join personel_departman in personelDepartmanRepository.GetAll() on entity.Id equals personel_departman.PersonelId
+                        join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
                         join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id
                         join pozisyon in pozisyonRepository.GetAll() on personel_departman.PozisyonId equals pozisyon.Id
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id

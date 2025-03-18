@@ -2,6 +2,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using PersonelYonetim.Server.Domain.RoleClaim;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
@@ -11,8 +12,9 @@ public sealed record UserCreateCommand(
     string FirstName,
     string LastName,
     string Email,
-    string Password
-    ) : IRequest<Result<string>>;
+    Guid SirketId,
+    IEnumerable<string> Rols
+    ) : IRequest<Result<Guid>>;
 
 public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCommand>
 {
@@ -21,14 +23,13 @@ public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCom
         RuleFor(x => x.FirstName).NotEmpty().WithMessage("Ad boş olamaz").MaximumLength(50);
         RuleFor(x => x.LastName).NotEmpty().WithMessage("Soyad boş olamaz").MaximumLength(50);
         RuleFor(x => x.Email).NotEmpty().WithMessage("Eposta boş olamaz").EmailAddress();
-        RuleFor(x => x.Password).NotEmpty().WithMessage("Şifre boş olamaz");
     }
 }
 internal sealed class UserCreateCommandHadler(
     UserManager<AppUser> usermanager,
-    ISender sender) : IRequestHandler<UserCreateCommand, Result<string>>
+    ISender sender) : IRequestHandler<UserCreateCommand, Result<Guid>>
 {
-    public async Task<Result<string>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
     {
         AppUser user = request.Adapt<AppUser>();
         string baseUserName = $"{request.FirstName}.{request.LastName}".ToLower().Replace(" ", "");
@@ -41,14 +42,14 @@ internal sealed class UserCreateCommandHadler(
             counter++;
         }
         user.UserName = userName;
-        //user.EmailConfirmed = true;
-        IdentityResult result = await usermanager.CreateAsync(user, request.Password);
-        await sender.Send(new UserAddRolesCommand(user.Id, ["user"]), cancellationToken);
+        user.EmailConfirmed = true;
+        IdentityResult result = await usermanager.CreateAsync(user, request.FirstName);
+        await sender.Send(new UserAddRolesCommand(user.Id, request.SirketId, request.Rols), cancellationToken);
 
         if (!result.Succeeded)
         {
-            return "Kullanıcı oluşturulurken hata oluştu";
+            return Result<Guid>.Failure("Kullanıcı oluşturulurken hata oluştu");
         }
-        return "Kullanıcı başarıyla oluşturuldu";
+        return Result<Guid>.Succeed(user.Id);
     }
 }
