@@ -3,7 +3,7 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using PersonelYonetim.Server.Domain.IzinTalepler;
-using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using System.Security.Claims;
 using TS.Result;
 

@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Application.Users;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Users;
@@ -36,7 +36,7 @@ internal sealed class PersonelUpdateCommandHandler(
     IPersonelRepository personelRepository,
     IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
-    IPersonelDepartmanRepository personelDepartmanRepository,
+    IPersonelAtamaRepository personelAtamaRepository,
     UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<PersonelUpdateCommand, Result<string>>
@@ -75,16 +75,16 @@ internal sealed class PersonelUpdateCommandHandler(
                 return Result<string>.Failure("Pozisyon bulunamadı");
         }
 
-        var personelDepartman = await personelDepartmanRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id);
-        if (personelDepartman is null)
+        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id);
+        if (personelAtama is null)
             return Result<string>.Failure("Personel departman bilgisi bulunamadı");
-        personelDepartman.DepartmanId = request!.DepartmanId;
-        personelDepartman.PozisyonId = request.PozisyonId;
+        personelAtama.DepartmanId = request!.DepartmanId;
+        personelAtama.PozisyonId = request.PozisyonId;
 
             
 
         personelRepository.Update(personel);
-        personelDepartmanRepository.Update(personelDepartman);
+        personelAtamaRepository.Update(personelAtama);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Succeed("Personel başarıyla güncellendi");

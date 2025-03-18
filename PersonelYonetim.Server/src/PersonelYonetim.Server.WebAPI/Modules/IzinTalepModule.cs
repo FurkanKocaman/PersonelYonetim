@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.Personeller;
+using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;
@@ -10,39 +11,38 @@ public static class IzinTalepModule
 {
     public static void RegisterIzinTalepRoutes(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/izin-talep").WithTags("IzinTalep").RequireAuthorization("user");
+        RouteGroupBuilder group = app.MapGroup("/izin-talep").WithTags("IzinTalep").RequireAuthorization();
 
-        group.MapPost("create",
+        group.MapPost("/create",
             async (ISender sender, [FromBody] IzinTalepCreateCommand request, CancellationToken cancellationToken) =>
             {
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
-            .Produces<Result<string>>().WithName("IzinTalepCreate");
+            .RequireAuthorization(Permissions.CreateIzinler).Produces<Result<string>>().WithName("IzinTalepCreate");
 
-        group.MapPut("update",
+        group.MapPut("/update",
             async (ISender sender, [FromBody] IzinTalepUpdateCommand request, CancellationToken cancellationToken) =>
             {
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
-            .Produces<Result<string>>().WithName("IzinTalepUpdate");
+             .RequireAuthorization(Permissions.CreateIzinler).Produces<Result<string>>().WithName("IzinTalepUpdate");
 
-        group.MapDelete("delete",
+        group.MapDelete("/delete",
            async (ISender sender, [FromBody] IzinTalepDeleteCommand request, CancellationToken cancellationToken) =>
            {
                var response = await sender.Send(request, cancellationToken);
                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
            })
-           .Produces<Result<string>>().WithName("IzinTalepDelete");
+           .RequireAuthorization(Permissions.CreateIzinler).Produces<Result<string>>().WithName("IzinTalepDelete");
 
-        RouteGroupBuilder _group = app.MapGroup("/izin-talep").WithTags("IzinTalep").RequireAuthorization("manager");
-        _group.MapPost("onay",
+        group.MapPost("/degerlendir",
              async (ISender sender, [FromBody]IzinTalepOnayCommand request, CancellationToken cancellationToken) =>
              {
                  var response = await sender.Send(request, cancellationToken);
                  return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
              })
-            .Produces<Result<string>>().WithName("IzinTalepOnay");
+            .RequireAuthorization(Permissions.ApproveIzinler).Produces<Result<string>>().WithName("IzinTalepDegerlendir");
     }
 }
