@@ -11,7 +11,10 @@ using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
-public sealed record PersonelGetAllQuery() : IRequest<IQueryable<PersonelGetAllQueryResponse>> ;
+public sealed record PersonelGetAllQuery(
+    Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId) : IRequest<IQueryable<PersonelGetAllQueryResponse>> ;
 
 public sealed class PersonelGetAllQueryResponse : EntityDto
 {
@@ -45,9 +48,12 @@ internal sealed class PersonelGetAllQueryHandler(
         }
 
         var response = (from entity in personelRepository.GetAll()
-                        join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
-                        join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id
-                        join pozisyon in pozisyonRepository.GetAll() on personel_departman.PozisyonId equals pozisyon.Id
+                        join personel_atama in personelAtamaRepository.GetAll() on entity.Id equals personel_atama.PersonelId
+                        where personel_atama.SirketId == request.SirketId
+                        && (request.SubeId == null || personel_atama.SubeId == request.SubeId)
+                        && (request.DepartmanId == null || personel_atama.DepartmanId == request.DepartmanId)
+                        join departman in departmanRepository.GetAll() on personel_atama.DepartmanId equals departman.Id
+                        join pozisyon in pozisyonRepository.GetAll() on personel_atama.PozisyonId equals pozisyon.Id
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
                         join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
                         into update_user

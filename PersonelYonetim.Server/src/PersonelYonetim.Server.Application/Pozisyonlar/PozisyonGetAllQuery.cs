@@ -13,6 +13,7 @@ public sealed class PozisyonGetAllQueryResponse : EntityDto
 {
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
+    public Guid DepartmanId { get; set; } = default!;
 }
 
 internal sealed class PozisyonGetAllQueryHandler(
@@ -31,6 +32,7 @@ internal sealed class PozisyonGetAllQueryHandler(
                             Id = entity.Id,
                             Ad = entity.Ad,
                             Aciklama = entity.Aciklama,
+                            DepartmanId = entity.DepartmanId,
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,
                             CreateUserId = create_user.Id,

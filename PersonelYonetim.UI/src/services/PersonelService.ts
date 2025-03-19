@@ -8,17 +8,22 @@ import api from "./Axios";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
-  async getPersonelList(): Promise<PersonelListResponse> {
+  async getPersonelList(
+    sirketId: string,
+    subeId: string | undefined,
+    departmanId: string | undefined
+  ): Promise<PersonelListResponse> {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personeller`, {
         params: {
           $count: true,
+          SirketId: sirketId,
+          SubeId: subeId,
+          DepartmanId: departmanId,
         },
       });
 
       const personelList: PersonelItem[] = response.data.value;
-
-      console.log(response.data.value);
 
       return {
         items: personelList,

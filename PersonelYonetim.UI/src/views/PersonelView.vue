@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import type { DepartmanModel } from "@/models/DepartmanModel";
 import type { PersonelItem } from "@/models/PersonelModels";
+import type { SirketModel } from "@/models/SirketModel";
+import type { SubeModel } from "@/models/SubeModel";
+import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
-import { onMounted, reactive, ref } from "vue";
+import SirketService from "@/services/SirketService";
+import SubeService from "@/services/SubeService";
+import { onMounted, reactive, ref, watch, type Ref } from "vue";
 
 const personeller: PersonelItem[] = reactive([]);
-onMounted(async () => {
-  const response = await PersonelService.getPersonelList();
-  console.log(response.items);
-  personeller.splice(0, personeller.length, ...response.items);
-  console.log(personeller[0]);
-});
 
 const showForm = ref(false);
 const newPerson = ref({
@@ -19,6 +19,48 @@ const newPerson = ref({
   email: "",
   photo: "",
 });
+const sirketler: Ref<SirketModel[] | undefined> = ref([]);
+const selectedSirket = ref("");
+
+const subeler: Ref<SubeModel[] | undefined> = ref([]);
+const selectedSube = ref("");
+
+const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
+const selectedDepartman = ref("");
+onMounted(async () => {
+  sirketler.value = await SirketService.getSirketler();
+  if (sirketler.value) {
+    selectedSirket.value = sirketler.value[0].id;
+  }
+  getPersoneller();
+});
+
+const getPersoneller = async () => {
+  const response = await PersonelService.getPersonelList(
+    selectedSirket.value,
+    selectedSube.value,
+    selectedDepartman.value
+  );
+  personeller.splice(0, personeller.length, ...response.items);
+};
+
+const getSubeler = async () => {
+  subeler.value = await SubeService.getSubeler(selectedSirket.value);
+  console.log(subeler);
+};
+
+const getDepartmanlar = async () => {
+  if (selectedSube.value == "") {
+    selectedDepartman.value = "";
+  }
+  departmanlar.value = await DepartmanService.getDepartmanlar(selectedSube.value);
+  console.log(departmanlar.value);
+};
+
+watch(selectedSirket, getSubeler);
+watch(selectedSube, getDepartmanlar);
+watch(selectedSube, getPersoneller);
+watch(selectedDepartman, getPersoneller);
 
 const addPerson = () => {
   if (
@@ -38,6 +80,51 @@ const addPerson = () => {
 <template>
   <div class="flex relative">
     <main class="flex-1 p-6">
+      <div class="flex w-full justify-start mb-5">
+        <div class="flex flex-col w-1/4 mr-3">
+          <label for="sirket">Sirket</label>
+          <select
+            id="sirket"
+            v-model="selectedSirket"
+            v-on:change="getSubeler()"
+            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+          >
+            <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
+              {{ sirket.ad }}
+            </option>
+          </select>
+        </div>
+        <div class="flex flex-col w-1/4 mr-3">
+          <label for="sube">Sube</label>
+          <select
+            id="sube"
+            v-model="selectedSube"
+            v-on:change="getDepartmanlar()"
+            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+            :disabled="selectedSirket == ''"
+          >
+            <option value="" selected>Şube seçiniz</option>
+            <option v-for="sube in subeler" :key="sube.id" :value="sube.id">
+              {{ sube.ad }}
+            </option>
+          </select>
+        </div>
+        <div class="flex flex-col w-1/4">
+          <label for="departman">Departman</label>
+          <select
+            id="departman"
+            v-model="selectedDepartman"
+            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+            :disabled="selectedSube == ''"
+          >
+            <option value="" selected>Departman seçiniz</option>
+            <option v-for="departman in departmanlar" :key="departman.id" :value="departman.id">
+              {{ departman.ad }}
+            </option>
+          </select>
+        </div>
+      </div>
+
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead

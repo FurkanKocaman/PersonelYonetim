@@ -12,7 +12,7 @@ public sealed class DepartmanGetAllQueryResponse : EntityDto
 {
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
-
+    public Guid SubeId { get; set; } = default!;
 }
 
 internal sealed class DepartmanGetAllQueryHandler(
@@ -31,6 +31,7 @@ internal sealed class DepartmanGetAllQueryHandler(
                             Id = entity.Id,
                             Ad = entity.Ad,
                             Aciklama = entity.Aciklama,
+                            SubeId = entity.SubeId,
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,
                             CreateUserId = create_user.Id,
