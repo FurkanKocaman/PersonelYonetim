@@ -17,9 +17,8 @@ public sealed class Personel : Entity
     public DateTimeOffset IseGirisTarihi { get; set; } = default!;
     public Guid? YoneticiId { get; set; }
     public Personel? Yonetici { get; set; }
-
     public Guid UserId { get; set; } = default!;
     public AppUser User { get; set; } = default!;
 
-    //public ICollection<PersonelAtama> PersonelAtamalar { get; set; } = default!;
+    public ICollection<PersonelAtama> PersonelAtamalar { get; set; } = default!;
 }

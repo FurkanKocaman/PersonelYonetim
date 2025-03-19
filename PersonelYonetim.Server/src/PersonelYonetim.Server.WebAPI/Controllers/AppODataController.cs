@@ -46,6 +46,14 @@ public class AppODataController(
         return response;
     }
 
+    [HttpGet("personel-current")]
+    [Authorize]
+    public async Task<IQueryable<PersonelGetCurrentQueryResponse>> GetCurrentPersonel(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new PersonelGetCurrentQuery(), cancellationToken);
+        return response;
+    }
+
     [HttpGet("departmanlar/{SubeId}")]
     [Authorize(Permissions.ViewDepartman)]
     public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid SubeId, CancellationToken cancellationToken)

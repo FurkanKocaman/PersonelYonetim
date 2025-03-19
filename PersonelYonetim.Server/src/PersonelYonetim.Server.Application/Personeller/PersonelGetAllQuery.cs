@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Departmanlar;
@@ -6,6 +7,7 @@ using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Users;
+using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
@@ -31,10 +33,17 @@ internal sealed class PersonelGetAllQueryHandler(
     IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
     IPersonelAtamaRepository personelAtamaRepository,
+    IHttpContextAccessor httpContextAccessor,
     UserManager<AppUser> userManager) : IRequestHandler<PersonelGetAllQuery, IQueryable<PersonelGetAllQueryResponse>>
 {
     public Task<IQueryable<PersonelGetAllQueryResponse>> Handle(PersonelGetAllQuery request, CancellationToken cancellationToken)
     {
+        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdString))
+        {
+            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+        }
+
         var response = (from entity in personelRepository.GetAll()
                         join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
                         join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id

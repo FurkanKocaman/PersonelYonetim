@@ -63,6 +63,11 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .WithMany()
             .HasForeignKey(p => p.PersonelId);
 
+        modelBuilder.Entity<Personel>()
+            .HasMany(p => p.PersonelAtamalar)
+            .WithOne(p => p.Personel)
+            .HasForeignKey(p => p.PersonelId);
+
         modelBuilder.Entity<PersonelAtama>()
            .HasOne(pa => pa.Departman)
            .WithMany()
@@ -129,26 +134,29 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         var userEntries = ChangeTracker.Entries<AppUser>();
 
         var userId = GetCurrentUserId();
-        if (userId.HasValue)
-        {
+
+
             foreach (var entry in entries)
             {
                 if (entry.State == EntityState.Added)
                 {
                     entry.Property(p => p.CreatedAt).CurrentValue = DateTimeOffset.Now;
-                    entry.Property(p => p.CreateUserId).CurrentValue = userId.Value;
+                    if(userId.HasValue)
+                        entry.Property(p => p.CreateUserId).CurrentValue = userId.Value;
                 }
                 if (entry.State == EntityState.Modified)
                 {
                     if (entry.Property(p => p.IsDeleted).CurrentValue == true)
                     {
                         entry.Property(p => p.DeleteAt).CurrentValue = DateTimeOffset.Now;
-                        entry.Property(p => p.DeleteUserId).CurrentValue = userId.Value;
+                        if (userId.HasValue)
+                            entry.Property(p => p.DeleteUserId).CurrentValue = userId.Value;
                     }
                     else
                     {
                         entry.Property(p => p.UpdateAt).CurrentValue = DateTimeOffset.Now;
-                        entry.Property(p => p.UpdateUserId).CurrentValue = userId.Value;
+                        if (userId.HasValue)
+                            entry.Property(p => p.UpdateUserId).CurrentValue = userId.Value;
                     }
 
                 }
@@ -162,19 +170,22 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
                 if (entry.State == EntityState.Added)
                 {
                     entry.Property(p => p.CreatedAt).CurrentValue = DateTimeOffset.Now;
-                    entry.Property(p => p.CreateUserId).CurrentValue = userId.Value;
+                    if (userId.HasValue)
+                        entry.Property(p => p.CreateUserId).CurrentValue = userId.Value;
                 }
                 if (entry.State == EntityState.Modified)
                 {
                     if (entry.Property(p => p.IsDeleted).CurrentValue == true)
                     {
                         entry.Property(p => p.DeleteAt).CurrentValue = DateTimeOffset.Now;
-                        entry.Property(p => p.DeleteUserId).CurrentValue = userId.Value;
+                        if (userId.HasValue)
+                            entry.Property(p => p.DeleteUserId).CurrentValue = userId.Value;
                     }
                     else
                     {
                         entry.Property(p => p.UpdateAt).CurrentValue = DateTimeOffset.Now;
-                        entry.Property(p => p.UpdateUserId).CurrentValue = userId.Value;
+                        if (userId.HasValue)
+                            entry.Property(p => p.UpdateUserId).CurrentValue = userId.Value;
                     }
                 }
                 if (entry.State == EntityState.Deleted)
@@ -182,7 +193,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
                     throw new ArgumentException("Cannot delete directly from Db");
                 }
             }
-        }
+        
        
 
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);

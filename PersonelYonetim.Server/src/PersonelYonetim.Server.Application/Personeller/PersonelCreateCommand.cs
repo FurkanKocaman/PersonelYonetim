@@ -2,15 +2,9 @@
 using GenericRepository;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Users;
-using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.RoleClaim;
-using PersonelYonetim.Server.Domain.Sirketler;
-using PersonelYonetim.Server.Domain.Subeler;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Personeller;
@@ -80,6 +74,7 @@ internal sealed class PersonelCreateCommandHandler(
             return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
         }
         personel.UserId = userResult.Data;
+        personel.CreateUserId = userResult.Data;
 
         personelRepository.Add(personel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -101,7 +96,7 @@ internal sealed class PersonelCreateCommandHandler(
         if (!personelAtamaResult.IsSuccessful)
             Result<string>.Failure("Personel atama oluşturulamadı");
 
-        return $"Personel başarıyla oluşturuldu. Giriş bilgileri Eposta:{personel.Iletisim.Eposta} Şifre:{personel.Ad}";
+        return userResult.Data.ToString();
     }
 }
 

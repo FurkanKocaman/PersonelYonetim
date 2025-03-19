@@ -12,4 +12,5 @@ export interface UserModel {
   sehir: string;
   ilce: string;
   tamAdres: string;
+  role: string;
 }

@@ -581,7 +581,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Personel")
-                        .WithMany()
+                        .WithMany("PersonelAtamalar")
                         .HasForeignKey("PersonelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -854,6 +854,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
                 {
                     b.Navigation("Pozisyonlar");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
+                {
+                    b.Navigation("PersonelAtamalar");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Sirketler.Sirket", b =>

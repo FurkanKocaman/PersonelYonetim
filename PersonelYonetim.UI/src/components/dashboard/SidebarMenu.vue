@@ -125,7 +125,16 @@ const isMenuItemActive = (itemPath: string): boolean => {
             <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
               {{ user.fullName }}
             </h4>
-            <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p
+              v-if="user.role == 'SirketSahibi'"
+              class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
+            >
+              Şirket Sahibi
+            </p>
+            <p
+              v-if="user.role != 'SirketSahibi'"
+              class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
+            >
               {{ user.pozisyonAd }}
             </p>
           </div>
