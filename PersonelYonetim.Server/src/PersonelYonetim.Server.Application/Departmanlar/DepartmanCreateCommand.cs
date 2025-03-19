@@ -1,14 +1,17 @@
 ﻿using FluentValidation;
 using GenericRepository;
+using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.Subeler;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Departmanlar;
 
 public sealed record DepartmanCreateCommand(
     string Ad,
-    string? Aciklama) :IRequest<Result<string>> ;
+    string? Aciklama,
+    Guid SubeId) :IRequest<Result<string>> ;
 
 public sealed class DepartmanCreateCommandValidator : AbstractValidator<DepartmanCreateCommand>
 {
@@ -21,6 +24,7 @@ public sealed class DepartmanCreateCommandValidator : AbstractValidator<Departma
 
 internal sealed class DepartmanCreateCommandHandler(
     IDepartmanRepository departmanRepository,
+    ISubeRepository subeRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DepartmanCreateCommand, Result<string>>
 {
 
@@ -28,14 +32,16 @@ internal sealed class DepartmanCreateCommandHandler(
     {
         var departmanVarMi = await departmanRepository.AnyAsync(p => p.Ad == request.Ad);
         if (departmanVarMi)
-            return Result<string>.Failure("Departman zaten mevcut");
-        Departman departman = new Departman
-        {
-            Ad = request.Ad,
-            Aciklama = request.Aciklama
-        };
+            return Result<string>.Failure("Bu isme sahip departman zaten mevcut");
+
+        var subeVarMi = await subeRepository.AnyAsync(p => p.Id == request.SubeId);
+        if (!subeVarMi)
+            return Result<string>.Failure("Şube bulunamadı");
+
+        Departman departman = request.Adapt<Departman>();
         departmanRepository.Add(departman);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return "Departman başarıyla oluşturuldu";
+
+        return Result<string>.Succeed("Departman başarıyla oluşturuldu");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using GenericRepository;
+using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
@@ -31,21 +32,17 @@ internal sealed class PozisyonCreateCommandHandler(
         var pozisyonVarMi = await pozisyonRepository.AnyAsync(p => p.Ad == request.Ad);
         if (pozisyonVarMi)
             return Result<string>.Failure("Pozisyon zaten mevcut");
-        Departman departman = await departmanRepository.FirstOrDefaultAsync(x => x.Id == request.DepartmanId);
-        if(departman == null)
+
+        var departmanVarMi = await departmanRepository.AnyAsync(p => p.Id == request.DepartmanId);
+        if(!departmanVarMi)
         {
             return Result<string>.Failure("Departman bulunamadı");
         }
 
-        Pozisyon pozisyon = new()
-        {
-            Ad = request.Ad,
-            Aciklama = request.Aciklama,
-            DepartmanId = request.DepartmanId
-        };
+        Pozisyon pozisyon = request.Adapt<Pozisyon>();
         pozisyonRepository.Add(pozisyon);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<string>.Succeed("Pozisyon başarıyla oluşturuldu");
+        return Result<string>.Succeed("Pozisyon oluşturuldu");
     }
 }

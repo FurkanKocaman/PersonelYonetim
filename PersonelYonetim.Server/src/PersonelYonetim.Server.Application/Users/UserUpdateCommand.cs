@@ -33,10 +33,23 @@ internal sealed class UserUpdateCommanHandler(
             user.FirstName = request.FirstName;
         if (!string.IsNullOrWhiteSpace(request?.LastName))
             user.LastName = request.LastName;
+        if(!string.IsNullOrWhiteSpace(request?.FirstName) || !string.IsNullOrWhiteSpace(request?.LastName))
+        {
+            string baseUserName = $"{request.FirstName}.{request.LastName}".ToLower().Replace(" ", "");
+            string userName = baseUserName;
+            int counter = 1;
+
+            while (await userManager.FindByNameAsync(userName) != null)
+            {
+                userName = $"{baseUserName}{counter}";
+                counter++;
+            }
+            user.UserName = userName;
+        }
+
         if (!string.IsNullOrWhiteSpace(request?.Email))
         {
             user.Email = request.Email;
-            user.UserName = request.Email;
         }
         
         var result = await userManager.UpdateAsync(user);
