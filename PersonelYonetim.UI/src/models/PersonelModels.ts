@@ -5,15 +5,23 @@
  */
 export interface PersonelItem {
   id: number;
-  ad: string;
-  soyad: string;
-  departman: string;
-  pozisyon: string;
+  fullName: string;
+  dogumTarihi: Date;
+  cinsiyet: boolean | undefined;
+  departmanAd: string;
+  pozisyonAd: string;
   iseGirisTarihi: string;
-  email: string;
+  eposta: string;
   telefon: string;
-  adres: string;
-  durum: string;
+  ulke: string;
+  sehir: string;
+  ilce: string;
+  tamAdres: string;
+  isActive: string;
+  createdAt: Date;
+  createUserName: string;
+  updateAt: string;
+  updateUserName: string;
 }
 
 /**
@@ -38,7 +46,7 @@ export interface PersonelPaginationParams {
   sayfa: number;
   sayfaBoyutu: number;
   siralamaAlani?: string;
-  siralama?: 'asc' | 'desc';
+  siralama?: "asc" | "desc";
 }
 
 /**

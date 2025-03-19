@@ -4,6 +4,8 @@ import { useRouter, useRoute } from "vue-router";
 import SidebarMenu from "@/components/dashboard/SidebarMenu.vue";
 import TopBar from "../components/dashboard/TopBar.vue";
 import type { MenuItem } from "@/types/menu";
+import { useUserStore } from "@/stores/user";
+import type { UserModel } from "@/models/UserModel";
 
 // Router
 const router = useRouter();
@@ -55,21 +57,15 @@ const menuItems = ref<MenuItem[]>([
   },
 ]);
 
-// Örnek kullanıcı verileri
-const user = {
-  name: "Ahmet Yılmaz",
-  role: "Yönetici",
-  avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-};
+const userStore = useUserStore();
 
-// Kenar çubuğunu aç/kapat
+const user: UserModel = userStore.user;
+
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;
 };
 
-// Menü öğesi tıklamasını işle
 const handleMenuClick = (item: MenuItem) => {
-  // Sadece zaten bu rotada değilsek gezinme işlemi yap
   if (route.path !== item.path) {
     isLoading.value = true;
     router.push(item.path);
@@ -79,7 +75,7 @@ const handleMenuClick = (item: MenuItem) => {
 // Mevcut rotaya göre aktif menü öğesini güncelle
 const updateActiveMenuItem = () => {
   // Tüm öğeleri sıfırla
-  menuItems.value.forEach(item => {
+  menuItems.value.forEach((item) => {
     item.active = false;
   });
 
@@ -87,7 +83,7 @@ const updateActiveMenuItem = () => {
   let bestMatch: MenuItem | null = null;
   let bestMatchLength = 0;
 
-  menuItems.value.forEach(item => {
+  menuItems.value.forEach((item) => {
     if (route.path.startsWith(item.path) && item.path.length > bestMatchLength) {
       bestMatch = item;
       bestMatchLength = item.path.length;
@@ -99,8 +95,8 @@ const updateActiveMenuItem = () => {
     (bestMatch as MenuItem).active = true;
   }
   // Eşleşme bulunamazsa ve dashboard kökündeysek, dashboard öğesini etkinleştir
-  else if (route.path === '/dashboard') {
-    const dashboardItem = menuItems.value.find(item => item.path === '/dashboard');
+  else if (route.path === "/dashboard") {
+    const dashboardItem = menuItems.value.find((item) => item.path === "/dashboard");
     if (dashboardItem) {
       (dashboardItem as MenuItem).active = true;
     }
@@ -118,14 +114,15 @@ watch(
 
 // Bileşen bağlandığında başlat
 onMounted(() => {
+  userStore.getUser();
   updateActiveMenuItem();
-  
+
   // Gezinme olay dinleyicilerini ekle
   router.beforeEach(() => {
     isLoading.value = true;
     return true;
   });
-  
+
   router.afterEach(async () => {
     // Yükleme göstergesini gizlemeden önce DOM'un güncellenmesini bekle
     await nextTick();
@@ -156,19 +153,23 @@ onMounted(() => {
       }"
     >
       <!-- Üst Çubuk -->
-      <TopBar :sidebarOpen="sidebarOpen" @toggle-sidebar="toggleSidebar" />
+      <TopBar :sidebarOpen="sidebarOpen" :header="route.path" @toggle-sidebar="toggleSidebar" />
 
       <!-- İçerik Alanı -->
-      <div class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-900 relative">
+      <div
+        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-900 relative"
+      >
         <!-- Yükleme Göstergesi -->
-        <div 
-          v-if="isLoading" 
+        <div
+          v-if="isLoading"
           class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 dark:bg-neutral-900 dark:bg-opacity-80 z-50"
         >
-          <div class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+          <div
+            class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"
+          ></div>
           <p class="mt-4 text-gray-700 dark:text-gray-300 font-medium">Yükleniyor...</p>
         </div>
-        
+
         <!-- Ana İçerik -->
         <router-view v-slot="{ Component }">
           <component :is="Component" :key="route.fullPath" />

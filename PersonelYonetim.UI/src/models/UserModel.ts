@@ -2,8 +2,8 @@ export interface UserModel {
   id: string;
   fullName: string;
   dogumTarihi: Date;
-  cinsiyet: boolean | null;
-  profilResimUrl: string | null;
+  cinsiyet: boolean | undefined;
+  profilResimUrl: string | undefined;
   departmanAd: string;
   pozisyonAd: string;
   eposta: string;
