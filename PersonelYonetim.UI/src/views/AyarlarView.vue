@@ -36,6 +36,26 @@ const systemSettings = ref({
   timeFormat: '24'
 });
 
+// Erişim ayarları ve roller
+const roles = ref([
+  { name: 'Yönetici', permissions: ['Personel Görüntüle', 'Personel Ekle', 'Personel Düzenle','Personel Sil','Şirket Görüntüle', 'Şirket Ekle', 'Şirket Düzenle','Şirket Sil','Şube Görüntüle', 'Şube Ekle', 'Şube Düzenle','Şube Sil','Departman Görüntüle', 'Departman Ekle', 'Departman Düzenle','Departman Sil','Pozisyon Görüntüle', 'Pozisyon Ekle', 'Pozisyon Düzenle','Pozisyon Sil','İzin Görüntüle', 'İzin Oluştur', 'İzin Onayla','Belge Görüntüle'] },
+  { name: 'Çalışan', permissions: ['Personel Görüntüle','Pozisyon Görüntüle','Şirket Görüntüle','Şube Görüntüle','Departman Görüntüle','İzin Oluştur'] },
+  { name: 'Admin', permissions: ['Personel Görüntüle', 'Personel Ekle', 'Personel Düzenle','Personel Sil','Şirket Görüntüle','Şube Görüntüle','Departman Görüntüle','Pozisyon Görüntüle', 'Pozisyon Ekle', 'Pozisyon Düzenle','Pozisyon Sil','İzin Görüntüle','Belge Görüntüle'] },
+  { name: 'Şirket Sahibi', permissions: ['Personel Görüntüle', 'Personel Ekle', 'Personel Düzenle','Personel Sil','Şirket Görüntüle', 'Şirket Ekle', 'Şirket Düzenle','Şirket Sil','Şube Görüntüle', 'Şube Ekle', 'Şube Düzenle','Şube Sil','Departman Görüntüle', 'Departman Ekle', 'Departman Düzenle','Departman Sil','Pozisyon Görüntüle', 'Pozisyon Ekle', 'Pozisyon Düzenle','Pozisyon Sil','İzin Görüntüle', 'İzin Oluştur', 'İzin Onayla','Belge Görüntüle'] },
+  
+]);
+const allPermissions = [
+  'Personel Görüntüle', 'Personel Ekle', 'Personel Düzenle', 'Personel Sil',
+  'Şirket Görüntüle', 'Şirket Ekle', 'Şirket Düzenle', 'Şirket Sil',
+  'Şube Görüntüle', 'Şube Ekle', 'Şube Düzenle', 'Şube Sil',
+  'Departman Görüntüle', 'Departman Ekle', 'Departman Düzenle', 'Departman Sil',
+  'Pozisyon Görüntüle', 'Pozisyon Ekle', 'Pozisyon Düzenle', 'Pozisyon Sil',
+  'İzin Görüntüle', 'İzin Oluştur', 'İzin Onayla', 'Belge Görüntüle'
+];
+
+const selectedRole = ref('Yönetici');
+const selectedPermissions = ref<string[]>([]);
+
 // Ayarları yükle
 const loadSettings = async () => {
   try {
@@ -85,6 +105,16 @@ const saveSettings = async () => {
   }
 };
 
+// Rol seçimi yapıldığında yetkileri güncelle
+const updatePermissions = () => {
+  const role = roles.value.find(r => r.name === selectedRole.value);
+  if (role) {
+    selectedPermissions.value = [...role.permissions]; // Seçili izinleri güncelle
+  } else {
+    selectedPermissions.value = [];
+  }
+};
+
 // Aktif sekmeyi değiştir
 const setActiveTab = (tab: string) => {
   activeTab.value = tab;
@@ -93,6 +123,7 @@ const setActiveTab = (tab: string) => {
 // Bileşeni başlat
 onMounted(() => {
   loadSettings();
+  updatePermissions();
 });
 </script>
 
@@ -152,6 +183,12 @@ onMounted(() => {
               :class="activeTab === 'bildirimler' ? 'text-sky-600 border-sky-600' : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
             >
               <i class="fas fa-bell mr-2"></i> Bildirimler
+            </button>
+          </li>
+          <li class="mr-2">
+            <button @click="setActiveTab('erisim')" class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg"
+                    :class="activeTab === 'erisim' ? 'text-sky-600 border-sky-600' : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'">
+                    <i class="fa-solid fa-address-card"></i> Erişim Ayarları
             </button>
           </li>
         </ul>
@@ -365,6 +402,43 @@ onMounted(() => {
             </div>
           </div>
         </div>
+
+        <!-- Erişim Ayarları -->
+        <div v-if="activeTab === 'erisim'" class="space-y-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Erişim Ayarları</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rol Seçin</label>
+              <select 
+                v-model="selectedRole" 
+                @change="updatePermissions"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 dark:bg-neutral-700 dark:text-white"
+              >
+                <option v-for="role in roles" :key="role.name" :value="role.name">{{ role.name }}</option>
+              </select>
+            </div>
+            
+            <!-- Yetkiler -->
+            <div>
+              <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Yetkiler</h3>
+              <div class="grid grid-cols-3 gap-4">
+                <div v-for="permission in allPermissions" :key="permission" class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    :value="permission" 
+                    v-model="selectedPermissions" 
+                    :checked="selectedPermissions.includes(permission)"
+                    class="rounded border-gray-300 text-sky-600 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50"
+                  >
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">{{ permission }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
         
         <!-- Kaydet Düğmesi -->
         <div class="mt-8 flex justify-end">
