@@ -1,209 +1,309 @@
-<script>
-import { ref } from "vue";
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import { takvimService, Etkinlik } from "@/services/takvimService";
 
-export default {
-    data() {
-    return {
-      currentDate: new Date(),
-      showModal: false,
-      newName: '',
-      newMonth: '',
-      newDay: '',
-      birthdays: {},
-      holidays: { "1-1": "Yılbaşı", "4-23": "23 Nisan", "5-19": "19 Mayıs", "8-30": "30 Ağustos", "10-29": "Cumhuriyet Bayramı" },
-      monthNames: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
-      dayNames: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"]
-    };
-  },
-  computed: {
-    currentMonth() {
-      return this.currentDate.getMonth();
-    },
-    currentYear() {
-      return this.currentDate.getFullYear();
-    },
-    calendarDays() {
-    let days = [];
-    let totalDays = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-    let firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay(); 
+// 🗓 Veriler
+const currentDate = ref(new Date());
+const etkinlikler = ref<Etkinlik[]>([]);
+const tatilGunleri = ref<{ [key: string]: string }>({});
+
+const showForm = ref(false); 
+const newEvent = ref({
+  id: 0,
+  baslik: "",
+  tarih: "",
+});
+
+
+const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+
+onMounted(async () => {
+  etkinlikler.value = await takvimService.getEtkinlikler();
+  tatilGunleri.value = await takvimService.getTatilGunleri();
+});
+
+
+const currentMonth = computed(() => currentDate.value.getMonth());
+const currentYear = computed(() => currentDate.value.getFullYear());
+
+
+const calendarDays = computed(() => {
+  let days = [];
+  let totalDays = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+  let firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1).getDay();
 
   
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push({ day: '', date: '' }); 
-    }
-
-   
-    for (let day = 1; day <= totalDays; day++) {
-      let dateKey = `${this.currentMonth + 1}-${day}`;
-      days.push({ day, date: dateKey });
-    }
-
-    return days;
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    days.push({ day: "", date: "" });
   }
-  },
+
+ 
+  for (let day = 1; day <= totalDays; day++) {
+    let dateKey = `${currentMonth.value + 1}-${day}`;
+    days.push({ day, date: dateKey });
+  }
+
+  return days;
+});
+
+
+const etkinlikVarMi = (date: string) => {
+  return etkinlikler.value.some(event => {
+    const [yil, ay, gun] = event.tarih.split("-").map(Number);
+    return `${ay}-${gun}` === date;
+  });
+};
+
+
+const tatilVarMi = (date: string) => {
+  return tatilGunleri.value[date] !== undefined;
+};
+
+
+const prevMonth = () => {
+  currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1);
+};
+const nextMonth = () => {
+  currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1);
+};
+
+
+const addEvent = async () => {
   
-  methods: {
-    prevMonth() {
-    this.currentDate = new Date(this.currentYear, this.currentMonth - 1, 1);
-  },
-  nextMonth() {
-    this.currentDate = new Date(this.currentYear, this.currentMonth + 1, 1);
-  },
-    isToday(date) {
-      let today = new Date();
-      return today.getDate() == date.split('-')[1] && today.getMonth() + 1 == date.split('-')[0];
-    },
-    isHoliday(date) {
-      return this.holidays[date] !== undefined;
-    },
-    addBirthday() {
-      let dateKey = `${this.newMonth}-${this.newDay}`;
-      if (this.newName && this.newMonth && this.newDay) {
-        this.birthdays[dateKey] = this.newName;
-        this.showModal = false;
-        this.newName = '';
-        this.newMonth = '';
-        this.newDay = '';
-      }
-    }
+  const newEventData = {
+    id: Date.now(), 
+    baslik: newEvent.value.baslik,
+    tarih: newEvent.value.tarih,
+  };
+
+  await takvimService.ekleEtkinlik(newEventData); 
+  etkinlikler.value = await takvimService.getEtkinlikler();
+  showForm.value = false; 
+  // Formu temizliyoruz
+  newEvent.value = { id: 0, baslik: "", tarih: "" };
+};
+
+
+const removeEvent = async (date: string) => {  
+  
+  const eventToRemove = etkinlikler.value.find(event => {
+    const [yil, ay, gun] = event.tarih.split("-").map(Number);
+    return `${ay}-${gun}` === date;
+  });
+
+  if (eventToRemove) {
+    takvimService.silEtkinlik(eventToRemove.id);
+    etkinlikler.value = await takvimService.getEtkinlikler(); 
   }
 };
 
+
+
+const toggleForm = () => {
+  showForm.value = !showForm.value;
+};
 </script>
 
+
 <template>
-    <div class="calendar">
-      <div class="calendar-header">
-        <button @click="prevMonth" class="bg-gray-300 text-white hover:bg-gray-400 px-4 py-2 rounded" style="cursor: pointer; ">&lt;</button>
-        <h2 style="font-weight: bold;">{{ monthNames[currentMonth] }} {{ currentYear }}</h2>
-        <button @click="nextMonth" class="bg-gray-300 text-white hover:bg-gray-400 px-4 py-2 rounded" style="cursor: pointer;">&gt;</button>
-        <button @click="showModal = true" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded " style="cursor: pointer;">Ekle</button>
-        
-      </div>
-      <div class="days">
-        <h1 class="day-names" v-for="day in dayNames" :key="day">{{ day }}</h1>
-        <div v-for="day in calendarDays" :key="day.date" class="day" 
-             :class="{'current-day': isToday(day.date), 'holiday': isHoliday(day.date)}">
-          <span class="day-number">{{ day.day }}</span>
-          <div v-if="birthdays[day.date]" style="margin-top: 158px; background-color:#d6d6d6;  font-size:12px; color: #474747;">{{ birthdays[day.date] }} doğum günü</div>
-        </div>
-      </div>
+  <div class="calendar">
+    <div class="calendar-header">
+      <button @click="prevMonth" class="button ">&lt;</button>
+      <h2 style="font-size: 22px; color:#141414 ;">{{ currentYear }} - {{ monthNames[currentMonth] }}</h2>
+      <button @click="nextMonth" class="button ">&gt;</button>
       
-      <div class="modal" v-if="showModal">
-        <div class="modal-content">
-          <h3>Doğum Günü Ekle</h3>
-          <label>İsim: 
-  <input v-model="newName" type="text" placeholder="İsim girin" class="input-field">
-</label><br>
+      
+      <button @click="toggleForm" class="button add-button">Ekle</button>
+    </div>
 
-<label>Ay: 
-  <select v-model="newMonth" class="input-field">
-    <option v-for="(month, index) in monthNames" :key="index" :value="index + 1">{{ month }}</option>
-  </select>
-</label><br>
+   
+    
 
-<label>Gün: 
-  <input v-model="newDay" type="number" min="1" max="31" placeholder="Gün girin" class="input-field">
-</label><br>
+   
+    <div v-if="showForm" class="event-form">
+      <h3>Yeni Etkinlik Ekle</h3>
+      <label for="eventType">Etkinlik Türü:</label>
+      <select v-model="newEvent.type" id="eventType">
+        <option value="Doğum Günü">Doğum Günü</option>
+        <option value="İzin">İzin</option>
+        <option value="Etkinlik">Etkinlik</option>
+      </select>
 
-          <label>Gün: <input v-model="newDay" type="number" min="1" max="31"></label><br>
-          <button @click="addBirthday " class="bg-blue-600 text-white hover:bg-blue-700  px-4 py-2 rounded" style="cursor: pointer;" >Ekle</button>
-          <button @click="showModal  = false" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded" style="margin-left: 10px;cursor: pointer;">Kapat</button>
+      <label for="eventName">Başlık:</label>
+      <input v-model="newEvent.baslik" type="text" id="eventName" placeholder="Başlık" required />
+
+      <label for="eventDate">Tarih:</label>
+      <input v-model="newEvent.tarih" type="date" id="eventDate" required />
+
+      <button @click="addEvent" class="button">Kaydet</button>
+      <button @click="toggleForm" class="button">İptal</button>
+    </div>
+    <div class="day-names">
+      <div v-for="(day, index) in dayNames" :key="index" class="day-name">{{ day }}</div>
+    </div>
+
+   
+    <div class="days">
+      <div v-for="day in calendarDays" :key="day.date" class="day"
+           :class="{ 'holiday': tatilVarMi(day.date), 'event-day': etkinlikVarMi(day.date) }">
+        <span class="day-number">{{ day.day }}</span>
+        <div v-if="tatilVarMi(day.date)" class="tatil">{{ tatilGunleri[day.date] }}</div>
+        <div v-if="etkinlikVarMi(day.date)" class="etkinlik">
+          📌 Etkinlik Var
+          <button @click="removeEvent(day.date)" class="button remove-button">X</button>
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
 
-<style>
-.calendar {
-  width: 83vw;
- height: 1400px;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
- 
-}
+<style scoped>
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 28px;
+  font-weight: bold;
   margin-bottom: 20px;
-  margin-left:170px;
+  padding: 20px;
+  margin-left:220px;
+  
 }
+
+
+.day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: bold;
+  font-size: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 2px; 
+  margin-left:20px;
+}
+
+.day-name {
+  margin-left:-13px;
+  
+}
+
+
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  height: 500px;
-  
+  gap: 0px;
+  margin-left:10px;
+  height:1100px;
 }
+
 .day {
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #ebeaea;
   text-align: center;
-  min-height: 80px;
-  position: relative;
-  height: 200px;
-}
-.day-names {
-    font-size: 13px;
-  text-align: center;
+  min-height: 140px;
+  font-size: 16px;
   font-weight: bold;
-  background: none;
-  border: none;
-  padding-top:40px;
+  background-color: #f8f8f8;
+  position: relative;
+  margin: 0;
 }
+
 .day-number {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 12px;
+  padding-left:81px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.button {
+  background-color: #007bff;
+  color: white;
+  padding: 4px 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 22px;
+  
   
 }
 
-.current-day {
-  background-color: rgb(188, 229, 243);
+.button:hover {
+  background-color: #036cdc;
 }
-.holiday {
-    background-color: rgb(188, 229, 243);
+
+.add-button {
+  font-size: 12px;  
+  padding: 10px 15px;  
+  
+}
+
+/*.remove-button {
+  background-color: #9b9b9b;
   color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 9px;
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}*/
+
+.remove-button {
+  background-color: #e1e1e1;
+  color: rgb(97, 95, 95);
+  padding: 4px 7px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 9px;
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
 }
-.modal {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  justify-content: center;
-  align-items: center;
+
+.remove-button:hover {
+  background-color: #b9b5b5;
 }
-.modal-content {
-  background: white;
+
+.event-form {
+  background-color: #f8f8f8;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 8px;
+  margin-top: 20px;
 }
 
+.event-form label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
 
-
-
-
-.input-field {
+.event-form input, .event-form select {
   width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 4px;
   border: 1px solid #ccc;
-  font-size: 16px;
-  box-sizing: border-box; 
 }
 
-.btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 5px;
-  margin-top: 15px;
-  font-size: 16px;
+.event-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size:10px;
+  margin-left:3px;
+  font-weight: bold;
 }
 
+.event-form button:hover {
+  background-color: #036cdc;
+}
 </style>
