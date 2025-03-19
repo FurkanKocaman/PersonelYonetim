@@ -6,7 +6,7 @@ using PersonelYonetim.Server.Domain.Users;
 
 namespace PersonelYonetim.Server.Application.Departmanlar;
 
-public sealed record DepartmanGetAllQuery() : IRequest<IQueryable<DepartmanGetAllQueryResponse>>;
+public sealed record DepartmanGetAllQuery(Guid SubeId) : IRequest<IQueryable<DepartmanGetAllQueryResponse>>;
 
 public sealed class DepartmanGetAllQueryResponse : EntityDto
 {
@@ -21,7 +21,7 @@ internal sealed class DepartmanGetAllQueryHandler(
 {
     public Task<IQueryable<DepartmanGetAllQueryResponse>> Handle(DepartmanGetAllQuery request, CancellationToken cancellationToken)
     {
-        var response = (from entity in departmanRepository.GetAll()
+        var response = (from entity in departmanRepository.GetAll() where entity.SubeId == request.SubeId
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
                         join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
                         into update_user

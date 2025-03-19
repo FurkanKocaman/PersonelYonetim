@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace PersonelYonetim.Server.Domain.Users;
 
@@ -6,11 +7,11 @@ public sealed class AppUser : IdentityUser<Guid>
 {
     public AppUser()
     {
-        Id = Guid.CreateVersion7();
+        Id = Guid.NewGuid();
     }
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
-    public string FullName => $"${FirstName} {LastName}";
+    public string FullName => $"{FirstName} {LastName}";
 
     #region Audit Log
     public DateTimeOffset CreatedAt { get; set; }

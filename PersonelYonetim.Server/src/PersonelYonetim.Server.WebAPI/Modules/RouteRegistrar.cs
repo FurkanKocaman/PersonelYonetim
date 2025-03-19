@@ -10,5 +10,7 @@ public static class RouteRegistrar
         app.RegisterDepartmanRoutes();
         app.RegisterPozisyonRoutes();
         app.RegisterIzinTalepRoutes();
+        app.RegisterSirketRoutes();
+        app.RegisterSubeRoutes();
     }
 }

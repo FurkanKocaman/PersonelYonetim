@@ -14,7 +14,7 @@ internal sealed class JwtProvider(
     IOptions<JwtOptions> options,
     UserManager<AppUser> userManager) : IJwtProvider
 {
-    public  Task<string> CreateTokenAsync(AppUser user, CancellationToken cancellationToken = default)
+    public Task<string> CreateTokenAsync(AppUser user, CancellationToken cancellationToken = default)
     {
         var roles =  userManager.GetRolesAsync(user).Result;
         List<Claim> claims = new()
