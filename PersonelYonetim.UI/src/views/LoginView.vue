@@ -2,46 +2,29 @@
 import { ref, onMounted } from "vue";
 import type { LoginRequest } from "@/models/LoginRequest";
 import AuthService from "@/services/AuthService";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const email = ref("");
 const password = ref("");
 const isLoading = ref(false);
 const loginResponse = ref("");
 
-const images = ref([
-  "https://www.fotovizyon.net/wp-content/uploads/2023/10/MG_50301.jpg",
-  "https://lwfiles.mycourse.app/64c2ad6a42f5698b2785c5da-public/6838886abe627023dbd894f478353a0d.jpeg",
-  "https://images.pexels.com/photos/290538/pexels-photo-290538.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-  "https://www.fotovizyon.net/wp-content/uploads/2023/10/MG_50301.jpg",
-  "https://istanbulpolisekip1.org/upload/galeri/germany_nature_wide_1366x768.jpg",
-]);
-
-const currentImageIndex = ref(0);
-
-const changeImage = () => {
-  currentImageIndex.value = (currentImageIndex.value + 1) % images.value.length;
-};
-
-const nextImage = () => {
-  currentImageIndex.value = (currentImageIndex.value + 1) % images.value.length;
-};
-
-const prevImage = () => {
-  currentImageIndex.value =
-    (currentImageIndex.value - 1 + images.value.length) % images.value.length;
-};
-
-onMounted(() => {
-  setInterval(changeImage, 5000);
-});
+onMounted(() => {});
 
 const handleLogin = async () => {
   try {
     isLoading.value = true;
     const loginData: LoginRequest = { usernameOrEmail: email.value, password: password.value };
     const response = await AuthService.login(loginData);
-    console.log("Response", response);
-    loginResponse.value = response;
+    if (response.success) {
+      loginResponse.value = response.message;
+      router.push("/");
+    } else {
+      loginResponse.value = response.message;
+      console.error(response);
+    }
     isLoading.value = false;
   } catch (error) {
     console.error("Error", error);
@@ -54,34 +37,16 @@ const handleLogin = async () => {
   <div class="flex justify-end h-dvh">
     <div
       class="w-full h-full flex items-center justify-center bg-gradient-to-r from-sky-600 to-sky-700"
-    >
-      <div class="relative w-full h-full">
-        <img
-          :src="images[currentImageIndex]"
-          alt="Personel Yönetim"
-          class="object-cover w-full h-full"
-        />
-        <button
-          @click="prevImage"
-          class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-opacity-50 p-2 text-white"
-        >
-          ‹
-        </button>
-        <button
-          @click="nextImage"
-          class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-opacity-50 p-2 text-white"
-        >
-          ›
-        </button>
-      </div>
-    </div>
+    ></div>
 
-    <div class="flex flex-col items-center justify-center md:w-1/2 h-full dark:bg-neutral-700">
+    <div
+      class="flex flex-col items-center justify-center md:w-1/2 h-full bg-neutral-200 dark:bg-neutral-700"
+    >
       <form @submit.prevent="handleLogin" class="space-y-4 w-full px-16">
-        <div class="formDisi">
-          <h1 class="text-2xl font-semibold text-center mb-6 text-white">Giriş Sayfası</h1>
+        <div>
+          <h1 class="text-2xl font-semibold text-center mb-6">Giriş Sayfası</h1>
           <div>
-            <label for="email" class="block text-sm/5 font-semibold my-2 text-white"
+            <label for="email" class="block text-sm/5 font-semibold my-2"
               >Eposta | Kullanıcı adı</label
             >
             <div class="relative">
@@ -100,15 +65,13 @@ const handleLogin = async () => {
                 v-model="email"
                 type="text"
                 required
-                class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 dark:text-neutral-200 rounded text-sm pl-10 text-white"
+                class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm pl-10"
                 placeholder="user@mail.com"
               />
             </div>
           </div>
           <div>
-            <label for="password" class="block text-sm/5 font-semibold my-2 text-white"
-              >Şifre</label
-            >
+            <label for="password" class="block text-sm/5 font-semibold my-2">Şifre</label>
             <div class="relative">
               <svg
                 viewBox="0 0 24 24"
@@ -125,37 +88,35 @@ const handleLogin = async () => {
                 v-model="password"
                 type="password"
                 required
-                class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 dark:text-neutral-200 rounded text-sm pl-10 text-white"
+                class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm pl-10"
                 placeholder="******"
               />
             </div>
           </div>
           <div class="flex items-center justify-between my-5">
-            <label class="flex items-center text-neutral-400 hover:text-neutral-700">
+            <label class="flex items-center hover:text-neutral-800 dark:hover:text-neutral-100">
               <input type="checkbox" class="rounded border-gray-300 size-4 accent-sky-600" />
-              <span class="ml-2 text-sm text-white">Remember me</span>
+              <span class="ml-2 text-sm">Remember me</span>
             </label>
-            <a
-              href="#"
-              class="text-sm text-neutral-400 dark:hover:text-neutral-200 hover:text-neutral-600 text-white"
+            <a href="#" class="text-sm dark:hover:text-neutral-100 hover:text-neutral-900"
               >Forgot password?</a
             >
           </div>
 
           <button
             type="submit"
-            class="flex items-center justify-center w-full bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white p-2 rounded hover:from-purple-700 hover:via-purple-800 hover:to-purple-900"
+            class="flex items-center justify-center w-full bg-sky-600 text-neutral-200 p-2 rounded hover:bg-sky-500"
             :disabled="isLoading"
             v-on:click="handleLogin()"
           >
             <svg
+              class="w-5 h-5 fill-none mr-1"
               viewBox="0 0 24 24"
-              class="w-4 h-4 fill-none dark:fill-neutral-200 mr-3"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M12 8V16M8 12H16"
-                class="stroke-neutral-800 dark:stroke-neutral-200"
+                d="M14 4L17.5 4C20.5577 4 20.5 8 20.5 12C20.5 16 20.5577 20 17.5 20H14M15 12L3 12M15 12L11 16M15 12L11 8"
+                class="stroke-neutral-200"
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -170,20 +131,13 @@ const handleLogin = async () => {
 </template>
 
 <style>
-body {
-  background: linear-gradient(135deg, #c7d6df, #2e1588);
-}
-.formDisi {
-  background: rgba(255, 255, 255, 0.1);
-  padding-top: 50px;
-  padding-left: 50px;
-  padding-right: 50px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  backdrop-filter: blur(10px);
-  width: 100%;
-  height: 450px;
-  position: relative;
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  background-color: red !important;
+  color: black !important;
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
+import type { UserModel } from "@/models/UserModel";
+import { defineProps, defineEmits, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 
 // Menü öğesi için tip tanımı
@@ -10,21 +11,14 @@ interface MenuItem {
   path: string;
 }
 
-// Kullanıcı için tip tanımı
-interface User {
-  name: string;
-  role: string;
-  avatar: string;
-}
-
-// Komponent prop'ları
+// Component prop'ları
 const props = defineProps({
   menuItems: {
     type: Array as () => MenuItem[],
     required: true,
   },
   user: {
-    type: Object as () => User,
+    type: Object as () => UserModel,
     required: true,
   },
   sidebarOpen: {
@@ -71,12 +65,12 @@ const isMenuItemActive = (itemPath: string): boolean => {
   if (itemPath === route.path) {
     return true;
   }
-  
+
   // İç içe rotalar için (örneğin /dashboard/personel)
-  if (itemPath !== '/dashboard' && route.path.startsWith(itemPath)) {
+  if (itemPath !== "/dashboard" && route.path.startsWith(itemPath)) {
     return true;
   }
-  
+
   return false;
 };
 </script>
@@ -124,13 +118,15 @@ const isMenuItemActive = (itemPath: string): boolean => {
           <img
             class="object-cover mx-2 rounded-full border-2 border-sky-500"
             :class="{ 'w-16 h-16': sidebarOpen, 'w-10 h-10': !sidebarOpen }"
-            :src="user.avatar"
+            :src="user.profilResimUrl"
             alt="Avatar"
           />
           <div :class="{ hidden: !sidebarOpen }">
-            <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">{{ user.name }}</h4>
+            <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
+              {{ user.fullName }}
+            </h4>
             <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.role }}
+              {{ user.pozisyonAd }}
             </p>
           </div>
         </div>
@@ -145,7 +141,9 @@ const isMenuItemActive = (itemPath: string): boolean => {
             :class="{
               'px-4 py-3 mx-3': sidebarOpen,
               'px-0 py-3 justify-center mx-3': !sidebarOpen,
-              'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': isMenuItemActive(item.path),
+              'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': isMenuItemActive(
+                item.path
+              ),
             }"
           >
             <!-- İkon Konteyneri - Her Zaman Görünür -->
