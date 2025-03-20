@@ -1,12 +1,9 @@
-import type { Adres, Iletisim } from "./RegisterRequest";
-
-export interface SirketModel {
+export interface PozisyonModel {
   id: string;
   ad: string;
   aciklama: string | undefined;
-  logoUrl: string | undefined;
-  adres: Adres;
-  iletisim: Iletisim;
+  sirketId: string;
+  sirketAd: string;
   isActive: boolean;
   createdAt: Date;
   createUserId: string;

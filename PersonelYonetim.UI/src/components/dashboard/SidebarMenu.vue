@@ -88,7 +88,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
     <aside
       class="fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-neutral-800 shadow-lg transition-all duration-300 ease-in-out"
       :class="{
-        'w-64': sidebarOpen,
+        'w-50': sidebarOpen,
         'w-20': !sidebarOpen,
         'translate-x-0': sidebarOpen || !isMobile,
         '-translate-x-full': !sidebarOpen && isMobile,

@@ -92,16 +92,11 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(pa => pa.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        //modelBuilder.Entity<Personel>()
-        //    .HasMany(p => p.PersonelAtamalar)
-        //    .WithOne(p => p.Personel)
-        //    .HasForeignKey(p => p.Id);
-
         modelBuilder.Entity<Personel>()
-        .HasOne(p => p.Yonetici)
-        .WithMany()
-        .HasForeignKey(p => p.YoneticiId)
-        .OnDelete(DeleteBehavior.NoAction);
+            .HasOne(p => p.Yonetici)
+            .WithMany()
+            .HasForeignKey(p => p.YoneticiId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Personel>()
             .HasOne(p => p.User)
@@ -115,17 +110,25 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.Sirket)
             .WithMany(s => s.Subeler)
             .HasForeignKey(s => s.SirketId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
+
         modelBuilder.Entity<Departman>()
             .HasOne(p => p.Sube)
             .WithMany(s => s.Departmanlar)
             .HasForeignKey(s => s.SubeId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
+
         modelBuilder.Entity<Pozisyon>()
-            .HasOne(p => p.Departman)
-            .WithMany(s => s.Pozisyonlar)
-            .HasForeignKey(s => s.DepartmanId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p =>p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Departman>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)

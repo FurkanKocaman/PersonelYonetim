@@ -5,16 +5,14 @@ using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Sirketler;
-using PersonelYonetim.Server.Domain.Subeler;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
-using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Sirketler;
 
-public sealed record SirketlerGetQuery() : IRequest<IQueryable<SirketlerGetCommandResponse>>;
+public sealed record SirketlerGetQuery() : IRequest<IQueryable<SirketlerGetQueryResponse>>;
 
-public sealed class SirketlerGetCommandResponse : EntityDto
+public sealed class SirketlerGetQueryResponse : EntityDto
 {
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
@@ -23,14 +21,14 @@ public sealed class SirketlerGetCommandResponse : EntityDto
     public Iletisim Iletisim { get; set; } = default!;
 }
 
-internal sealed class SirketlerGetCommandHandler(
+internal sealed class SirketlerGetQueryHandler(
     UserManager<AppUser> userManager,
     IPersonelRepository personelRepository,
     ISirketRepository sirketRepository,
     IPersonelAtamaRepository personelAtamaRepository,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<SirketlerGetQuery, IQueryable<SirketlerGetCommandResponse>>
+    IHttpContextAccessor httpContextAccessor) : IRequestHandler<SirketlerGetQuery, IQueryable<SirketlerGetQueryResponse>>
 {
-    public Task<IQueryable<SirketlerGetCommandResponse>> Handle(SirketlerGetQuery request, CancellationToken cancellationToken)
+    public Task<IQueryable<SirketlerGetQueryResponse>> Handle(SirketlerGetQuery request, CancellationToken cancellationToken)
     {
         var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdString))
@@ -49,7 +47,7 @@ internal sealed class SirketlerGetCommandHandler(
                       into update_user
                       from update_users in update_user.DefaultIfEmpty()
                           //where personelAtama.YoneticiTipi >= 0
-                      select new SirketlerGetCommandResponse
+                      select new SirketlerGetQueryResponse
                       {
                           Id = sirket.Id,
                           Ad=sirket.Ad,

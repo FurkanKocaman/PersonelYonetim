@@ -19,7 +19,7 @@ public sealed record RegisterCommand (
     Iletisim PersonelIletisim,
     Adres PersonelAdres,
     string SirketAd,
-     DateTimeOffset SirketKurulusTarihi,
+    DateTimeOffset SirketKurulusTarihi,
     Iletisim SirketIletisim,
     Adres SirketAdres,
     Guid? SirketId) : IRequest<Result<LoginCommandResponse>>;
@@ -47,7 +47,7 @@ internal sealed class RegisterCommandHandler(
                 DateTimeOffset.Now,
                 null,
                 Guid.Parse(result.Data!),
-                null, null, null,2);
+                null, null, null,0,1,null,2);
 
             var response = await sender.Send(personelCreateCommand);
             if (response.IsSuccessful)

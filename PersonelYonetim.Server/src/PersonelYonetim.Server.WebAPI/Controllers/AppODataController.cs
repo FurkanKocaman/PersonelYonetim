@@ -29,7 +29,7 @@ public class AppODataController(
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
         builder.EntitySet<DepartmanGetAllQueryResponse>("departmanlar");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
-        builder.EntitySet<SirketlerGetCommandResponse>("sirketler");
+        builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
         return builder.GetEdmModel();
     }
@@ -59,33 +59,33 @@ public class AppODataController(
     }
     [HttpGet("sirketler")]
     [Authorize]
-    public async Task<IQueryable<SirketlerGetCommandResponse>> GetAllSirketler(CancellationToken cancellationToken)
+    public async Task<IQueryable<SirketlerGetQueryResponse>> GetAllSirketler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SirketlerGetQuery(), cancellationToken);
         return response;
     }
 
-    [HttpGet("subeler/{SirketId}")]
+    [HttpGet("subeler")]
     [Authorize]
-    public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid SirketId, CancellationToken cancellationToken)
+    public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);
         return response;
     }
 
-    [HttpGet("departmanlar/{SubeId}")]
+    [HttpGet("departmanlar")]
     [Authorize]
-    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid SubeId, CancellationToken cancellationToken)
+    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid? SubeId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new DepartmanGetAllQuery(SubeId), cancellationToken);
         return response;
     }
 
-    [HttpGet("pozisyonlar/{DepartmanId}")]
+    [HttpGet("pozisyonlar")]
     [Authorize]
-    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid DepartmanId, CancellationToken cancellationToken)
+    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid? SirketId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PozisyonGetAllQuery(DepartmanId), cancellationToken);
+        var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
         return response;
     }
 
@@ -96,5 +96,6 @@ public class AppODataController(
         var response = await sender.Send(new IzinTalepGetAllQuery(DepartmanId), cancellationToken);
         return response;
     }
+
 }
 

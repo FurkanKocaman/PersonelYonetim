@@ -5,7 +5,7 @@ class DepartmanService {
   async getDepartmanlar(subeId: string): Promise<DepartmanModel[] | undefined> {
     try {
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/departmanlar/${subeId}`
+        `${import.meta.env.VITE_API_URL}/odata/departmanlar?subeId=${subeId}`
       );
       return response.data.value;
     } catch (error) {

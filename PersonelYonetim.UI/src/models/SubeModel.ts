@@ -7,10 +7,11 @@ export interface SubeModel {
   adres: Adres;
   iletisim: Iletisim;
   sirketId: string;
+  sirketAd: string;
   isActive: boolean;
   createdAt: Date;
   createUserId: string;
-  createuserName: string;
+  createUserName: string;
   updateAt: Date;
   updateUserId: string;
   updateuserName: string;

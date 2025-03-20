@@ -3,7 +3,7 @@ using MediatR;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using TS.Result;
 
-namespace PersonelYonetim.Server.Application.Personeller;
+namespace PersonelYonetim.Server.Application.PersonelAtamalar;
 
 public sealed record PersonelAtamaUpdateCommand(
     Guid PersonelId,

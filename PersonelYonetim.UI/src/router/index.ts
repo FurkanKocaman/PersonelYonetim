@@ -19,6 +19,12 @@ const router = createRouter({
           meta: { title: "Ana Sayfa" },
         },
         {
+          path: "sirket",
+          name: "Sirket",
+          component: () => import("../views/SirketView.vue"),
+          meta: { title: "Sirket Yönetimi" },
+        },
+        {
           path: "personel",
           name: "Personel",
           component: () => import("../views/PersonelView.vue"),

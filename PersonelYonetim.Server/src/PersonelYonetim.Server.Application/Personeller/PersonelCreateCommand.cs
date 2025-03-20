@@ -2,6 +2,7 @@
 using GenericRepository;
 using Mapster;
 using MediatR;
+using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Users;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.RoleClaim;
@@ -23,6 +24,9 @@ public sealed record PersonelCreateCommand(
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
+    int CalismaSekliValue,
+    int SozlesmeTuruValue,
+    DateTimeOffset? SozlesmeBitisTarihi,
     int YoneticiTipiValue = -1
     ) : IRequest<Result<string>>;
 
@@ -90,7 +94,11 @@ internal sealed class PersonelCreateCommandHandler(
 
         //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
 
-        PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,request.PozisyonId,request.YoneticiTipiValue);
+        PersonelAtamaCreateCommand personelAtamaCreateCommand = 
+            new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,
+            request.PozisyonId,request.YoneticiTipiValue,request.CalismaSekliValue,
+            request.SozlesmeTuruValue,request.SozlesmeBitisTarihi);
+
         var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
 
         if (!personelAtamaResult.IsSuccessful)
