@@ -12,14 +12,16 @@ using TS.Result;
 namespace PersonelYonetim.Server.Application.Auth;
 
 public sealed record RegisterCommand (
-    string SirketAd,
     string Ad,
     string Soyad,
     DateTimeOffset DogumTarihi,
     bool? Cinsiyet,
-    Iletisim Iletisim,
-    Adres Adres,
-    string Sifre,
+    Iletisim PersonelIletisim,
+    Adres PersonelAdres,
+    string SirketAd,
+     DateTimeOffset SirketKurulusTarihi,
+    Iletisim SirketIletisim,
+    Adres SirketAdres,
     Guid? SirketId) : IRequest<Result<LoginCommandResponse>>;
 
 internal sealed class RegisterCommandHandler(
@@ -30,7 +32,7 @@ internal sealed class RegisterCommandHandler(
 {
     public async Task<Result<LoginCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        SirketCreateCommand sirketCreateCommand = new(request.SirketAd,null,null,request.Adres,request.Iletisim);
+        SirketCreateCommand sirketCreateCommand = new(request.SirketAd,null,null,request.SirketAdres,request.SirketIletisim);
         var result = await sender.Send(sirketCreateCommand);
         if (result.IsSuccessful)
         {
@@ -40,8 +42,8 @@ internal sealed class RegisterCommandHandler(
                 request.DogumTarihi,
                 request.Cinsiyet,
                 null,
-                request.Iletisim,
-                request.Adres,
+                request.PersonelIletisim,
+                request.PersonelAdres,
                 DateTimeOffset.Now,
                 null,
                 Guid.Parse(result.Data!),
@@ -58,7 +60,7 @@ internal sealed class RegisterCommandHandler(
                 user!.CreateUserId = user.Id;
                 await unitOfWork.SaveChangesAsync();
 
-                LoginCommand login = new(request.Iletisim.Eposta, request.Sifre);
+                LoginCommand login = new(request.PersonelIletisim.Eposta, request.Ad);
                 var loginRes = await sender.Send(login);
                 return loginRes;
             }

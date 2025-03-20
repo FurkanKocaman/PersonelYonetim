@@ -14,6 +14,7 @@
   "dependencies": {
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@tailwindcss/vite": "^4.0.12",
+    "@vuepic/vue-datepicker": "^11.0.2",
     "axios": "^1.8.3",
     "jspdf": "^3.0.0",
     "jspdf-autotable": "^5.0.2",

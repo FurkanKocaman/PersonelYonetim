@@ -1,12 +1,14 @@
 export interface RegisterRequest {
-  sirketAd: string;
   ad: string;
   soyad: string;
   dogumTarihi: Date;
   cinsiyet: boolean | undefined;
-  iletisim: Iletisim;
-  adres: Adres;
-  sifre: string;
+  personelIletisim: Iletisim;
+  personelAdres: Adres;
+  sirketAd: string;
+  sirketKurulusTarihi: Date;
+  sirketIletisim: Iletisim;
+  sirketAdres: Adres;
 }
 export interface Adres {
   ulke: string;
