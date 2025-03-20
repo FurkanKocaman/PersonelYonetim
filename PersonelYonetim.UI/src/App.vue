@@ -1,29 +1,35 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref } from "vue";
 
-const router = useRouter();
 const isLoading = ref(true);
 
 onMounted(() => {
   // Simulate initial loading
+
   setTimeout(() => {
     isLoading.value = false;
   }, 500);
-  
-  console.log('App mounted, router ready');
+
+  console.log("App mounted, router ready");
 });
 </script>
 
 <template>
   <!-- Global Loading Screen (only shown on initial app load) -->
-  <div v-if="isLoading" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-neutral-900 z-50">
+  <div
+    v-if="isLoading"
+    class="fixed inset-0 flex items-center justify-center bg-white dark:bg-neutral-900 z-50"
+  >
     <div class="text-center">
-      <div class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p class="mt-4 text-gray-700 dark:text-gray-300 font-medium">Personel Yönetim Sistemi Yükleniyor...</p>
+      <div
+        class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto"
+      ></div>
+      <p class="mt-4 text-gray-700 dark:text-gray-300 font-medium">
+        Personel Yönetim Sistemi Yükleniyor...
+      </p>
     </div>
   </div>
-  
+
   <!-- Main App Container -->
   <div class="app-container">
     <RouterView v-slot="{ Component }">
@@ -36,7 +42,7 @@ onMounted(() => {
 
 <style>
 /* Global Styles */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
   --primary-color: #0ea5e9;
@@ -50,7 +56,7 @@ onMounted(() => {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -68,8 +74,12 @@ body {
 
 /* Loading animation */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-spin {

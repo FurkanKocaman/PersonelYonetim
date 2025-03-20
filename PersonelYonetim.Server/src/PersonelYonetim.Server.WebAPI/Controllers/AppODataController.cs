@@ -9,6 +9,7 @@ using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
+using PersonelYonetim.Server.Domain.RoleClaim;
 
 namespace PersonelYonetim.Server.WebAPI.Controllers;
 
@@ -30,6 +31,7 @@ public class AppODataController(
     }
 
     [HttpGet("personeller")]
+    [Authorize(Permissions.ViewPersonel)]
     public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PersonelGetAllQuery(), cancellationToken);
@@ -37,30 +39,33 @@ public class AppODataController(
         return response;
     }
     [HttpGet("personeller/{Id}")]
+    [Authorize(Permissions.ViewPersonel)]
     public async Task<IQueryable<PersonelGetQueryResponse>> GetPersonel(Guid Id, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PersonelGetQuery(Id), cancellationToken);
         return response;
     }
 
-    [HttpGet("departmanlar")]
-    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(CancellationToken cancellationToken)
+    [HttpGet("departmanlar/{SubeId}")]
+    [Authorize(Permissions.ViewDepartman)]
+    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid SubeId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new DepartmanGetAllQuery(), cancellationToken);
+        var response = await sender.Send(new DepartmanGetAllQuery(SubeId), cancellationToken);
         return response;
     }
 
-    [HttpGet("pozisyonlar/{Id}")]
-    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid Id,CancellationToken cancellationToken)
+    [HttpGet("pozisyonlar/{DepartmanId}")]
+    [Authorize(Permissions.ViewPozisyon)]
+    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid DepartmanId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PozisyonGetAllQuery(Id), cancellationToken);
+        var response = await sender.Send(new PozisyonGetAllQuery(DepartmanId), cancellationToken);
         return response;
     }
-    [HttpGet("IzinTalepler/{Id}")]
-    [Authorize("manager")]
-    public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid Id, CancellationToken cancellationToken)
+    [HttpGet("IzinTalepler/{DepartmanId}")]
+    [Authorize(Permissions.ViewIzinler)]
+    public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid DepartmanId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new IzinTalepGetAllQuery(Id), cancellationToken);
+        var response = await sender.Send(new IzinTalepGetAllQuery(DepartmanId), cancellationToken);
         return response;
     }
 }

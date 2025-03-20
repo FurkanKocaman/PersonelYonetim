@@ -1,4 +1,5 @@
 ﻿using Ardalis.SmartEnum;
+using PersonelYonetim.Server.Domain.Personeller;
 
 namespace PersonelYonetim.Server.Domain.IzinTalepler;
 
@@ -10,14 +11,16 @@ public sealed class IzinTalep
     }
     public Guid Id { get; set; }
     public Guid PersonelId { get; set; }
+    public Personel Personel { get; set; } = default!;
     public Guid DepartmanId { get; set; }
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
     public IzinTipiEnum IzinTipi { get; set; } = default!;
     public string? Aciklama { get; set; }
-    public OnayDurumEnum OnayDurumu { get; set; } = default!;
-    public Guid? OnaylayanId { get; set; }
-    public DateTimeOffset? OnaylanmaTarihi { get; set; }
+    public DegerlendirmeDurumEnum DegerlendirmeDurumu { get; set; } = default!;
+    public Guid? DegerlendirenId { get; set; }
+    public Personel? Degerlendiren { get; set; }
+    public DateTimeOffset? DegerlendirilmeTarihi { get; set; }
 }
 
 public sealed class IzinTipiEnum : SmartEnum<IzinTipiEnum>
@@ -29,12 +32,12 @@ public sealed class IzinTipiEnum : SmartEnum<IzinTipiEnum>
     {
     }
 }
-public sealed class OnayDurumEnum : SmartEnum<OnayDurumEnum>
+public sealed class DegerlendirmeDurumEnum : SmartEnum<DegerlendirmeDurumEnum>
 {
-    public static readonly OnayDurumEnum Onaylandi = new("Onaylandı", 0);
-    public static readonly OnayDurumEnum Reddedildi = new("Reddedildi", 1);
-    public static readonly OnayDurumEnum Beklemede = new("Beklemede", 2);
-    private OnayDurumEnum(string name, int value) : base(name, value)
+    public static readonly DegerlendirmeDurumEnum Onaylandi = new("Onaylandı", 0);
+    public static readonly DegerlendirmeDurumEnum Reddedildi = new("Reddedildi", 1);
+    public static readonly DegerlendirmeDurumEnum Beklemede = new("Beklemede", 2);
+    private DegerlendirmeDurumEnum(string name, int value) : base(name, value)
     {
     }
 }

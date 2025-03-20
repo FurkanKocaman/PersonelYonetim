@@ -1,13 +1,17 @@
-﻿using PersonelYonetim.Server.Domain.Personeller;
-using FluentValidation;
+﻿using FluentValidation;
 using GenericRepository;
 using Mapster;
 using MediatR;
-using TS.Result;
-using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
-using PersonelYonetim.Server.Domain.PersonelDepartmanlar;
+using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Users;
+using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.RoleClaim;
+using PersonelYonetim.Server.Domain.Sirketler;
+using PersonelYonetim.Server.Domain.Subeler;
+using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
@@ -16,10 +20,16 @@ public sealed record PersonelCreateCommand(
     string Soyad,
     DateTimeOffset DogumTarihi,
     bool? Cinsiyet,
+    string? ProfilResimUrl,
     Iletisim Iletisim,
     Adres Adres,
-    Guid DepartmanId,
-    Guid PozisyonId
+    DateTimeOffset IseGirisTarihi,
+    Guid? YoneticiId,
+    Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId,
+    Guid? PozisyonId,
+    int YoneticiTipiValue = -1
     ) : IRequest<Result<string>>;
 
 public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelCreateCommand>
@@ -31,8 +41,6 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
         RuleFor(x => x.DogumTarihi).NotEmpty().WithMessage("Doğum tarihi boş olamaz");
         RuleFor(x => x.Iletisim.Eposta).NotEmpty().WithMessage("Eposta boş olamaz").EmailAddress();
         RuleFor(x => x.Iletisim.Telefon).NotEmpty().WithMessage("Telefon boş olamaz");
-        RuleFor(x => x.DepartmanId).NotEmpty().WithMessage("Departman boş olamaz");
-        RuleFor(x => x.PozisyonId).NotEmpty().WithMessage("Pozisyon boş olamaz");
         RuleFor(x => x.Adres.Ulke).NotEmpty().WithMessage("Ülke boş olamaz");
         RuleFor(x => x.Adres.Sehir).NotEmpty().WithMessage("Şehir boş olamaz");
         RuleFor(x => x.Adres.Ilce).NotEmpty().WithMessage("İlçe boş olamaz");
@@ -41,9 +49,11 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
 }
 internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository,
-    IDepartmanRepository departmanRepository,
-    IPozisyonRepository pozisyonRepository,
-    IPersonelDepartmanRepository personelDepartmanRepository,
+    //ISirketRepository sirketRepository,
+    //ISubeRepository subeRepository,
+    //IDepartmanRepository departmanRepository,
+    //IPozisyonRepository pozisyonRepository,
+    //IPersonelAtamaRepository personelDepartmanRepository,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
@@ -53,31 +63,43 @@ internal sealed class PersonelCreateCommandHandler(
         if (personelVarMi)
             return Result<string>.Failure("Personel zaten mevcut");
 
-        var departman = await departmanRepository.FirstOrDefaultAsync(p => p.Id == request.DepartmanId);
-        if (departman is null)
-            return Result<string>.Failure("Departman bulunamadı");
-        var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
-        if (pozisyon is null)
-            return Result<string>.Failure("Pozisyon bulunamadı");
-
         Personel personel = request.Adapt<Personel>();
-        PersonelDepartman personelDepartman = new()
-        {
-            PersonelId = personel.Id,
-            DepartmanId = departman.Id,
-            PozisyonId = pozisyon.Id
-        };
 
-        personelRepository.Add(personel);
-        personelDepartmanRepository.Add(personelDepartman);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        IEnumerable<string> Rol = [RoleClaims.Calisan];
 
-        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, personel.Ad);
+        if (request.YoneticiTipiValue == 2)
+            Rol = [RoleClaims.SirketSahibi];
+
+        if (request.YoneticiTipiValue == 1 || request.YoneticiTipiValue == 0)
+            Rol = [RoleClaims.Yonetici];
+
+        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, request.SirketId, Rol);
         var userResult = await sender.Send(userCreateCommand, cancellationToken);
         if (!userResult.IsSuccessful)
         {
             return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
         }
+        personel.UserId = userResult.Data;
+
+        personelRepository.Add(personel);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+       
+
+        //var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == request.SirketId);
+        //if (sirket is null)
+        //    return Result<string>.Failure("Şirket bulunamadı");
+
+        //var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
+
+        //var departman = await departmanRepository.FirstOrDefaultAsync(p => p.Id == request.DepartmanId);
+
+        //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
+
+        PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,request.PozisyonId,request.YoneticiTipiValue);
+        var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
+
+        if (!personelAtamaResult.IsSuccessful)
+            Result<string>.Failure("Personel atama oluşturulamadı");
 
         return $"Personel başarıyla oluşturuldu. Giriş bilgileri Eposta:{personel.Iletisim.Eposta} Şifre:{personel.Ad}";
     }

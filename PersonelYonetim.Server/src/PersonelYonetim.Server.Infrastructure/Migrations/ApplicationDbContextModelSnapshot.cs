@@ -22,17 +22,26 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.HasKey("Id");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
@@ -66,6 +75,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("SubeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset?>("UpdateAt")
                         .HasColumnType("datetimeoffset");
 
@@ -74,10 +86,12 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("SubeId");
+
                     b.ToTable("Departmanlar");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.IzinTalepleri.IzinTalep", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.IzinTalepler.IzinTalep", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -92,43 +106,56 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<DateTimeOffset>("BitisTarihi")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("DegerlendirenId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DegerlendirilmeTarihi")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("DegerlendirmeDurumu")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("DepartmanId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("IzinTipi")
                         .HasColumnType("int");
 
-                    b.Property<int>("OnayDurumu")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("OnaylanmaTarihi")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("OnaylayanId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("PersonelId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DegerlendirenId");
+
+                    b.HasIndex("PersonelId");
+
                     b.ToTable("IzinTalepleri");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelAtamalar.PersonelAtama", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("DepartmanId")
+                    b.Property<Guid?>("DepartmanId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("PersonelId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("PozisyonId")
+                    b.Property<Guid?>("PozisyonId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SirketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SubeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("YoneticiTipi")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -138,7 +165,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasIndex("PozisyonId");
 
-                    b.ToTable("PersonelDepartman");
+                    b.HasIndex("SirketId");
+
+                    b.HasIndex("SubeId");
+
+                    b.ToTable("PersonelAtama");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
@@ -175,6 +206,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTimeOffset>("IseGirisTarihi")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("ProfilResimUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -188,7 +222,18 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid?>("UpdateUserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("YoneticiId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.HasIndex("YoneticiId");
 
                     b.ToTable("Personeller");
                 });
@@ -235,7 +280,25 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmanId");
+
                     b.ToTable("Pozisyonlar");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Roller.AppUserRole", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SirketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId", "SirketId");
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Rols.AppRole", b =>
@@ -277,6 +340,122 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Sirketler.Sirket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid>("CreateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeleteAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeleteUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("UpdateAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Sirketler");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Subeler.Sube", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ad")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<Guid>("CreateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeleteAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DeleteUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SirketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("UpdateAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UpdateUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SirketId");
+
+                    b.ToTable("Subeler");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Tokenler.Token", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("TokenString")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TokenType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tokenler");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Users.AppUser", b =>
@@ -365,35 +544,88 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelDepartmanlar.PersonelDepartman", b =>
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
                 {
-                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", "Departman")
-                        .WithMany("PersonelDepartmanlar")
-                        .HasForeignKey("DepartmanId")
+                    b.HasOne("PersonelYonetim.Server.Domain.Subeler.Sube", "Sube")
+                        .WithMany("Departmanlar")
+                        .HasForeignKey("SubeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Sube");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.IzinTalepler.IzinTalep", b =>
+                {
+                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Degerlendiren")
+                        .WithMany()
+                        .HasForeignKey("DegerlendirenId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Personel")
-                        .WithMany("PersonelDepartmanlar")
+                        .WithMany()
+                        .HasForeignKey("PersonelId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Degerlendiren");
+
+                    b.Navigation("Personel");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.PersonelAtamalar.PersonelAtama", b =>
+                {
+                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", "Departman")
+                        .WithMany()
+                        .HasForeignKey("DepartmanId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Personel")
+                        .WithMany()
                         .HasForeignKey("PersonelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", "Pozisyon")
-                        .WithMany("PersonelDepartmanlar")
+                        .WithMany()
                         .HasForeignKey("PozisyonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Sirketler.Sirket", "Sirket")
+                        .WithMany()
+                        .HasForeignKey("SirketId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Subeler.Sube", "Sube")
+                        .WithMany()
+                        .HasForeignKey("SubeId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Departman");
 
                     b.Navigation("Personel");
 
                     b.Navigation("Pozisyon");
+
+                    b.Navigation("Sirket");
+
+                    b.Navigation("Sube");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
                 {
+                    b.HasOne("PersonelYonetim.Server.Domain.Users.AppUser", "User")
+                        .WithOne()
+                        .HasForeignKey("PersonelYonetim.Server.Domain.Personeller.Personel", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Yonetici")
+                        .WithMany()
+                        .HasForeignKey("YoneticiId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Adres", "Adres", b1 =>
                         {
                             b1.Property<Guid>("PersonelId")
@@ -458,21 +690,180 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
 
                     b.Navigation("Iletisim")
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
-                {
-                    b.Navigation("PersonelDepartmanlar");
-                });
+                    b.Navigation("User");
 
-            modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
-                {
-                    b.Navigation("PersonelDepartmanlar");
+                    b.Navigation("Yonetici");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", b =>
                 {
-                    b.Navigation("PersonelDepartmanlar");
+                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", "Departman")
+                        .WithMany("Pozisyonlar")
+                        .HasForeignKey("DepartmanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Departman");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Sirketler.Sirket", b =>
+                {
+                    b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Adres", "Adres", b1 =>
+                        {
+                            b1.Property<Guid>("SirketId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Ilce")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("İlçe");
+
+                            b1.Property<string>("Sehir")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Şehir");
+
+                            b1.Property<string>("TamAdres")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("TamAdres");
+
+                            b1.Property<string>("Ulke")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Ülke");
+
+                            b1.HasKey("SirketId");
+
+                            b1.ToTable("Sirketler");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SirketId");
+                        });
+
+                    b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Iletisim", "Iletisim", b1 =>
+                        {
+                            b1.Property<Guid>("SirketId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Eposta")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)")
+                                .HasColumnName("Eposta");
+
+                            b1.Property<string>("Telefon")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Telefon");
+
+                            b1.HasKey("SirketId");
+
+                            b1.HasIndex("Eposta")
+                                .IsUnique();
+
+                            b1.ToTable("Sirketler");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SirketId");
+                        });
+
+                    b.Navigation("Adres")
+                        .IsRequired();
+
+                    b.Navigation("Iletisim")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Subeler.Sube", b =>
+                {
+                    b.HasOne("PersonelYonetim.Server.Domain.Sirketler.Sirket", "Sirket")
+                        .WithMany("Subeler")
+                        .HasForeignKey("SirketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Adres", "Adres", b1 =>
+                        {
+                            b1.Property<Guid>("SubeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Ilce")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("İlçe");
+
+                            b1.Property<string>("Sehir")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Şehir");
+
+                            b1.Property<string>("TamAdres")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("TamAdres");
+
+                            b1.Property<string>("Ulke")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Ülke");
+
+                            b1.HasKey("SubeId");
+
+                            b1.ToTable("Subeler");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubeId");
+                        });
+
+                    b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Iletisim", "Iletisim", b1 =>
+                        {
+                            b1.Property<Guid>("SubeId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Eposta")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(450)")
+                                .HasColumnName("Eposta");
+
+                            b1.Property<string>("Telefon")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("Telefon");
+
+                            b1.HasKey("SubeId");
+
+                            b1.HasIndex("Eposta")
+                                .IsUnique();
+
+                            b1.ToTable("Subeler");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubeId");
+                        });
+
+                    b.Navigation("Adres")
+                        .IsRequired();
+
+                    b.Navigation("Iletisim")
+                        .IsRequired();
+
+                    b.Navigation("Sirket");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Departmanlar.Departman", b =>
+                {
+                    b.Navigation("Pozisyonlar");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Sirketler.Sirket", b =>
+                {
+                    b.Navigation("Subeler");
+                });
+
+            modelBuilder.Entity("PersonelYonetim.Server.Domain.Subeler.Sube", b =>
+                {
+                    b.Navigation("Departmanlar");
                 });
 #pragma warning restore 612, 618
         }
