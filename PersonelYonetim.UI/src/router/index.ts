@@ -76,7 +76,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   // Set document title
   document.title = `${to.meta.title || 'Personel Yönetim'} | Personel Yönetim Sistemi`
-  
+
   // Add authentication logic here if needed
   // For now, we'll just allow all routes
   next()

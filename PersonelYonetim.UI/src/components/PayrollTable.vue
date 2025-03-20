@@ -8,7 +8,7 @@ interface PayrollItem {
   id: number;
   name: string;
   department: string;
-  status: string;
+  status: string;   
   date: string;
 }
 
