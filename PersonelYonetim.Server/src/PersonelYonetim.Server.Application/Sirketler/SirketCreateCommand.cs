@@ -28,6 +28,6 @@ internal sealed class SirketCreateCommandHandler(
         sirketRepository.Add(sirket);
         await unitOfWork.SaveChangesAsync();
 
-        return Result<string>.Succeed("Şirket oluşturuldu");
+        return Result<string>.Succeed(sirket.Id.ToString());
     }
 }

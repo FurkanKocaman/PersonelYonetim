@@ -19,5 +19,13 @@ public static class AuthModule
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
             .Produces<Result<LoginCommandResponse>>();
+
+        group.MapPost("register",
+            async (ISender sender, RegisterCommand request, CancellationToken cancellationToken, UserManager<AppUser> userManager) =>
+            {
+                var response = await sender.Send(request, cancellationToken);
+                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+            })
+            .Produces<Result<LoginCommandResponse>>();
     }
 }

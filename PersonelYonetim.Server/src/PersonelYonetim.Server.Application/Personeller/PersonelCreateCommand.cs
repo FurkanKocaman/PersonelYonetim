@@ -2,15 +2,10 @@
 using GenericRepository;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Users;
-using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.RoleClaim;
-using PersonelYonetim.Server.Domain.Sirketler;
-using PersonelYonetim.Server.Domain.Subeler;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Personeller;
@@ -29,6 +24,9 @@ public sealed record PersonelCreateCommand(
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
+    int CalismaSekliValue,
+    int SozlesmeTuruValue,
+    DateTimeOffset? SozlesmeBitisTarihi,
     int YoneticiTipiValue = -1
     ) : IRequest<Result<string>>;
 
@@ -80,6 +78,7 @@ internal sealed class PersonelCreateCommandHandler(
             return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
         }
         personel.UserId = userResult.Data;
+        personel.CreateUserId = userResult.Data;
 
         personelRepository.Add(personel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -95,13 +94,17 @@ internal sealed class PersonelCreateCommandHandler(
 
         //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
 
-        PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,request.PozisyonId,request.YoneticiTipiValue);
+        PersonelAtamaCreateCommand personelAtamaCreateCommand = 
+            new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,
+            request.PozisyonId,request.YoneticiTipiValue,request.CalismaSekliValue,
+            request.SozlesmeTuruValue,request.SozlesmeBitisTarihi);
+
         var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
 
         if (!personelAtamaResult.IsSuccessful)
             Result<string>.Failure("Personel atama oluşturulamadı");
 
-        return $"Personel başarıyla oluşturuldu. Giriş bilgileri Eposta:{personel.Iletisim.Eposta} Şifre:{personel.Ad}";
+        return userResult.Data.ToString();
     }
 }
 

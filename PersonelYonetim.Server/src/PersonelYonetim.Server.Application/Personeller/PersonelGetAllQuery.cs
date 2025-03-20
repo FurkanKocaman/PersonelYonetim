@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Departmanlar;
@@ -6,10 +7,14 @@ using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Users;
+using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.Personeller;
 
-public sealed record PersonelGetAllQuery() : IRequest<IQueryable<PersonelGetAllQueryResponse>> ;
+public sealed record PersonelGetAllQuery(
+    Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId) : IRequest<IQueryable<PersonelGetAllQueryResponse>> ;
 
 public sealed class PersonelGetAllQueryResponse : EntityDto
 {
@@ -31,14 +36,24 @@ internal sealed class PersonelGetAllQueryHandler(
     IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
     IPersonelAtamaRepository personelAtamaRepository,
+    IHttpContextAccessor httpContextAccessor,
     UserManager<AppUser> userManager) : IRequestHandler<PersonelGetAllQuery, IQueryable<PersonelGetAllQueryResponse>>
 {
     public Task<IQueryable<PersonelGetAllQueryResponse>> Handle(PersonelGetAllQuery request, CancellationToken cancellationToken)
     {
+        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdString))
+        {
+            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+        }
+
         var response = (from entity in personelRepository.GetAll()
-                        join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
-                        join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id
-                        join pozisyon in pozisyonRepository.GetAll() on personel_departman.PozisyonId equals pozisyon.Id
+                        join personel_atama in personelAtamaRepository.GetAll() on entity.Id equals personel_atama.PersonelId
+                        where personel_atama.SirketId == request.SirketId
+                        && (request.SubeId == null || personel_atama.SubeId == request.SubeId)
+                        && (request.DepartmanId == null || personel_atama.DepartmanId == request.DepartmanId)
+                        join departman in departmanRepository.GetAll() on personel_atama.DepartmanId equals departman.Id
+                        join pozisyon in pozisyonRepository.GetAll() on personel_atama.PozisyonId equals pozisyon.Id
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
                         join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
                         into update_user

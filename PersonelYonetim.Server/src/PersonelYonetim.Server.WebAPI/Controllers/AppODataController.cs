@@ -9,6 +9,8 @@ using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
+using PersonelYonetim.Server.Application.Sirketler;
+using PersonelYonetim.Server.Application.Subeler;
 using PersonelYonetim.Server.Domain.RoleClaim;
 
 namespace PersonelYonetim.Server.WebAPI.Controllers;
@@ -27,14 +29,16 @@ public class AppODataController(
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
         builder.EntitySet<DepartmanGetAllQueryResponse>("departmanlar");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
+        builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
+        builder.EntitySet<SubelerGetQueryResponse>("subeler");
         return builder.GetEdmModel();
     }
 
     [HttpGet("personeller")]
     [Authorize(Permissions.ViewPersonel)]
-    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(CancellationToken cancellationToken)
+    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId, Guid? SubeId, Guid? DepartmanId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PersonelGetAllQuery(), cancellationToken);
+        var response = await sender.Send(new PersonelGetAllQuery(SirketId, SubeId, DepartmanId), cancellationToken);
 
         return response;
     }
@@ -46,21 +50,45 @@ public class AppODataController(
         return response;
     }
 
-    [HttpGet("departmanlar/{SubeId}")]
-    [Authorize(Permissions.ViewDepartman)]
-    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid SubeId, CancellationToken cancellationToken)
+    [HttpGet("personel-current")]
+    [Authorize]
+    public async Task<IQueryable<PersonelGetCurrentQueryResponse>> GetCurrentPersonel(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new PersonelGetCurrentQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("sirketler")]
+    [Authorize]
+    public async Task<IQueryable<SirketlerGetQueryResponse>> GetAllSirketler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new SirketlerGetQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("subeler")]
+    [Authorize]
+    public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("departmanlar")]
+    [Authorize]
+    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid? SubeId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new DepartmanGetAllQuery(SubeId), cancellationToken);
         return response;
     }
 
-    [HttpGet("pozisyonlar/{DepartmanId}")]
-    [Authorize(Permissions.ViewPozisyon)]
-    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid DepartmanId, CancellationToken cancellationToken)
+    [HttpGet("pozisyonlar")]
+    [Authorize]
+    public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid? SirketId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PozisyonGetAllQuery(DepartmanId), cancellationToken);
+        var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
         return response;
     }
+
     [HttpGet("IzinTalepler/{DepartmanId}")]
     [Authorize(Permissions.ViewIzinler)]
     public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid DepartmanId, CancellationToken cancellationToken)
@@ -68,5 +96,6 @@ public class AppODataController(
         var response = await sender.Send(new IzinTalepGetAllQuery(DepartmanId), cancellationToken);
         return response;
     }
+
 }
 

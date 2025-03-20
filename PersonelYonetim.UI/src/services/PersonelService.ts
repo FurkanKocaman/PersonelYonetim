@@ -2,86 +2,28 @@ import type {
   PersonelItem,
   // PersonelRequest,
   PersonelListResponse,
-  PersonelPaginationParams,
+  // PersonelPaginationParams,
 } from "@/models/PersonelModels";
 import api from "./Axios";
 
 class PersonelService {
-  async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
+  // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
+  async getPersonelList(
+    sirketId: string,
+    subeId: string | undefined,
+    departmanId: string | undefined
+  ): Promise<PersonelListResponse> {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personeller`, {
         params: {
           $count: true,
+          SirketId: sirketId,
+          SubeId: subeId,
+          DepartmanId: departmanId,
         },
       });
 
       const personelList: PersonelItem[] = response.data.value;
-
-      console.log(response.data.value);
-
-      // Mock veri
-      // const mockPersonelList: PersonelItem[] = [
-      //   {
-      //     id: 1,
-      //     ad: "Ahmet",
-      //     soyad: "Yılmaz",
-      //     departman: "Bilgi İşlem",
-      //     pozisyon: "Yazılım Geliştirici",
-      //     iseGirisTarihi: "2020-01-15",
-      //     email: "ahmet.yilmaz@sirket.com",
-      //     telefon: "555-123-4567",
-      //     adres: "Ankara, Çankaya",
-      //     durum: "Aktif",
-      //   },
-      //   {
-      //     id: 2,
-      //     ad: "Ayşe",
-      //     soyad: "Demir",
-      //     departman: "İnsan Kaynakları",
-      //     pozisyon: "İK Uzmanı",
-      //     iseGirisTarihi: "2019-05-20",
-      //     email: "ayse.demir@sirket.com",
-      //     telefon: "555-234-5678",
-      //     adres: "İstanbul, Kadıköy",
-      //     durum: "Aktif",
-      //   },
-      //   {
-      //     id: 3,
-      //     ad: "Mehmet",
-      //     soyad: "Kaya",
-      //     departman: "Muhasebe",
-      //     pozisyon: "Muhasebe Müdürü",
-      //     iseGirisTarihi: "2018-03-10",
-      //     email: "mehmet.kaya@sirket.com",
-      //     telefon: "555-345-6789",
-      //     adres: "İzmir, Konak",
-      //     durum: "Aktif",
-      //   },
-      //   {
-      //     id: 4,
-      //     ad: "Zeynep",
-      //     soyad: "Çelik",
-      //     departman: "Pazarlama",
-      //     pozisyon: "Pazarlama Uzmanı",
-      //     iseGirisTarihi: "2021-02-01",
-      //     email: "zeynep.celik@sirket.com",
-      //     telefon: "555-456-7890",
-      //     adres: "Bursa, Nilüfer",
-      //     durum: "Aktif",
-      //   },
-      //   {
-      //     id: 5,
-      //     ad: "Ali",
-      //     soyad: "Öztürk",
-      //     departman: "Satış",
-      //     pozisyon: "Satış Temsilcisi",
-      //     iseGirisTarihi: "2020-07-15",
-      //     email: "ali.ozturk@sirket.com",
-      //     telefon: "555-567-8901",
-      //     adres: "Antalya, Muratpaşa",
-      //     durum: "İzinli",
-      //   },
-      // ];
 
       return {
         items: personelList,

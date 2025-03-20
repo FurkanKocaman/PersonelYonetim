@@ -88,7 +88,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
     <aside
       class="fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-neutral-800 shadow-lg transition-all duration-300 ease-in-out"
       :class="{
-        'w-64': sidebarOpen,
+        'w-50': sidebarOpen,
         'w-20': !sidebarOpen,
         'translate-x-0': sidebarOpen || !isMobile,
         '-translate-x-full': !sidebarOpen && isMobile,
@@ -125,7 +125,16 @@ const isMenuItemActive = (itemPath: string): boolean => {
             <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
               {{ user.fullName }}
             </h4>
-            <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p
+              v-if="user.role == 'SirketSahibi'"
+              class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
+            >
+              Şirket Sahibi
+            </p>
+            <p
+              v-if="user.role != 'SirketSahibi'"
+              class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
+            >
               {{ user.pozisyonAd }}
             </p>
           </div>

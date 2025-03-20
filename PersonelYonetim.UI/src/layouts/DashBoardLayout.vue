@@ -26,6 +26,12 @@ const menuItems = ref<MenuItem[]>([
     path: "/dashboard",
   },
   {
+    name: "Sirket",
+    icon: "building",
+    active: false,
+    path: "/dashboard/sirket",
+  },
+  {
     name: "Personel",
     icon: "users",
     active: false,
@@ -148,7 +154,7 @@ onMounted(() => {
     <div
       class="flex-1 flex flex-col transition-all duration-300"
       :class="{
-        'lg:ml-64': sidebarOpen,
+        'lg:ml-50': sidebarOpen,
         'lg:ml-20': !sidebarOpen,
       }"
     >
