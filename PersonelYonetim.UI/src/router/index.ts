@@ -60,6 +60,12 @@ const router = createRouter({
           component: () => import("../views/AyarlarView.vue"),
           meta: { title: "Ayarlar" },
         },
+        {
+          path: "profil",
+          name: "Profil",
+          component: () => import("../views/ProfilView.vue"),
+          meta: { title: "Profil" },
+        },
       ],
     },
     {
