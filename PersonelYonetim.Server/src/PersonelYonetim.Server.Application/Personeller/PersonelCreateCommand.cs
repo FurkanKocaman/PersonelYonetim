@@ -95,7 +95,7 @@ internal sealed class PersonelCreateCommandHandler(
         //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
 
         PersonelAtamaCreateCommand personelAtamaCreateCommand = 
-            new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,
+            new(personel, request.SirketId,request.SubeId,request.DepartmanId,
             request.PozisyonId,request.YoneticiTipiValue,request.CalismaSekliValue,
             request.SozlesmeTuruValue,request.SozlesmeBitisTarihi);
 

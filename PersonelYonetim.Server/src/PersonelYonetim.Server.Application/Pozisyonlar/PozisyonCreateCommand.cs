@@ -4,6 +4,7 @@ using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Sirketler;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Pozisyonlar;
@@ -11,7 +12,7 @@ namespace PersonelYonetim.Server.Application.Pozisyonlar;
 public sealed record PozisyonCreateCommand(
     string Ad,
     string? Aciklama,
-    Guid DepartmanId) : IRequest<Result<string>> ;
+    Guid SirketId) : IRequest<Result<string>> ;
 
 public sealed class PozisyonCreateCommandValidator : AbstractValidator<PozisyonCreateCommand>
 {
@@ -24,7 +25,7 @@ public sealed class PozisyonCreateCommandValidator : AbstractValidator<PozisyonC
 
 internal sealed class PozisyonCreateCommandHandler(
     IPozisyonRepository pozisyonRepository,
-    IDepartmanRepository departmanRepository,
+    ISirketRepository sirketRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<PozisyonCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PozisyonCreateCommand request, CancellationToken cancellationToken)
@@ -33,10 +34,10 @@ internal sealed class PozisyonCreateCommandHandler(
         if (pozisyonVarMi)
             return Result<string>.Failure("Pozisyon zaten mevcut");
 
-        var departmanVarMi = await departmanRepository.AnyAsync(p => p.Id == request.DepartmanId);
-        if(!departmanVarMi)
+        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId);
+        if(!sirketVarMi)
         {
-            return Result<string>.Failure("Departman bulunamadı");
+            return Result<string>.Failure("Şirket bulunamadı");
         }
 
         Pozisyon pozisyon = request.Adapt<Pozisyon>();

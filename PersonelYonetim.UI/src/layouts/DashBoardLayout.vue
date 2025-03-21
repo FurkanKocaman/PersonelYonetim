@@ -6,6 +6,7 @@ import TopBar from "../components/dashboard/TopBar.vue";
 import type { MenuItem } from "@/types/menu";
 import { useUserStore } from "@/stores/user";
 import type { UserModel } from "@/models/UserModel";
+import Roles from "@/models/Roles";
 
 // Router
 const router = useRouter();
@@ -30,6 +31,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "building",
     active: false,
     path: "/dashboard/sirket",
+    roles: [Roles.SirketSahibi, Roles.Yonetici],
   },
   {
     name: "Personel",
@@ -151,13 +153,7 @@ onMounted(() => {
     />
 
     <!-- Ana İçerik -->
-    <div
-      class="flex-1 flex flex-col transition-all duration-300"
-      :class="{
-        'lg:ml-50': sidebarOpen,
-        'lg:ml-20': !sidebarOpen,
-      }"
-    >
+    <div class="flex-1 flex flex-col transition-all duration-300">
       <!-- Üst Çubuk -->
       <TopBar :sidebarOpen="sidebarOpen" :header="route.path" @toggle-sidebar="toggleSidebar" />
 

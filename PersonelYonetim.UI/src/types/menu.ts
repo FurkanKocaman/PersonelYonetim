@@ -6,4 +6,5 @@ export interface MenuItem {
   icon: string;
   active: boolean;
   path: string;
+  roles?: string[];
 }

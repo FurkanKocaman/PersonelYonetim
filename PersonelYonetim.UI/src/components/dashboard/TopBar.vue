@@ -29,7 +29,7 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <header class="bg-white dark:bg-neutral-800 shadow-sm h-16 flex items-center">
+  <header class="w-full bg-white dark:bg-neutral-800/60 shadow-sm h-16 flex items-center">
     <div class="container mx-auto px-4 flex justify-between items-center">
       <!-- Sol taraf - Mobil için açma/kapama düğmesi -->
       <div class="flex items-center">

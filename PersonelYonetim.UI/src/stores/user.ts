@@ -23,7 +23,6 @@ export const useUserStore = defineStore("user", () => {
 
   const getUser = async () => {
     const response = await AuthService.getCurrentUser();
-    console.log(response);
     Object.assign(user, response);
   };
 

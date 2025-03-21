@@ -60,7 +60,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
 
         modelBuilder.Entity<PersonelAtama>()
             .HasOne(p => p.Personel)
-            .WithMany()
+            .WithMany(p => p.PersonelAtamalar)
             .HasForeignKey(p => p.PersonelId);
 
         modelBuilder.Entity<Personel>()

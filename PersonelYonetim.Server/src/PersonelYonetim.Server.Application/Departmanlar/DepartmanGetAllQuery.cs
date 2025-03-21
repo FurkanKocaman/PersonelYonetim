@@ -40,7 +40,7 @@ internal sealed class DepartmanGetAllQueryHandler(
 
         var personel = personelRepository.GetAll()
             .Where(p => p.UserId == Guid.Parse(userIdString))
-            .Select(p => new { p.Id })
+            .Select(p => new { p.Id, p.PersonelAtamalar })
             .FirstOrDefault();
 
         if (personel == null)
@@ -49,15 +49,15 @@ internal sealed class DepartmanGetAllQueryHandler(
         }
 
         var departmanlar = departmanRepository.GetAll();
-        if (request.SubeId != null)
+        if (request.SubeId is not null)
         {
             departmanlar = departmanlar.Where(d => d.SubeId == request.SubeId);
         }
 
         var response = departmanlar
             .Join(personelAtamaRepository.GetAll(),
-                  departman => departman.Id,
-                  personelAtama => personelAtama.DepartmanId,
+                  departman => departman.SirketId,
+                  personelAtama => personelAtama.SirketId,
                   (departman, personelAtama) => new { departman, personelAtama })
             .Where(dp => dp.personelAtama.PersonelId == personel.Id)
             .Join(userManager.Users,

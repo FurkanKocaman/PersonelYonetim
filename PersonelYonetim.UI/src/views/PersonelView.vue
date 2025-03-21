@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { DepartmanModel } from "@/models/DepartmanModel";
+import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
 import type { PersonelItem } from "@/models/PersonelModels";
-import type { SirketModel } from "@/models/SirketModel";
-import type { SubeModel } from "@/models/SubeModel";
+import type { SirketModel } from "@/models/entity-models/SirketModel";
+import type { SubeModel } from "@/models/entity-models/SubeModel";
 import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
 import SirketService from "@/services/SirketService";
@@ -28,7 +28,8 @@ const selectedSube = ref("");
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const selectedDepartman = ref("");
 onMounted(async () => {
-  sirketler.value = await SirketService.getSirketler();
+  const res = await SirketService.sirketlerGet();
+  sirketler.value = res?.Sirketler;
   if (sirketler.value) {
     selectedSirket.value = sirketler.value[0].id;
   }
@@ -45,16 +46,16 @@ const getPersoneller = async () => {
 };
 
 const getSubeler = async () => {
-  subeler.value = await SubeService.getSubeler(selectedSirket.value);
-  console.log(subeler);
+  const res = await SubeService.subelerGet(selectedSirket.value);
+  subeler.value = res?.Subeler;
 };
 
 const getDepartmanlar = async () => {
   if (selectedSube.value == "") {
     selectedDepartman.value = "";
   }
-  departmanlar.value = await DepartmanService.getDepartmanlar(selectedSube.value);
-  console.log(departmanlar.value);
+  const res = await DepartmanService.departmanlarGet(selectedSube.value);
+  departmanlar.value = res?.Departmanlar;
 };
 
 watch(selectedSirket, getSubeler);

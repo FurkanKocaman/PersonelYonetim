@@ -10,6 +10,7 @@ class AuthService {
     try {
       console.log(data);
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, data);
+      console.log(response);
       const loginResponse: LoginResponse = response.data.data;
 
       localStorage.setItem("accessToken", loginResponse.accessToken);

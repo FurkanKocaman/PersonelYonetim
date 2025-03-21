@@ -34,11 +34,12 @@ internal sealed class DepartmanCreateCommandHandler(
         if (departmanVarMi)
             return Result<string>.Failure("Bu isme sahip departman zaten mevcut");
 
-        var subeVarMi = await subeRepository.AnyAsync(p => p.Id == request.SubeId);
-        if (!subeVarMi)
+        var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
+        if (sube is null)
             return Result<string>.Failure("Şube bulunamadı");
 
         Departman departman = request.Adapt<Departman>();
+        departman.SirketId = sube.SirketId;
         departmanRepository.Add(departman);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
