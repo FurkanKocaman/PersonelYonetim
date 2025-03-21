@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import DashboardLayout from "@/layouts/DashBoardLayout.vue";
+import Roles from "@/models/Roles";
+import { authGuard } from "./authGuard";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,13 +24,29 @@ const router = createRouter({
           path: "sirket",
           name: "Sirket",
           component: () => import("../views/SirketView.vue"),
-          meta: { title: "Sirket Yönetimi" },
+          meta: {
+            title: "Sirket Yönetimi",
+            requiredRole: [Roles.Yonetici, Roles.SirketSahibi, Roles.Admin],
+          },
+          beforeEnter: authGuard,
+        },
+        {
+          path: "modal",
+          name: "Modal",
+          component: () => import("../components/modals/DepartmanCreateModal.vue"),
+          meta: {
+            title: "Modal",
+          },
         },
         {
           path: "personel",
           name: "Personel",
           component: () => import("../views/PersonelView.vue"),
-          meta: { title: "Personel Yönetimi" },
+          meta: {
+            title: "Personel Yönetimi",
+            requiredRole: [Roles.Yonetici, Roles.SirketSahibi, Roles.Admin, Roles.Calisan],
+          },
+          beforeEnter: authGuard,
         },
         {
           path: "izin",
@@ -53,12 +71,19 @@ const router = createRouter({
           name: "Takvim",
           component: () => import("../views/TakvimView.vue"),
           meta: { title: "Takvim" },
+          beforeEnter: authGuard,
         },
         {
           path: "ayarlar",
           name: "Ayarlar",
           component: () => import("../views/AyarlarView.vue"),
           meta: { title: "Ayarlar" },
+          beforeEnter: authGuard,
+        },
+        {
+          path: "/unauthorized",
+          name: "Unauthorized",
+          component: () => import("../views/Auth/UnauthorizedView.vue"),
         },
       ],
     },
@@ -90,14 +115,13 @@ const router = createRouter({
   },
 });
 
-// Navigation guards
-router.beforeEach((to, from, next) => {
-  // Set document title
-  document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
+// // Navigation guards
+// router.beforeEach((to, from, next) => {
+//   document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
 
-  // Add authentication logic here if needed
-  // For now, we'll just allow all routes
-  next();
-});
+//   // Add authentication logic here if needed
+//   // For now, we'll just allow all routes
+//   next();
+// });
 
 export default router;

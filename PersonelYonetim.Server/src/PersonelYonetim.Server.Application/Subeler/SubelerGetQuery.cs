@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
@@ -37,36 +38,62 @@ internal sealed class SubelerGetQueryHandler(
         {
             throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
         }
-        var personel = personelRepository.FirstOrDefault(p => p.UserId == Guid.Parse(userIdString));
+
+        var personel = personelRepository.GetAll()
+            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Select(p => new { p.Id, p.PersonelAtamalar })
+            .FirstOrDefault();
+
         if (personel == null)
         {
+            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var result = (from sube in subeRepository.GetAll() where request.SirketId != null ? request.SirketId == sube.SirketId : true
-                      join personelAtama in personelAtamaRepository.GetAll() on personel!.Id equals personelAtama.PersonelId
-                      join create_user in userManager.Users.AsQueryable() on sube.CreateUserId equals create_user.Id
-                      join update_user in userManager.Users.AsQueryable() on sube.UpdateUserId equals update_user.Id
-                      into update_user
-                      from update_users in update_user.DefaultIfEmpty()
-                      select new SubelerGetQueryResponse
-                      {
-                          Id= sube.Id,
-                          Ad = sube.Ad,
-                          Aciklama = sube.Aciklama,
-                          Adres = sube.Adres,
-                          Iletisim = sube.Iletisim,
-                          SirketId = sube.SirketId,
-                          SirketAd = sube.Sirket.Ad,
-                          IsActive = sube.IsActive,
-                          CreatedAt = sube.CreatedAt,
-                          CreateUserId = create_user.Id,
-                          CreateUserName = create_user.FirstName + " " + create_user.LastName + " (" + create_user.Email + ")",
-                          UpdateAt = sube.UpdateAt,
-                          UpdateUserId = update_users.Id,
-                          UpdateUserName = sube.UpdateUserId == null ? null : update_users.FirstName + " " + update_users.LastName + " (" + update_users.Email + ")",
-                          IsDeleted = sube.IsDeleted,
-                          DeleteAt = sube.DeleteAt,
-                      });
-        return Task.FromResult(result);
+        var subeler = subeRepository.GetAll();
+        if(request.SirketId is not null)
+        {
+            subeler = subeler.Where(s => s.SirketId == request.SirketId);
+        }
+
+        var response = subeler
+            .Join(personelAtamaRepository.GetAll(),
+                  sube => sube.SirketId,
+                  personelAtama => personelAtama.SirketId,
+                  (sube, personelAtama) => new { sube, personelAtama })
+            .Where(sp => sp.personelAtama.PersonelId == personel.Id)
+            .Join(userManager.Users,
+                  sp => sp.sube.CreateUserId,
+                  createUser => createUser.Id,
+                  (sp, createUser) => new { sp.sube, createUser })
+            .GroupJoin(userManager.Users,
+                  sp => sp.sube.UpdateUserId,
+                  updateUser => updateUser.Id,
+                  (sp, updateUsers) => new { sp.sube, sp.createUser, updateUsers })
+            .SelectMany(
+                  spu => spu.updateUsers.DefaultIfEmpty(),
+                  (spu, updateUser) => new SubelerGetQueryResponse
+                  {
+                      Id = spu.sube.Id,
+                      Ad = spu.sube.Ad,
+                      Aciklama = spu.sube.Aciklama,
+                      Adres = spu.sube.Adres,
+                      Iletisim = spu.sube.Iletisim,
+                      SirketId = spu.sube.Sirket.Id,
+                      SirketAd = spu.sube.Sirket.Ad,
+                      IsActive = spu.sube.IsActive,
+                      CreatedAt = spu.sube.CreatedAt,
+                      CreateUserId = spu.createUser.Id,
+                      CreateUserName = spu.createUser.FirstName + " " + spu.createUser.LastName + " (" + spu.createUser.Email + ")",
+                      UpdateAt = spu.sube.UpdateAt,
+                      UpdateUserId = updateUser != null ? updateUser.Id : null,
+                      UpdateUserName = updateUser != null
+                          ? updateUser.FirstName + " " + updateUser.LastName + " (" + updateUser.Email + ")"
+                          : null,
+                      IsDeleted = spu.sube.IsDeleted,
+                      DeleteAt = spu.sube.DeleteAt
+                  });
+
+
+        return Task.FromResult(response);
     }
 }

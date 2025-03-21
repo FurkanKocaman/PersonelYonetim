@@ -58,7 +58,7 @@ public class AppODataController(
         return response;
     }
     [HttpGet("sirketler")]
-    [Authorize]
+    [Authorize(Permissions.ViewSirket)]
     public async Task<IQueryable<SirketlerGetQueryResponse>> GetAllSirketler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SirketlerGetQuery(), cancellationToken);
@@ -66,7 +66,7 @@ public class AppODataController(
     }
 
     [HttpGet("subeler")]
-    [Authorize]
+    [Authorize(Permissions.ViewSube)]
     public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);
@@ -74,7 +74,7 @@ public class AppODataController(
     }
 
     [HttpGet("departmanlar")]
-    [Authorize]
+    [Authorize(Permissions.ViewDepartman)]
     public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid? SubeId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new DepartmanGetAllQuery(SubeId), cancellationToken);
@@ -82,7 +82,7 @@ public class AppODataController(
     }
 
     [HttpGet("pozisyonlar")]
-    [Authorize]
+    [Authorize(Permissions.ViewPozisyon)]
     public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);

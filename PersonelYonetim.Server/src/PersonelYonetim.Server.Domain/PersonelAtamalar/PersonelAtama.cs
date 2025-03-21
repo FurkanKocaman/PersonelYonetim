@@ -26,7 +26,7 @@ public sealed class PersonelAtama
     public Sube? Sube { get; set; }
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
-    public bool IsActive = true;
+    public bool IsActive { get; set; } = true;
     public YoneticiTipiEnum? YoneticiTipi { get; set; }
     public CalismaSekliEnum CalismaSekli { get; set; } = default!;
     public SozlesmeTuruEnum SozlesmeTuru { get; set; } = default!;

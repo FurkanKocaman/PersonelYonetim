@@ -1,3 +1,6 @@
+import type { Adres } from "./entity-models/Adres";
+import type { Iletisim } from "./entity-models/Iletisim";
+
 export interface RegisterRequest {
   ad: string;
   soyad: string;
@@ -9,14 +12,4 @@ export interface RegisterRequest {
   sirketKurulusTarihi: Date;
   sirketIletisim: Iletisim;
   sirketAdres: Adres;
-}
-export interface Adres {
-  ulke: string;
-  sehir: string;
-  ilce: string;
-  tamAdres: string;
-}
-export interface Iletisim {
-  eposta: string;
-  telefon: string;
 }

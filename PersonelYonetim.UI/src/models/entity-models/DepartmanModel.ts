@@ -1,7 +1,10 @@
 export interface DepartmanModel {
   id: string;
   ad: string;
+  subeId: string;
   subeAd: string;
+  sirketId: string;
+  sirketAd: string;
   aciklama: string | undefined;
   isActive: boolean;
   createdAt: Date;
