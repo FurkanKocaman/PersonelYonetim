@@ -37,3 +37,4 @@ secrets.json
 .vite/
 .vitepress/cache/
 .idea/
+PersonelYonetim.Server/src/PersonelYonetim.Server.WebAPI/appsettings.Development.json
