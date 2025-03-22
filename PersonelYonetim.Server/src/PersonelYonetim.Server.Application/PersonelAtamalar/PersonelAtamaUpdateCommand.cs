@@ -11,7 +11,7 @@ public sealed record PersonelAtamaUpdateCommand(
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
-    int YoneticiTipiValue) : IRequest<Result<string>>;
+    int RolTipiValue) : IRequest<Result<string>>;
 
 internal sealed class PersonelAtamaUpdateCommandHandler(
     IPersonelAtamaRepository personelAtamaRepository,
@@ -26,7 +26,7 @@ internal sealed class PersonelAtamaUpdateCommandHandler(
         personelAtama.SubeId = request.SubeId;
         personelAtama.DepartmanId = request.DepartmanId;
         personelAtama.PozisyonId = request.PozisyonId;
-        personelAtama.YoneticiTipi = YoneticiTipiEnum.FromValue(request.YoneticiTipiValue);
+        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

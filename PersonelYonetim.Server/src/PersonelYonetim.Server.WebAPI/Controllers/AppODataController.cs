@@ -36,12 +36,16 @@ public class AppODataController(
 
     [HttpGet("personeller")]
     [Authorize(Permissions.ViewPersonel)]
-    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId, Guid? SubeId, Guid? DepartmanId, CancellationToken cancellationToken)
+    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId,
+    Guid? PozisyonId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PersonelGetAllQuery(SirketId, SubeId, DepartmanId), cancellationToken);
+        var response = await sender.Send(new PersonelGetAllQuery(SirketId,SubeId,DepartmanId,PozisyonId), cancellationToken);
 
         return response;
     }
+
     [HttpGet("personeller/{Id}")]
     [Authorize(Permissions.ViewPersonel)]
     public async Task<IQueryable<PersonelGetQueryResponse>> GetPersonel(Guid Id, CancellationToken cancellationToken)

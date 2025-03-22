@@ -17,7 +17,7 @@ public sealed record PersonelAtamaCreateCommand(
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
-    int YoneticiTipiValue,
+    int RolTipiValue,
     int CalismaSekliValue,
     int SozlesmeTuruValue,
     DateTimeOffset? SozlesmeBitisTarihi
@@ -33,45 +33,43 @@ internal sealed class PersonelAtamaCreateCommandHandler(
     {
         PersonelAtama personelAtama = request.Adapt<PersonelAtama>();
         personelAtama.PersonelId = request.RequestPersonel.Id;
-        personelAtama.YoneticiTipi = request.YoneticiTipiValue == -1 ? null : YoneticiTipiEnum.FromValue(request.YoneticiTipiValue);
+        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
         personelAtama.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
         personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
 
         personelAtamaRepository.Add(personelAtama);
         await unitOfWork.SaveChangesAsync();
 
-        if(request.YoneticiTipiValue != -1)
+        if (request.RolTipiValue == 6 || request.RolTipiValue == 5)
         {
-            if(request.YoneticiTipiValue == 2)
+            var role = await roleManager.FindByNameAsync("SirketSahibi");
+            if (role == null)
+                return Result<string>.Failure("Rol bulunamadı");
+            AppUserRole appUserRole = new()
             {
-                var role = await roleManager.FindByNameAsync("SirketSahibi");
-                if (role == null)
-                    return Result<string>.Failure("Rol bulunamadı");
-                AppUserRole appUserRole = new()
-                {
-                    UserId = request.RequestPersonel.Id,
-                    RoleId = role!.Id,
-                    SirketId = personelAtama.SirketId,
-                };
-                userRoleRepository.Add(appUserRole);
-                await unitOfWork.SaveChangesAsync();
-            }
-            else
-            {
-                var role = await roleManager.FindByNameAsync("Yonetici");
-                if (role == null)
-                    return Result<string>.Failure("Rol bulunamadı");
-                AppUserRole appUserRole = new()
-                {
-                    UserId = request.RequestPersonel.Id,
-                    RoleId = role!.Id,
-                    SirketId = personelAtama.SirketId,
-                };
-                userRoleRepository.Add(appUserRole);
-                await unitOfWork.SaveChangesAsync();
-            }
+                UserId = request.RequestPersonel.Id,
+                RoleId = role!.Id,
+                SirketId = personelAtama.SirketId,
+            };
+            userRoleRepository.Add(appUserRole);
+            await unitOfWork.SaveChangesAsync();
         }
-        else
+        if(request.RolTipiValue >=1 && request.RolTipiValue <=4)
+        {
+            var role = await roleManager.FindByNameAsync("Yonetici");
+            if (role == null)
+                return Result<string>.Failure("Rol bulunamadı");
+            AppUserRole appUserRole = new()
+            {
+                UserId = request.RequestPersonel.Id,
+                RoleId = role!.Id,
+                SirketId = personelAtama.SirketId,
+            };
+            userRoleRepository.Add(appUserRole);
+            await unitOfWork.SaveChangesAsync();
+        }
+
+        if (request.RolTipiValue == 0)
         {
             var role = await roleManager.FindByNameAsync("Calisan");
             if (role == null)
@@ -85,6 +83,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             userRoleRepository.Add(appUserRole);
             await unitOfWork.SaveChangesAsync();
         }
+       
             return Result<string>.Succeed("Personel atama oluşturuldu");
     }
 }

@@ -27,7 +27,7 @@ public sealed record PersonelCreateCommand(
     int CalismaSekliValue,
     int SozlesmeTuruValue,
     DateTimeOffset? SozlesmeBitisTarihi,
-    int YoneticiTipiValue = -1
+    int YoneticiTipiValue = 0
     ) : IRequest<Result<string>>;
 
 public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelCreateCommand>
@@ -47,11 +47,6 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
 }
 internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository,
-    //ISirketRepository sirketRepository,
-    //ISubeRepository subeRepository,
-    //IDepartmanRepository departmanRepository,
-    //IPozisyonRepository pozisyonRepository,
-    //IPersonelAtamaRepository personelDepartmanRepository,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
@@ -82,17 +77,7 @@ internal sealed class PersonelCreateCommandHandler(
 
         personelRepository.Add(personel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-       
 
-        //var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == request.SirketId);
-        //if (sirket is null)
-        //    return Result<string>.Failure("Şirket bulunamadı");
-
-        //var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
-
-        //var departman = await departmanRepository.FirstOrDefaultAsync(p => p.Id == request.DepartmanId);
-
-        //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
 
         PersonelAtamaCreateCommand personelAtamaCreateCommand = 
             new(personel, request.SirketId,request.SubeId,request.DepartmanId,
