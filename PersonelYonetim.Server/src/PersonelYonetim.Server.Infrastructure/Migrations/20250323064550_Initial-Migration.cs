@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PersonelYonetim.Server.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_migration : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -167,8 +167,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         name: "FK_Subeler_Sirketler_SirketId",
                         column: x => x.SirketId,
                         principalTable: "Sirketler",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -188,7 +187,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     İlçe = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TamAdres = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IseGirisTarihi = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    YoneticiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -202,11 +200,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Personeller", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Personeller_Personeller_YoneticiId",
-                        column: x => x.YoneticiId,
-                        principalTable: "Personeller",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Personeller_Users_UserId",
                         column: x => x.UserId,
@@ -222,7 +215,8 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Ad = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Aciklama = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SubeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SirketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreateUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -236,11 +230,15 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Departmanlar", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Departmanlar_Sirketler_SirketId",
+                        column: x => x.SirketId,
+                        principalTable: "Sirketler",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Departmanlar_Subeler_SubeId",
                         column: x => x.SubeId,
                         principalTable: "Subeler",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -280,7 +278,8 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Ad = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Aciklama = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DepartmanId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SirketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmanId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreateUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -294,11 +293,15 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Pozisyonlar", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pozisyonlar_Departmanlar_DepartmanId",
-                        column: x => x.DepartmanId,
+                        name: "FK_Pozisyonlar_Departmanlar_SirketId",
+                        column: x => x.SirketId,
                         principalTable: "Departmanlar",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Pozisyonlar_Sirketler_SirketId",
+                        column: x => x.SirketId,
+                        principalTable: "Sirketler",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -310,8 +313,15 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     DepartmanId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PozisyonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     SubeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SirketId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    YoneticiTipi = table.Column<int>(type: "int", nullable: false)
+                    SirketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    YoneticiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    RolTipi = table.Column<int>(type: "int", nullable: false),
+                    CalismaSekli = table.Column<int>(type: "int", nullable: false),
+                    SozlesmeTuru = table.Column<int>(type: "int", nullable: false),
+                    SozlesmeBitisTarihi = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    PozisyonBaslamaTarihi = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    PozisyonBitisTarihi = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -322,11 +332,16 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         principalTable: "Departmanlar",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PersonelAtama_Personeller_Id",
-                        column: x => x.Id,
+                        name: "FK_PersonelAtama_Personeller_PersonelId",
+                        column: x => x.PersonelId,
                         principalTable: "Personeller",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PersonelAtama_Personeller_YoneticiId",
+                        column: x => x.YoneticiId,
+                        principalTable: "Personeller",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PersonelAtama_Pozisyonlar_PozisyonId",
                         column: x => x.PozisyonId,
@@ -343,6 +358,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         principalTable: "Subeler",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Departmanlar_SirketId",
+                table: "Departmanlar",
+                column: "SirketId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Departmanlar_SubeId",
@@ -365,6 +385,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 column: "DepartmanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PersonelAtama_PersonelId",
+                table: "PersonelAtama",
+                column: "PersonelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PersonelAtama_PozisyonId",
                 table: "PersonelAtama",
                 column: "PozisyonId");
@@ -380,6 +405,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 column: "SubeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PersonelAtama_YoneticiId",
+                table: "PersonelAtama",
+                column: "YoneticiId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Personeller_Eposta",
                 table: "Personeller",
                 column: "Eposta",
@@ -392,14 +422,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Personeller_YoneticiId",
-                table: "Personeller",
-                column: "YoneticiId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Pozisyonlar_DepartmanId",
+                name: "IX_Pozisyonlar_SirketId",
                 table: "Pozisyonlar",
-                column: "DepartmanId");
+                column: "SirketId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sirketler_Eposta",

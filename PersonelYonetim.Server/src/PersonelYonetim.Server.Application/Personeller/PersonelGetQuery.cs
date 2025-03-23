@@ -64,7 +64,7 @@ internal sealed class PersonelGetQueryHandler(
                             TamAdres = entity.Adres.TamAdres,
                             DepartmanAd = departman.Ad,
                             PozisyonAd = pozisyon.Ad,
-                            Yonetici = entity.Yonetici != null ? entity.Yonetici!.FullName : "",
+                            //Yonetici = entity.Yonetici != null ? entity.Yonetici!.FullName : "",
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,
                             CreateUserId = create_user.Id,

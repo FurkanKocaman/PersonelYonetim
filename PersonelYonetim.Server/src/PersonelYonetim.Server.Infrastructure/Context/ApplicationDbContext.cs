@@ -92,7 +92,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(pa => pa.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Personel>()
+        modelBuilder.Entity<PersonelAtama>()
             .HasOne(p => p.Yonetici)
             .WithMany()
             .HasForeignKey(p => p.YoneticiId)
@@ -122,6 +122,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.Sirket)
             .WithMany()
             .HasForeignKey(p =>p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Pozisyon>()
+            .HasOne(p => p.Departman)
+            .WithMany(p => p.Pozisyonlar)
+            .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Departman>()

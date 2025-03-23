@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.Rols;
 
 namespace PersonelYonetim.Server.Infrastructure.Configurations;
 

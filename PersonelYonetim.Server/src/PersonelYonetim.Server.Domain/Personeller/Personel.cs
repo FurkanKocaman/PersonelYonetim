@@ -15,8 +15,6 @@ public sealed class Personel : Entity
     public Iletisim Iletisim { get; set; } = default!;
     public Adres Adres { get; set; } = default!;
     public DateTimeOffset IseGirisTarihi { get; set; } = default!;
-    public Guid? YoneticiId { get; set; }
-    public Personel? Yonetici { get; set; }
     public Guid UserId { get; set; } = default!;
     public AppUser User { get; set; } = default!;
 

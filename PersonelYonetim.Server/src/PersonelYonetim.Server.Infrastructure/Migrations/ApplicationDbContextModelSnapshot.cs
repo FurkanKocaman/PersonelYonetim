@@ -78,7 +78,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid>("SirketId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SubeId")
+                    b.Property<Guid?>("SubeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("UpdateAt")
@@ -180,6 +180,9 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid?>("SubeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("YoneticiId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmanId");
@@ -191,6 +194,8 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.HasIndex("SirketId");
 
                     b.HasIndex("SubeId");
+
+                    b.HasIndex("YoneticiId");
 
                     b.ToTable("PersonelAtama");
                 });
@@ -248,15 +253,10 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("YoneticiId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UserId")
                         .IsUnique();
-
-                    b.HasIndex("YoneticiId");
 
                     b.ToTable("Personeller");
                 });
@@ -305,8 +305,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmanId");
 
                     b.HasIndex("SirketId");
 
@@ -583,8 +581,7 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.HasOne("PersonelYonetim.Server.Domain.Subeler.Sube", "Sube")
                         .WithMany("Departmanlar")
                         .HasForeignKey("SubeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Sirket");
 
@@ -638,6 +635,11 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .HasForeignKey("SubeId")
                         .OnDelete(DeleteBehavior.NoAction);
 
+                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Yonetici")
+                        .WithMany()
+                        .HasForeignKey("YoneticiId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Departman");
 
                     b.Navigation("Personel");
@@ -647,6 +649,8 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                     b.Navigation("Sirket");
 
                     b.Navigation("Sube");
+
+                    b.Navigation("Yonetici");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Personeller.Personel", b =>
@@ -656,11 +660,6 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .HasForeignKey("PersonelYonetim.Server.Domain.Personeller.Personel", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PersonelYonetim.Server.Domain.Personeller.Personel", "Yonetici")
-                        .WithMany()
-                        .HasForeignKey("YoneticiId")
-                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.OwnsOne("PersonelYonetim.Server.Domain.Personeller.Adres", "Adres", b1 =>
                         {
@@ -728,21 +727,23 @@ namespace PersonelYonetim.Server.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-
-                    b.Navigation("Yonetici");
                 });
 
             modelBuilder.Entity("PersonelYonetim.Server.Domain.Pozisyonlar.Pozisyon", b =>
                 {
-                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", null)
+                    b.HasOne("PersonelYonetim.Server.Domain.Departmanlar.Departman", "Departman")
                         .WithMany("Pozisyonlar")
-                        .HasForeignKey("DepartmanId");
+                        .HasForeignKey("SirketId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("PersonelYonetim.Server.Domain.Sirketler.Sirket", "Sirket")
                         .WithMany()
                         .HasForeignKey("SirketId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Departman");
 
                     b.Navigation("Sirket");
                 });

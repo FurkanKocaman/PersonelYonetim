@@ -1,11 +1,7 @@
 ﻿using FluentValidation;
-using GenericRepository;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Domain.IzinTalepler;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;

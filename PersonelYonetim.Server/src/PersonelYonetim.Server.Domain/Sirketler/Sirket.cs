@@ -12,5 +12,5 @@ public sealed class Sirket : Entity
     public Adres Adres { get; set; } = default!;
     public Iletisim Iletisim { get; set; } = default!;
 
-    public ICollection<Sube> Subeler { get; set; } = new List<Sube>();
+    public ICollection<Sube>? Subeler { get; set; }
 }

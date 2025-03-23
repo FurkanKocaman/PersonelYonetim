@@ -2,9 +2,9 @@
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.Subeler;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PersonelYonetim.Server.Domain.PersonelAtamalar;
 
@@ -26,6 +26,8 @@ public sealed class PersonelAtama
     public Sube? Sube { get; set; }
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
+    public Guid? YoneticiId { get; set; }
+    public Personel? Yonetici { get; set; }
     public bool IsActive { get; set; } = true;
     public RolTipiEnum RolTipi { get; set; } = default!;
     public CalismaSekliEnum CalismaSekli { get; set; } = default!;
@@ -33,20 +35,6 @@ public sealed class PersonelAtama
     public DateTimeOffset? SozlesmeBitisTarihi { get; set; }
     public DateTimeOffset PozisyonBaslamaTarihi { get; set; } = default!;
     public DateTimeOffset? PozisyonBitisTarihi { get; set; }
-}
-
-public sealed class RolTipiEnum : SmartEnum<RolTipiEnum>
-{
-    public static readonly RolTipiEnum Calisan = new("Çalışan", 0);
-    public static readonly RolTipiEnum DepartmanYardimci = new("Departman Yönetici Yardımcı", 1);
-    public static readonly RolTipiEnum DepartmanYonetici = new("Departman Yönetici", 2);
-    public static readonly RolTipiEnum SubeYardimci = new("Şube Yönetici Yardımcı", 3);
-    public static readonly RolTipiEnum SubeYonetici = new("Şube Yönetici", 4);
-    public static readonly RolTipiEnum SirketYardimci = new("Şirket Yönetici Yardımcı", 5);
-    public static readonly RolTipiEnum SirketYonetici = new("Şirket Yönetici", 6);
-    private RolTipiEnum(string name, int value) : base(name, value)
-    {
-    }
 }
 public sealed class CalismaSekliEnum : SmartEnum<CalismaSekliEnum>
 {
