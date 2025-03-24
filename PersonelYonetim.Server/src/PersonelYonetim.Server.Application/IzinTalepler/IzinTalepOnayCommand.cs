@@ -1,7 +1,7 @@
 ﻿using GenericRepository;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using System.Security.Claims;
 using TS.Result;
 

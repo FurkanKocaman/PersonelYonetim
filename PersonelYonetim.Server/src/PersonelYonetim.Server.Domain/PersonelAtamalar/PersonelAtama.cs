@@ -1,5 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
@@ -35,6 +36,8 @@ public sealed class PersonelAtama
     public DateTimeOffset? SozlesmeBitisTarihi { get; set; }
     public DateTimeOffset PozisyonBaslamaTarihi { get; set; } = default!;
     public DateTimeOffset? PozisyonBitisTarihi { get; set; }
+    public Guid? IzinKuralId { get; set; }
+    public IzinKural? IzinKural { get; set; }
 }
 public sealed class CalismaSekliEnum : SmartEnum<CalismaSekliEnum>
 {

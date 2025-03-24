@@ -1,4 +1,5 @@
 ﻿using PersonelYonetim.Server.Domain.Abstractions;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Users;
 
@@ -17,6 +18,8 @@ public sealed class Personel : Entity
     public DateTimeOffset IseGirisTarihi { get; set; } = default!;
     public Guid UserId { get; set; } = default!;
     public AppUser User { get; set; } = default!;
+    public Guid? IzinKuralId { get; set; }
+    public IzinKural? IzinKural { get; set; }
 
     public ICollection<PersonelAtama> PersonelAtamalar { get; set; } = default!;
 }

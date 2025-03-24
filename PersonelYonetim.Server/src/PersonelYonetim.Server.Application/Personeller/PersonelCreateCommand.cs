@@ -80,7 +80,7 @@ internal sealed class PersonelCreateCommandHandler(
 
 
         PersonelAtamaCreateCommand personelAtamaCreateCommand = 
-            new(personel, request.SirketId,request.SubeId,request.DepartmanId,
+            new(personel.Id, request.SirketId,request.SubeId,request.DepartmanId,
             request.PozisyonId,request.YoneticiTipiValue,request.CalismaSekliValue,
             request.SozlesmeTuruValue,request.SozlesmeBitisTarihi);
 

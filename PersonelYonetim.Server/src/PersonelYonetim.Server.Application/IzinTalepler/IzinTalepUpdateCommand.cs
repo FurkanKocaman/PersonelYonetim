@@ -2,7 +2,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using System.Security.Claims;
 using TS.Result;
@@ -29,7 +29,7 @@ internal sealed class IzinTalepUpdateCommandHandler(
 
         izinTalep.BaslangicTarihi = request.BaslangicTarihi;
         izinTalep.BitisTarihi = request.BitisTarihi;
-        izinTalep.IzinTipi = IzinTipiEnum.FromValue(request.IzinTipiValue);
+        //izinTalep.IzinTipi = IzinTipiEnum.FromValue(request.IzinTipiValue);
         izinTalep.Aciklama = request.Aciklama;
         
         await unitOfWork.SaveChangesAsync();

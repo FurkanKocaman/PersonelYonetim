@@ -4,10 +4,9 @@ using PersonelYonetim.Server.Infrastructure.Context;
 
 namespace PersonelYonetim.Server.Infrastructure.Repositories;
 
-internal sealed class IzinTalepRepository : Repository<IzinTalep, ApplicationDbContext>, IIzinTalepRepository
+internal sealed class IzinKuralRepository : Repository<IzinKural, ApplicationDbContext>, IIzinKuralRepository
 {
-    public IzinTalepRepository(ApplicationDbContext context) : base(context)
+    public IzinKuralRepository(ApplicationDbContext context) : base(context)
     {
     }
 }
-

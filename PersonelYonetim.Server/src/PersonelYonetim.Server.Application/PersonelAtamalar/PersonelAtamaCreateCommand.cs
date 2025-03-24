@@ -44,6 +44,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
 
         PersonelAtama personelAtama = request.Adapt<PersonelAtama>();
         personelAtama.PersonelId = request.PersonelId;
+        personelAtama.IsActive = true;
         personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
         personelAtama.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
         personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);

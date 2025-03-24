@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
@@ -32,13 +32,14 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<Departman> Departmanlar { get; set; }
     public DbSet<Pozisyon> Pozisyonlar { get; set; }
     public DbSet<IzinTalep> IzinTalepleri { get; set; }
+    public DbSet<IzinTur> IzinTurleri { get; set; }
+    public DbSet<IzinKural> IzinKuralları { get; set; }
     public DbSet<IdentityRoleClaim<Guid>> IdentityRoleClaims { get; set; }
     public DbSet<Token> Tokenler { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        //modelBuilder.Ignore<IdentityRoleClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
@@ -57,6 +58,33 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .WithMany()
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTur>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+         .HasKey(ik => new { ik.IzinTurId, ik.IzinKuralId });
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+            .HasOne(ik => ik.IzinTur)
+            .WithMany()
+            .HasForeignKey(ik => ik.IzinTurId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+            .HasOne(ik => ik.IzinKural)
+            .WithMany(i => i.IzinTurler)
+            .HasForeignKey(ik => ik.IzinKuralId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PersonelAtama>()
+            .HasOne(p => p.IzinKural)
+            .WithMany(p => p.PersonelAtamalar)
+            .HasForeignKey(p => p.IzinKuralId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<PersonelAtama>()
             .HasOne(p => p.Personel)
