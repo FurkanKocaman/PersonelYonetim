@@ -78,7 +78,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                 PozisyonAd = entity.PersonelAtamalar
                     .Select(pa => pa.Pozisyon!.Ad)
                     .FirstOrDefault() ?? "",
-                Yonetici = entity.Yonetici != null ? entity.Yonetici.FullName : "",
+                //Yonetici = entity.Yonetici != null ? entity.Yonetici.FullName : "",
                 IsActive = entity.IsActive,
                 CreatedAt = entity.CreatedAt,
                 CreateUserId = entity.CreateUserId,

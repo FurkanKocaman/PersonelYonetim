@@ -1,7 +1,10 @@
 ﻿using GenericRepository;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Sirketler;
 using PersonelYonetim.Server.Domain.Personeller;
@@ -26,6 +29,7 @@ public sealed record RegisterCommand (
 
 internal sealed class RegisterCommandHandler(
     ISirketRepository sirketRepository,
+    IPersonelRepository personelRepository,
     UserManager<AppUser> userManager,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<RegisterCommand, Result<LoginCommandResponse>>
@@ -47,7 +51,7 @@ internal sealed class RegisterCommandHandler(
                 DateTimeOffset.Now,
                 null,
                 Guid.Parse(result.Data!),
-                null, null, null,0,1,null,2);
+                null, null, null,0,1,null,6);
 
             var response = await sender.Send(personelCreateCommand);
             if (response.IsSuccessful)
@@ -55,6 +59,12 @@ internal sealed class RegisterCommandHandler(
                 var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
                 sirket.CreateUserId = Guid.Parse(response.Data!);
                 await unitOfWork.SaveChangesAsync();
+
+                var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
+                if (personel == null)
+                {
+                    return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
+                }
 
                 var user = await userManager.FindByIdAsync(response.Data!);
                 user!.CreateUserId = user.Id;

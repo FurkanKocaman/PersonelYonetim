@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Users;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;
@@ -33,7 +33,7 @@ internal sealed class IzinTalepGetAllQueryHandler(
                             Id = entity.Id,
                             BaslangicTarihi = entity.BaslangicTarihi,
                             BitisTarihi = entity.BitisTarihi,
-                            IzinTipi = entity.IzinTipi.Name,
+                            //IzinTipi = entity.IzinTipi.Name,
                             Aciklama = entity.Aciklama!,
                             OnayDurumu = entity.DegerlendirmeDurumu.Name,
                             Onaylayan = entity.Degerlendiren == null ? "" : onay_users.FirstName + " " + onay_users.LastName + " (" + onay_users.Email + ")",

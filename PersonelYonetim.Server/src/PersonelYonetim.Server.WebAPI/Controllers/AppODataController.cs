@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Departmanlar;
+using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
@@ -31,17 +32,22 @@ public class AppODataController(
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
+        builder.EntitySet<IzinKuralGetAllResponse>("izinler");
         return builder.GetEdmModel();
     }
 
     [HttpGet("personeller")]
     [Authorize(Permissions.ViewPersonel)]
-    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId, Guid? SubeId, Guid? DepartmanId, CancellationToken cancellationToken)
+    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId,
+    Guid? PozisyonId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PersonelGetAllQuery(SirketId, SubeId, DepartmanId), cancellationToken);
+        var response = await sender.Send(new PersonelGetAllQuery(SirketId,SubeId,DepartmanId,PozisyonId), cancellationToken);
 
         return response;
     }
+
     [HttpGet("personeller/{Id}")]
     [Authorize(Permissions.ViewPersonel)]
     public async Task<IQueryable<PersonelGetQueryResponse>> GetPersonel(Guid Id, CancellationToken cancellationToken)
@@ -86,6 +92,13 @@ public class AppODataController(
     public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
+        return response;
+    }
+    [HttpGet("izinler")]
+    [Authorize]
+    public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
         return response;
     }
 

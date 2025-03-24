@@ -14,8 +14,6 @@ public sealed record TokenCreateCommand(
 internal sealed class TokenCreateCommandHandler(
     UserManager<AppUser> userManager,
     IEmailService emailService
-    //ITokenRepository tokenRepository,
-    //IUnitOfWork unitOfWork
     ) : IRequestHandler<TokenCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(TokenCreateCommand request, CancellationToken cancellationToken)
@@ -31,15 +29,8 @@ internal sealed class TokenCreateCommandHandler(
         token.Expires = DateTimeOffset.UtcNow.AddHours(1);
         token.UserId = user.Id;
 
-
-        //tokenRepository.Add(token);
-        //int affectedRows = await unitOfWork.SaveChangesAsync(cancellationToken);
-        //if (affectedRows == 0)
-        //{
-        //    return Result<string>.Failure("Token kaydedilemedi.");
-        //}
         string confirmationLink = $"https://localhost:7063/users/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token.TokenString)}";
-        //string confirmationLink = $"https://localhost:7063/users/confirm-email/{token.TokenString}";
+
         emailService.SendAsync(user.Email!, $"{request.TokenTypeEnum.Name} Link", $"<p>E-posta adresinizi doğrulamak için aşağıdaki bağlantıya tıklayın:</p><a href={confirmationLink}>E-posta Doğrula</a>", cancellationToken).Wait();
 
         return Result<string>.Succeed($"Token {user.Email} adresine gönderildi");

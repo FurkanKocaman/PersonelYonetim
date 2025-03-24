@@ -12,18 +12,20 @@ using TS.Result;
 namespace PersonelYonetim.Server.Application.PersonelAtamalar;
 
 public sealed record PersonelAtamaCreateCommand(
-    Personel RequestPersonel,
+    Guid PersonelId,
     Guid SirketId,
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
-    int YoneticiTipiValue,
+    int RolTipiValue,
     int CalismaSekliValue,
     int SozlesmeTuruValue,
     DateTimeOffset? SozlesmeBitisTarihi
     ) : IRequest<Result<string>>;
 
 internal sealed class PersonelAtamaCreateCommandHandler(
+    UserManager<AppUser> userManager,
+    IPersonelRepository personelRepository,
     IUserRoleRepository userRoleRepository,
     RoleManager<AppRole> roleManager,
     IPersonelAtamaRepository personelAtamaRepository,
@@ -31,60 +33,46 @@ internal sealed class PersonelAtamaCreateCommandHandler(
 {
     public async Task<Result<string>> Handle(PersonelAtamaCreateCommand request, CancellationToken cancellationToken)
     {
+        PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.IsActive == true);
+        if(personelAtamaEski != null)
+        {
+            personelAtamaEski.IsActive = false;
+            personelAtamaEski.SozlesmeBitisTarihi = DateTimeOffset.Now;
+            personelAtamaRepository.Update(personelAtamaEski);
+            await unitOfWork.SaveChangesAsync();
+        }
+
         PersonelAtama personelAtama = request.Adapt<PersonelAtama>();
-        personelAtama.PersonelId = request.RequestPersonel.Id;
-        personelAtama.YoneticiTipi = request.YoneticiTipiValue == -1 ? null : YoneticiTipiEnum.FromValue(request.YoneticiTipiValue);
+        personelAtama.PersonelId = request.PersonelId;
+        personelAtama.IsActive = true;
+        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
         personelAtama.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
         personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
 
         personelAtamaRepository.Add(personelAtama);
         await unitOfWork.SaveChangesAsync();
 
-        if(request.YoneticiTipiValue != -1)
+        var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
+        if (personel == null)
+            return Result<string>.Failure("Personel bulunamadı");
+
+        var user = await userManager.FindByIdAsync(personel.UserId.ToString());
+        if (user == null)
+            return Result<string>.Failure("User bulunamadı");
+
+        var role = await roleManager.FindByNameAsync(request.RolTipiValue.ToString());
+        if (role == null)
+            return Result<string>.Failure("Rol bulunamadı");
+
+        AppUserRole appUserRole = new()
         {
-            if(request.YoneticiTipiValue == 2)
-            {
-                var role = await roleManager.FindByNameAsync("SirketSahibi");
-                if (role == null)
-                    return Result<string>.Failure("Rol bulunamadı");
-                AppUserRole appUserRole = new()
-                {
-                    UserId = request.RequestPersonel.Id,
-                    RoleId = role!.Id,
-                    SirketId = personelAtama.SirketId,
-                };
-                userRoleRepository.Add(appUserRole);
-                await unitOfWork.SaveChangesAsync();
-            }
-            else
-            {
-                var role = await roleManager.FindByNameAsync("Yonetici");
-                if (role == null)
-                    return Result<string>.Failure("Rol bulunamadı");
-                AppUserRole appUserRole = new()
-                {
-                    UserId = request.RequestPersonel.Id,
-                    RoleId = role!.Id,
-                    SirketId = personelAtama.SirketId,
-                };
-                userRoleRepository.Add(appUserRole);
-                await unitOfWork.SaveChangesAsync();
-            }
-        }
-        else
-        {
-            var role = await roleManager.FindByNameAsync("Calisan");
-            if (role == null)
-                return Result<string>.Failure("Rol bulunamadı");
-            AppUserRole appUserRole = new()
-            {
-                UserId = request.RequestPersonel.Id,
-                RoleId = role!.Id,
-                SirketId = personelAtama.SirketId,
-            };
-            userRoleRepository.Add(appUserRole);
-            await unitOfWork.SaveChangesAsync();
-        }
-            return Result<string>.Succeed("Personel atama oluşturuldu");
+            UserId = user.Id,
+            RoleId = role.Id,
+            SirketId = request.SirketId,
+        };
+        userRoleRepository.Add(appUserRole);
+        await unitOfWork.SaveChangesAsync();
+       
+        return Result<string>.Succeed("Personel atama oluşturuldu");
     }
 }

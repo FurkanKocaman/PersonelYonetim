@@ -12,8 +12,8 @@ public sealed class Departman : Entity
     public Guid SirketId { get; set; } = default!;
     public Sirket Sirket { get; set; } = default!;
 
-    public Guid SubeId { get; set; } = default!;
-    public Sube Sube { get; set; } = default!;
+    public Guid? SubeId { get; set; }
+    public Sube? Sube { get; set; }
 
     public ICollection<Pozisyon>? Pozisyonlar { get; set; }
 

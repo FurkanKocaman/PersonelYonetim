@@ -1,6 +1,7 @@
 ﻿using GenericRepository;
 using MediatR;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.Rols;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelAtamalar;
@@ -11,7 +12,7 @@ public sealed record PersonelAtamaUpdateCommand(
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
-    int YoneticiTipiValue) : IRequest<Result<string>>;
+    int RolTipiValue) : IRequest<Result<string>>;
 
 internal sealed class PersonelAtamaUpdateCommandHandler(
     IPersonelAtamaRepository personelAtamaRepository,
@@ -19,14 +20,22 @@ internal sealed class PersonelAtamaUpdateCommandHandler(
 {
     public async Task<Result<string>> Handle(PersonelAtamaUpdateCommand request, CancellationToken cancellationToken)
     {
-        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId);
+        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsActive);
         if (personelAtama == null)
             return Result<string>.Failure("Mevcut atama bulunamadı");
 
-        personelAtama.SubeId = request.SubeId;
-        personelAtama.DepartmanId = request.DepartmanId;
-        personelAtama.PozisyonId = request.PozisyonId;
-        personelAtama.YoneticiTipi = YoneticiTipiEnum.FromValue(request.YoneticiTipiValue);
+        if(request.SubeId is not null)
+            personelAtama.SubeId = request.SubeId;
+
+        if(request.DepartmanId is not null)
+            personelAtama.DepartmanId = request.DepartmanId;
+
+        if(request.PozisyonId is not null)
+            personelAtama.PozisyonId = request.PozisyonId;
+
+        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
+
+        personelAtamaRepository.Update(personelAtama);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

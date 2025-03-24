@@ -2,7 +2,7 @@
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Domain.RoleClaim;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
