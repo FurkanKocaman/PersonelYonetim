@@ -31,7 +31,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "building",
     active: false,
     path: "/dashboard/sirket",
-    roles: [Roles.SirketSahibi, Roles.Yonetici],
+    roles: [Roles.SirketYonetici.value, Roles.SirketYardimci.value, Roles.Admin.value],
   },
   {
     name: "Personel",
@@ -125,7 +125,6 @@ onMounted(() => {
   userStore.getUser();
   updateActiveMenuItem();
 
-  // Gezinme olay dinleyicilerini ekle
   router.beforeEach(() => {
     isLoading.value = true;
     return true;

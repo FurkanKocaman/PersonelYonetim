@@ -18,7 +18,7 @@ export const useUserStore = defineStore("user", () => {
     sehir: "",
     ilce: "",
     tamAdres: "",
-    role: "",
+    role: -1,
   });
 
   const getUser = async () => {

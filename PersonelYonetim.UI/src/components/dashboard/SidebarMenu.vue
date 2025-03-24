@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import type { UserModel } from "@/models/UserModel";
+import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 
 // Menü öğesi için tip tanımı
-interface MenuItem {
-  name: string;
-  icon: string;
-  active: boolean;
-  path: string;
-  roles?: string[];
-}
 
 // Component prop'ları
 const props = defineProps({
@@ -56,7 +50,7 @@ const isMobile = ref(false);
 
 onMounted(() => {
   checkScreenWidth();
-
+  console.log(props.user);
   window.addEventListener("resize", checkScreenWidth);
 });
 
@@ -112,17 +106,14 @@ const isMenuItemActive = (itemPath: string): boolean => {
             <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
               {{ user.fullName }}
             </h4>
-            <p
+            <!-- <p
               v-if="user.role == 'SirketSahibi'"
               class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
             >
               Şirket Sahibi
-            </p>
-            <p
-              v-if="user.role != 'SirketSahibi'"
-              class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400"
-            >
-              {{ user.pozisyonAd }}
+            </p> -->
+            <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+              {{ user.pozisyonAd }}- {{ user.role }}
             </p>
           </div>
         </div>

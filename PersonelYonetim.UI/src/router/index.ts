@@ -26,7 +26,11 @@ const router = createRouter({
           component: () => import("../views/SirketView.vue"),
           meta: {
             title: "Sirket Yönetimi",
-            requiredRole: [Roles.Yonetici, Roles.SirketSahibi, Roles.Admin],
+            requiredRole: [
+              Roles.SirketYonetici.value,
+              Roles.SirketYardimci.value,
+              Roles.Admin.value,
+            ],
           },
           beforeEnter: authGuard,
         },
@@ -44,7 +48,12 @@ const router = createRouter({
           component: () => import("../views/PersonelView.vue"),
           meta: {
             title: "Personel Yönetimi",
-            requiredRole: [Roles.Yonetici, Roles.SirketSahibi, Roles.Admin, Roles.Calisan],
+            requiredRole: [
+              Roles.SirketYonetici.value,
+              Roles.SirketYardimci.value,
+              Roles.Admin.value,
+              Roles.Calisan.value,
+            ],
           },
           beforeEnter: authGuard,
         },

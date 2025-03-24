@@ -8,17 +8,10 @@ import PersonelService from "@/services/PersonelService";
 import SirketService from "@/services/SirketService";
 import SubeService from "@/services/SubeService";
 import { onMounted, reactive, ref, watch, type Ref } from "vue";
+import PersonelCreateModal from "@/components/modals/PersonelCreateModal.vue";
 
 const personeller: PersonelItem[] = reactive([]);
 
-const showForm = ref(false);
-const newPerson = ref({
-  name: "",
-  department: "",
-  status: "Aktif",
-  email: "",
-  photo: "",
-});
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
 const selectedSirket = ref("");
 
@@ -27,6 +20,8 @@ const selectedSube = ref("");
 
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const selectedDepartman = ref("");
+
+const showPersonelCreateModal = ref(false);
 onMounted(async () => {
   const res = await SirketService.sirketlerGet();
   sirketler.value = res?.Sirketler;
@@ -62,69 +57,74 @@ watch(selectedSirket, getSubeler);
 watch(selectedSube, getDepartmanlar);
 watch(selectedSube, getPersoneller);
 watch(selectedDepartman, getPersoneller);
-
-const addPerson = () => {
-  if (
-    !newPerson.value.name ||
-    !newPerson.value.department ||
-    !newPerson.value.email ||
-    !newPerson.value.photo
-  ) {
-    alert("Lütfen tüm alanları doldurunuz!");
-    return;
-  }
-  newPerson.value = { name: "", department: "", status: "Aktif", email: "", photo: "" };
-  showForm.value = false;
-};
 </script>
 
 <template>
   <div class="flex relative">
     <main class="flex-1 p-6">
-      <div class="flex w-full justify-start mb-5">
-        <div class="flex flex-col w-1/4 mr-3">
-          <label for="sirket">Sirket</label>
-          <select
-            id="sirket"
-            v-model="selectedSirket"
-            v-on:change="getSubeler()"
-            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-          >
-            <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
-              {{ sirket.ad }}
-            </option>
-          </select>
+      <div class="flex w-full justify-between mb-5">
+        <div class="flex flex-1">
+          <div class="flex flex-col w-1/4 mr-3">
+            <label for="sirket">Sirket</label>
+            <select
+              id="sirket"
+              v-model="selectedSirket"
+              v-on:change="getSubeler()"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+            >
+              <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
+                {{ sirket.ad }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col w-1/4 mr-3">
+            <label for="sube">Sube</label>
+            <select
+              id="sube"
+              v-model="selectedSube"
+              v-on:change="getDepartmanlar()"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              :disabled="selectedSirket == ''"
+            >
+              <option value="" selected>Şube seçiniz</option>
+              <option v-for="sube in subeler" :key="sube.id" :value="sube.id">
+                {{ sube.ad }}
+              </option>
+            </select>
+          </div>
+          <div class="flex flex-col w-1/4">
+            <label for="departman">Departman</label>
+            <select
+              id="departman"
+              v-model="selectedDepartman"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              :disabled="selectedSube == ''"
+            >
+              <option value="" selected>Departman seçiniz</option>
+              <option v-for="departman in departmanlar" :key="departman.id" :value="departman.id">
+                {{ departman.ad }}
+              </option>
+            </select>
+          </div>
         </div>
-        <div class="flex flex-col w-1/4 mr-3">
-          <label for="sube">Sube</label>
-          <select
-            id="sube"
-            v-model="selectedSube"
-            v-on:change="getDepartmanlar()"
-            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-            :disabled="selectedSirket == ''"
+        <div class="flex items-end">
+          <button
+            class="w-full px-4 py-3 bg-sky-600 h-fit rounded-md hover:bg-sky-700 text-neutral-300 hover:text-neutral-200 transition duration-300 ease-in-out cursor-pointer"
+            @click="
+              () => {
+                showPersonelCreateModal = !showPersonelCreateModal;
+              }
+            "
           >
-            <option value="" selected>Şube seçiniz</option>
-            <option v-for="sube in subeler" :key="sube.id" :value="sube.id">
-              {{ sube.ad }}
-            </option>
-          </select>
-        </div>
-        <div class="flex flex-col w-1/4">
-          <label for="departman">Departman</label>
-          <select
-            id="departman"
-            v-model="selectedDepartman"
-            class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-            :disabled="selectedSube == ''"
-          >
-            <option value="" selected>Departman seçiniz</option>
-            <option v-for="departman in departmanlar" :key="departman.id" :value="departman.id">
-              {{ departman.ad }}
-            </option>
-          </select>
+            + Personel ekle
+          </button>
         </div>
       </div>
+
+      <PersonelCreateModal
+        @close-modal="(p) => (showPersonelCreateModal = p)"
+        v-if="showPersonelCreateModal"
+      />
 
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -264,66 +264,8 @@ const addPerson = () => {
           </tbody>
         </table>
       </div>
-      <!-- </div> -->
     </main>
-
-    <div v-if="showForm" class="fixed inset-0 flex justify-center items-center z-50">
-      <div class="absolute inset-0 bg-gray-900 opacity-50 backdrop-blur-sm"></div>
-
-      <div class="bg-white p-6 rounded-lg shadow-lg w-96 relative z-10">
-        <button
-          @click="showForm = false"
-          class="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl"
-        >
-          ✖
-        </button>
-        <h3 class="text-lg font-bold mb-2 text-center">Yeni Personel Ekle</h3>
-
-        <div class="grid grid-cols-1 gap-4">
-          <input
-            v-model="newPerson.name"
-            type="text"
-            placeholder="İsim"
-            class="p-2 border rounded"
-          />
-          <input
-            v-model="newPerson.department"
-            type="text"
-            placeholder="Departman"
-            class="p-2 border rounded"
-          />
-          <select v-model="newPerson.status" class="p-2 border rounded">
-            <option value="Aktif">Aktif</option>
-            <option value="Pasif">Pasif</option>
-          </select>
-          <input
-            v-model="newPerson.email"
-            type="email"
-            placeholder="E-posta"
-            class="p-2 border rounded"
-          />
-          <input
-            v-model="newPerson.photo"
-            type="text"
-            placeholder="Fotoğraf URL"
-            class="p-2 border rounded"
-          />
-        </div>
-
-        <button @click="addPerson" class="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full">
-          Tamam
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-}
-button:hover {
-  transition: 0.5s ease;
-  cursor: pointer;
-}
-</style>
+<style></style>

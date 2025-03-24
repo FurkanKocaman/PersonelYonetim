@@ -178,7 +178,6 @@ const getPozisyonlar = async () => {
               @click="
                 () => {
                   expand.sirketler = !expand.sirketler;
-                  console.log(sirketler);
                 }
               "
             >
