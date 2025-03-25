@@ -61,7 +61,7 @@ const checkScreenWidth = () => {
 // Bir menü öğesinin aktif olup olmadığını mevcut rotaya göre kontrol et
 const isMenuItemActive = (itemPath: string): boolean => {
   // Tam eşleşmeler için (örneğin dashboard ana sayfası)
-  if (itemPath === route.path) {
+  if (itemPath == route.path) {
     return true;
   }
 
@@ -85,7 +85,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
 
     <!-- Sidebar -->
     <aside
-      class="h-full inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-neutral-800 shadow-lg transition-all duration-300 ease-in-out"
+      class="h-full inset-y-0 left-0 z-30 flex flex-col shadow-lg dark:bg-neutral-900 dark:shadow-neutral-800 shadow-neutral-300 transition-all duration-300 ease-in-out"
       :class="{
         'w-50': sidebarOpen,
         'w-20': !sidebarOpen,
@@ -94,6 +94,22 @@ const isMenuItemActive = (itemPath: string): boolean => {
       }"
     >
       <div class="h-full flex flex-col overflow-y-auto overflow-x-hidden">
+        <div
+          class="relative flex h-16 items-center justify-center border-b dark:border-neutral-600 border-neutral-400"
+        >
+          <h1
+            class="my-3 text-xl font-semibold text-sky-600 transition-all duration-300 ease-in-out"
+            :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
+          >
+            Personel Yönetim
+          </h1>
+          <div
+            class="text-xl font-semibold text-sky-600 transition-all duration-300 ease-in-out"
+            :class="{ 'opacity-100': !sidebarOpen, 'opacity-0 w-0': sidebarOpen }"
+          >
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+        </div>
         <!-- Kullanıcı Profili -->
         <div class="flex flex-col items-center mt-4 -mx-2" :class="{ 'px-2': !sidebarOpen }">
           <img
@@ -113,7 +129,8 @@ const isMenuItemActive = (itemPath: string): boolean => {
               Şirket Sahibi
             </p> -->
             <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd }}- {{ user.role }}
+              {{ user.pozisyonAd != "" ? user.pozisyonAd + "|" : "" }}
+              {{ user.role }}
             </p>
           </div>
         </div>
@@ -155,10 +172,10 @@ const isMenuItemActive = (itemPath: string): boolean => {
         </div>
 
         <!-- Sidebar Toggle Butonu - Sidebar'ın Ortasında Pozisyonlandırılmış -->
-        <div class="absolute inset-y-1/2 -right-0 flex items-center justify-center">
+        <div class="absolute inset-y-12 -right-0 flex items-start justify-start">
           <button
             @click="toggleSidebar"
-            class="w-6 h-16 flex items-center justify-center bg-white dark:bg-neutral-800 text-gray-600 dark:text-gray-300 rounded-r-md shadow-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-200 focus:outline-none"
+            class="py-3 px-2 flex items-center justify-center bg-white dark:bg-neutral-800 text-gray-600 dark:text-gray-300 rounded-sm shadow-md hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-200 focus:outline-none"
           >
             <i
               class="fas"

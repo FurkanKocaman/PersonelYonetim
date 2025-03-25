@@ -61,7 +61,25 @@ const router = createRouter({
           path: "izin",
           name: "Izin",
           component: () => import("../views/IzinView.vue"),
+          redirect: "/dashboard/izin/izinler",
           meta: { title: "İzin Yönetimi" },
+          children: [
+            {
+              path: "izinler",
+              name: "Izinler",
+              component: () => import("../components/izinler/IzinlerTable.vue"),
+            },
+            {
+              path: "izin-kurallar",
+              name: "IzinKurallar",
+              component: () => import("../components/izinler/IzinKural.vue"),
+            },
+          ],
+        },
+        {
+          path: "izin-kural-olustur",
+          name: "IzinKuralOlustur",
+          component: () => import("../views/Izinler/IzinKuralCreateView.vue"),
         },
         {
           path: "izin/talep",

@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/stores/ThemeStore";
-import { defineProps, defineEmits, onMounted } from "vue";
+import { defineEmits, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
 
-// Prop'lar
-const props = defineProps({
-  sidebarOpen: {
-    type: Boolean,
-    default: true,
-  },
-  header: {
-    type: String,
-    default: "",
-  },
+const route = useRoute();
+const activeTab = computed(() => {
+  if (route.path.includes("/sirket")) return "sirket";
+  if (route.path.includes("/personel")) return "personel";
+  if (route.path.includes("/izin")) return "izin";
+  if (route.path.includes("/maas")) return "maas";
+  if (route.path.includes("/takvim")) return "takvim";
+  if (route.path.includes("/ayarlar")) return "ayarlar";
+  if (route.path.includes("/dashboard")) return "dashboard";
+  return "";
 });
 
 const themeStore = useThemeStore();
 onMounted(() => {
-  const theme: string = themeStore.theme;
+  // const theme: string = themeStore.theme;
 });
 
 // Event'ler
@@ -39,7 +40,10 @@ const toggleSidebar = () => {
         >
           <i class="fas fa-bars"></i>
         </button>
-        {{ props.header }}
+        <span v-if="activeTab == 'dashboard'"> Ana Sayfa</span>
+        <span v-if="activeTab == 'sirket'" class="text-xl"> Şirket Birimleri </span>
+        <span v-if="activeTab == 'personel'" class="text-xl">Personeller</span>
+        <span v-if="activeTab == 'izin'" class="text-xl"> İzin Yönetim </span>
       </div>
 
       <!-- Sağ taraf - Kullanıcı işlemleri -->

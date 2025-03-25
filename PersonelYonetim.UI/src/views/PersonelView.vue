@@ -60,7 +60,12 @@ watch(selectedDepartman, getPersoneller);
 </script>
 
 <template>
-  <div class="flex relative">
+  <div class="relative">
+    <div class="w-full mt-2 ml-5">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+        Personelleri görüntüleyip düzenleyebilirsiniz.
+      </p>
+    </div>
     <main class="flex-1 p-6">
       <div class="flex w-full justify-between mb-5">
         <div class="flex flex-1">

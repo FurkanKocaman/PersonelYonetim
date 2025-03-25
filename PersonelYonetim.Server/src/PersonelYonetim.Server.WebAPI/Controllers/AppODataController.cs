@@ -32,7 +32,7 @@ public class AppODataController(
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
-        builder.EntitySet<IzinKuralGetAllResponse>("izinler");
+        builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         return builder.GetEdmModel();
     }
 
@@ -94,7 +94,7 @@ public class AppODataController(
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
         return response;
     }
-    [HttpGet("izinler")]
+    [HttpGet("izin-kurallar")]
     [Authorize]
     public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
     {

@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using GenericRepository;
 using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Subeler;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Departmanlar;

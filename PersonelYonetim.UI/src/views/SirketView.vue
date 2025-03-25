@@ -159,7 +159,6 @@ const getPozisyonlar = async () => {
 <template>
   <div class="flex flex-col">
     <div class="w-full mt-2 ml-5">
-      <h1 class="text-2xl font-semibold">Şirket Birimleri</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
         Şirketteki birimleri buradan düzenleyebilirsiniz.
       </p>
@@ -220,6 +219,7 @@ const getPozisyonlar = async () => {
           v-if="expand.sirketler && !loading.sirketler"
           :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
           :tableContent="filteredSirketler"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
@@ -286,6 +286,7 @@ const getPozisyonlar = async () => {
             'Durum',
           ]"
           :tableContent="filteredSubeler"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
@@ -345,6 +346,7 @@ const getPozisyonlar = async () => {
           v-if="expand.departmanlar && !loading.departmanlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
           :tableContent="filteredDepartmanlar"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
@@ -404,6 +406,7 @@ const getPozisyonlar = async () => {
           v-if="expand.pozisyonlar && !loading.pozisyonlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
           :tableContent="filteredPozisyonlar"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
     </div>
