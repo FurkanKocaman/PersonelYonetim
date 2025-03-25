@@ -1,14 +1,11 @@
-﻿using GenericRepository;
-using Mapster;
-using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Sirketler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Sirketler;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
@@ -36,45 +33,71 @@ internal sealed class RegisterCommandHandler(
 {
     public async Task<Result<LoginCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        SirketCreateCommand sirketCreateCommand = new(request.SirketAd,null,null,request.SirketAdres,request.SirketIletisim);
-        var result = await sender.Send(sirketCreateCommand);
-        if (result.IsSuccessful)
+        using(var transaction  = unitOfWork.BeginTransaction())
         {
-            PersonelCreateCommand personelCreateCommand = new(
-                request.Ad,
-                request.Soyad,
-                request.DogumTarihi,
-                request.Cinsiyet,
-                null,
-                request.PersonelIletisim,
-                request.PersonelAdres,
-                DateTimeOffset.Now,
-                null,
-                Guid.Parse(result.Data!),
-                null, null, null,0,1,null,6);
-
-            var response = await sender.Send(personelCreateCommand);
-            if (response.IsSuccessful)
+            try
             {
-                var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
-                sirket.CreateUserId = Guid.Parse(response.Data!);
-                await unitOfWork.SaveChangesAsync();
-
-                var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
-                if (personel == null)
+                SirketCreateCommand sirketCreateCommand = new(request.SirketAd, null, null, request.SirketAdres, request.SirketIletisim);
+                var result = await sender.Send(sirketCreateCommand);
+                if (result.IsSuccessful)
                 {
-                    return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
+                    PersonelCreateCommand personelCreateCommand = new(
+                        request.Ad,
+                        request.Soyad,
+                        request.DogumTarihi,
+                        request.Cinsiyet,
+                        null,
+                        request.PersonelIletisim,
+                        request.PersonelAdres,
+                        DateTimeOffset.Now,
+                        null,
+                        Guid.Parse(result.Data!),
+                        null, null, null, null, 1, null, 6);
+
+                    var response = await sender.Send(personelCreateCommand);
+                    if (response.IsSuccessful)
+                    {
+                        var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
+                        sirket.CreateUserId = Guid.Parse(response.Data!);
+                        await unitOfWork.SaveChangesAsync();
+
+                        var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
+                        if (personel == null)
+                        {
+                            return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
+                        }
+
+                        var user = await userManager.FindByIdAsync(response.Data!);
+                        user!.CreateUserId = user.Id;
+                        await unitOfWork.SaveChangesAsync();
+
+                        LoginCommand login = new(request.PersonelIletisim.Eposta, request.Ad);
+                        var loginRes = await sender.Send(login);
+                        if (loginRes.IsSuccessful)
+                        {
+                            await unitOfWork.CommitTransactionAsync(transaction);
+                            return loginRes;
+                        }
+                        else
+                        {
+                            await unitOfWork.RollbackTransactionAsync(transaction);
+                        }    
+                    }
                 }
+                else
+                {
+                    await unitOfWork.RollbackTransactionAsync(transaction);
+                    return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
+                }
+                return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
 
-                var user = await userManager.FindByIdAsync(response.Data!);
-                user!.CreateUserId = user.Id;
-                await unitOfWork.SaveChangesAsync();
-
-                LoginCommand login = new(request.PersonelIletisim.Eposta, request.Ad);
-                var loginRes = await sender.Send(login);
-                return loginRes;
+            }
+            catch (Exception ex)
+            {
+                await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<LoginCommandResponse>.Failure("Hata oluştu: "+ex.Message);
             }
         }
-        return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
+        
     }
 }

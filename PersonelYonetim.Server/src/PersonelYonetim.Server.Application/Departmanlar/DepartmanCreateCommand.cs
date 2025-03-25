@@ -30,19 +30,32 @@ internal sealed class DepartmanCreateCommandHandler(
 
     public async Task<Result<string>> Handle(DepartmanCreateCommand request, CancellationToken cancellationToken)
     {
-        var departmanVarMi = await departmanRepository.AnyAsync(p => p.Ad == request.Ad);
-        if (departmanVarMi)
-            return Result<string>.Failure("Bu isme sahip departman zaten mevcut");
+        using(var transaction = unitOfWork.BeginTransaction())
+        {
+            try
+            {
+                var departmanVarMi = await departmanRepository.AnyAsync(p => p.Ad == request.Ad);
+                if (departmanVarMi)
+                    return Result<string>.Failure("Bu isme sahip departman zaten mevcut");
 
-        var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
-        if (sube is null)
-            return Result<string>.Failure("Şube bulunamadı");
+                var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
+                if (sube is null)
+                    return Result<string>.Failure("Şube bulunamadı");
 
-        Departman departman = request.Adapt<Departman>();
-        departman.SirketId = sube.SirketId;
-        departmanRepository.Add(departman);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+                Departman departman = request.Adapt<Departman>();
+                departman.SirketId = sube.SirketId;
+                departmanRepository.Add(departman);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<string>.Succeed("Departman başarıyla oluşturuldu");
+                await unitOfWork.CommitTransactionAsync(transaction);
+
+                return Result<string>.Succeed("Departman başarıyla oluşturuldu");
+            }catch (Exception ex)
+            {
+                await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<string>.Failure("Bir hata oluştu: " + ex.Message);
+            }
+        }
+       
     }
 }

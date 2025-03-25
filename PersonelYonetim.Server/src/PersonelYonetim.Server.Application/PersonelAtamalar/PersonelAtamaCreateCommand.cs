@@ -1,4 +1,4 @@
-﻿using GenericRepository;
+﻿
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +6,7 @@ using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
@@ -18,7 +19,7 @@ public sealed record PersonelAtamaCreateCommand(
     Guid? DepartmanId,
     Guid? PozisyonId,
     int RolTipiValue,
-    int CalismaSekliValue,
+    Guid? CalismaTakvimId,
     int SozlesmeTuruValue,
     DateTimeOffset? SozlesmeBitisTarihi
     ) : IRequest<Result<string>>;
@@ -46,7 +47,6 @@ internal sealed class PersonelAtamaCreateCommandHandler(
         personelAtama.PersonelId = request.PersonelId;
         personelAtama.IsActive = true;
         personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
-        personelAtama.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
         personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
 
         personelAtamaRepository.Add(personelAtama);

@@ -1,12 +1,9 @@
-﻿using GenericRepository;
+﻿
 using Mapster;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Sirketler;
-using System.Security.Claims;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Sirketler;
