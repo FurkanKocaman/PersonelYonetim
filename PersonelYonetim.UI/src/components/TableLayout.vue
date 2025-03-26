@@ -4,6 +4,7 @@ import { computed, defineProps } from "vue";
 const props = defineProps<{
   tableHeaders: string[];
   tableContent: Array<Record<string, unknown>>;
+  islemler: string[];
 }>();
 
 const tableKeys = computed<string[]>(() => {
@@ -16,6 +17,9 @@ const formatValue = (value: unknown) => {
   }
   if (typeof value === "object" && value !== null) {
     return JSON.stringify(value);
+  }
+  if (value === null || value === undefined || value === "") {
+    return "-";
   }
 
   return value;
@@ -63,7 +67,7 @@ const formatValue = (value: unknown) => {
           <tr
             v-for="(row, rowIndex) in tableContent"
             :key="rowIndex"
-            class="hover:bg-gray-50 dark:hover:bg-neutral-800"
+            class="hover:bg-gray-50 dark:hover:bg-neutral-800 border-b dark:border-neutral-600 border-neutral-400"
           >
             <td
               v-for="key in tableKeys"
@@ -73,15 +77,17 @@ const formatValue = (value: unknown) => {
               {{ formatValue(row[key as string]) }}
             </td>
 
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
               <button
-                class="text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 mr-3"
+                v-if="props.islemler.some((item) => item.includes('detaylar'))"
+                class="text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 mr-3 cursor-pointer"
               >
                 <i class="fas fa-eye"></i>
               </button>
 
               <button
-                class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
+                v-if="props.islemler.some((item) => item.includes('edit'))"
+                class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 cursor-pointer"
               >
                 <i class="fas fa-edit"></i>
               </button>

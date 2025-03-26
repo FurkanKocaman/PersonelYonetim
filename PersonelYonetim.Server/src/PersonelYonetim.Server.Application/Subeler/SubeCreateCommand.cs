@@ -1,10 +1,10 @@
-﻿using GenericRepository;
+﻿
 using Mapster;
 using MediatR;
-using PersonelYonetim.Server.Application.Sirketler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.Subeler;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Subeler;

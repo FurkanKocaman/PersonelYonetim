@@ -9,13 +9,13 @@ public sealed class IzinTur : Entity
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
     public bool UcretliMi { get; set; } = false;
-    public LimitTipiEnum? LimitTipi { get; set; }
+    public LimitTipiEnum LimitTipi { get; set; } = default!;
     public int LimitGunSayisi {  get; set; }
     // Limit tipi 
     public EksiBakiyeHakkıEnum? EksiBakiyeHakkı { get; set; }
     public int EksiBakiyeLimit { get; set; }
     public HakEdisEnum HakEdis { get; set; } = default!;
-    public bool HakEdisDonem { get; set; } = false; //Donem başında true /sonunda false
+    public bool HakEdisDonem { get; set; } = true; //Donem başında true /sonunda false
     public bool HakEdisBaslangic { get; set; } = false;//Yılın ilk günü true / işe başlama tarihi false
     public DevretmeTipiEnum? DevretmeTipi { get; set; }
     public int DevretmeGunLimit {  get; set; }
@@ -24,14 +24,14 @@ public sealed class IzinTur : Entity
     public int KidemArtıGun { get; set; }
     public int EnAzTalep {  get; set; }
     public int EnCokTalep { get; set; }
-    //LimitTipi her talep için limitli ise sadece bu kısım
-    public bool HesapSekli { get; set; } = false; // tamgün/yarımgün true  /  saatlik false
+    //LimitTipi her talep için limitli ise sadece bu kısım alt taraf eğer yıl içinde limitli ise üset tarafta var
+    public bool HesapSekli { get; set; } = true; // tamgün/yarımgün true  /  saatlik false
     public bool AciklamaZorunlu { get; set; } = false;
     public bool YerineBakacakZorunlu { get; set; } = false;
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
 
-    //public ICollection<IzinTurIzinKural> IzinKurallar {  get; set; } = new List<IzinTurIzinKural>();
+    public ICollection<IzinTurIzinKural> IzinKurallar {  get; set; } = new List<IzinTurIzinKural>();
 }
 
 public sealed class LimitTipiEnum : SmartEnum<LimitTipiEnum>

@@ -1,12 +1,10 @@
-﻿using GenericRepository;
-using Mapster;
+﻿using Mapster;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.CalismaTakvimleri;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Sirketler;
-using System.Security.Claims;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Sirketler;
@@ -20,36 +18,63 @@ public sealed record SirketCreateCommand(
 
 internal sealed class SirketCreateCommandHandler(
     ISirketRepository sirketRepository,
+    IIzinKuralRepository izinKuralRepository,
+    IIzinTurIzinKuralRepository izinturIzinKuralRepository,
+    IIzinTurRepository izinTurRepository,
+    ICalismaTakvimRepository calismaTakvimRepository,
+    ICalismaGunRepository calismaGunRepository,
     //IPersonelRepository personelRepository,
     //IHttpContextAccessor httpContextAccessor,
     IUnitOfWork unitOfWork) : IRequestHandler<SirketCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(SirketCreateCommand request, CancellationToken cancellationToken)
     {
-        //var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //if (string.IsNullOrEmpty(userIdString))
-        //{
-        //    throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
-        //}
-        //var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(userIdString));
-        //if (personel == null)
-        //{
-        //    return Result<string>.Failure("Kullanıcı bulunamadı");
-        //}
-
         var sirketVarMi = await sirketRepository.AnyAsync(p => p.Ad == request.Ad);
         if (sirketVarMi)
             return Result<string>.Failure("Bu isme sahip şirket zaten mevcut.");
 
         Sirket sirket = request.Adapt<Sirket>();
         sirketRepository.Add(sirket);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        //PersonelAtamaCreateCommand createCommand = new(personel.Id, sirket.Id, null, null, null, 2, 0, 1, null);
-        //var result = await sender.Send(createCommand);
-        //if(!result.IsSuccessful)
-        //    return Result<string>.Failure("Şirket oluşturma başarısız.");
+        var defaultIzinTurler = DefaultIzinTurler.GetDefaultIzinTurler(sirket.Id);
+        foreach(var izinTur in defaultIzinTurler)
+        {
+            izinTurRepository.Add(izinTur);
+        }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
+        IzinKural defaultIzinKural = new()
+        {
+            Ad = "Default İzin Kural",
+            Aciklama = "Şirket oluşturulduğunda otomatşk oluşan default izin kuralı",
+            SirketId = sirket.Id,
+        };
+        izinKuralRepository.Add(defaultIzinKural);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach (var izinTurId in defaultIzinTurler.Select(p => p.Id))
+        {
+            IzinTurIzinKural izinTurkural = new()
+            {
+                IzinTurId = izinTurId,
+                IzinKuralId = defaultIzinKural.Id,
+            };
+            izinturIzinKuralRepository.Add(izinTurkural);
+        }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        CalismaTakvimi defaultCalismaTakvim = DefaultCalismaTakvim.GetDefaultCalismaTakvim(sirket.Id);
+        List<CalismaGun> defaultCalismaGunler = DefaultCalismaTakvim.GetDefaultCalismaGunler(defaultCalismaTakvim.Id);
+
+        calismaTakvimRepository.Add(defaultCalismaTakvim);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        foreach(CalismaGun gun in defaultCalismaGunler)
+        {
+            calismaGunRepository.Add(gun);
+        }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Succeed(sirket.Id.ToString());
     }

@@ -31,7 +31,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "building",
     active: false,
     path: "/dashboard/sirket",
-    roles: [Roles.SirketSahibi, Roles.Yonetici],
+    roles: [Roles.SirketYonetici.value, Roles.SirketYardimci.value, Roles.Admin.value],
   },
   {
     name: "Personel",
@@ -44,6 +44,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "calendar-alt",
     active: false,
     path: "/dashboard/izin",
+    roles: [Roles.SirketYonetici.value, Roles.SirketYardimci.value, Roles.Admin.value],
   },
   {
     name: "Maaş Yönetimi",
@@ -125,7 +126,6 @@ onMounted(() => {
   userStore.getUser();
   updateActiveMenuItem();
 
-  // Gezinme olay dinleyicilerini ekle
   router.beforeEach(() => {
     isLoading.value = true;
     return true;
@@ -153,18 +153,16 @@ onMounted(() => {
     />
 
     <!-- Ana İçerik -->
-    <div class="flex-1 flex flex-col transition-all duration-300">
+    <div class="flex-1 flex flex-col transition-all duration-300 bg-neutral-50 dark:bg-neutral-900">
       <!-- Üst Çubuk -->
       <TopBar :sidebarOpen="sidebarOpen" :header="route.path" @toggle-sidebar="toggleSidebar" />
 
       <!-- İçerik Alanı -->
-      <div
-        class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-900 relative"
-      >
+      <div class="flex-1 overflow-x-hidden overflow-y-auto relative">
         <!-- Yükleme Göstergesi -->
         <div
           v-if="isLoading"
-          class="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-80 dark:bg-neutral-900 dark:bg-opacity-80 z-50"
+          class="absolute inset-0 flex flex-col items-center justify-center bg-opacity-80 dark:bg-opacity-80 z-50"
         >
           <div
             class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"

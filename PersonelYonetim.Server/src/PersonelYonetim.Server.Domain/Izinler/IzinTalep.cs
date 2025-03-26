@@ -1,20 +1,18 @@
 ﻿using Ardalis.SmartEnum;
+using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Personeller;
 
 namespace PersonelYonetim.Server.Domain.Izinler;
 
-public sealed class IzinTalep
+public sealed class IzinTalep : Entity
 {
-    public IzinTalep()
-    {
-        Id = Guid.CreateVersion7();
-    }
-    public Guid Id { get; set; }
     public Guid PersonelId { get; set; }
     public Personel Personel { get; set; } = default!;
     public Guid DepartmanId { get; set; }
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
+    public DateTimeOffset MesaiBaslangicTarihi { get; set; }
+    public decimal ToplamSure {  get; set; }
     public Guid IzinTuru { get; set; }
     public string? Aciklama { get; set; }
     public DegerlendirmeDurumEnum DegerlendirmeDurumu { get; set; } = default!;

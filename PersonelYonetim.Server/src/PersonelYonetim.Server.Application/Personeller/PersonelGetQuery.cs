@@ -56,7 +56,7 @@ internal sealed class PersonelGetQueryHandler(
                             Eposta = entity.Iletisim.Eposta,
                             Telefon = entity.Iletisim.Telefon,
                             DogumTarihi = entity.DogumTarihi,
-                            IseGirisTarihi = entity.IseGirisTarihi,
+                            IseGirisTarihi = DateTimeOffset.Now,
                             ProfilResimUrl = entity.ProfilResimUrl,
                             Ulke = entity.Adres.Ulke,
                             Sehir = entity.Adres.Sehir,

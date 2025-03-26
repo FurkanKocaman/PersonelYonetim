@@ -6,7 +6,7 @@ namespace PersonelYonetim.Server.Domain.Izinler;
 
 public sealed class IzinKural : Entity
 {
-    public string Ad {  get; set; } = default!;
+    public string Ad {  get; set; } = default!; 
     public string? Aciklama { get; set; }
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
