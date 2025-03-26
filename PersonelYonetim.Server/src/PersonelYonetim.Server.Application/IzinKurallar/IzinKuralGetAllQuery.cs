@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
@@ -51,7 +52,9 @@ internal sealed class IzinKuralGetAllQueryHandler(
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-        var izinKurallar = izinKuralRepository.GetAll();
+        var izinKurallar = izinKuralRepository.GetAll()
+            .Include(p => p.IzinTurler);
+
 
         var response = izinKurallar
                 .Join(personelAtamaRepository.GetAll(),
@@ -59,14 +62,13 @@ internal sealed class IzinKuralGetAllQueryHandler(
                     personelAtama => personelAtama.SirketId,
                     (izinKural, personelAtama) => new { izinKural, personelAtama })
                 .Where(ip => ip.personelAtama.PersonelId == personel.Id)
-                //.Join(izinTurIzinKuralRepository.GetAll(),
-                //    ip =>ip.izinKural.Id,
-                //    izinTurKural => izinTurKural.IzinKuralId,
-                //    (ip, IzinTurKural) => new {ip.izinKural, IzinTurKural})
-                .Join(userManager.Users,
-                      ip => ip.izinKural.CreateUserId,
-                      createUser => createUser.Id,
-                      (ip, createUser) => new { ip.izinKural, createUser })
+                .GroupJoin(userManager.Users,
+                    ip => ip.izinKural.CreateUserId,
+                    createUser => createUser.Id,
+                    (ip, createUsers) => new { ip.izinKural, createUsers })
+                .SelectMany(
+                    iuu => iuu.createUsers.DefaultIfEmpty(),
+                    (iuu, createUser) => new { iuu.izinKural, createUser })
                 .GroupJoin(userManager.Users,
                       ip => ip.izinKural.UpdateUserId,
                       updateUser => updateUser.Id,
@@ -82,8 +84,10 @@ internal sealed class IzinKuralGetAllQueryHandler(
                             SirketAd = iuu.izinKural.Sirket.Ad,
                             IsActive = iuu.izinKural.IsActive,
                             CreatedAt = iuu.izinKural.CreatedAt,
-                            CreateUserId = iuu.createUser.Id,
-                            CreateUserName = iuu.createUser.FirstName + " " + iuu.createUser.LastName + " (" + iuu.createUser.Email + ")",
+                            CreateUserId = iuu.createUser == null ? null : iuu.createUser.Id,
+                            CreateUserName = iuu.createUser == null
+                                    ? null
+                                    : iuu.createUser.FirstName + " " + iuu.createUser.LastName + " (" + iuu.createUser.Email + ")",
                             UpdateAt = iuu.izinKural.UpdateAt,
                             UpdateUserId = updateUser != null ? updateUser.Id : null,
                             UpdateUserName = updateUser != null
@@ -91,7 +95,7 @@ internal sealed class IzinKuralGetAllQueryHandler(
                           : null,
                             IsDeleted = iuu.izinKural.IsDeleted,
                             DeleteAt = iuu.izinKural.DeleteAt,
-                            IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTur { Id = it.IzinTur.Id, Ad=it.IzinTur.Ad} ),
+                            IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTur { Id = it.IzinTur.Id, Ad = it.IzinTur.Ad }),
                             izinTur = iuu.izinKural.IzinTurler.Select(p => p.IzinTur.Ad)
                         });
         return Task.FromResult(response);

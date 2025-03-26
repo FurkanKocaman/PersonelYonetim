@@ -34,7 +34,6 @@ public sealed class PersonelAtama
     public SozlesmeTuruEnum SozlesmeTuru { get; set; } = default!;
     public DateTimeOffset? SozlesmeBitisTarihi { get; set; }
     public DateTimeOffset PozisyonBaslamaTarihi { get; set; } = DateTimeOffset.Now;
-    public DateTimeOffset? PozisyonBitisTarihi { get; set; }
     public Guid? IzinKuralId { get; set; }
     public IzinKural? IzinKural { get; set; }
     public Guid? CalismaTakvimId { get; set; }

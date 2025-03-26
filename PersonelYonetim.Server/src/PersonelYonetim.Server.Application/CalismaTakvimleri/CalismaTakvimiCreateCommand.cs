@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
+using PersonelYonetim.Server.Domain.Dtos;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
@@ -13,17 +14,8 @@ namespace PersonelYonetim.Server.Application.CalismaTakvimleri;
 public sealed record CalismaTakvimiCreateCommand(
     string Ad,
     string? Aciklama,
-    IEnumerable<CalismaGunModel> CalismaGunlerModel) : IRequest<Result<string>>;
+    IEnumerable<CalismaGunDto> CalismaGunlerModel) : IRequest<Result<string>>;
 
-public sealed class CalismaGunModel
-{
-    public DayOfWeek Gun { get; set; }
-    public TimeSpan CalismaBaslangic { get; set; }
-    public TimeSpan CalismaBitis { get; set; }
-    public TimeSpan MolaBaslangic { get; set; }
-    public TimeSpan MolaBitis { get; set; }
-    public bool IsCalismaGunu { get; set; } = true;
-}
 
 internal sealed class CalismaTakvimiCreateCommandHandler(
     ICalismaTakvimRepository calismaTakvimRepository,

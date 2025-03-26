@@ -17,7 +17,6 @@ public sealed record PersonelCreateCommand(
     string? ProfilResimUrl,
     Iletisim Iletisim,
     Adres Adres,
-    DateTimeOffset IseGirisTarihi,
     Guid? YoneticiId,
     Guid SirketId,
     Guid? SubeId,
@@ -25,7 +24,9 @@ public sealed record PersonelCreateCommand(
     Guid? PozisyonId,
     Guid? CalismaTavimiId,
     int SozlesmeTuruValue,
+    DateTimeOffset? PozisyonBaslangicTarih,
     DateTimeOffset? SozlesmeBitisTarihi,
+    Guid? IzinKuralId,
     int RolValue = 0
     ) : IRequest<Result<string>>;
 
@@ -52,39 +53,36 @@ internal sealed class PersonelCreateCommandHandler(
     public async Task<Result<string>> Handle(PersonelCreateCommand request, CancellationToken cancellationToken)
     {
 
-                var personelVarMi = await personelRepository.AnyAsync(p => p.Iletisim.Eposta == request.Iletisim.Eposta);
-                if (personelVarMi)
-                    return Result<string>.Failure("Personel zaten mevcut");
+        var personelVarMi = await personelRepository.AnyAsync(p => p.Iletisim.Eposta == request.Iletisim.Eposta);
+        if (personelVarMi)
+            return Result<string>.Failure("Personel zaten mevcut");
 
-                Personel personel = request.Adapt<Personel>();
+        Personel personel = request.Adapt<Personel>();
 
-                UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, request.SirketId);
-                var userResult = await sender.Send(userCreateCommand, cancellationToken);
-                if (!userResult.IsSuccessful)
-                {
-                    return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
-                }
+        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, request.SirketId);
+        var userResult = await sender.Send(userCreateCommand, cancellationToken);
+        if (!userResult.IsSuccessful)
+        {
+            return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
+        } 
 
-                personel.UserId = userResult.Data;
-                personel.CreateUserId = userResult.Data;
+        personel.UserId = userResult.Data;
+        personel.CreateUserId = userResult.Data;
 
-                personelRepository.Add(personel);
-                await unitOfWork.SaveChangesAsync(cancellationToken);
+        personelRepository.Add(personel);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                PersonelAtamaCreateCommand personelAtamaCreateCommand =
-                    new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId,
-                    request.PozisyonId, request.RolValue, request.CalismaTavimiId,
-                    request.SozlesmeTuruValue, request.SozlesmeBitisTarihi);
+        PersonelAtamaCreateCommand personelAtamaCreateCommand =
+            new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId,
+            request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTavimiId,
+            request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih ?? DateTimeOffset.Now, request.IzinKuralId);
 
-                var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
+        var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
 
-                if (!personelAtamaResult.IsSuccessful)
-                    Result<string>.Failure("Personel atama oluşturulamadı");
+        if (!personelAtamaResult.IsSuccessful)
+            Result<string>.Failure("Personel atama oluşturulamadı");
 
-                return userResult.Data.ToString();
-
-
-       
+        return Result<string>.Succeed(userResult.Data.ToString());
     }
 }
 

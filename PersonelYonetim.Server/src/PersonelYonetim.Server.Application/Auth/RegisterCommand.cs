@@ -49,10 +49,9 @@ internal sealed class RegisterCommandHandler(
                         null,
                         request.PersonelIletisim,
                         request.PersonelAdres,
-                        DateTimeOffset.Now,
                         null,
                         Guid.Parse(result.Data!),
-                        null, null, null, null, 1, null, 6);
+                        null, null, null, null, 1, DateTimeOffset.Now, null, null, 6);
 
                     var response = await sender.Send(personelCreateCommand);
                     if (response.IsSuccessful)
