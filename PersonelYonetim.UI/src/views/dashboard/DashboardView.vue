@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import PayrollTable from "../components/dashboard/PayrollTable.vue";
-import AnnouncementsCard from "../components/dashboard/AnnouncementsCard.vue";
-import QuickAccessButtons from "../components/dashboard/QuickAccessButtons.vue";
+import PayrollTable from "../../components/dashboard/PayrollTable.vue";
+import AnnouncementsCard from "../../components/dashboard/AnnouncementsCard.vue";
+import QuickAccessButtons from "../../components/dashboard/QuickAccessButtons.vue";
 import StatisticsCard from "@/components/dashboard/StatisticsCard.vue";
 
 const payrollItems = ref([

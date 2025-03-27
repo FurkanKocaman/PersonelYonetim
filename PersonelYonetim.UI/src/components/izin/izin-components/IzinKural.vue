@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue";
-import TableLayout from "../TableLayout.vue";
+import TableLayout from "../../TableLayout.vue";
 import IzinService from "@/services/IzinService";
 import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
 
