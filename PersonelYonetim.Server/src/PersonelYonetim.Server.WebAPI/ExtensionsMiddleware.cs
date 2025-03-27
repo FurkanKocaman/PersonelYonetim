@@ -37,10 +37,14 @@ public static class ExtensionsMiddleware
             }
                 var roles = new List<AppRole>
             {
-                new AppRole {Id = Guid.CreateVersion7(), Name = RoleClaims.Admin, CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
-                new AppRole {Id = Guid.CreateVersion7(), Name = RoleClaims.SirketSahibi, CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
-                new AppRole {Id = Guid.CreateVersion7(), Name = RoleClaims.Yonetici, CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
-                new AppRole {Id = Guid.CreateVersion7(), Name = RoleClaims.Calisan, CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") }
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.Calisan.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.DepartmanYardimci.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.DepartmanYonetici.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.SubeYardimci.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.SubeYonetici.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.SirketYardimci.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.SirketYonetici.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
+                new AppRole {Id = Guid.CreateVersion7(), Name = RolTipiEnum.Admin.Value.ToString(), CreatedAt = DateTimeOffset.Now, CreateUserId = Guid.Parse("3023f17b-df7f-4720-83b1-5334ec87cd13") },
             };
 
             foreach (var role in roles)
@@ -63,10 +67,13 @@ public static class ExtensionsMiddleware
             };
             var claims = new Dictionary<string, List<string>>
             {
-                { RoleClaims.Admin, allPermissions },
-                { RoleClaims.SirketSahibi, allPermissions },
+                { RolTipiEnum.Admin.Value.ToString(), allPermissions },
+                { RolTipiEnum.SirketYardimci.Value.ToString(), allPermissions },
+                { RolTipiEnum.SirketYonetici.Value.ToString(), allPermissions },
+                { RolTipiEnum.SubeYardimci.Value.ToString(), allPermissions },
+                { RolTipiEnum.SubeYonetici.Value.ToString(), allPermissions },
 
-                { RoleClaims.Yonetici, new List<string>
+                { RolTipiEnum.DepartmanYardimci.Value.ToString(), new List<string>
                     {
                         Permissions.ViewPersonel, Permissions.CreatePersonel, Permissions.EditPersonel,
                         Permissions.ViewSirket, Permissions.ViewSube, Permissions.ViewDepartman, Permissions.ViewPozisyon,
@@ -74,8 +81,16 @@ public static class ExtensionsMiddleware
                         Permissions.ViewRaporlar
                     }
                 },
-                
-                { RoleClaims.Calisan, new List<string>
+                { RolTipiEnum.DepartmanYonetici.Value.ToString(), new List<string>
+                    {
+                        Permissions.ViewPersonel, Permissions.CreatePersonel, Permissions.EditPersonel,
+                        Permissions.ViewSirket, Permissions.ViewSube, Permissions.ViewDepartman, Permissions.ViewPozisyon,
+                        Permissions.ViewIzinler, Permissions.CreateIzinler, Permissions.ApproveIzinler,
+                        Permissions.ViewRaporlar
+                    }
+                },
+
+                { RolTipiEnum.Calisan.Value.ToString(), new List<string>
                     {
                         Permissions.ViewPersonel, Permissions.CreateIzinler, Permissions.ViewIzinler
                     }
@@ -95,7 +110,7 @@ public static class ExtensionsMiddleware
             }
 
             AppUser adminUser = await userManager.FindByNameAsync("admin");
-            AppRole adminRole = await roleManager.FindByNameAsync("admin");
+            AppRole adminRole = await roleManager.FindByNameAsync(RolTipiEnum.Admin.Value.ToString());
             if (!userRoleRepository.Any(p => p.UserId == adminUser.Id && p.RoleId == adminRole.Id))
             {
                 AppUserRole appUserRole = new() { UserId = adminUser.Id, SirketId = adminUser.Id, RoleId = adminRole.Id };

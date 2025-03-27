@@ -20,7 +20,7 @@ public abstract class Entity
     public DateTimeOffset? UpdateAt { get; set; }
     public Guid? UpdateUserId { get; set; }
     public string? UpdateuserName => GetUpdateUserName();
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public DateTimeOffset? DeleteAt { get; set; }
     public Guid? DeleteUserId { get; set; }
     private string GetCreateUserName()

@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
+using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelIzinler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Roller;
@@ -32,16 +34,26 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<Departman> Departmanlar { get; set; }
     public DbSet<Pozisyon> Pozisyonlar { get; set; }
     public DbSet<IzinTalep> IzinTalepleri { get; set; }
+    public DbSet<IzinTur> IzinTurleri { get; set; }
+    public DbSet<IzinKural> IzinKuralları { get; set; }
+    public DbSet<PersonelIzin> PersonelIzinler {  get; set; }
     public DbSet<IdentityRoleClaim<Guid>> IdentityRoleClaims { get; set; }
     public DbSet<Token> Tokenler { get; set; }
+    public DbSet<CalismaTakvimi> CalismaTakvimleri { get; set; }
+    public DbSet<CalismaGun> CalismaGunleri { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        //modelBuilder.Ignore<IdentityRoleClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+
+        modelBuilder.Entity<PersonelIzin>()
+            .HasOne(p => p.Personel)
+            .WithMany()
+            .HasForeignKey(p => p.PersonelId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AppUserRole>()
             .HasKey(p => new {p.UserId, p.RoleId, p.SirketId});
@@ -57,6 +69,33 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .WithMany()
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTur>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+         .HasKey(ik => new { ik.IzinTurId, ik.IzinKuralId });
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+            .HasOne(ik => ik.IzinTur)
+            .WithMany(i => i.IzinKurallar)
+            .HasForeignKey(ik => ik.IzinTurId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<IzinTurIzinKural>()
+            .HasOne(ik => ik.IzinKural)
+            .WithMany(i => i.IzinTurler)
+            .HasForeignKey(ik => ik.IzinKuralId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PersonelAtama>()
+            .HasOne(p => p.IzinKural)
+            .WithMany(p => p.PersonelAtamalar)
+            .HasForeignKey(p => p.IzinKuralId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<PersonelAtama>()
             .HasOne(p => p.Personel)
@@ -92,10 +131,28 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(pa => pa.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Personel>()
+        modelBuilder.Entity<PersonelAtama>()
             .HasOne(p => p.Yonetici)
             .WithMany()
             .HasForeignKey(p => p.YoneticiId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PersonelAtama>()
+            .HasOne(p => p.CalismaTakvimi)
+            .WithMany(p => p.Personeller)
+            .HasForeignKey(p => p.CalismaTakvimId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<CalismaTakvimi>()
+            .HasMany(p => p.CalismaGunler)
+            .WithOne(p => p.CalismaTakvimi)
+            .HasForeignKey(p => p.CalismaTakvimId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<CalismaTakvimi>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Personel>()
@@ -122,6 +179,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.Sirket)
             .WithMany()
             .HasForeignKey(p =>p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Pozisyon>()
+            .HasOne(p => p.Departman)
+            .WithMany(p => p.Pozisyonlar)
+            .HasForeignKey(p => p.DepartmanId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Departman>()

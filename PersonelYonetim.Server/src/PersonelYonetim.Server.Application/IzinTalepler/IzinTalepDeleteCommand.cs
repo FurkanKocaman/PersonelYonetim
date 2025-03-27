@@ -1,6 +1,6 @@
 ﻿using GenericRepository;
 using MediatR;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;

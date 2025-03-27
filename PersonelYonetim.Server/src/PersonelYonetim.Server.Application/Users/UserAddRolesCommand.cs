@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using GenericRepository;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
@@ -12,7 +12,7 @@ namespace PersonelYonetim.Server.Application.Users;
 public sealed record UserAddRolesCommand(
     Guid Id,
     Guid SirketId,
-    IEnumerable<string> Roles) : IRequest<Result<string>>;
+    IEnumerable<int> Roles) : IRequest<Result<string>>;
 
 public sealed class UserAddRolesCommandValidator : AbstractValidator<UserAddRolesCommand>
 {
@@ -35,11 +35,11 @@ internal sealed class UserAddRolesCommandHandler(
             return Result<string>.Failure("Kullanıcı bulunamadı");
         foreach (var role in request.Roles)
         {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                return Result<string>.Failure($"Rol:{role} bulunamadı");
-            }
-            var roleInDb = await roleManager.FindByNameAsync(role);
+            //if (!await roleManager.RoleExistsAsync(role.ToString()))
+            //{
+            //    return Result<string>.Failure($"Rol:{role} bulunamadı");
+            //}
+            var roleInDb = await roleManager.FindByNameAsync(role.ToString());
             if(await userRoleRepository.AnyAsync(p => p.UserId == request.Id && p.RoleId == roleInDb!.Id && p.SirketId == request.SirketId))
             {
                 return Result<string>.Failure($"Kullanıcı belirtilen şirkette {role} rolüne sahip");

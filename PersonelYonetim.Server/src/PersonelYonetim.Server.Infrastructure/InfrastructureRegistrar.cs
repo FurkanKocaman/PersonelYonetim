@@ -9,8 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scrutor;
 using PersonelYonetim.Server.Domain.Rols;
-using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.RoleClaim;
+using PersonelYonetim.Server.Infrastructure.Repositories;
+using PersonelYonetim.Server.Domain.UnitOfWork;
+using Microsoft.Extensions.Options;
 
 namespace PersonelYonetim.Server.Infrastructure;
 
@@ -22,9 +24,10 @@ public static class InfrastructureRegistrar
         {
             string connectionString = configuration.GetConnectionString("SqlServer")!;
             opt.UseSqlServer(connectionString);
+            opt.EnableSensitiveDataLogging();
         });
 
-        services.AddScoped<IUnitOfWork>(srv => srv.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<Domain.UnitOfWork.IUnitOfWork, UnitOfWork>();
 
         services
             .AddIdentity<AppUser, AppRole>(opt =>
@@ -82,7 +85,7 @@ public static class InfrastructureRegistrar
 
             opt.AddPolicy(Permissions.ViewRaporlar, policy => policy.RequireClaim("permission", Permissions.ViewRaporlar));
         });
-
+        
         services.Scan(opt => opt
         .FromAssemblies(typeof(InfrastructureRegistrar).Assembly)
         .AddClasses(publicOnly:false)

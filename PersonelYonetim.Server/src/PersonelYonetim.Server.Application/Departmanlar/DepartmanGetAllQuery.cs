@@ -17,8 +17,8 @@ public sealed class DepartmanGetAllQueryResponse : EntityDto
 {
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
-    public string SubeAd { get; set; } = default!;
-    public Guid SubeId { get; set; } = default!;
+    public string? SubeAd { get; set; } = default!;
+    public Guid? SubeId { get; set; } = default!;
     public string SirketAd { get; set; } = default!;
     public Guid SirketId { get; set; } = default!;
 }
@@ -76,7 +76,7 @@ internal sealed class DepartmanGetAllQueryHandler(
                       Ad = dpu.departman.Ad,
                       Aciklama = dpu.departman.Aciklama,
                       SubeId = dpu.departman.SubeId,
-                      SubeAd = dpu.departman.Sube.Ad,
+                      SubeAd = dpu.departman.Sube!.Ad,
                       SirketId = dpu.departman.Sirket.Id,
                       SirketAd = dpu.departman.Sirket.Ad,
                       IsActive = dpu.departman.IsActive,

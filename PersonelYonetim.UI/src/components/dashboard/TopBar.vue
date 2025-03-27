@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/stores/ThemeStore";
-import { defineProps, defineEmits, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { defineProps, defineEmits, onMounted, ref, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 
-// Prop'lar
-const props = defineProps({
-  sidebarOpen: {
-    type: Boolean,
-    default: true,
-  },
-  header: {
-    type: String,
-    default: "",
-  },
+const route = useRoute();
+const activeTab = computed(() => {
+  if (route.path.includes("/sirket")) return "sirket";
+  if (route.path.includes("/personel")) return "personel";
+  if (route.path.includes("/izin")) return "izin";
+  if (route.path.includes("/maas")) return "maas";
+  if (route.path.includes("/takvim")) return "takvim";
+  if (route.path.includes("/ayarlar")) return "ayarlar";
+  if (route.path.includes("/dashboard")) return "dashboard";
+  return "";
 });
 
 const router = useRouter();
@@ -40,7 +40,7 @@ const messages = ref([
 
 onMounted(() => {
   const theme: string = themeStore.theme;
-  
+
   // Dropdown'ları kapatmak için dışarı tıklama olayını dinle
   document.addEventListener('click', closeDropdowns);
 });
@@ -121,7 +121,7 @@ const logout = () => {
         >
           <i class="fas fa-bars"></i>
         </button>
-        <span class="ml-2 text-gray-700 dark:text-gray-200 font-medium">{{ props.header }}</span>
+        <span class="ml-2 text-gray-700 dark:text-gray-200 font-medium">{{ activeTab }}</span>
       </div>
 
       <!-- Sağ taraf - Kullanıcı işlemleri -->
@@ -157,7 +157,7 @@ const logout = () => {
             />
           </svg>
         </div>
-        
+
         <!-- Bildirimler -->
         <div class="relative dropdown-container">
           <button
@@ -171,10 +171,10 @@ const logout = () => {
               >{{ notifications.filter(n => !n.read).length }}</span
             >
           </button>
-          
+
           <!-- Bildirimler Dropdown -->
-          <div 
-            v-if="notificationsOpen" 
+          <div
+            v-if="notificationsOpen"
             class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
           >
             <div class="p-3 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center">
@@ -184,8 +184,8 @@ const logout = () => {
               </span>
             </div>
             <div class="max-h-96 overflow-y-auto">
-              <div 
-                v-for="notification in notifications" 
+              <div
+                v-for="notification in notifications"
                 :key="notification.id"
                 @click="markNotificationAsRead(notification.id)"
                 class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
@@ -231,10 +231,10 @@ const logout = () => {
               >{{ messages.filter(m => !m.read).length }}</span
             >
           </button>
-          
+
           <!-- Mesajlar Dropdown -->
-          <div 
-            v-if="messagesOpen" 
+          <div
+            v-if="messagesOpen"
             class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
           >
             <div class="p-3 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center">
@@ -244,8 +244,8 @@ const logout = () => {
               </span>
             </div>
             <div class="max-h-96 overflow-y-auto">
-              <div 
-                v-for="message in messages" 
+              <div
+                v-for="message in messages"
                 :key="message.id"
                 @click="markMessageAsRead(message.id)"
                 class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
@@ -291,17 +291,17 @@ const logout = () => {
               class="w-8 h-8 rounded-full border border-gray-200 dark:border-neutral-600"
             />
           </button>
-          
+
           <!-- Kullanıcı Menüsü Dropdown -->
-          <div 
-            v-if="userMenuOpen" 
+          <div
+            v-if="userMenuOpen"
             class="absolute right-0 mt-2 w-60 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
           >
             <div class="p-4 border-b border-gray-200 dark:border-neutral-700 text-center">
               <div class="relative mx-auto w-16 h-16 mb-3">
-                <img 
-                  :src="userStore.user?.profilResimUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
-                  alt="Kullanıcı" 
+                <img
+                  :src="userStore.user?.profilResimUrl || 'https://randomuser.me/api/portraits/men/1.jpg'"
+                  alt="Kullanıcı"
                   class="w-16 h-16 rounded-full border-2 border-white dark:border-neutral-600 shadow-md object-cover"
                 />
                 <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-neutral-800"></div>
@@ -313,28 +313,28 @@ const logout = () => {
               </div>
             </div>
             <div class="py-1">
-              <router-link 
-                to="/dashboard/ayarlar" 
+              <router-link
+                to="/dashboard/ayarlar"
                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i class="fas fa-user-cog mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> Profil Ayarları
               </router-link>
-              <router-link 
-                to="/dashboard/izin/talep" 
+              <router-link
+                to="/dashboard/izin/talep"
                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i class="fas fa-calendar-alt mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> İzin Talebi
               </router-link>
-              <router-link 
-                to="/dashboard/takvim" 
+              <router-link
+                to="/dashboard/takvim"
                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i class="fas fa-calendar-week mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> Takvim
               </router-link>
             </div>
             <div class="border-t border-gray-200 dark:border-neutral-700 py-1">
-              <button 
-                @click="logout" 
+              <button
+                @click="logout"
                 class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i class="fas fa-sign-out-alt mr-3 w-5 text-center"></i> Çıkış Yap
@@ -368,5 +368,6 @@ const logout = () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-clamp: 2;
 }
 </style>

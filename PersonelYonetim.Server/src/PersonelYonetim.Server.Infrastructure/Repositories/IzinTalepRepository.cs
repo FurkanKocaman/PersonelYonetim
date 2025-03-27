@@ -1,5 +1,5 @@
 ﻿using GenericRepository;
-using PersonelYonetim.Server.Domain.IzinTalepler;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Infrastructure.Context;
 
 namespace PersonelYonetim.Server.Infrastructure.Repositories;

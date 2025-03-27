@@ -1,11 +1,10 @@
 ﻿using FluentValidation;
-using GenericRepository;
 using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Users;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.RoleClaim;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Personeller;
@@ -18,16 +17,17 @@ public sealed record PersonelCreateCommand(
     string? ProfilResimUrl,
     Iletisim Iletisim,
     Adres Adres,
-    DateTimeOffset IseGirisTarihi,
     Guid? YoneticiId,
     Guid SirketId,
     Guid? SubeId,
     Guid? DepartmanId,
     Guid? PozisyonId,
-    int CalismaSekliValue,
+    Guid? CalismaTavimiId,
     int SozlesmeTuruValue,
+    DateTimeOffset? PozisyonBaslangicTarih,
     DateTimeOffset? SozlesmeBitisTarihi,
-    int YoneticiTipiValue = -1
+    Guid? IzinKuralId,
+    int RolValue = 0
     ) : IRequest<Result<string>>;
 
 public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelCreateCommand>
@@ -47,64 +47,42 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
 }
 internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository,
-    //ISirketRepository sirketRepository,
-    //ISubeRepository subeRepository,
-    //IDepartmanRepository departmanRepository,
-    //IPozisyonRepository pozisyonRepository,
-    //IPersonelAtamaRepository personelDepartmanRepository,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelCreateCommand request, CancellationToken cancellationToken)
     {
+
         var personelVarMi = await personelRepository.AnyAsync(p => p.Iletisim.Eposta == request.Iletisim.Eposta);
         if (personelVarMi)
             return Result<string>.Failure("Personel zaten mevcut");
 
         Personel personel = request.Adapt<Personel>();
 
-        IEnumerable<string> Rol = [RoleClaims.Calisan];
-
-        if (request.YoneticiTipiValue == 2)
-            Rol = [RoleClaims.SirketSahibi];
-
-        if (request.YoneticiTipiValue == 1 || request.YoneticiTipiValue == 0)
-            Rol = [RoleClaims.Yonetici];
-
-        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, request.SirketId, Rol);
+        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta, request.SirketId);
         var userResult = await sender.Send(userCreateCommand, cancellationToken);
         if (!userResult.IsSuccessful)
         {
             return Result<string>.Failure("Kullanıcı oluşturulurken hata oluştu");
-        }
+        } 
+
         personel.UserId = userResult.Data;
         personel.CreateUserId = userResult.Data;
 
         personelRepository.Add(personel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-       
 
-        //var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == request.SirketId);
-        //if (sirket is null)
-        //    return Result<string>.Failure("Şirket bulunamadı");
-
-        //var sube = await subeRepository.FirstOrDefaultAsync(p => p.Id == request.SubeId);
-
-        //var departman = await departmanRepository.FirstOrDefaultAsync(p => p.Id == request.DepartmanId);
-
-        //var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
-
-        PersonelAtamaCreateCommand personelAtamaCreateCommand = 
-            new(personel, request.SirketId,request.SubeId,request.DepartmanId,
-            request.PozisyonId,request.YoneticiTipiValue,request.CalismaSekliValue,
-            request.SozlesmeTuruValue,request.SozlesmeBitisTarihi);
+        PersonelAtamaCreateCommand personelAtamaCreateCommand =
+            new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId,
+            request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTavimiId,
+            request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih ?? DateTimeOffset.Now, request.IzinKuralId);
 
         var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
 
         if (!personelAtamaResult.IsSuccessful)
             Result<string>.Failure("Personel atama oluşturulamadı");
 
-        return userResult.Data.ToString();
+        return Result<string>.Succeed(userResult.Data.ToString());
     }
 }
 

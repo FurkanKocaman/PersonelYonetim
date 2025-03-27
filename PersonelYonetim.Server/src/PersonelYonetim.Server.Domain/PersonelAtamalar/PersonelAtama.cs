@@ -1,10 +1,12 @@
 ﻿using Ardalis.SmartEnum;
+using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.Subeler;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PersonelYonetim.Server.Domain.PersonelAtamalar;
 
@@ -13,7 +15,6 @@ public sealed class PersonelAtama
     public PersonelAtama()
     {
         Id = Guid.CreateVersion7();
-        PozisyonBaslamaTarihi = DateTimeOffset.Now;
     }
     public Guid Id { get; set; }
     public Guid PersonelId { get; set; }
@@ -26,32 +27,17 @@ public sealed class PersonelAtama
     public Sube? Sube { get; set; }
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
+    public Guid? YoneticiId { get; set; }
+    public Personel? Yonetici { get; set; }
     public bool IsActive { get; set; } = true;
-    public YoneticiTipiEnum? YoneticiTipi { get; set; }
-    public CalismaSekliEnum CalismaSekli { get; set; } = default!;
+    public RolTipiEnum RolTipi { get; set; } = default!;
     public SozlesmeTuruEnum SozlesmeTuru { get; set; } = default!;
     public DateTimeOffset? SozlesmeBitisTarihi { get; set; }
-    public DateTimeOffset PozisyonBaslamaTarihi { get; set; } = default!;
-    public DateTimeOffset? PozisyonBitisTarihi { get; set; }
-}
-
-public sealed class YoneticiTipiEnum : SmartEnum<YoneticiTipiEnum>
-{
-    public static readonly YoneticiTipiEnum Departman = new("Departman Yöneticisi", 0);
-    public static readonly YoneticiTipiEnum Sube = new("Şube Yöneticisi", 1);
-    public static readonly YoneticiTipiEnum Sirket = new("Şirket Yöneticisi", 2);
-    private YoneticiTipiEnum(string name, int value) : base(name, value)
-    {
-    }
-}
-public sealed class CalismaSekliEnum : SmartEnum<CalismaSekliEnum>
-{
-    public static readonly CalismaSekliEnum TamZamanli = new("Tam Zamanlı", 0);
-    public static readonly CalismaSekliEnum YariZamanli = new("Yari Zamanli", 1);
-    public static readonly CalismaSekliEnum EsnekZamanli = new("Esnek Zamanli", 2);
-    private CalismaSekliEnum(string name, int value) : base(name, value)
-    {
-    }
+    public DateTimeOffset PozisyonBaslamaTarihi { get; set; } = DateTimeOffset.Now;
+    public Guid? IzinKuralId { get; set; }
+    public IzinKural? IzinKural { get; set; }
+    public Guid? CalismaTakvimId { get; set; }
+    public CalismaTakvimi CalismaTakvimi{ get; set; } = default!;
 }
 
 public sealed class SozlesmeTuruEnum : SmartEnum<SozlesmeTuruEnum>

@@ -6,6 +6,7 @@ import type {
 } from "@/models/PersonelModels";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import api from "./Axios";
+import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
@@ -36,6 +37,12 @@ class PersonelService {
       console.error("Personel listesi alınırken hata oluştu:", error);
       throw error;
     }
+  }
+
+  async createPersonel(request: PersonelCreateRequest): Promise<string> {
+    console.log(request);
+
+    return "a";
   }
 
   /**

@@ -1,10 +1,9 @@
 ﻿using FluentValidation;
-using GenericRepository;
 using Mapster;
 using MediatR;
-using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Sirketler;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.Pozisyonlar;
@@ -41,6 +40,8 @@ internal sealed class PozisyonCreateCommandHandler(
         }
 
         Pozisyon pozisyon = request.Adapt<Pozisyon>();
+        pozisyon.DepartmanId = null;
+        pozisyon.Departman = null;
         pozisyonRepository.Add(pozisyon);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -66,7 +66,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                 Eposta = entity.Iletisim.Eposta,
                 Telefon = entity.Iletisim.Telefon,
                 DogumTarihi = entity.DogumTarihi,
-                IseGirisTarihi = entity.IseGirisTarihi,
+                IseGirisTarihi = DateTimeOffset.Now,
                 ProfilResimUrl = entity.ProfilResimUrl,
                 Ulke = entity.Adres.Ulke,
                 Sehir = entity.Adres.Sehir,
@@ -78,7 +78,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                 PozisyonAd = entity.PersonelAtamalar
                     .Select(pa => pa.Pozisyon!.Ad)
                     .FirstOrDefault() ?? "",
-                Yonetici = entity.Yonetici != null ? entity.Yonetici.FullName : "",
+                //Yonetici = entity.Yonetici != null ? entity.Yonetici.FullName : "",
                 IsActive = entity.IsActive,
                 CreatedAt = entity.CreatedAt,
                 CreateUserId = entity.CreateUserId,
@@ -103,7 +103,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                         ur => ur.RoleId,
                         role => role.Id,
                         (ur, role) => role.Name)
-                    .FirstOrDefault() ?? "User",
+                    .FirstOrDefault()!,
             });
 
         return Task.FromResult(response);

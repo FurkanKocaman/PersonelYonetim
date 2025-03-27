@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Departmanlar;
+using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
+using PersonelYonetim.Server.Application.IzinTurler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Sirketler;
@@ -31,17 +34,24 @@ public class AppODataController(
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
+        builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
+        builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
+        builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         return builder.GetEdmModel();
     }
 
     [HttpGet("personeller")]
     [Authorize(Permissions.ViewPersonel)]
-    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId, Guid? SubeId, Guid? DepartmanId, CancellationToken cancellationToken)
+    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId,
+    Guid? SubeId,
+    Guid? DepartmanId,
+    Guid? PozisyonId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PersonelGetAllQuery(SirketId, SubeId, DepartmanId), cancellationToken);
+        var response = await sender.Send(new PersonelGetAllQuery(SirketId,SubeId,DepartmanId,PozisyonId), cancellationToken);
 
         return response;
     }
+
     [HttpGet("personeller/{Id}")]
     [Authorize(Permissions.ViewPersonel)]
     public async Task<IQueryable<PersonelGetQueryResponse>> GetPersonel(Guid Id, CancellationToken cancellationToken)
@@ -88,12 +98,33 @@ public class AppODataController(
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
         return response;
     }
+    [HttpGet("izin-kurallar")]
+    [Authorize]
+    public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("izin-turler")]
+    [Authorize]
+    public async Task<IQueryable<IzinTurGetAllQueryResponse>> GetAllIzinTurler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinTurGetAllQuery(), cancellationToken);
+        return response;
+    }
 
     [HttpGet("IzinTalepler/{DepartmanId}")]
     [Authorize(Permissions.ViewIzinler)]
     public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid DepartmanId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new IzinTalepGetAllQuery(DepartmanId), cancellationToken);
+        return response;
+    }
+    [HttpGet("calisma-takvim")]
+    [Authorize]
+    public async Task<IQueryable<CalismaTakvimiGetQueryResponse>> GetCalismaTakvim(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new CalismaTakvimiGetQuery(), cancellationToken);
         return response;
     }
 

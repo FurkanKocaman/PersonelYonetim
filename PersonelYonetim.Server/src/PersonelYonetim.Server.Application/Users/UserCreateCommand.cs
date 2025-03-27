@@ -2,18 +2,16 @@
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Domain.RoleClaim;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
-namespace PersonelYonetim.Server.Application.Users;
+namespace PersonelYonetim.Server.Application.Users; 
 
 public sealed record UserCreateCommand(
     string FirstName,
     string LastName,
     string Email,
-    Guid SirketId,
-    IEnumerable<string> Rols
+    Guid SirketId
     ) : IRequest<Result<Guid>>;
 
 public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCommand>
@@ -26,8 +24,7 @@ public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCom
     }
 }
 internal sealed class UserCreateCommandHadler(
-    UserManager<AppUser> usermanager,
-    ISender sender) : IRequestHandler<UserCreateCommand, Result<Guid>>
+    UserManager<AppUser> usermanager) : IRequestHandler<UserCreateCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(UserCreateCommand request, CancellationToken cancellationToken)
     {
@@ -44,7 +41,6 @@ internal sealed class UserCreateCommandHadler(
         user.UserName = userName;
         user.EmailConfirmed = true;
         IdentityResult result = await usermanager.CreateAsync(user, request.FirstName);
-        await sender.Send(new UserAddRolesCommand(user.Id, request.SirketId, request.Rols), cancellationToken);
 
         if (!result.Succeeded)
         {
