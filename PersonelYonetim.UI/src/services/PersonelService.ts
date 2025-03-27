@@ -1,10 +1,4 @@
-import type {
-  PersonelItem,
-  // PersonelRequest,
-  PersonelListResponse,
-  // PersonelPaginationParams,
-} from "@/models/PersonelModels";
-import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
+import { type PersonelItem, type PersonelListResponse } from "@/models/PersonelModels";
 import api from "./Axios";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 
@@ -40,9 +34,22 @@ class PersonelService {
   }
 
   async createPersonel(request: PersonelCreateRequest): Promise<string> {
-    console.log(request);
-
-    return "a";
+    try {
+      const res = await api.post(`${import.meta.env.VITE_API_URL}/personeller/create`, request);
+      return res.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+  async updatePersonel(request: PersonelCreateRequest): Promise<string> {
+    try {
+      const res = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
+      return res.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
   /**
@@ -50,42 +57,27 @@ class PersonelService {
    * @param id Personel ID'si
    * @returns Personel detayları
    */
-  async getPersonelById(id: number): Promise<PersonelItem> {
-    try {
-      // Gerçek API çağrısı:
-      // const response = await axios.get(`${this.baseUrl}/${id}`);
-      // return response.data;
+  // async getPersonelById(id: number): Promise<PersonelItem> {
+  //   try {
+  //     // Gerçek API çağrısı:
+  //     // const response = await axios.get(`${this.baseUrl}/${id}`);
+  //     // return response.data;
 
-      // Mock veri
-      const mockPersonelList: PersonelItem[] = [];
+  //     // Mock veri
+  //     const mockPersonelList: PersonelItem[] = [];
 
-      const personel = mockPersonelList.find((p) => p.id === id);
+  //     const personel = mockPersonelList.find((p) => p.id === id);
 
-      if (!personel) {
-        throw new Error("Personel bulunamadı");
-      }
+  //     if (!personel) {
+  //       throw new Error("Personel bulunamadı");
+  //     }
 
-      return personel;
-    } catch (error) {
-      console.error(`ID: ${id} olan personel alınırken hata oluştu:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Yeni bir personel kaydı oluşturur
-   * @param personelData Personel verisi
-   * @returns Oluşturulan personel kaydı
-   */
-  async createPersonel(personelData: PersonelCreateRequest): Promise<any> {
-    try {
-      const response = await api.post(`${import.meta.env.VITE_API_URL}/personeller/create`, personelData);
-      return response.data;
-    } catch (error) {
-      console.error("Personel kaydı oluşturulurken hata oluştu:", error);
-      throw error;
-    }
-  }
+  //     return personel;
+  //   } catch (error) {
+  //     console.error(`ID: ${id} olan personel alınırken hata oluştu:`, error);
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Mevcut bir personel kaydını günceller
@@ -93,15 +85,22 @@ class PersonelService {
    * @param personelData Güncellenmiş personel verisi
    * @returns Güncellenmiş personel kaydı
    */
-  async updatePersonel(id: string, personelData: PersonelCreateRequest): Promise<any> {
-    try {
-      const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/${id}`, personelData);
-      return response.data;
-    } catch (error) {
-      console.error(`ID: ${id} olan personel güncellenirken hata oluştu:`, error);
-      throw error;
-    }
-  }
+  // async updatePersonel(id: number, personelData: PersonelRequest): Promise<PersonelItem> {
+  //   try {
+  //     // Gerçek API çağrısı:
+  //     // const response = await axios.put(`${this.baseUrl}/${id}`, personelData);
+  //     // return response.data;
+
+  //     // Mock yanıt
+  //     return {
+  //       id,
+  //       ...personelData,
+  //     };
+  //   } catch (error) {
+  //     console.error(`ID: ${id} olan personel güncellenirken hata oluştu:`, error);
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Bir personel kaydını siler

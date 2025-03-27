@@ -1,27 +1,37 @@
 // Personel veri modelleri
 
+import type { Adres } from "./entity-models/Adres";
+import type { EntityDto } from "./entity-models/EntityDto";
+import type { Iletisim } from "./entity-models/Iletisim";
+
 /**
  * Personel kaydı için veri modeli
  */
-export interface PersonelItem {
-  id: number;
+export interface PersonelItem extends EntityDto {
+  ad: string;
+  soyad: string;
   fullName: string;
   dogumTarihi: Date;
   cinsiyet: boolean | undefined;
-  departmanAd: string;
-  pozisyonAd: string;
-  iseGirisTarihi: string;
-  eposta: string;
-  telefon: string;
-  ulke: string;
-  sehir: string;
-  ilce: string;
-  tamAdres: string;
-  isActive: string;
-  createdAt: Date;
-  createUserName: string;
-  updateAt: string;
-  updateUserName: string;
+  profilResimUrl: string | undefined;
+  iletisim: Iletisim;
+  adres: Adres;
+  yoneticiId: string | undefined;
+  sirketId: string;
+  sirketAd: string;
+  subeId: string | undefined;
+  subeAd: string | undefined;
+  departmanId: string | undefined;
+  departmanAd: string | undefined;
+  pozisyonId: string | undefined;
+  pozisyonAd: string | undefined;
+  calismaTakvimiId: string | undefined;
+  sozlesmeTuruValue: number;
+  pozisyonBaslangicTarih: Date;
+  sozlesmeBitisTarihi: Date | undefined;
+  izinKuralId: string | undefined;
+  rolValue: number;
+  rolAd: string;
 }
 
 /**

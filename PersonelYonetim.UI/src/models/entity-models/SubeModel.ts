@@ -1,4 +1,5 @@
-import type { Adres, Iletisim } from "./RegisterRequest";
+import type { Adres } from "./Adres";
+import type { Iletisim } from "./Iletisim";
 
 export interface SubeModel {
   id: string;

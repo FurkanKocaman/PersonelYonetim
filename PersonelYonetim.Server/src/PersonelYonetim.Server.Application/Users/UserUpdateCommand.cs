@@ -11,7 +11,7 @@ public sealed record UserUpdateCommand(
     string? FirstName,
     string? LastName,
     string? Email
-    ) : IRequest<Result<string>>;
+) : IRequest<Result<string>>;
 
 public sealed class UserUpdateCommandValidator : AbstractValidator<UserUpdateCommand>
 {
@@ -20,6 +20,7 @@ public sealed class UserUpdateCommandValidator : AbstractValidator<UserUpdateCom
         RuleFor(x => x.Id).NotEmpty().WithMessage("Id değeri boş olamaz");
     }
 }
+
 internal sealed class UserUpdateCommanHandler(
     UserManager<AppUser> userManager) : IRequestHandler<UserUpdateCommand, Result<string>>
 {
@@ -29,17 +30,25 @@ internal sealed class UserUpdateCommanHandler(
         if (user is null)
             return Result<string>.Failure("Kullanıcı bulunamadı");
 
-        if (!string.IsNullOrWhiteSpace(request?.FirstName))
-            user.FirstName = request.FirstName;
-        if (!string.IsNullOrWhiteSpace(request?.LastName))
-            user.LastName = request.LastName;
-        if(!string.IsNullOrWhiteSpace(request?.FirstName) || !string.IsNullOrWhiteSpace(request?.LastName))
+        bool nameChanged = false;
+        if (!string.IsNullOrWhiteSpace(request?.FirstName) && user.FirstName != request.FirstName)
         {
-            string baseUserName = $"{request.FirstName}.{request.LastName}".ToLower().Replace(" ", "");
+            user.FirstName = request.FirstName;
+            nameChanged = true;
+        }
+        if (!string.IsNullOrWhiteSpace(request?.LastName) && user.LastName != request.LastName)
+        {
+            user.LastName = request.LastName;
+            nameChanged = true;
+        }
+
+        if (nameChanged)
+        {
+            string baseUserName = $"{request!.FirstName}.{request.LastName}".ToLower().Replace(" ", "");
             string userName = baseUserName;
             int counter = 1;
 
-            while (await userManager.FindByNameAsync(userName) != null)
+            while (await userManager.FindByNameAsync(userName) != null && user.UserName != userName)
             {
                 userName = $"{baseUserName}{counter}";
                 counter++;
@@ -47,16 +56,17 @@ internal sealed class UserUpdateCommanHandler(
             user.UserName = userName;
         }
 
-        if (!string.IsNullOrWhiteSpace(request?.Email))
+        if (!string.IsNullOrWhiteSpace(request?.Email) && user.Email != request.Email)
         {
             user.Email = request.Email;
+            user.EmailConfirmed = false;
         }
-        
+
         var result = await userManager.UpdateAsync(user);
 
         if (!result.Succeeded)
             return Result<string>.Failure("Kullanıcı güncellenirken hata oluştu");
 
-        return "Kullanıcı başarıyla güncellendi";
+        return Result<string>.Succeed("Kullanıcı başarıyla güncellendi");
     }
 }
