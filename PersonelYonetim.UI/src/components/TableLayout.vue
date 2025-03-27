@@ -6,9 +6,11 @@ const props = defineProps<{
   tableContent: Array<Record<string, unknown>>;
   islemler: string[];
 }>();
+const hiddenColumns = ["id"];
 
 const tableKeys = computed<string[]>(() => {
-  return props.tableContent.length > 0 ? Object.keys(props.tableContent[0]) : [];
+  if (props.tableContent.length === 0) return [];
+  return Object.keys(props.tableContent[0]).filter((key) => !hiddenColumns.includes(key));
 });
 
 const formatValue = (value: unknown) => {
@@ -23,6 +25,16 @@ const formatValue = (value: unknown) => {
   }
 
   return value;
+};
+
+const emit = defineEmits(["edit-click", "detail-click"]);
+
+const handleEdit = (item: unknown) => {
+  emit("edit-click", item);
+};
+
+const handleDetail = (item: unknown) => {
+  emit("detail-click", item);
 };
 </script>
 
@@ -79,14 +91,16 @@ const formatValue = (value: unknown) => {
 
             <td class="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
               <button
-                v-if="props.islemler.some((item) => item.includes('detaylar'))"
+                v-if="props.islemler.includes('detaylar')"
+                @click="handleDetail(row)"
                 class="text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 mr-3 cursor-pointer"
               >
                 <i class="fas fa-eye"></i>
               </button>
 
               <button
-                v-if="props.islemler.some((item) => item.includes('edit'))"
+                v-if="props.islemler.includes('edit')"
+                @click="handleEdit(row)"
                 class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 cursor-pointer"
               >
                 <i class="fas fa-edit"></i>

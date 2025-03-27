@@ -19,6 +19,9 @@ class Roles {
   public static getRoleByValue(value: number): Role {
     return Object.values(Roles).find((role) => role.value === value);
   }
+  public static getRoleByName(name: string): Role {
+    return Object.values(Roles).find((role) => role.name === name);
+  }
 }
 
 export default Roles;

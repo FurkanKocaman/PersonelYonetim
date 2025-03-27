@@ -50,7 +50,6 @@ const isMobile = ref(false);
 
 onMounted(() => {
   checkScreenWidth();
-  console.log(props.user);
   window.addEventListener("resize", checkScreenWidth);
 });
 

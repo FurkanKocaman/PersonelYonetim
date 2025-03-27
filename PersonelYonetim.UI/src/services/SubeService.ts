@@ -13,7 +13,6 @@ class SubeService {
           },
         }
       );
-      console.log(response);
       return { Subeler: response.data.value, count: response.data["@odata.count"] };
     } catch (error) {
       console.error(error);

@@ -165,7 +165,7 @@ const getPozisyonlar = async () => {
     </div>
     <div class="flex flex-col mt-5">
       <div
-        class="mx-10 my-3 p-1 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+        class="mx-10 my-3 p-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center">
@@ -194,7 +194,8 @@ const getPozisyonlar = async () => {
               {{ count.sirketler || 0 }}
             </div>
             <button
-              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              type="button"
+              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
               @click="
                 () => {
                   showModal.sirketler = !showModal.sirketler;
@@ -223,7 +224,7 @@ const getPozisyonlar = async () => {
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center">
@@ -252,7 +253,8 @@ const getPozisyonlar = async () => {
               {{ count.subeler || 0 }}
             </div>
             <button
-              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              type="button"
+              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
               @click="
                 () => {
                   showModal.subeler = !showModal.subeler;
@@ -290,7 +292,7 @@ const getPozisyonlar = async () => {
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center">
@@ -319,7 +321,8 @@ const getPozisyonlar = async () => {
               {{ count.departmanlar || 0 }}
             </div>
             <button
-              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              type="button"
+              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
               @click="
                 () => {
                   showModal.departmanlar = !showModal.departmanlar;
@@ -350,7 +353,7 @@ const getPozisyonlar = async () => {
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
         <div class="flex justify-between items-center p-2">
           <div class="flex items-center">
@@ -379,7 +382,8 @@ const getPozisyonlar = async () => {
               {{ count.pozisyonlar || 0 }}
             </div>
             <button
-              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              type="button"
+              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
               @click="
                 () => {
                   showModal.pozisyonlar = !showModal.pozisyonlar;

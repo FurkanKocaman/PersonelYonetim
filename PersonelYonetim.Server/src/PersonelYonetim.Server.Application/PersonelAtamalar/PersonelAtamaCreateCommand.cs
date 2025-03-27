@@ -74,6 +74,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             var izinTurIzinKural = request.IzinKuralId == null
                 ? await izinTurIzinKuralRepository.GetAll()
                     .Include(p => p.IzinTur)
+                    .Include(p => p.IzinKural)
                     .Where(p => p.IzinKural.SirketId == request.SirketId)
                     .ToListAsync()
                 : await izinTurIzinKuralRepository.GetAll()
@@ -99,6 +100,8 @@ internal sealed class PersonelAtamaCreateCommandHandler(
                     KullanilanIzin = 0
                 };
                 personelIzinRepository.Add(personelIzin);
+                personelAtama.IzinKuralId = izinTur.IzinKuralId;
+                personelAtamaRepository.Update(personelAtama);
                 await unitOfWork.SaveChangesAsync();
             }
             else
@@ -116,9 +119,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             personelAtama.CalismaTakvimId = defaultTakvim.Id;
         }
 
-
-
-        var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
+       var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
         if (personel == null)
             return Result<string>.Failure("Personel bulunamadı");
 

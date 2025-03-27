@@ -53,6 +53,8 @@ const router = createRouter({
               Roles.SirketYardimci.value,
               Roles.Admin.value,
               Roles.Calisan.value,
+              Roles.DepartmanYonetici.value,
+              Roles.DepartmanYardimci.value,
             ],
           },
         },
@@ -131,20 +133,20 @@ const router = createRouter({
         {
           path: "/unauthorized",
           name: "Unauthorized",
-          component: () => import("@/views/auth/UnauthorizedView.vue"),
+          component: () => import("@/views/Auth/UnauthorizedView.vue"),
         },
       ],
     },
     {
       path: "/login",
       name: "login",
-      component: () => import("@/views/auth/LoginView.vue"),
+      component: () => import("@/views/Auth/LoginView.vue"),
       meta: { title: "Giriş", public: true },
     },
     {
       path: "/register",
       name: "register",
-      component: () => import("@/views/auth/RegisterView.vue"),
+      component: () => import("@/views/Auth/RegisterView.vue"),
       meta: { title: "Kayıt ol", public: true },
     },
     {
