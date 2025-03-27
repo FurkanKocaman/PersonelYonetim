@@ -4,7 +4,7 @@ import { useRouter, useRoute } from "vue-router";
 import IzinService from "@/services/IzinService";
 import { PersonelService } from "@/services/PersonelService";
 import type { IzinRequest, IzinItem } from "@/models/IzinModels";
-import type { PersonelItem } from "@/models/PersonelModels";
+import type PersonelItem from "@/models/PersonelModels";
 
 const router = useRouter();
 const route = useRoute();
@@ -38,7 +38,7 @@ const formData = reactive<IzinRequest & { dosya: File | null }>({
   personelAdi: "",
   gun: 0,
   durum: "Beklemede",
-  dosya: null
+  dosya: null,
 });
 
 // Form durumu
@@ -47,7 +47,7 @@ const formStatus = reactive({
   submitting: false,
   success: false,
   error: false,
-  errorMessage: ""
+  errorMessage: "",
 });
 
 // Form doğrulama hataları
@@ -56,7 +56,7 @@ const formErrors = reactive({
   baslangicTarihi: "",
   bitisTarihi: "",
   aciklama: "",
-  personelAdi: ""
+  personelAdi: "",
 });
 
 // Dosya seçimi için referans
@@ -74,13 +74,13 @@ const submitButtonText = computed(() => {
 // Mevcut izin verisini yükle (düzenleme modu için)
 const loadExistingIzin = async () => {
   if (!editId.value) return;
-  
+
   formStatus.loading = true;
   formStatus.error = false;
-  
+
   try {
     const izinData = await IzinService.getIzinById(editId.value);
-    
+
     // Tarih formatını düzelt (DD.MM.YYYY -> YYYY-MM-DD)
     const formatDate = (dateStr: string) => {
       if (!dateStr) return "";
@@ -88,7 +88,7 @@ const loadExistingIzin = async () => {
       if (parts.length !== 3) return dateStr;
       return `${parts[2]}-${parts[1]}-${parts[0]}`;
     };
-    
+
     // Form verilerini doldur
     formData.izinTipi = izinData.izinTipi;
     formData.baslangicTarihi = formatDate(izinData.baslangicTarihi);
@@ -97,7 +97,6 @@ const loadExistingIzin = async () => {
     formData.personelAdi = izinData.personelAdi;
     formData.gun = izinData.gun;
     formData.durum = izinData.durum;
-    
   } catch (error) {
     console.error("İzin verisi yüklenirken hata oluştu:", error);
     formStatus.error = true;
@@ -123,7 +122,7 @@ const loadPersonelList = async () => {
 // Komponent yüklendiğinde
 onMounted(async () => {
   await loadPersonelList();
-  
+
   if (isEditMode.value) {
     await loadExistingIzin();
   }
@@ -141,19 +140,19 @@ const handleFileChange = (event: Event) => {
 const clearFileSelection = () => {
   formData.dosya = null;
   if (fileInput.value) {
-    fileInput.value.value = '';
+    fileInput.value.value = "";
   }
 };
 
 // Form doğrulama
 const validateForm = () => {
   // Hata mesajlarını temizle
-  Object.keys(formErrors).forEach(key => {
+  Object.keys(formErrors).forEach((key) => {
     (formErrors as any)[key] = "";
   });
-  
+
   let isValid = true;
-  
+
   // İzin türü doğrulama
   if (!formData.izinTipi) {
     formErrors.izinTipi = "İzin türü seçilmelidir";
@@ -161,7 +160,7 @@ const validateForm = () => {
   } else {
     formErrors.izinTipi = "";
   }
-  
+
   // Personel doğrulama
   if (!formData.personelAdi) {
     formErrors.personelAdi = "Personel seçilmelidir";
@@ -169,7 +168,7 @@ const validateForm = () => {
   } else {
     formErrors.personelAdi = "";
   }
-  
+
   // Başlangıç tarihi doğrulama
   if (!formData.baslangicTarihi) {
     formErrors.baslangicTarihi = "Başlangıç tarihi seçilmelidir";
@@ -177,7 +176,7 @@ const validateForm = () => {
   } else {
     formErrors.baslangicTarihi = "";
   }
-  
+
   // Bitiş tarihi doğrulama
   if (!formData.bitisTarihi) {
     formErrors.bitisTarihi = "Bitiş tarihi seçilmelidir";
@@ -186,7 +185,7 @@ const validateForm = () => {
     // Bitiş tarihi başlangıç tarihinden sonra olmalı
     const baslangic = new Date(formData.baslangicTarihi);
     const bitis = new Date(formData.bitisTarihi);
-    
+
     if (bitis < baslangic) {
       formErrors.bitisTarihi = "Bitiş tarihi başlangıç tarihinden sonra olmalıdır";
       isValid = false;
@@ -194,7 +193,7 @@ const validateForm = () => {
       formErrors.bitisTarihi = "";
     }
   }
-  
+
   return isValid;
 };
 
@@ -203,10 +202,10 @@ const submitForm = async () => {
   if (!validateForm()) {
     return;
   }
-  
+
   formStatus.submitting = true;
   formStatus.error = false;
-  
+
   try {
     // Form verilerini hazırla
     const izinData: IzinRequest = {
@@ -216,26 +215,25 @@ const submitForm = async () => {
       bitisTarihi: formData.bitisTarihi,
       gun: formData.gun,
       aciklama: formData.aciklama,
-      durum: formData.durum
+      durum: formData.durum,
     };
-    
+
     // Dosya varsa yükle
-    
+
     // İzin talebini kaydet
     if (isEditMode.value && editId.value) {
       await IzinService.updateIzin(editId.value, izinData);
     } else {
       await IzinService.createIzin(izinData);
     }
-    
+
     // Başarılı mesajı göster
     formStatus.success = true;
-    
+
     // 2 saniye sonra izin listesine yönlendir
     setTimeout(() => {
-      router.push({ name: 'izinler' });
+      router.push({ name: "izinler" });
     }, 2000);
-    
   } catch (error) {
     console.error("İzin talebi kaydedilirken hata oluştu:", error);
     formStatus.error = true;
@@ -247,7 +245,7 @@ const submitForm = async () => {
 
 // Formu iptal etme
 const cancelForm = () => {
-  router.push({ name: 'izinler' });
+  router.push({ name: "izinler" });
 };
 </script>
 
@@ -260,7 +258,7 @@ const cancelForm = () => {
         <p class="text-gray-600 dark:text-gray-400">İzin talebinizi oluşturun veya düzenleyin.</p>
       </div>
     </header>
-    
+
     <main class="p-6">
       <!-- Form Alanı -->
       <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
@@ -268,7 +266,7 @@ const cancelForm = () => {
         <div v-if="formStatus.loading" class="flex justify-center items-center py-12">
           <svg class="animate-spin h-12 w-12 border-b-2 border-blue-600"></svg>
         </div>
-        
+
         <template v-else>
           <!-- Başarı Mesajı -->
           <div
@@ -307,10 +305,24 @@ const cancelForm = () => {
           <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Personel Seçimi -->
             <div>
-              <label for="personel" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Personel</label>
-              <div v-if="loadingPersonel" class="flex items-center text-gray-500 dark:text-gray-400">
+              <label
+                for="personel"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >Personel</label
+              >
+              <div
+                v-if="loadingPersonel"
+                class="flex items-center text-gray-500 dark:text-gray-400"
+              >
                 <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
                   <path
                     class="opacity-75"
                     fill="currentColor"
@@ -327,17 +339,30 @@ const cancelForm = () => {
                   :class="{ 'border-red-500 dark:border-red-500': formErrors.personelAdi }"
                 >
                   <option value="">Personel Seçiniz</option>
-                  <option v-for="personel in personelList" :key="personel.id" :value="personel.ad + ' ' + personel.soyad">
-                    {{ personel.ad + ' ' + personel.soyad }} ({{ personel.departman }})
+                  <option
+                    v-for="personel in personelList"
+                    :key="personel.id"
+                    :value="personel.ad + ' ' + personel.soyad"
+                  >
+                    {{ personel.ad + " " + personel.soyad }} ({{ personel.departman }})
                   </option>
                 </select>
-                <p v-if="formErrors.personelAdi" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ formErrors.personelAdi }}</p>
+                <p
+                  v-if="formErrors.personelAdi"
+                  class="mt-1 text-sm text-red-600 dark:text-red-400"
+                >
+                  {{ formErrors.personelAdi }}
+                </p>
               </div>
             </div>
 
             <!-- İzin Türü -->
             <div>
-              <label for="izinTuru" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">İzin Türü</label>
+              <label
+                for="izinTuru"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >İzin Türü</label
+              >
               <select
                 id="izinTuru"
                 v-model="formData.izinTipi"
@@ -347,14 +372,20 @@ const cancelForm = () => {
                 <option value="">İzin Türü Seçiniz</option>
                 <option v-for="tur in izinTurleri" :key="tur" :value="tur">{{ tur }}</option>
               </select>
-              <p v-if="formErrors.izinTipi" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ formErrors.izinTipi }}</p>
+              <p v-if="formErrors.izinTipi" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ formErrors.izinTipi }}
+              </p>
             </div>
 
             <!-- Tarih Seçimleri -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <!-- Başlangıç Tarihi -->
               <div>
-                <label for="baslangicTarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Başlangıç Tarihi</label>
+                <label
+                  for="baslangicTarihi"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >Başlangıç Tarihi</label
+                >
                 <input
                   type="date"
                   id="baslangicTarihi"
@@ -362,12 +393,21 @@ const cancelForm = () => {
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
                   :class="{ 'border-red-500 dark:border-red-500': formErrors.baslangicTarihi }"
                 />
-                <p v-if="formErrors.baslangicTarihi" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ formErrors.baslangicTarihi }}</p>
+                <p
+                  v-if="formErrors.baslangicTarihi"
+                  class="mt-1 text-sm text-red-600 dark:text-red-400"
+                >
+                  {{ formErrors.baslangicTarihi }}
+                </p>
               </div>
 
               <!-- Bitiş Tarihi -->
               <div>
-                <label for="bitisTarihi" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bitiş Tarihi</label>
+                <label
+                  for="bitisTarihi"
+                  class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >Bitiş Tarihi</label
+                >
                 <input
                   type="date"
                   id="bitisTarihi"
@@ -375,13 +415,22 @@ const cancelForm = () => {
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
                   :class="{ 'border-red-500 dark:border-red-500': formErrors.bitisTarihi }"
                 />
-                <p v-if="formErrors.bitisTarihi" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ formErrors.bitisTarihi }}</p>
+                <p
+                  v-if="formErrors.bitisTarihi"
+                  class="mt-1 text-sm text-red-600 dark:text-red-400"
+                >
+                  {{ formErrors.bitisTarihi }}
+                </p>
               </div>
             </div>
 
             <!-- Açıklama -->
             <div>
-              <label for="aciklama" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Açıklama</label>
+              <label
+                for="aciklama"
+                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >Açıklama</label
+              >
               <textarea
                 id="aciklama"
                 v-model="formData.aciklama"
@@ -390,12 +439,16 @@ const cancelForm = () => {
                 :class="{ 'border-red-500 dark:border-red-500': formErrors.aciklama }"
                 placeholder="İzin talebiniz hakkında açıklama yazınız..."
               ></textarea>
-              <p v-if="formErrors.aciklama" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ formErrors.aciklama }}</p>
+              <p v-if="formErrors.aciklama" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                {{ formErrors.aciklama }}
+              </p>
             </div>
 
             <!-- Dosya Yükleme -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Belge Yükleme (İsteğe Bağlı)</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >Belge Yükleme (İsteğe Bağlı)</label
+              >
               <div class="mt-1 flex items-center">
                 <input
                   type="file"
@@ -427,7 +480,9 @@ const cancelForm = () => {
                     </svg>
                   </button>
                 </span>
-                <span v-else class="ml-3 text-gray-500 dark:text-gray-400">Henüz dosya seçilmedi</span>
+                <span v-else class="ml-3 text-gray-500 dark:text-gray-400"
+                  >Henüz dosya seçilmedi</span
+                >
               </div>
               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 PDF, Word veya resim dosyaları yükleyebilirsiniz (max. 5MB)
@@ -449,8 +504,19 @@ const cancelForm = () => {
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span v-if="formStatus.submitting" class="flex items-center">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <svg
+                    class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
                     <path
                       class="opacity-75"
                       fill="currentColor"

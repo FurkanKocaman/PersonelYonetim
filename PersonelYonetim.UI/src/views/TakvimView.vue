@@ -1,66 +1,70 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { takvimService, Etkinlik } from "@/services/takvimService";
+import { takvimService, Etkinlik } from "@/services/TakvimService";
 
 // 🗓 Veriler
 const currentDate = ref(new Date());
 const etkinlikler = ref<Etkinlik[]>([]);
 const tatilGunleri = ref<{ [key: string]: string }>({});
 
-const showForm = ref(false); 
+const showForm = ref(false);
 const newEvent = ref({
   id: 0,
   baslik: "",
   tarih: "",
 });
 
-
 const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
-const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-
+const monthNames = [
+  "Ocak",
+  "Şubat",
+  "Mart",
+  "Nisan",
+  "Mayıs",
+  "Haziran",
+  "Temmuz",
+  "Ağustos",
+  "Eylül",
+  "Ekim",
+  "Kasım",
+  "Aralık",
+];
 
 onMounted(async () => {
   etkinlikler.value = await takvimService.getEtkinlikler();
   tatilGunleri.value = await takvimService.getTatilGunleri();
 });
 
-
 const currentMonth = computed(() => currentDate.value.getMonth());
 const currentYear = computed(() => currentDate.value.getFullYear());
 
-
 const calendarDays = computed(() => {
-  let days = [];
-  let totalDays = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-  let firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1).getDay();
+  const days = [];
+  const totalDays = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1).getDay();
 
-  
   for (let i = 0; i < firstDayOfMonth; i++) {
     days.push({ day: "", date: "" });
   }
 
- 
   for (let day = 1; day <= totalDays; day++) {
-    let dateKey = `${currentMonth.value + 1}-${day}`;
+    const dateKey = `${currentMonth.value + 1}-${day}`;
     days.push({ day, date: dateKey });
   }
 
   return days;
 });
 
-
 const etkinlikVarMi = (date: string) => {
-  return etkinlikler.value.some(event => {
+  return etkinlikler.value.some((event) => {
     const [yil, ay, gun] = event.tarih.split("-").map(Number);
     return `${ay}-${gun}` === date;
   });
 };
 
-
 const tatilVarMi = (date: string) => {
   return tatilGunleri.value[date] !== undefined;
 };
-
 
 const prevMonth = () => {
   currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1);
@@ -69,59 +73,49 @@ const nextMonth = () => {
   currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1);
 };
 
-
 const addEvent = async () => {
-  
   const newEventData = {
-    id: Date.now(), 
+    id: Date.now(),
     baslik: newEvent.value.baslik,
     tarih: newEvent.value.tarih,
   };
 
-  await takvimService.ekleEtkinlik(newEventData); 
+  await takvimService.ekleEtkinlik(newEventData);
   etkinlikler.value = await takvimService.getEtkinlikler();
-  showForm.value = false; 
+  showForm.value = false;
   // Formu temizliyoruz
   newEvent.value = { id: 0, baslik: "", tarih: "" };
 };
 
-
-const removeEvent = async (date: string) => {  
-  
-  const eventToRemove = etkinlikler.value.find(event => {
+const removeEvent = async (date: string) => {
+  const eventToRemove = etkinlikler.value.find((event) => {
     const [yil, ay, gun] = event.tarih.split("-").map(Number);
     return `${ay}-${gun}` === date;
   });
 
   if (eventToRemove) {
     takvimService.silEtkinlik(eventToRemove.id);
-    etkinlikler.value = await takvimService.getEtkinlikler(); 
+    etkinlikler.value = await takvimService.getEtkinlikler();
   }
 };
-
-
 
 const toggleForm = () => {
   showForm.value = !showForm.value;
 };
 </script>
 
-
 <template>
   <div class="calendar">
     <div class="calendar-header">
-      <button @click="prevMonth" class="button ">&lt;</button>
-      <h2 style="font-size: 22px; color:#141414 ;">{{ currentYear }} - {{ monthNames[currentMonth] }}</h2>
-      <button @click="nextMonth" class="button ">&gt;</button>
-      
-      
+      <button @click="prevMonth" class="button">&lt;</button>
+      <h2 style="font-size: 22px; color: #141414">
+        {{ currentYear }} - {{ monthNames[currentMonth] }}
+      </h2>
+      <button @click="nextMonth" class="button">&gt;</button>
+
       <button @click="toggleForm" class="button add-button">Ekle</button>
     </div>
 
-   
-    
-
-   
     <div v-if="showForm" class="event-form">
       <h3>Yeni Etkinlik Ekle</h3>
       <label for="eventType">Etkinlik Türü:</label>
@@ -144,10 +138,13 @@ const toggleForm = () => {
       <div v-for="(day, index) in dayNames" :key="index" class="day-name">{{ day }}</div>
     </div>
 
-   
     <div class="days">
-      <div v-for="day in calendarDays" :key="day.date" class="day"
-           :class="{ 'holiday': tatilVarMi(day.date), 'event-day': etkinlikVarMi(day.date) }">
+      <div
+        v-for="day in calendarDays"
+        :key="day.date"
+        class="day"
+        :class="{ holiday: tatilVarMi(day.date), 'event-day': etkinlikVarMi(day.date) }"
+      >
         <span class="day-number">{{ day.day }}</span>
         <div v-if="tatilVarMi(day.date)" class="tatil">{{ tatilGunleri[day.date] }}</div>
         <div v-if="etkinlikVarMi(day.date)" class="etkinlik">
@@ -168,10 +165,8 @@ const toggleForm = () => {
   font-weight: bold;
   margin-bottom: 20px;
   padding: 20px;
-  margin-left:220px;
-  
+  margin-left: 220px;
 }
-
 
 .day-names {
   display: grid;
@@ -180,22 +175,20 @@ const toggleForm = () => {
   font-weight: bold;
   font-size: 12px;
   padding-bottom: 10px;
-  margin-bottom: 2px; 
-  margin-left:20px;
+  margin-bottom: 2px;
+  margin-left: 20px;
 }
 
 .day-name {
-  margin-left:-13px;
-  
+  margin-left: -13px;
 }
-
 
 .days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0px;
-  margin-left:10px;
-  height:1100px;
+  margin-left: 10px;
+  height: 1100px;
 }
 
 .day {
@@ -213,7 +206,7 @@ const toggleForm = () => {
 .day-number {
   position: absolute;
   top: 12px;
-  padding-left:81px;
+  padding-left: 81px;
   font-size: 12px;
   font-weight: bold;
 }
@@ -226,8 +219,6 @@ const toggleForm = () => {
   cursor: pointer;
   border-radius: 8px;
   font-size: 22px;
-  
-  
 }
 
 .button:hover {
@@ -235,9 +226,8 @@ const toggleForm = () => {
 }
 
 .add-button {
-  font-size: 12px;  
-  padding: 10px 15px;  
-  
+  font-size: 12px;
+  padding: 10px 15px;
 }
 
 /*.remove-button {
@@ -283,7 +273,8 @@ const toggleForm = () => {
   display: block;
 }
 
-.event-form input, .event-form select {
+.event-form input,
+.event-form select {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -298,8 +289,8 @@ const toggleForm = () => {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size:10px;
-  margin-left:3px;
+  font-size: 10px;
+  margin-left: 3px;
   font-weight: bold;
 }
 

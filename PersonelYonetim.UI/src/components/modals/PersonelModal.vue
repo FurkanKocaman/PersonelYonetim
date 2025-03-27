@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CalismaTakvimModel } from "@/models/entity-models/calisma-takvim/CalismaTakvimModel";
 import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
 import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
 import type { SirketModel } from "@/models/entity-models/SirketModel";
@@ -7,6 +8,7 @@ import type { PersonelItem } from "@/models/PersonelModels";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import Roles from "@/models/Roles";
 import { SozlesmeTuru } from "@/models/UserModel";
+import CalismaTakvimService from "@/services/CalismaTakvimService";
 import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
 import PozisyonService from "@/services/PozisyonService";
@@ -22,39 +24,53 @@ const subeler: Ref<SubeModel[] | undefined> = ref([]);
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
+const calismaTakvimler: Ref<CalismaTakvimModel[] | undefined> = ref([]);
 
-const request: PersonelCreateRequest = reactive({
-  ad: "",
-  soyad: "",
-  dogumTarihi: new Date(),
-  cinsiyet: undefined,
-  profilResimUrl: undefined,
-  iletisim: {
-    eposta: "",
-    telefon: "",
-  },
-  adres: {
-    ulke: "Türkiye",
-    sehir: "",
-    ilce: "",
-    tamAdres: "",
-  },
-  iseGirisTarihi: new Date(),
-  yoneticiId: undefined,
-  sirketId: "",
-  subeId: undefined,
-  departmanId: undefined,
-  pozisyonId: undefined,
-  calismaTakvimiValue: -1,
-  sozlesmeTuruValue: -1,
-  sozlesmeBitisTarihi: undefined,
-  rolValue: -1,
-});
+const props = defineProps<{
+  personel?: PersonelCreateRequest;
+}>();
+
+const request: PersonelCreateRequest = reactive(
+  props.personel
+    ? JSON.parse(JSON.stringify(props.personel))
+    : {
+        ad: "",
+        soyad: "",
+        dogumTarihi: new Date(),
+        cinsiyet: undefined,
+        profilResimUrl: undefined,
+        iletisim: {
+          eposta: "",
+          telefon: "",
+        },
+        adres: {
+          ulke: "Türkiye",
+          sehir: "",
+          ilce: "",
+          tamAdres: "",
+        },
+        iseGirisTarihi: new Date(),
+        yoneticiId: undefined,
+        sirketId: "",
+        subeId: undefined,
+        departmanId: undefined,
+        pozisyonId: undefined,
+        calismaTakvimiValue: -1,
+        sozlesmeTuruValue: -1,
+        sozlesmeBitisTarihi: undefined,
+        rolValue: -1,
+        calismaTakvimiId: undefined,
+        pozisyonBaslangicTarih: new Date(),
+        izinKuralId: undefined,
+      }
+);
 onMounted(() => {
+  console.log("Props Personel:", props.personel);
   getSirketler();
   getSubeler();
   getDepartmanlar();
   getPozisyonlar();
+  getCalismaTakvimler();
 });
 
 const handlePersonelCreate = async () => {
@@ -104,6 +120,11 @@ const getPersoneller = async () => {
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
+};
+
+const getCalismaTakvimler = async () => {
+  const res = await CalismaTakvimService.getCalismaTakvimleri();
+  calismaTakvimler.value = res;
 };
 </script>
 <template>
@@ -299,6 +320,39 @@ const getPersoneller = async () => {
                     required
                   />
                 </div>
+                <div class="mb-2 flex flex-col">
+                  <label
+                    for="sirket"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Cinsiyet</label
+                  >
+                  <select
+                    id="sirket"
+                    class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
+                    v-model="request.cinsiyet"
+                  >
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
+                      Cinsiyet seçin
+                    </option>
+                    <option class="text-neutral-800 dark:text-neutral-200" :value="true" selected>
+                      Erkek
+                    </option>
+                    <option class="text-neutral-800 dark:text-neutral-200" :value="false" selected>
+                      Kadın
+                    </option>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
+                      Belirtmek istemiyorum
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <div class="flex flex-col ml-2 w-full">
@@ -350,6 +404,18 @@ const getPersoneller = async () => {
                   />
                 </div>
                 <div class="w-full mr-1">
+                  <label for="isebaslamatarih" class="block text-sm/5 font-semibold my-2"
+                    >İşe Başlama Tarihi</label
+                  >
+                  <Datepicker
+                    id="isebaslamatarih"
+                    v-model="request.pozisyonBaslangicTarih"
+                    locale="TR"
+                    :enable-time-picker="true"
+                    :format="'dd-MM-yyyy'"
+                  />
+                </div>
+                <div class="w-full mr-1">
                   <label for="tarih" class="block text-sm/5 font-semibold my-2">Doğum Tarihi</label>
                   <Datepicker
                     id="tarih"
@@ -394,7 +460,7 @@ const getPersoneller = async () => {
                     v-model="request.sirketId"
                     @change="getPersoneller()"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" value="0" selected>
+                    <option class="text-neutral-800 dark:text-neutral-200" value="" selected>
                       Personelin çalışdacağı şirketi seçin
                     </option>
                     <option
@@ -416,9 +482,15 @@ const getPersoneller = async () => {
                   <select
                     id="sube"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
+                    :class="request.sirketId == '' ? 'opacity-50' : ''"
                     v-model="request.subeId"
+                    :disabled="request.sirketId == ''"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" value="0" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelin çalışdacağı şubeyi seçin
                     </option>
                     <option
@@ -440,9 +512,15 @@ const getPersoneller = async () => {
                   <select
                     id="departman"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
+                    :class="request.subeId == undefined ? 'opacity-50' : ''"
                     v-model="request.departmanId"
+                    :disabled="request.subeId == undefined"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" value="0" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelin çalışdacağı departmanı seçin
                     </option>
                     <option
@@ -464,9 +542,15 @@ const getPersoneller = async () => {
                   <select
                     id="pozisyon"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
+                    :class="request.departmanId == undefined ? 'opacity-50' : ''"
                     v-model="request.pozisyonId"
+                    :disabled="request.departmanId == undefined"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" value="0" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelin çalışdacağı pozisyonu seçin
                     </option>
                     <option
@@ -499,7 +583,7 @@ const getPersoneller = async () => {
                     <option
                       v-for="rol in [0, 1, 2, 3, 4, 5, 6]"
                       :key="rol"
-                      :value="Roles.getRoleByValue(rol).value"
+                      :value="rol"
                       class="text-neutral-800 dark:text-neutral-200"
                     >
                       {{ Roles.getRoleByValue(rol).name }}
@@ -551,19 +635,22 @@ const getPersoneller = async () => {
                   <select
                     id="calisma"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.calismaTakvimiValue"
+                    v-model="request.calismaTakvimiId"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="-1" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelin çalışma takvimini seçin
                     </option>
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="0">
-                      Çalışma takvimi 1
-                    </option>
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="0">
-                      Çalışma takvimi 2
-                    </option>
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="0">
-                      Çalışma takvimi 3
+                    <option
+                      v-for="calismaTakvim in calismaTakvimler"
+                      :key="calismaTakvim.id"
+                      :value="calismaTakvim.id"
+                      class="text-neutral-800 dark:text-neutral-200"
+                    >
+                      {{ calismaTakvim.ad }}
                     </option>
                   </select>
                 </div>
@@ -578,7 +665,11 @@ const getPersoneller = async () => {
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
                     v-model="request.yoneticiId"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="-1" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelden sorumlu yöneticiyi seçin
                     </option>
                     <option

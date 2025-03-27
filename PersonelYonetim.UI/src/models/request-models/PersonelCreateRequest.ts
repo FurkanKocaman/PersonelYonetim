@@ -9,14 +9,15 @@ export interface PersonelCreateRequest {
   profilResimUrl: string | undefined;
   iletisim: Iletisim;
   adres: Adres;
-  iseGirisTarihi: Date;
   yoneticiId: string | undefined;
   sirketId: string;
   subeId: string | undefined;
   departmanId: string | undefined;
   pozisyonId: string | undefined;
-  calismaTakvimiValue: number;
+  calismaTakvimiId: string | undefined;
   sozlesmeTuruValue: number;
+  pozisyonBaslangicTarih: Date;
   sozlesmeBitisTarihi: Date | undefined;
+  izinKuralId: string | undefined;
   rolValue: number;
 }

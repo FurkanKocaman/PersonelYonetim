@@ -7,10 +7,13 @@ import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
 import SirketService from "@/services/SirketService";
 import SubeService from "@/services/SubeService";
-import { onMounted, reactive, ref, watch, type Ref } from "vue";
-import PersonelCreateModal from "@/components/modals/PersonelCreateModal.vue";
+import { computed, onMounted, ref, watch, type Ref } from "vue";
+import PersonelModal from "@/components/modals/PersonelModal.vue";
+import TableLayout from "@/components/TableLayout.vue";
+import Roles from "@/models/Roles";
 
-const personeller: PersonelItem[] = reactive([]);
+const selectedPersonel = ref<PersonelItem | undefined>(undefined);
+const personeller: Ref<PersonelItem[] | undefined> = ref([]);
 
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
 const selectedSirket = ref("");
@@ -21,7 +24,7 @@ const selectedSube = ref("");
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const selectedDepartman = ref("");
 
-const showPersonelCreateModal = ref(false);
+const showPersonelModal = ref(false);
 onMounted(async () => {
   const res = await SirketService.sirketlerGet();
   sirketler.value = res?.Sirketler;
@@ -37,8 +40,23 @@ const getPersoneller = async () => {
     selectedSube.value,
     selectedDepartman.value
   );
-  personeller.splice(0, personeller.length, ...response.items);
+  personeller.value = response.items;
 };
+
+const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
+  return (personeller.value || []).map(
+    ({ id, fullName, sirketAd, subeAd, departmanAd, pozisyonAd, rolAd, isActive }) => ({
+      id,
+      fullName,
+      sirketAd,
+      subeAd,
+      departmanAd,
+      pozisyonAd,
+      rolAd,
+      isActive: isActive ? "Aktif" : "Pasif",
+    })
+  );
+});
 
 const getSubeler = async () => {
   const res = await SubeService.subelerGet(selectedSirket.value);
@@ -57,6 +75,12 @@ watch(selectedSirket, getSubeler);
 watch(selectedSube, getDepartmanlar);
 watch(selectedSube, getPersoneller);
 watch(selectedDepartman, getPersoneller);
+
+const openEditModal = (personel: PersonelItem) => {
+  selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
+  selectedPersonel.value!.rolValue = Roles.getRoleByName(personel.rolAd).value;
+  showPersonelModal.value = true;
+};
 </script>
 
 <template>
@@ -117,7 +141,8 @@ watch(selectedDepartman, getPersoneller);
             class="w-full px-4 py-3 bg-sky-600 h-fit rounded-md hover:bg-sky-700 text-neutral-300 hover:text-neutral-200 transition duration-300 ease-in-out cursor-pointer"
             @click="
               () => {
-                showPersonelCreateModal = !showPersonelCreateModal;
+                selectedPersonel = undefined;
+                showPersonelModal = !showPersonelModal;
               }
             "
           >
@@ -126,148 +151,19 @@ watch(selectedDepartman, getPersoneller);
         </div>
       </div>
 
-      <PersonelCreateModal
-        @close-modal="(p) => (showPersonelCreateModal = p)"
-        v-if="showPersonelCreateModal"
+      <PersonelModal
+        :personel="selectedPersonel"
+        @close-modal="(p) => (showPersonelModal = p)"
+        v-if="showPersonelModal"
       />
 
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead
-            class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
-          >
-            <tr>
-              <th scope="col" class="px-6 py-3">Personel</th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  E-posta
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  Cinsiyet
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  departmanAd
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  pozisyonAd
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  telefon
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-              <th scope="col" class="px-6 py-3">
-                <div class="flex items-center">
-                  tamAdres
-                  <svg
-                    class="w-3 h-3 ms-1.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
-                    />
-                  </svg>
-                </div>
-              </th>
-
-              <th scope="col" class="px-6 py-3">
-                <span class="sr-only">Edit</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="personel in personeller"
-              :key="personel.id"
-              class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
-            >
-              <th
-                scope="row"
-                class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center"
-              >
-                <img :src="personel.fullName" alt="" class="size-10 rounded-full mr-2" />
-                {{ personel.fullName }}
-              </th>
-              <td class="px-6 py-4">{{ personel.eposta }}</td>
-              <td class="px-6 py-4">{{ personel.cinsiyet }}</td>
-              <td class="px-6 py-4">{{ personel.departmanAd }}</td>
-              <td class="px-6 py-4">{{ personel.pozisyonAd }}</td>
-              <td class="px-6 py-4">{{ personel.telefon }}</td>
-              <td class="px-6 py-4">{{ personel.tamAdres }}</td>
-
-              <td class="px-6 py-4 text-right">
-                <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                  >Edit</a
-                >
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <TableLayout
+          :table-headers="['ad', 'sirket', 'şube', 'departman', 'pozisyon', 'rol', 'durum']"
+          :table-content="filteredPersoneller"
+          :islemler="['edit', 'detaylar']"
+          @edit-click="openEditModal"
+        />
       </div>
     </main>
   </div>

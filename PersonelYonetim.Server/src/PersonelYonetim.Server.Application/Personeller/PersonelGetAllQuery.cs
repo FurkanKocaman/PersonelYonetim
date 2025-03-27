@@ -17,6 +17,8 @@ public sealed record PersonelGetAllQuery(
 
 public sealed class PersonelGetAllQueryResponse : EntityDto
 {
+    public string Ad { get; set; } = default!;
+    public string Soyad { get; set; } = default!;
     public string FullName { get; set; } = default!;
     public DateTimeOffset DogumTarihi { get; set; }
      public bool? Cinsiyet { get; set; }
@@ -30,6 +32,8 @@ public sealed class PersonelGetAllQueryResponse : EntityDto
     public Guid? PozisyonId { get; set; }
     public string RolAd { get; set; } = default!;
     //public string ErisimSekli { get; set; } = "aa";
+    public int SozlesmeTuruValue { get; set; }
+    public DateTimeOffset PozisyonBaslangicTarih {  get; set; }
     public Iletisim Iletisim { get; set; } = default!;
     public Adres Adres { get; set; } = default!;
 }
@@ -72,6 +76,8 @@ internal sealed class PersonelGetAllQueryHandler(
                   (ppuu, updateUser) => new PersonelGetAllQueryResponse
                   {
                       Id = ppuu.personel.Id,
+                      Ad = ppuu.personel.Ad,
+                      Soyad = ppuu.personel.Soyad,
                       FullName = ppuu.personel.FullName,
                       DogumTarihi = ppuu.personel.DogumTarihi,
                       Cinsiyet = ppuu.personel.Cinsiyet,
@@ -84,6 +90,8 @@ internal sealed class PersonelGetAllQueryHandler(
                       PozisyonId = ppuu.personelAtama.PozisyonId,
                       PozisyonAd = ppuu.personelAtama.Pozisyon!.Ad,
                       RolAd = ppuu.personelAtama.RolTipi!.Name,
+                      SozlesmeTuruValue = ppuu.personelAtama.SozlesmeTuru.Value,
+                      PozisyonBaslangicTarih = ppuu.personelAtama.PozisyonBaslamaTarihi,
                       Iletisim = ppuu.personel.Iletisim,
                       Adres = ppuu.personel.Adres,
                       IsActive = ppuu.personel.IsActive,

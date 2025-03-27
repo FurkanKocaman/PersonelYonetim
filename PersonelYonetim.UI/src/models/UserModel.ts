@@ -29,6 +29,9 @@ export class SozlesmeTuru {
   public static getSozlesmeByValue(value: number): NameValue {
     return Object.values(SozlesmeTuru).find((p) => p.value === value);
   }
+  public static getSozlesmeByName(name: string): NameValue {
+    return Object.values(SozlesmeTuru).find((p) => p.name === name);
+  }
 }
 export class CalismaSekli {
   public static readonly TamZamanli: NameValue = { name: "Tam Zamanlı", value: 0 };
