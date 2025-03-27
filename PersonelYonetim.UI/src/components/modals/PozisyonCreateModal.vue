@@ -16,9 +16,11 @@ const request: PozisyonCreateRequest = {
   aciklama: null,
   sirketId: "",
 };
+const emit = defineEmits(["closeModal"]);
 const handlePozisyonCreate = async () => {
   const response = await PozisyonService.pozisyonlarCreate(request);
   console.log(response);
+  emit("closeModal", false);
 };
 </script>
 <template>

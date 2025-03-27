@@ -3,6 +3,8 @@ import type { DepartmanCreateRequest } from "@/models/request-models/DepartmanCr
 import type { SubeModel } from "@/models/entity-models/SubeModel";
 import DepartmanService from "@/services/DepartmanService";
 import type { PropType } from "vue";
+// import { emit } from "process";
+
 const props = defineProps({
   subeler: {
     type: Array as PropType<SubeModel[]>,
@@ -19,10 +21,11 @@ const request: DepartmanCreateRequest = {
     telefon: "",
   },
 };
-
+const emit = defineEmits(["closeModal"]);
 const handleDepartmanCreate = async () => {
   const response = await DepartmanService.departmanlarCreate(request);
   console.log(response);
+  emit("closeModal", false);
 };
 </script>
 <template>

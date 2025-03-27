@@ -18,10 +18,11 @@ const request: SirketCreateRequest = reactive({
     telefon: "",
   },
 });
-
+const emit = defineEmits(["closeModal"]);
 const handleSirketCreate = async () => {
   const response = await SirketService.sirketlerCreate(request);
   console.log(response);
+  emit("closeModal", false);
 };
 </script>
 <template>

@@ -26,10 +26,11 @@ const request: SubeCreateRequest = reactive({
     telefon: "",
   },
 });
-
+const emit = defineEmits(["closeModal"]);
 const handleSubeCreate = async () => {
   const response = await SubeService.subelerCreate(request);
   console.log(response);
+  emit("closeModal", false);
 };
 </script>
 <template>

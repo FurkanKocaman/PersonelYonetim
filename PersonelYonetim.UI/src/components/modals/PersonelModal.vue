@@ -66,9 +66,9 @@ const request: PersonelCreateRequest = reactive(
 );
 onMounted(() => {
   getSirketler();
-  getSubeler();
-  getDepartmanlar();
-  getPozisyonlar();
+  // getSubeler();
+  // getDepartmanlar();
+  // getPozisyonlar();
   getCalismaTakvimler();
   console.log(request);
   if (request.sirketId != "") getPersoneller();
@@ -78,22 +78,29 @@ const handlePersonel = async () => {
   if (props.personel) {
     const response = await PersonelService.updatePersonel(request);
     console.log(response);
+    const emit = defineEmits(["closeModal"]);
+    emit("closeModal", false);
   } else {
     const response = await PersonelService.createPersonel(request);
     console.log(response);
+    const emit = defineEmits(["closeModal"]);
+    emit("closeModal", false);
   }
 };
 const getSirketler = async () => {
   try {
     const res = await SirketService.sirketlerGet();
     sirketler.value = res?.Sirketler;
+    request.sirketId = sirketler.value![0].id;
+    getSubeler(request.sirketId);
+    getPozisyonlar(request.sirketId);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
 };
-const getSubeler = async () => {
+const getSubeler = async (id: string) => {
   try {
-    const res = await SubeService.subelerGet("");
+    const res = await SubeService.subelerGet(id);
 
     subeler.value = res?.Subeler;
   } catch (error) {
@@ -101,17 +108,18 @@ const getSubeler = async () => {
   }
 };
 
-const getDepartmanlar = async () => {
+const getDepartmanlar = async (id: string) => {
   try {
-    const res = await DepartmanService.departmanlarGet("");
+    const res = await DepartmanService.departmanlarGet(id);
     departmanlar.value = res?.Departmanlar;
+    console.log(res);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
 };
-const getPozisyonlar = async () => {
+const getPozisyonlar = async (id: string) => {
   try {
-    const res = await PozisyonService.pozisyonlarGet("");
+    const res = await PozisyonService.pozisyonlarGet(id);
     pozisyonlar.value = res?.Pozisyonlar;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
@@ -119,7 +127,7 @@ const getPozisyonlar = async () => {
 };
 const getPersoneller = async () => {
   try {
-    if (request.sirketId != "0") {
+    if (request.sirketId != "") {
       console.log("here");
       const res = await PersonelService.getPersonelList(request.sirketId, "", "");
       personeller.value = res.items;
@@ -491,6 +499,18 @@ const getCalismaTakvimler = async () => {
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
                     :class="request.sirketId == '' ? 'opacity-50' : ''"
                     v-model="request.subeId"
+                    @change="
+                      () => {
+                        if(request.subeId != undefined){
+                          getDepartmanlar(request.subeId!);
+                        }
+                        else{
+                          request.departmanId = undefined
+                          request.pozisyonId = undefined
+                          departmanlar = []
+                        }
+                      }
+                    "
                     :disabled="request.sirketId == ''"
                   >
                     <option
@@ -534,6 +554,11 @@ const getCalismaTakvimler = async () => {
                       v-for="departman in departmanlar"
                       :key="departman.id"
                       :value="departman.id"
+                      @change="
+                        () => {
+                          if (request.departmanId == undefined) request.pozisyonId = undefined;
+                        }
+                      "
                       class="text-neutral-800 dark:text-neutral-200"
                     >
                       {{ departman.ad }}

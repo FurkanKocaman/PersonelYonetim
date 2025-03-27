@@ -13,6 +13,7 @@ import SirketCreateModal from "@/components/modals/SirketCreateModal.vue";
 import SubeCreateModal from "@/components/modals/SubeCreateModal.vue";
 import DepartmanCreateModal from "@/components/modals/DepartmanCreateModal.vue";
 import PozisyonCreateModal from "@/components/modals/PozisyonCreateModal.vue";
+import { useToastStore } from "@/stores/ToastStore";
 
 const expand = ref({
   sirketler: false,
@@ -50,7 +51,7 @@ const filteredSirketler = computed<Record<string, unknown>[]>(() => {
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       createUserName,
       isActive: isActive ? "Aktif" : "Pasif", // "isActive" değerini metne dönüştür
     })
@@ -63,7 +64,7 @@ const filteredSubeler = computed<Record<string, unknown>[]>(() => {
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       createUserName: createUserName,
       sirketAd,
       isActive: isActive ? "Aktif" : "Pasif",
@@ -74,7 +75,7 @@ const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
   return (departmanlar.value || []).map(
     ({ ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
       ad,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       createUserName: createUserName,
       subeAd,
       sirketAd,
@@ -86,7 +87,7 @@ const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
 const filteredPozisyonlar = computed<Record<string, unknown>[]>(() => {
   return (pozisyonlar.value || []).map(({ ad, createdAt, createUserName, sirketAd, isActive }) => ({
     ad,
-    createdAt: new Date(createdAt).toDateString(),
+    createdAt: new Date(createdAt),
     createUserName: createUserName,
     sirketAd,
     isActive: isActive ? "Aktif" : "Pasif",
@@ -94,7 +95,8 @@ const filteredPozisyonlar = computed<Record<string, unknown>[]>(() => {
 });
 
 onMounted(async () => {
-  console.log("mounted");
+  const toastStore = useToastStore();
+  console.log(toastStore.toasts);
   getSirketler();
   getSubeler();
   getDepartmanlar();
@@ -106,7 +108,6 @@ const getSirketler = async () => {
     const res = await SirketService.sirketlerGet();
     count.value.sirketler = res!.count;
     sirketler.value = res?.Sirketler;
-    console.log("Sirketler", sirketler);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -120,7 +121,6 @@ const getSubeler = async () => {
     const res = await SubeService.subelerGet("");
     count.value.subeler = res!.count;
     subeler.value = res?.Subeler;
-    console.log(res);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -144,10 +144,8 @@ const getPozisyonlar = async () => {
   loading.value.pozisyonlar = true;
   try {
     const res = await PozisyonService.pozisyonlarGet("");
-    console.log(res);
     count.value.pozisyonlar = res!.count;
     pozisyonlar.value = res?.Pozisyonlar;
-    console.log(pozisyonlar.value);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -167,14 +165,21 @@ const getPozisyonlar = async () => {
       <div
         class="mx-10 my-3 p-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.sirketler = !expand.sirketler;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.sirketler }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.sirketler = !expand.sirketler;
                 }
@@ -196,7 +201,7 @@ const getPozisyonlar = async () => {
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.sirketler = !showModal.sirketler;
                 }
@@ -212,7 +217,12 @@ const getPozisyonlar = async () => {
           ></div>
         </div>
         <SirketCreateModal
-          @close-modal="(p) => (showModal.sirketler = p)"
+          @close-modal="
+            (p) => {
+              showModal.sirketler = p;
+              getSirketler();
+            }
+          "
           v-if="showModal.sirketler"
         />
 
@@ -226,14 +236,21 @@ const getPozisyonlar = async () => {
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.subeler = !expand.subeler;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.subeler }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.subeler = !expand.subeler;
                 }
@@ -255,7 +272,7 @@ const getPozisyonlar = async () => {
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.subeler = !showModal.subeler;
                 }
@@ -272,7 +289,12 @@ const getPozisyonlar = async () => {
         </div>
         <SubeCreateModal
           :sirketler="sirketler!"
-          @close-modal="(p) => (showModal.subeler = p)"
+          @close-modal="
+            (p) => {
+              showModal.subeler = p;
+              getSubeler();
+            }
+          "
           v-if="showModal.subeler"
         />
 
@@ -294,14 +316,21 @@ const getPozisyonlar = async () => {
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.departmanlar = !expand.departmanlar;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.departmanlar }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.departmanlar = !expand.departmanlar;
                 }
@@ -323,7 +352,7 @@ const getPozisyonlar = async () => {
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.departmanlar = !showModal.departmanlar;
                 }
@@ -341,7 +370,12 @@ const getPozisyonlar = async () => {
 
         <DepartmanCreateModal
           :subeler="subeler!"
-          @close-modal="(p) => (showModal.departmanlar = p)"
+          @close-modal="
+            (p) => {
+              showModal.departmanlar = p;
+              getDepartmanlar();
+            }
+          "
           v-if="showModal.departmanlar"
         />
 
@@ -355,14 +389,21 @@ const getPozisyonlar = async () => {
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.pozisyonlar = !expand.pozisyonlar;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.pozisyonlar }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.pozisyonlar = !expand.pozisyonlar;
                 }
@@ -384,7 +425,7 @@ const getPozisyonlar = async () => {
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.pozisyonlar = !showModal.pozisyonlar;
                 }
@@ -402,7 +443,12 @@ const getPozisyonlar = async () => {
 
         <PozisyonCreateModal
           :sirketler="sirketler!"
-          @close-modal="(p) => (showModal.pozisyonlar = p)"
+          @close-modal="
+            (p) => {
+              showModal.pozisyonlar = p;
+              getPozisyonlar();
+            }
+          "
           v-if="showModal.pozisyonlar"
         />
 
