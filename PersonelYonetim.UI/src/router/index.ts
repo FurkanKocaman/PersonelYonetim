@@ -53,6 +53,8 @@ const router = createRouter({
               Roles.SirketYardimci.value,
               Roles.Admin.value,
               Roles.Calisan.value,
+              Roles.DepartmanYonetici.value,
+              Roles.DepartmanYardimci.value,
             ],
           },
           beforeEnter: authGuard,

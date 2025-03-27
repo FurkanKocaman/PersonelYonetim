@@ -32,6 +32,7 @@ public sealed class PersonelGetAllQueryResponse : EntityDto
     public Guid? PozisyonId { get; set; }
     public string RolAd { get; set; } = default!;
     //public string ErisimSekli { get; set; } = "aa";
+    public Guid? YoneticiId { get; set; }
     public int SozlesmeTuruValue { get; set; }
     public DateTimeOffset PozisyonBaslangicTarih {  get; set; }
     public Iletisim Iletisim { get; set; } = default!;
@@ -90,6 +91,7 @@ internal sealed class PersonelGetAllQueryHandler(
                       PozisyonId = ppuu.personelAtama.PozisyonId,
                       PozisyonAd = ppuu.personelAtama.Pozisyon!.Ad,
                       RolAd = ppuu.personelAtama.RolTipi!.Name,
+                      YoneticiId = ppuu.personelAtama.YoneticiId,
                       SozlesmeTuruValue = ppuu.personelAtama.SozlesmeTuru.Value,
                       PozisyonBaslangicTarih = ppuu.personelAtama.PozisyonBaslamaTarihi,
                       Iletisim = ppuu.personel.Iletisim,

@@ -65,17 +65,23 @@ const request: PersonelCreateRequest = reactive(
       }
 );
 onMounted(() => {
-  console.log("Props Personel:", props.personel);
   getSirketler();
   getSubeler();
   getDepartmanlar();
   getPozisyonlar();
   getCalismaTakvimler();
+  console.log(request);
+  if (request.sirketId != "") getPersoneller();
 });
 
-const handlePersonelCreate = async () => {
-  const response = await PersonelService.createPersonel(request);
-  console.log(response);
+const handlePersonel = async () => {
+  if (props.personel) {
+    const response = await PersonelService.updatePersonel(request);
+    console.log(response);
+  } else {
+    const response = await PersonelService.createPersonel(request);
+    console.log(response);
+  }
 };
 const getSirketler = async () => {
   try {
@@ -114,6 +120,7 @@ const getPozisyonlar = async () => {
 const getPersoneller = async () => {
   try {
     if (request.sirketId != "0") {
+      console.log("here");
       const res = await PersonelService.getPersonelList(request.sirketId, "", "");
       personeller.value = res.items;
     }
@@ -252,7 +259,7 @@ const getCalismaTakvimler = async () => {
         <!-- Stepper End -->
 
         <div class="p-4 md:p-5 w-full">
-          <form class="space-y-4 w-full" @submit.prevent="handlePersonelCreate()">
+          <form class="space-y-4 w-full" @submit.prevent="handlePersonel()">
             <!-- Kişisel bilgiler start -->
             <div v-if="currentStep == 0" class="flex">
               <div class="flex flex-col mr-2 w-full">
@@ -665,11 +672,7 @@ const getCalismaTakvimler = async () => {
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
                     v-model="request.yoneticiId"
                   >
-                    <option
-                      class="text-neutral-800 dark:text-neutral-200"
-                      :value="undefined"
-                      selected
-                    >
+                    <option class="text-neutral-800 dark:text-neutral-200" :value="null" selected>
                       Personelden sorumlu yöneticiyi seçin
                     </option>
                     <option

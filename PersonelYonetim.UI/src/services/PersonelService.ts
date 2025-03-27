@@ -42,6 +42,15 @@ class PersonelService {
       throw error;
     }
   }
+  async updatePersonel(request: PersonelCreateRequest): Promise<string> {
+    try {
+      const res = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
+      return res.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 
   /**
    * Belirli bir personelin detaylarını ID'ye göre getirir

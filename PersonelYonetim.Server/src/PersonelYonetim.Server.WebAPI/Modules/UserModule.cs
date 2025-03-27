@@ -17,6 +17,13 @@ public static class UserModule
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
             .RequireAuthorization(policy => policy.RequireRole(RoleClaims.Admin)).Produces<Result<string>>().WithName("UserCreate");
+        group.MapPut("update",
+            async (ISender sender, UserUpdateCommand request, CancellationToken cancellationToken) =>
+            {
+                var response = await sender.Send(request, cancellationToken);
+                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+            })
+            .RequireAuthorization(policy => policy.RequireRole(RoleClaims.Admin)).Produces<Result<string>>().WithName("Userupdate");
         group.MapPost("addroles",
             async (ISender sender, UserAddRolesCommand request, CancellationToken cancellationToken) =>
             {
