@@ -26,5 +26,28 @@ export const useUserStore = defineStore("user", () => {
     Object.assign(user, response);
   };
 
-  return { user, getUser };
+  const logout = () => {
+    // Kullanıcı bilgilerini sıfırla
+    Object.assign(user, {
+      id: "",
+      fullName: "",
+      dogumTarihi: new Date(),
+      cinsiyet: undefined,
+      profilResimUrl: undefined,
+      departmanAd: "",
+      pozisyonAd: "",
+      eposta: "",
+      telefon: "",
+      ulke: "",
+      sehir: "",
+      ilce: "",
+      tamAdres: "",
+      role: "",
+    });
+    
+    // Token'ı localStorage'dan kaldır
+    localStorage.removeItem("token");
+  };
+
+  return { user, getUser, logout };
 });

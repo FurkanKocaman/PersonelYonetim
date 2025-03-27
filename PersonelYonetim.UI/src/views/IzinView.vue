@@ -131,25 +131,44 @@ onActivated(() => {
     <main class="p-6">
       <!-- Üst Kontroller -->
       <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <!-- Filtreler -->
-        <div class="flex flex-wrap gap-4">
-          <div class="w-full sm:w-auto">
-            <select 
-              v-model="filterOptions.durum" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+        <!-- Filtreler ve Sekmeler -->
+        <div class="flex flex-col gap-4 w-full md:w-auto">
+          <!-- Sekmeler -->
+          <div class="flex space-x-2 mb-2">
+            <router-link 
+              :to="{ name: 'Izin' }" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
-              <option value="">Tüm Durumlar</option>
-              <option v-for="durum in izinDurumlari" :key="durum" :value="durum">{{ durum }}</option>
-            </select>
+              İzin Talepleri
+            </router-link>
+            <router-link 
+              :to="{ name: 'IzinKurallari' }" 
+              class="px-4 py-2 bg-gray-200 text-gray-700 dark:bg-neutral-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-neutral-600 rounded-lg transition-colors duration-300"
+            >
+              İzin Kuralları
+            </router-link>
           </div>
-          <div class="w-full sm:w-auto">
-            <select 
-              v-model="filterOptions.izinTipi" 
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
-            >
-              <option value="">Tüm İzin Türleri</option>
-              <option v-for="izinTipi in izinTurleri" :key="izinTipi" :value="izinTipi">{{ izinTipi }}</option>
-            </select>
+          
+          <!-- Filtreler -->
+          <div class="flex flex-wrap gap-4">
+            <div class="w-full sm:w-auto">
+              <select 
+                v-model="filterOptions.durum" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+              >
+                <option value="">Tüm Durumlar</option>
+                <option v-for="durum in izinDurumlari" :key="durum" :value="durum">{{ durum }}</option>
+              </select>
+            </div>
+            <div class="w-full sm:w-auto">
+              <select 
+                v-model="filterOptions.izinTipi" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+              >
+                <option value="">Tüm İzin Türleri</option>
+                <option v-for="izinTipi in izinTurleri" :key="izinTipi" :value="izinTipi">{{ izinTipi }}</option>
+              </select>
+            </div>
           </div>
         </div>
         

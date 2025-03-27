@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/stores/ThemeStore";
-import { defineProps, defineEmits, onMounted } from "vue";
+import { defineProps, defineEmits, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 
 // Prop'lar
 const props = defineProps({
@@ -14,9 +16,33 @@ const props = defineProps({
   },
 });
 
+const router = useRouter();
 const themeStore = useThemeStore();
+const userStore = useUserStore();
+
+// Dropdown durumları
+const notificationsOpen = ref(false);
+const messagesOpen = ref(false);
+const userMenuOpen = ref(false);
+
+// Örnek bildirimler
+const notifications = ref([
+  { id: 1, title: "Yeni izin talebi", message: "İzin talebiniz onaylandı", time: "5 dk önce", read: false },
+  { id: 2, title: "Toplantı hatırlatması", message: "Yarın saat 10:00'da toplantı var", time: "1 saat önce", read: false },
+  { id: 3, title: "Maaş bildirimi", message: "Maaşınız hesabınıza yatırıldı", time: "2 gün önce", read: false },
+]);
+
+// Örnek mesajlar
+const messages = ref([
+  { id: 1, sender: "Ahmet Yılmaz", message: "Merhaba, raporları gönderebilir misiniz?", time: "10 dk önce", avatar: "https://randomuser.me/api/portraits/men/2.jpg", read: false },
+  { id: 2, sender: "Ayşe Demir", message: "Toplantı saati değişti, bilginize", time: "2 saat önce", avatar: "https://randomuser.me/api/portraits/women/3.jpg", read: false },
+]);
+
 onMounted(() => {
   const theme: string = themeStore.theme;
+  
+  // Dropdown'ları kapatmak için dışarı tıklama olayını dinle
+  document.addEventListener('click', closeDropdowns);
 });
 
 // Event'ler
@@ -25,6 +51,62 @@ const emit = defineEmits(["toggle-sidebar"]);
 // Kenar çubuğunu aç/kapat
 const toggleSidebar = () => {
   emit("toggle-sidebar");
+};
+
+// Bildirimleri aç/kapat
+const toggleNotifications = (event: Event) => {
+  event.stopPropagation();
+  notificationsOpen.value = !notificationsOpen.value;
+  messagesOpen.value = false;
+  userMenuOpen.value = false;
+};
+
+// Mesajları aç/kapat
+const toggleMessages = (event: Event) => {
+  event.stopPropagation();
+  messagesOpen.value = !messagesOpen.value;
+  notificationsOpen.value = false;
+  userMenuOpen.value = false;
+};
+
+// Kullanıcı menüsünü aç/kapat
+const toggleUserMenu = (event: Event) => {
+  event.stopPropagation();
+  userMenuOpen.value = !userMenuOpen.value;
+  notificationsOpen.value = false;
+  messagesOpen.value = false;
+};
+
+// Tüm açılır menüleri kapat
+const closeDropdowns = (event: Event) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.dropdown-container')) {
+    notificationsOpen.value = false;
+    messagesOpen.value = false;
+    userMenuOpen.value = false;
+  }
+};
+
+// Bildirimi okundu olarak işaretle
+const markNotificationAsRead = (id: number) => {
+  const notification = notifications.value.find(n => n.id === id);
+  if (notification) {
+    notification.read = true;
+  }
+};
+
+// Mesajı okundu olarak işaretle
+const markMessageAsRead = (id: number) => {
+  const message = messages.value.find(m => m.id === id);
+  if (message) {
+    message.read = true;
+  }
+};
+
+// Çıkış yap
+const logout = () => {
+  userStore.logout();
+  router.push('/login');
 };
 </script>
 
@@ -39,11 +121,12 @@ const toggleSidebar = () => {
         >
           <i class="fas fa-bars"></i>
         </button>
-        {{ props.header }}
+        <span class="ml-2 text-gray-700 dark:text-gray-200 font-medium">{{ props.header }}</span>
       </div>
 
       <!-- Sağ taraf - Kullanıcı işlemleri -->
       <div class="flex items-center space-x-4">
+        <!-- Tema değiştirme -->
         <div class="cursor-pointer">
           <svg
             v-if="themeStore.theme == 'light'"
@@ -74,35 +157,132 @@ const toggleSidebar = () => {
             />
           </svg>
         </div>
+        
         <!-- Bildirimler -->
-        <div class="relative">
+        <div class="relative dropdown-container">
           <button
+            @click="toggleNotifications"
             class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 focus:outline-none"
           >
             <i class="fas fa-bell"></i>
             <span
+              v-if="notifications.filter(n => !n.read).length > 0"
               class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-              >3</span
+              >{{ notifications.filter(n => !n.read).length }}</span
             >
           </button>
+          
+          <!-- Bildirimler Dropdown -->
+          <div 
+            v-if="notificationsOpen" 
+            class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
+          >
+            <div class="p-3 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Bildirimler</h3>
+              <span class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
+                {{ notifications.filter(n => !n.read).length }} yeni
+              </span>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              <div 
+                v-for="notification in notifications" 
+                :key="notification.id"
+                @click="markNotificationAsRead(notification.id)"
+                class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
+                :class="{'bg-blue-50 dark:bg-blue-900/20': !notification.read}"
+              >
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 mr-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <i class="fas fa-bell text-blue-500 dark:text-blue-400"></i>
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ notification.title }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ notification.message }}</p>
+                    <div class="flex items-center mt-1">
+                      <i class="fas fa-clock text-xs text-gray-500 dark:text-gray-500 mr-1"></i>
+                      <p class="text-xs text-gray-500 dark:text-gray-500">{{ notification.time }}</p>
+                    </div>
+                  </div>
+                  <div v-if="!notification.read" class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                </div>
+              </div>
+              <div v-if="notifications.length === 0" class="p-3 text-center text-gray-500 dark:text-gray-400">
+                Bildirim bulunmuyor
+              </div>
+            </div>
+            <div class="p-2 border-t border-gray-200 dark:border-neutral-700 text-center bg-gray-50 dark:bg-neutral-700/50">
+              <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">Tümünü Gör</button>
+            </div>
+          </div>
         </div>
 
         <!-- Mesajlar -->
-        <div class="relative">
+        <div class="relative dropdown-container">
           <button
+            @click="toggleMessages"
             class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 focus:outline-none"
           >
             <i class="fas fa-envelope"></i>
             <span
+              v-if="messages.filter(m => !m.read).length > 0"
               class="absolute top-0 right-0 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-              >2</span
+              >{{ messages.filter(m => !m.read).length }}</span
             >
           </button>
+          
+          <!-- Mesajlar Dropdown -->
+          <div 
+            v-if="messagesOpen" 
+            class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
+          >
+            <div class="p-3 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center">
+              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Mesajlar</h3>
+              <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full">
+                {{ messages.filter(m => !m.read).length }} yeni
+              </span>
+            </div>
+            <div class="max-h-96 overflow-y-auto">
+              <div 
+                v-for="message in messages" 
+                :key="message.id"
+                @click="markMessageAsRead(message.id)"
+                class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
+                :class="{'bg-green-50 dark:bg-green-900/20': !message.read}"
+              >
+                <div class="flex items-start">
+                  <img :src="message.avatar" alt="Avatar" class="w-10 h-10 rounded-full mr-3 border-2 border-white dark:border-neutral-600 shadow-sm">
+                  <div class="flex-1">
+                    <div class="flex justify-between items-center">
+                      <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ message.sender }}</p>
+                      <div class="flex items-center">
+                        <i class="fas fa-clock text-xs text-gray-500 dark:text-gray-500 mr-1"></i>
+                        <p class="text-xs text-gray-500 dark:text-gray-500">{{ message.time }}</p>
+                      </div>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{{ message.message }}</p>
+                  </div>
+                  <div v-if="!message.read" class="w-2 h-2 bg-green-500 rounded-full ml-1"></div>
+                </div>
+              </div>
+              <div v-if="messages.length === 0" class="p-3 text-center text-gray-500 dark:text-gray-400">
+                Mesaj bulunmuyor
+              </div>
+            </div>
+            <div class="p-2 border-t border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-700/50 flex justify-between items-center">
+              <button class="text-xs text-green-600 dark:text-green-400 hover:underline font-medium">Tüm Mesajlar</button>
+              <button class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full transition-colors duration-150">
+                <i class="fas fa-plus mr-1"></i> Yeni Mesaj
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Kullanıcı menüsü -->
-        <div class="relative">
+        <div class="relative dropdown-container">
           <button
+            @click="toggleUserMenu"
             class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-full p-1 focus:outline-none"
           >
             <img
@@ -111,6 +291,56 @@ const toggleSidebar = () => {
               class="w-8 h-8 rounded-full border border-gray-200 dark:border-neutral-600"
             />
           </button>
+          
+          <!-- Kullanıcı Menüsü Dropdown -->
+          <div 
+            v-if="userMenuOpen" 
+            class="absolute right-0 mt-2 w-60 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
+          >
+            <div class="p-4 border-b border-gray-200 dark:border-neutral-700 text-center">
+              <div class="relative mx-auto w-16 h-16 mb-3">
+                <img 
+                  :src="userStore.user?.profilResimUrl || 'https://randomuser.me/api/portraits/men/1.jpg'" 
+                  alt="Kullanıcı" 
+                  class="w-16 h-16 rounded-full border-2 border-white dark:border-neutral-600 shadow-md object-cover"
+                />
+                <div class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-neutral-800"></div>
+              </div>
+              <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ userStore.user?.fullName || 'Kullanıcı' }}</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ userStore.user?.eposta || 'kullanici@ornek.com' }}</p>
+              <div class="mt-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 py-1 px-2 rounded-full inline-block">
+                {{ userStore.user?.role || 'Kullanıcı' }}
+              </div>
+            </div>
+            <div class="py-1">
+              <router-link 
+                to="/dashboard/ayarlar" 
+                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
+              >
+                <i class="fas fa-user-cog mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> Profil Ayarları
+              </router-link>
+              <router-link 
+                to="/dashboard/izin/talep" 
+                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
+              >
+                <i class="fas fa-calendar-alt mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> İzin Talebi
+              </router-link>
+              <router-link 
+                to="/dashboard/takvim" 
+                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
+              >
+                <i class="fas fa-calendar-week mr-3 text-gray-500 dark:text-gray-400 w-5 text-center"></i> Takvim
+              </router-link>
+            </div>
+            <div class="border-t border-gray-200 dark:border-neutral-700 py-1">
+              <button 
+                @click="logout" 
+                class="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
+              >
+                <i class="fas fa-sign-out-alt mr-3 w-5 text-center"></i> Çıkış Yap
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -118,5 +348,25 @@ const toggleSidebar = () => {
 </template>
 
 <style scoped>
-/* Özel stiller için TopBar */
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>

@@ -46,7 +46,7 @@ const router = createRouter({
             title: "Personel Yönetimi",
             requiredRole: [Roles.Yonetici, Roles.SirketSahibi, Roles.Admin, Roles.Calisan],
           },
-          beforeEnter: authGuard,
+          // beforeEnter: authGuard,
         },
         {
           path: "izin",
@@ -59,6 +59,30 @@ const router = createRouter({
           name: "IzinTalep",
           component: () => import("../views/IzinTalepView.vue"),
           meta: { title: "İzin Talebi" },
+        },
+        {
+          path: "izin/kurallar",
+          name: "IzinKurallari",
+          component: () => import("../views/IzinKurallariView.vue"),
+          meta: { title: "İzin Kuralları" },
+        },
+        {
+          path: "izin/kurallar/raporlar",
+          name: "IzinKurallariRaporlar",
+          component: () => import("../views/IzinKurallariRaporlarView.vue"),
+          meta: { title: "İzin Raporları" },
+        },
+        {
+          path: "izin/kurallar/kurallar",
+          name: "IzinKurallariKurallar",
+          component: () => import("../views/IzinKurallariKurallarView.vue"),
+          meta: { title: "İzin Kuralları Detayları" },
+        },
+        {
+          path: "izin/kurallar/orneksablonlar",
+          name: "IzinKurallariOrnekSablonlar",
+          component: () => import("../views/IzinKurallariOrnekSablonlarView.vue"),
+          meta: { title: "İzin Kuralları Şablonları" },
         },
         {
           path: "maas",

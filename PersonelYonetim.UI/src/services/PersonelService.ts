@@ -4,6 +4,7 @@ import type {
   PersonelListResponse,
   // PersonelPaginationParams,
 } from "@/models/PersonelModels";
+import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import api from "./Axios";
 
 class PersonelService {
@@ -69,22 +70,15 @@ class PersonelService {
    * @param personelData Personel verisi
    * @returns Oluşturulan personel kaydı
    */
-  // async createPersonel(personelData: PersonelRequest): Promise<PersonelItem> {
-  //   try {
-  //     // Gerçek API çağrısı:
-  //     // const response = await axios.post(this.baseUrl, personelData);
-  //     // return response.data;
-
-  //     // Mock yanıt
-  //     return {
-  //       id: Math.floor(Math.random() * 1000) + 6,
-  //       ...personelData,
-  //     };
-  //   } catch (error) {
-  //     console.error("Personel kaydı oluşturulurken hata oluştu:", error);
-  //     throw error;
-  //   }
-  // }
+  async createPersonel(personelData: PersonelCreateRequest): Promise<any> {
+    try {
+      const response = await api.post(`${import.meta.env.VITE_API_URL}/personeller/create`, personelData);
+      return response.data;
+    } catch (error) {
+      console.error("Personel kaydı oluşturulurken hata oluştu:", error);
+      throw error;
+    }
+  }
 
   /**
    * Mevcut bir personel kaydını günceller
@@ -92,22 +86,15 @@ class PersonelService {
    * @param personelData Güncellenmiş personel verisi
    * @returns Güncellenmiş personel kaydı
    */
-  // async updatePersonel(id: number, personelData: PersonelRequest): Promise<PersonelItem> {
-  //   try {
-  //     // Gerçek API çağrısı:
-  //     // const response = await axios.put(`${this.baseUrl}/${id}`, personelData);
-  //     // return response.data;
-
-  //     // Mock yanıt
-  //     return {
-  //       id,
-  //       ...personelData,
-  //     };
-  //   } catch (error) {
-  //     console.error(`ID: ${id} olan personel güncellenirken hata oluştu:`, error);
-  //     throw error;
-  //   }
-  // }
+  async updatePersonel(id: string, personelData: PersonelCreateRequest): Promise<any> {
+    try {
+      const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/${id}`, personelData);
+      return response.data;
+    } catch (error) {
+      console.error(`ID: ${id} olan personel güncellenirken hata oluştu:`, error);
+      throw error;
+    }
+  }
 
   /**
    * Bir personel kaydını siler
