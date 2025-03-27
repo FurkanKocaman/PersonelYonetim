@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-const activeTab = ref('genel');
+const activeTab = ref('profilim');
+const activeTab2 = ref('pozisyon');
+const activeTab4 = ref('harcama');
 const setActiveTab = (tab: string) => {
   activeTab.value = tab;
+};
+const setActiveTab2 = (tab: string) => {
+  activeTab2.value = tab;
+};
+const setActiveTab4 = (tab: string) => {
+  activeTab4.value = tab;
 };
 </script>
 
@@ -555,7 +563,164 @@ const setActiveTab = (tab: string) => {
 
 </div>
 
+<!-- kariyer kısmı -->
+
+<div v-if="activeTab === 'kariyerim'" class="space-y-6">
+    <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab2('pozisyon')"
+            :class="activeTab2 === 'pozisyon' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Pozisyon
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab2('maas')"
+            :class="activeTab2 === 'maas' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Maaş
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab2('calismaTakvimi')"
+            :class="activeTab2 === 'calismaTakvimi' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Çalışma Takvimi
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab2('performans')"
+            :class="activeTab2 === 'performans' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Performans
+        </button>
+          </li>
+        </ul>
+
+        <div v-if="activeTab2 === 'maas'" class="space-y-6">
+
+            <div class="flex justify-center items-center h-screen">
+  <div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+    <div class="text-center" style="margin-top: 20px;">
+    
+      
+      <i class="fa-solid fa-wallet fa-2xl" style="color: #3562b1;"></i>
+    
+      
+      
+       <br> <br>
+      <p class="text-gray-800 text-l mb-4" >Maaş bilgisi bulunamadı</p>
+      
+     
+      <p class="text-gray-700 text-sm">Bordro işlemleri için bir maaş bilgisi ekleyin</p>
+    </div>
+  </div>
+</div>
+
+        </div>
+
+        <div v-if="activeTab2 === 'performans'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+<i class="fa-solid fa-circle-exclamation fa-2xl" style="color: #3562b1;"></i>
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Girilen kriterlere uygun sonuç bulunamadı</p>
+</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- ödemeler kısmı -->
+<div v-if="activeTab === 'odemelerim'" class="space-y-6">
+    <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('harcama')"
+            :class="activeTab4 === 'harcama' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Harcama
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('fazlaMesai')"
+            :class="activeTab4 === 'fazlaMesai' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Fazla Mesai
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('ekOdemeler')"
+            :class="activeTab4 === 'ekOdemeler' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Ek ödemeler
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('ozelKesintiler')"
+            :class="activeTab4 === 'ozelKesintiler' ? 'bg-sky-900' : 'bg-gray-400 '"
+          >
+          Özel Kesintiler
+        </button>
+          </li>
+        </ul>
+
+        <div v-if="activeTab4 === 'fazlaMesai'" class="space-y-6">
+
+            <div class="flex justify-center items-center h-screen">
+  <div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+    <div class="text-center" style="margin-top: 20px;">
+    
+      
+      <i class="fa-solid fa-wallet fa-2xl" style="color: #3562b1;"></i>
+    
+      
+      
+       <br> <br>
+      <p class="text-gray-800 text-l mb-4" >Maaş bilgisi bulunamadı</p>
+      
+     
+      <p class="text-gray-700 text-sm">Bordro işlemleri için bir maaş bilgisi ekleyin</p>
+    </div>
+  </div>
+</div>
+
+        </div>
+
+        <div v-if="activeTab4 === 'ozelKesintiler'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+    <i class="fa-solid fa-wallet fa-2xl" style="color: #3562b1;"></i>
+
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı Ödeme Bulunamadı</p>
+</div>
+</div>
+</div>
+
+</div>
+
+</div>
+
       
 
 
 </template>
+
