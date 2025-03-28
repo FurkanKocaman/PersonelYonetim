@@ -14,7 +14,7 @@ public static class IzinTalepModule
         RouteGroupBuilder group = app.MapGroup("/izin-talep").WithTags("IzinTalep").RequireAuthorization();
 
         group.MapPost("/create",
-            async (ISender sender, [FromBody] IzinTalepCreateCommand request, CancellationToken cancellationToken) =>
+            async (ISender sender, IzinTalepCreateCommand request, CancellationToken cancellationToken) =>
             {
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);

@@ -8,12 +8,12 @@ public sealed class IzinTalep : Entity
 {
     public Guid PersonelId { get; set; }
     public Personel Personel { get; set; } = default!;
-    public Guid DepartmanId { get; set; }
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
     public DateTimeOffset MesaiBaslangicTarihi { get; set; }
     public decimal ToplamSure {  get; set; }
-    public Guid IzinTuru { get; set; }
+    public Guid IzinTurId { get; set; }
+    public IzinTur IzinTur { get; set; } = default!;
     public string? Aciklama { get; set; }
     public DegerlendirmeDurumEnum DegerlendirmeDurumu { get; set; } = default!;
     public Guid? DegerlendirenId { get; set; }

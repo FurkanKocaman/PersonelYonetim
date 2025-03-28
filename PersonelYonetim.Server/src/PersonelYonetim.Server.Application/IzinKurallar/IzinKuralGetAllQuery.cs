@@ -19,18 +19,23 @@ public sealed class IzinKuralGetAllResponse : EntityDto
     public string? Aciklama { get; set; }
     public Guid SirketId { get; set; } = default;
     public string SirketAd { get; set; } = default!;
-    public IEnumerable<IzinTur> IzinTurler { get; set; } = new List<IzinTur>();
-    public IEnumerable<string> izinTur { get; set; } = [];
+    public IEnumerable<IzinTurResponse> IzinTurler { get; set; } = new List<IzinTurResponse>();
 }
-internal sealed class IzinTurAd
+public sealed class IzinTurResponse
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = default!;
+    public string Ad { get; set; } = default!;
+    public string? Aciklama { get; set; }
+    public bool UcretliMi { get; set; } = false;
+    public string LimitTipiName { get; set; } = default!;
+
+    public decimal KalanGunSayisi { get; set; }
 }
 
 internal sealed class IzinKuralGetAllQueryHandler(
     IIzinKuralRepository izinKuralRepository,
     //IIzinTurIzinKuralRepository izinTurIzinKuralRepository,
+    IIzinTalepRepository izinTalepRepository,
     UserManager<AppUser> userManager,
     IHttpContextAccessor httpContextAccessor,
     IPersonelAtamaRepository personelAtamaRepository,
@@ -55,6 +60,8 @@ internal sealed class IzinKuralGetAllQueryHandler(
         var izinKurallar = izinKuralRepository.GetAll()
             .Include(p => p.IzinTurler);
 
+        var izinTalepler = izinTalepRepository.Where(p => p.PersonelId == personel.Id && p.BitisTarihi.Year == DateTime.Now.Year );
+
 
         var response = izinKurallar
                 .Join(personelAtamaRepository.GetAll(),
@@ -65,14 +72,14 @@ internal sealed class IzinKuralGetAllQueryHandler(
                 .GroupJoin(userManager.Users,
                     ip => ip.izinKural.CreateUserId,
                     createUser => createUser.Id,
-                    (ip, createUsers) => new { ip.izinKural, createUsers })
+                    (ip, createUsers) => new { ip.izinKural,ip.personelAtama, createUsers })
                 .SelectMany(
                     iuu => iuu.createUsers.DefaultIfEmpty(),
-                    (iuu, createUser) => new { iuu.izinKural, createUser })
+                    (iuu, createUser) => new { iuu.izinKural, iuu.personelAtama, createUser })
                 .GroupJoin(userManager.Users,
                       ip => ip.izinKural.UpdateUserId,
                       updateUser => updateUser.Id,
-                      (ip, updateUsers) => new { ip.izinKural, ip.createUser, updateUsers })
+                      (ip, updateUsers) => new { ip.izinKural, ip.personelAtama, ip.createUser, updateUsers })
                 .SelectMany(
                         iuu => iuu.updateUsers.DefaultIfEmpty(),
                         (iuu, updateUser) => new IzinKuralGetAllResponse
@@ -95,8 +102,15 @@ internal sealed class IzinKuralGetAllQueryHandler(
                           : null,
                             IsDeleted = iuu.izinKural.IsDeleted,
                             DeleteAt = iuu.izinKural.DeleteAt,
-                            IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTur { Id = it.IzinTur.Id, Ad = it.IzinTur.Ad }),
-                            izinTur = iuu.izinKural.IzinTurler.Select(p => p.IzinTur.Ad)
+                            IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTurResponse
+                            {
+                                Id = it.IzinTurId,
+                                Ad = it.IzinTur.Ad,
+                                Aciklama = it.IzinTur.Aciklama,
+                                UcretliMi = it.IzinTur.UcretliMi,
+                                LimitTipiName = it.IzinTur.LimitTipi == LimitTipiEnum.Limitsiz ? LimitTipiEnum.Limitsiz.Name : $"{it.IzinTur.LimitTipi.Name} {it.IzinTur.LimitGunSayisi} gün",
+                                KalanGunSayisi = (((DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year)) * it.IzinTur.LimitGunSayisi) - izinTalepler.Where(p => p.IzinTurId == it.IzinTur.Id).Sum(p => p.ToplamSure)
+                            }),
                         });
         return Task.FromResult(response);
     }
