@@ -1,6 +1,7 @@
 import { type PersonelItem, type PersonelListResponse } from "@/models/PersonelModels";
 import api from "./Axios";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
+import { useToastStore } from "@/stores/ToastStore";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
@@ -35,8 +36,15 @@ class PersonelService {
 
   async createPersonel(request: PersonelCreateRequest): Promise<string> {
     try {
-      const res = await api.post(`${import.meta.env.VITE_API_URL}/personeller/create`, request);
-      return res.data;
+      const response = await api.post(
+        `${import.meta.env.VITE_API_URL}/personeller/create`,
+        request
+      );
+      if (response.status == 200) {
+        useToastStore().addToast(response.data.data, "", "success", 5000, true);
+        return response.data.data;
+      }
+      return response.data;
     } catch (error) {
       console.error(error);
       throw error;
@@ -44,8 +52,12 @@ class PersonelService {
   }
   async updatePersonel(request: PersonelCreateRequest): Promise<string> {
     try {
-      const res = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
-      return res.data;
+      const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
+      if (response.status == 200) {
+        useToastStore().addToast(response.data.data, "", "success", 5000, true);
+        return response.data.data;
+      }
+      return response.data;
     } catch (error) {
       console.error(error);
       throw error;

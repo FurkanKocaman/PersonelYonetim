@@ -14,15 +14,16 @@ import Roles from "@/models/Roles";
 
 const selectedPersonel = ref<PersonelItem | undefined>(undefined);
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
+const filteredPersonellerList: Ref<PersonelItem[] | undefined> = ref([]);
 
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
 const selectedSirket = ref("");
 
 const subeler: Ref<SubeModel[] | undefined> = ref([]);
-const selectedSube = ref("");
+const selectedSube: Ref<string | undefined> = ref(undefined);
 
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
-const selectedDepartman = ref("");
+const selectedDepartman: Ref<string | undefined> = ref(undefined);
 
 const showPersonelModal = ref(false);
 onMounted(async () => {
@@ -41,10 +42,21 @@ const getPersoneller = async () => {
     selectedDepartman.value
   );
   personeller.value = response.items;
+  filteredPersonellerList.value = personeller.value;
+  filterPersoneller();
+};
+
+const filterPersoneller = () => {
+  console.log(selectedDepartman.value, selectedSube.value);
+  filteredPersonellerList.value = personeller.value?.filter(
+    (p) =>
+      (selectedSube.value == undefined || selectedSube.value == p.subeId) &&
+      (selectedDepartman.value == undefined || selectedDepartman.value == p.departmanId)
+  );
 };
 
 const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
-  return (personeller.value || []).map(
+  return (filteredPersonellerList.value || []).map(
     ({ id, fullName, sirketAd, subeAd, departmanAd, pozisyonAd, rolAd, isActive }) => ({
       id,
       fullName,
@@ -64,17 +76,18 @@ const getSubeler = async () => {
 };
 
 const getDepartmanlar = async () => {
-  if (selectedSube.value == "") {
-    selectedDepartman.value = "";
+  if (selectedSube.value == undefined) {
+    selectedDepartman.value = undefined;
+  } else {
+    const res = await DepartmanService.departmanlarGet(selectedSube.value!);
+    departmanlar.value = res?.Departmanlar;
   }
-  const res = await DepartmanService.departmanlarGet(selectedSube.value);
-  departmanlar.value = res?.Departmanlar;
 };
 
 watch(selectedSirket, getSubeler);
 watch(selectedSube, getDepartmanlar);
-watch(selectedSube, getPersoneller);
-watch(selectedDepartman, getPersoneller);
+watch(selectedSube, filterPersoneller);
+watch(selectedDepartman, filterPersoneller);
 
 const openEditModal = (personel: PersonelItem) => {
   selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
@@ -94,12 +107,12 @@ const openEditModal = (personel: PersonelItem) => {
       <div class="flex w-full justify-between mb-5">
         <div class="flex flex-1">
           <div class="flex flex-col w-1/4 mr-3">
-            <label for="sirket">Sirket</label>
+            <label for="sirket">Şirket</label>
             <select
               id="sirket"
               v-model="selectedSirket"
               v-on:change="getSubeler()"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded-sm text-sm"
             >
               <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
                 {{ sirket.ad }}
@@ -107,15 +120,15 @@ const openEditModal = (personel: PersonelItem) => {
             </select>
           </div>
           <div class="flex flex-col w-1/4 mr-3">
-            <label for="sube">Sube</label>
+            <label for="sube">Şube</label>
             <select
               id="sube"
               v-model="selectedSube"
               v-on:change="getDepartmanlar()"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
               :disabled="selectedSirket == ''"
             >
-              <option value="" selected>Şube seçiniz</option>
+              <option :value="undefined" selected>Şube seçiniz</option>
               <option v-for="sube in subeler" :key="sube.id" :value="sube.id">
                 {{ sube.ad }}
               </option>
@@ -126,10 +139,10 @@ const openEditModal = (personel: PersonelItem) => {
             <select
               id="departman"
               v-model="selectedDepartman"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-              :disabled="selectedSube == ''"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              :disabled="selectedSube == undefined"
             >
-              <option value="" selected>Departman seçiniz</option>
+              <option :value="undefined" selected>Departman seçiniz</option>
               <option v-for="departman in departmanlar" :key="departman.id" :value="departman.id">
                 {{ departman.ad }}
               </option>
@@ -138,7 +151,8 @@ const openEditModal = (personel: PersonelItem) => {
         </div>
         <div class="flex items-end">
           <button
-            class="w-full px-4 py-3 bg-sky-600 h-fit rounded-md hover:bg-sky-700 text-neutral-300 hover:text-neutral-200 transition duration-300 ease-in-out cursor-pointer"
+            type="button"
+            class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
             @click="
               () => {
                 selectedPersonel = undefined;

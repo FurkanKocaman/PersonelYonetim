@@ -16,6 +16,9 @@ const tableKeys = computed<string[]>(() => {
 const formatValue = (value: unknown) => {
   if (value instanceof Date) {
     return value.toLocaleDateString();
+    // `${value.getDate()}.${
+    //   value.getMonth() < 10 ? "0" + value.getMonth() : value.getMonth()
+    // }.${value.getFullYear()} `;
   }
   if (typeof value === "object" && value !== null) {
     return JSON.stringify(value);
@@ -42,7 +45,7 @@ const handleDetail = (item: unknown) => {
   <div class="bg-white dark:bg-neutral-100 shadow-sm mt-5">
     <div class="overflow-auto">
       <table class="w-full divide-y divide-gray-200 dark:divide-neutral-700">
-        <thead class="bg-gray-50 dark:bg-neutral-800">
+        <thead class="bg-gray-200 dark:bg-neutral-800">
           <tr>
             <th
               v-for="header in props.tableHeaders"
@@ -74,12 +77,12 @@ const handleDetail = (item: unknown) => {
           </tr>
         </thead>
         <tbody
-          class="bg-white dark:bg-neutral-900 divide-y divide-gray-200 dark:divide-neutral-700"
+          class="bg-white dark:bg-neutral-800 divide-y divide-gray-300 dark:divide-neutral-700"
         >
           <tr
             v-for="(row, rowIndex) in tableContent"
             :key="rowIndex"
-            class="hover:bg-gray-50 dark:hover:bg-neutral-800 border-b dark:border-neutral-600 border-neutral-400"
+            class="hover:bg-gray-50 dark:hover:bg-neutral-900"
           >
             <td
               v-for="key in tableKeys"
@@ -113,11 +116,4 @@ const handleDetail = (item: unknown) => {
   </div>
 </template>
 
-<style scoped>
-/* Add any component-specific styles here.  Scoped to this component. */
-/* Example:
-.some-class {
-  color: blue;
-}
-*/
-</style>
+<style scoped></style>

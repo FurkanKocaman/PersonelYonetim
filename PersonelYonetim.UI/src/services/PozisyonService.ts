@@ -1,6 +1,7 @@
 import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
 import api from "./Axios";
 import type { PozisyonCreateRequest } from "@/models/request-models/PozisyonlarCreateRequest";
+import { useToastStore } from "@/stores/ToastStore";
 
 class PozisyonService {
   async pozisyonlarGet(
@@ -24,8 +25,11 @@ class PozisyonService {
   async pozisyonlarCreate(request: PozisyonCreateRequest): Promise<string> {
     const response = await api.post(`${import.meta.env.VITE_API_URL}/pozisyonlar/create`, request);
     console.log(response);
-
-    return "a";
+    if (response.status == 200) {
+      useToastStore().addToast(response.data.data, "", "success", 5000, true);
+      return response.data.data;
+    }
+    return response.data;
   }
   
   // Pozisyon güncelleme metodu

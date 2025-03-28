@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import ToastComponent from "./components/ToastComponent.vue";
 
 const isLoading = ref(true);
 
@@ -37,6 +38,9 @@ onMounted(() => {
         <component :is="Component" />
       </transition>
     </RouterView>
+  </div>
+  <div class="fixed z-50 right-0 top-0 flex flex-col">
+    <ToastComponent />
   </div>
 </template>
 

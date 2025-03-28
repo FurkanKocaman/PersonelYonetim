@@ -1,6 +1,7 @@
 import type { DepartmanCreateRequest } from "@/models/request-models/DepartmanCreateCommand";
 import api from "./Axios";
 import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
+import { useToastStore } from "@/stores/ToastStore";
 
 class DepartmanService {
   async departmanlarGet(
@@ -24,8 +25,12 @@ class DepartmanService {
   async departmanlarCreate(request: DepartmanCreateRequest): Promise<string> {
     const response = await api.post(`${import.meta.env.VITE_API_URL}/departmanlar/create`, request);
     console.log(response);
+    if (response.status == 200) {
+      useToastStore().addToast(response.data.data, "", "success", 5000, true);
+      return response.data.data;
+    }
 
-    return "a";
+    return response.data;
   }
   
   // Departman güncelleme metodu
