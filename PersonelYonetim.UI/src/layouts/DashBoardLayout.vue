@@ -27,11 +27,10 @@ const menuItems = ref<MenuItem[]>([
     path: "/dashboard",
   },
   {
-    name: "Sirket",
+    name: "Şirket Yönetimi",
     icon: "building",
     active: false,
     path: "/dashboard/sirket",
-    roles: [Roles.SirketYonetici.value, Roles.SirketYardimci.value, Roles.Admin.value],
   },
   {
     name: "Personel",
@@ -86,6 +85,11 @@ const updateActiveMenuItem = () => {
   // Tüm öğeleri sıfırla
   menuItems.value.forEach((item) => {
     item.active = false;
+    if (item.subItems) {
+      item.subItems.forEach((subItem) => {
+        subItem.active = false;
+      });
+    }
   });
 
   // En spesifik eşleşen rotayı bul
@@ -96,6 +100,14 @@ const updateActiveMenuItem = () => {
     if (route.path.startsWith(item.path) && item.path.length > bestMatchLength) {
       bestMatch = item;
       bestMatchLength = item.path.length;
+    }
+    if (item.subItems) {
+      item.subItems.forEach((subItem) => {
+        if (route.path.startsWith(subItem.path) && subItem.path.length > bestMatchLength) {
+          bestMatch = subItem;
+          bestMatchLength = subItem.path.length;
+        }
+      });
     }
   });
 

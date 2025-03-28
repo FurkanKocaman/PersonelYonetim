@@ -1,3 +1,5 @@
+import type { Iletisim } from "./Iletisim";
+
 export interface DepartmanModel {
   id: string;
   ad: string;
@@ -6,6 +8,7 @@ export interface DepartmanModel {
   sirketId: string;
   sirketAd: string;
   aciklama: string | undefined;
+  iletisim: Iletisim;
   isActive: boolean;
   createdAt: Date;
   createUserId: string;

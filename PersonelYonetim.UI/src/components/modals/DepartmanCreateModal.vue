@@ -3,12 +3,25 @@ import type { DepartmanCreateRequest } from "@/models/request-models/DepartmanCr
 import type { SubeModel } from "@/models/entity-models/SubeModel";
 import DepartmanService from "@/services/DepartmanService";
 import type { PropType } from "vue";
+import { onMounted } from "vue";
+import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
+
 const props = defineProps({
   subeler: {
     type: Array as PropType<SubeModel[]>,
     required: true,
   },
+  editMode: {
+    type: Boolean,
+    default: false
+  },
+  departman: {
+    type: Object as PropType<DepartmanModel>,
+    default: null
+  }
 });
+
+const emit = defineEmits(['closeModal', 'departmanCreated', 'departmanUpdated']);
 
 const request: DepartmanCreateRequest = {
   ad: "",
@@ -20,9 +33,33 @@ const request: DepartmanCreateRequest = {
   },
 };
 
+// Düzenleme modunda ise mevcut departman bilgilerini forma dolduruyoruz
+onMounted(() => {
+  if (props.editMode && props.departman) {
+    request.ad = props.departman.ad;
+    request.aciklama = props.departman.aciklama || null;
+    request.subeId = props.departman.subeId.toString();
+    request.iletisim.eposta = props.departman.iletisim.eposta;
+    request.iletisim.telefon = props.departman.iletisim.telefon;
+  }
+});
+
 const handleDepartmanCreate = async () => {
-  const response = await DepartmanService.departmanlarCreate(request);
-  console.log(response);
+  let response;
+  
+  try {
+    if (props.editMode && props.departman) {
+      response = await DepartmanService.departmanlarUpdate(Number(props.departman.id), request);
+      emit('departmanUpdated', true);
+    } else {
+      response = await DepartmanService.departmanlarCreate(request);
+      emit('departmanCreated', true);
+    }
+    
+    emit('closeModal', false);
+  } catch (error) {
+    console.error(error);
+  }
 };
 </script>
 <template>
@@ -34,7 +71,9 @@ const handleDepartmanCreate = async () => {
         <div
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Departman Oluştur</h3>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ props.editMode ? 'Departman Düzenle' : 'Departman Oluştur' }}
+          </h3>
           <button
             type="button"
             class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -92,7 +131,6 @@ const handleDepartmanCreate = async () => {
                     v-model="request.iletisim.eposta"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="info@sirket1.com"
-                    required
                   />
                 </div>
                 <div class="mb-2">
@@ -108,7 +146,6 @@ const handleDepartmanCreate = async () => {
                     v-model="request.iletisim.telefon"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="0850 000 00 00"
-                    required
                   />
                 </div>
               </div>
@@ -148,6 +185,7 @@ const handleDepartmanCreate = async () => {
                 type="text"
                 name="aciklama"
                 id="aciklama"
+                v-model="request.aciklama"
                 class="bg-gray-50 border max-h-20 min-h-20 border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                 placeholder=""
               ></textarea>
@@ -157,7 +195,7 @@ const handleDepartmanCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Oluştur
+              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
             </button>
           </form>
         </div>

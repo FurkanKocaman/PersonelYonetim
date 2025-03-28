@@ -7,6 +7,10 @@ export async function authGuard(
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) {
+  document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
+  next();
+
+  /*
   await useUserStore().getUser();
   const user: UserModel = useUserStore().user;
 
@@ -19,4 +23,5 @@ export async function authGuard(
     document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
     next();
   }
+  */
 }

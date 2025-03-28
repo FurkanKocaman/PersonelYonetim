@@ -7,4 +7,5 @@ export interface MenuItem {
   active: boolean;
   path: string;
   roles?: number[];
+  subItems?: MenuItem[];
 }

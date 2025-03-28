@@ -1,16 +1,29 @@
 <script setup lang="ts">
 import type { SubeCreateRequest } from "@/models/request-models/SubeCreateRequest";
 import type { SirketModel } from "@/models/entity-models/SirketModel";
+import type { SubeModel } from "@/models/entity-models/SubeModel";
 
 import SubeService from "@/services/SubeService";
-import { reactive, type PropType } from "vue";
+import { reactive, onMounted, type PropType } from "vue";
 
 const props = defineProps({
   sirketler: {
     type: Array as PropType<SirketModel[]>,
     required: true,
   },
+  editMode: {
+    type: Boolean,
+    default: false
+  },
+  sube: {
+    type: Object as PropType<SubeModel>,
+    default: null
+  }
 });
+
+// Modal'ı kapatmak ve işlem sonrası yenileme için emit tanımlıyoruz
+const emit = defineEmits(["closeModal", "refresh"]);
+
 const request: SubeCreateRequest = reactive({
   ad: "",
   aciklama: null,
@@ -27,9 +40,39 @@ const request: SubeCreateRequest = reactive({
   },
 });
 
+// Düzenleme modunda ise mevcut şube bilgilerini forma dolduruyoruz
+onMounted(() => {
+  if (props.editMode && props.sube) {
+    request.ad = props.sube.ad;
+    request.aciklama = props.sube.aciklama || null;
+    request.sirketId = props.sube.sirketId.toString();
+    request.adres.ulke = props.sube.adres.ulke;
+    request.adres.sehir = props.sube.adres.sehir;
+    request.adres.ilce = props.sube.adres.ilce;
+    request.adres.tamAdres = props.sube.adres.tamAdres;
+    request.iletisim.eposta = props.sube.iletisim.eposta;
+    request.iletisim.telefon = props.sube.iletisim.telefon;
+  }
+});
+
 const handleSubeCreate = async () => {
-  const response = await SubeService.subelerCreate(request);
-  console.log(response);
+  try {
+    let response;
+    
+    if (props.editMode && props.sube) {
+      // Düzenleme modunda güncelleme işlemi yapılıyor
+      response = await SubeService.subelerUpdate(Number(props.sube.id), request);
+    } else {
+      // Yeni şube oluşturma işlemi yapılıyor
+      response = await SubeService.subelerCreate(request);
+    }
+    
+    console.log(response);
+    emit("refresh"); // Listeyi yenilemek için emit
+    emit("closeModal", false); // Modal'ı kapatmak için emit
+  } catch (error) {
+    console.error("Şube işlemi sırasında hata oluştu:", error);
+  }
 };
 </script>
 <template>
@@ -41,7 +84,9 @@ const handleSubeCreate = async () => {
         <div
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Şube Oluştur</h3>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ props.editMode ? 'Şube Düzenle' : 'Şube Oluştur' }}
+          </h3>
           <button
             type="button"
             class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -215,7 +260,7 @@ const handleSubeCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Oluştur
+              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
             </button>
           </form>
         </div>

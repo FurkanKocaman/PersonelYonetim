@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import type { SirketCreateRequest } from "@/models/request-models/SirketCreateRequest";
+import type { SirketModel } from "@/models/entity-models/SirketModel";
 import SirketService from "@/services/SirketService";
-import { reactive } from "vue";
+import { reactive, onMounted } from "vue";
+
+const props = defineProps<{
+  editMode?: boolean;
+  sirket?: SirketModel;
+}>();
+
+const emit = defineEmits(["closeModal", "refresh"]);
 
 const request: SirketCreateRequest = reactive({
   ad: "",
@@ -19,9 +27,36 @@ const request: SirketCreateRequest = reactive({
   },
 });
 
+onMounted(() => {
+  if (props.editMode && props.sirket) {
+    request.ad = props.sirket.ad;
+    request.aciklama = props.sirket.aciklama || null;
+    request.logoUrl = props.sirket.logoUrl || null;
+    request.adres.ulke = props.sirket.adres.ulke;
+    request.adres.sehir = props.sirket.adres.sehir;
+    request.adres.ilce = props.sirket.adres.ilce;
+    request.adres.tamAdres = props.sirket.adres.tamAdres;
+    request.iletisim.eposta = props.sirket.iletisim.eposta;
+    request.iletisim.telefon = props.sirket.iletisim.telefon;
+  }
+});
+
 const handleSirketCreate = async () => {
-  const response = await SirketService.sirketlerCreate(request);
-  console.log(response);
+  try {
+    let response;
+    
+    if (props.editMode && props.sirket) {
+      response = await SirketService.sirketlerUpdate(Number(props.sirket.id), request);
+    } else {
+      response = await SirketService.sirketlerCreate(request);
+    }
+    
+    console.log(response);
+    emit("refresh"); 
+    emit("closeModal", false); 
+  } catch (error) {
+    console.error("Şirket işlemi sırasında hata oluştu:", error);
+  }
 };
 </script>
 <template>
@@ -33,7 +68,9 @@ const handleSirketCreate = async () => {
         <div
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Şirket Oluştur</h3>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ props.editMode ? 'Şirket Düzenle' : 'Şirket Oluştur' }}
+          </h3>
           <button
             type="button"
             class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -54,7 +91,7 @@ const handleSirketCreate = async () => {
                 d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
               />
             </svg>
-            <span class="sr-only">Close modal</span>
+            <span class="sr-only">Kapat</span>
           </button>
         </div>
 
@@ -198,7 +235,7 @@ const handleSirketCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              Oluştur
+              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
             </button>
           </form>
         </div>

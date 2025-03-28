@@ -15,34 +15,41 @@ const quickAccessButtons = ref([
   },
   {
     id: 2,
+    title: "Şirket Yönetimi",
+    icon: "building",
+    color: "bg-teal-500 hover:bg-teal-600",
+    route: "/dashboard/sirket"
+  },
+  {
+    id: 3,
     title: "Bordro Oluştur",
     icon: "file-invoice-dollar",
     color: "bg-green-500 hover:bg-green-600",
     route: "/dashboard"
   },
   {
-    id: 3,
+    id: 4,
     title: "İzin Talebi",
     icon: "calendar-plus",
     color: "bg-purple-500 hover:bg-purple-600",
     route: "/dashboard/izin/talep"
   },
   { 
-    id: 4, 
+    id: 5, 
     title: "Rapor Oluştur", 
     icon: "chart-line", 
     color: "bg-amber-500 hover:bg-amber-600",
     route: "/dashboard"
   },
   { 
-    id: 5, 
+    id: 6, 
     title: "Mesai Kaydet", 
     icon: "clock", 
     color: "bg-red-500 hover:bg-red-600",
     route: "/dashboard"
   },
   {
-    id: 6,
+    id: 7,
     title: "İzin Yönetimi",
     icon: "calendar-alt",
     color: "bg-indigo-500 hover:bg-indigo-600",

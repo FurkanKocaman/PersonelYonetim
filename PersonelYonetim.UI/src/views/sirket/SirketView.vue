@@ -13,6 +13,10 @@ import SirketCreateModal from "@/components/modals/SirketCreateModal.vue";
 import SubeCreateModal from "@/components/modals/SubeCreateModal.vue";
 import DepartmanCreateModal from "@/components/modals/DepartmanCreateModal.vue";
 import PozisyonCreateModal from "@/components/modals/PozisyonCreateModal.vue";
+import SirketDetailModal from "@/components/modals/SirketDetailModal.vue";
+import SubeDetailModal from "@/components/modals/SubeDetailModal.vue";
+import DepartmanDetailModal from "@/components/modals/DepartmanDetailModal.vue";
+import PozisyonDetailModal from "@/components/modals/PozisyonDetailModal.vue";
 
 const expand = ref({
   sirketler: false,
@@ -39,6 +43,19 @@ const showModal = ref({
   pozisyonlar: false,
 });
 
+const showDetailModal = ref({
+  sirketler: false,
+  subeler: false,
+  departmanlar: false,
+  pozisyonlar: false,
+});
+
+const editMode = ref(false);
+const selectedSirket = ref<SirketModel | null>(null);
+const selectedSube = ref<SubeModel | null>(null);
+const selectedDepartman = ref<DepartmanModel | null>(null);
+const selectedPozisyon = ref<PozisyonModel | null>(null);
+
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
 const subeler: Ref<SubeModel[] | undefined> = ref([]);
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
@@ -46,20 +63,27 @@ const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
 
 const filteredSirketler = computed<Record<string, unknown>[]>(() => {
   return (sirketler.value || []).map(
-    ({ ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
+    ({ id, ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
+      id,
       ad,
       eposta: iletisim.eposta,
-      adres: adres.sehir,
-      createdAt: new Date(createdAt).toDateString(),
+      telefon: iletisim.telefon,
+      adres: `${adres.ilce}, ${adres.sehir}`,
       createUserName,
-      isActive: isActive ? "Aktif" : "Pasif", // "isActive" değerini metne dönüştür
+      createdAt: new Date(createdAt).toLocaleDateString("tr-TR"),
+      isActive: isActive ? "Aktif" : "Pasif",
+      actions: {
+        detail: (row: any) => handleSirketDetail(row),
+        edit: (row: any) => handleSirketEdit(row),
+      },
     })
   );
 });
 
 const filteredSubeler = computed<Record<string, unknown>[]>(() => {
   return (subeler.value || []).map(
-    ({ ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
+    ({ id, ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
+      id,
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
@@ -67,29 +91,43 @@ const filteredSubeler = computed<Record<string, unknown>[]>(() => {
       createUserName: createUserName,
       sirketAd,
       isActive: isActive ? "Aktif" : "Pasif",
+      actions: {
+        detail: (row: any) => handleSubeDetail(row),
+        edit: (row: any) => handleSubeEdit(row),
+      },
     })
   );
 });
 const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
   return (departmanlar.value || []).map(
-    ({ ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
+    ({ id, ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
+      id,
       ad,
       createdAt: new Date(createdAt).toDateString(),
       createUserName: createUserName,
       subeAd,
       sirketAd,
       isActive: isActive ? "Aktif" : "Pasif",
+      actions: {
+        detail: (row: any) => handleDepartmanDetail(row),
+        edit: (row: any) => handleDepartmanEdit(row),
+      },
     })
   );
 });
 
 const filteredPozisyonlar = computed<Record<string, unknown>[]>(() => {
-  return (pozisyonlar.value || []).map(({ ad, createdAt, createUserName, sirketAd, isActive }) => ({
+  return (pozisyonlar.value || []).map(({ id, ad, createdAt, createUserName, sirketAd, isActive }) => ({
+    id,
     ad,
     createdAt: new Date(createdAt).toDateString(),
     createUserName: createUserName,
     sirketAd,
     isActive: isActive ? "Aktif" : "Pasif",
+    actions: {
+      detail: (row: any) => handlePozisyonDetail(row),
+      edit: (row: any) => handlePozisyonEdit(row),
+    },
   }));
 });
 
@@ -100,6 +138,7 @@ onMounted(async () => {
   getDepartmanlar();
   getPozisyonlar();
 });
+
 const getSirketler = async () => {
   loading.value.sirketler = true;
   try {
@@ -154,6 +193,131 @@ const getPozisyonlar = async () => {
     loading.value.pozisyonlar = false;
   }
 };
+
+// Şirket detay fonksiyonu
+const handleSirketDetail = (row: any) => {
+  const sirket = sirketler.value?.find((s) => s.id === row.id);
+  if (sirket) {
+    selectedSirket.value = sirket;
+    showDetailModal.value.sirketler = true;
+  }
+};
+
+// Şirket düzenleme fonksiyonu
+const handleSirketEdit = (row: any) => {
+  const sirket = sirketler.value?.find((s) => s.id === row.id);
+  if (sirket) {
+    selectedSirket.value = sirket;
+    editMode.value = true;
+    showModal.value.sirketler = true;
+  }
+};
+
+// Şube detay fonksiyonu
+const handleSubeDetail = (row: any) => {
+  const sube = subeler.value?.find((s) => s.id === row.id);
+  if (sube) {
+    selectedSube.value = sube;
+    showDetailModal.value.subeler = true;
+  }
+};
+
+// Şube düzenleme fonksiyonu
+const handleSubeEdit = (row: any) => {
+  const sube = subeler.value?.find((s) => s.id === row.id);
+  if (sube) {
+    selectedSube.value = sube;
+    editMode.value = true;
+    showModal.value.subeler = true;
+  }
+};
+
+// Departman detay fonksiyonu
+const handleDepartmanDetail = (row: any) => {
+  const departman = departmanlar.value?.find((d) => d.id === row.id);
+  if (departman) {
+    selectedDepartman.value = departman;
+    showDetailModal.value.departmanlar = true;
+  }
+};
+
+// Departman düzenleme fonksiyonu
+const handleDepartmanEdit = (row: any) => {
+  const departman = departmanlar.value?.find((d) => d.id === row.id);
+  if (departman) {
+    selectedDepartman.value = departman;
+    editMode.value = true;
+    showModal.value.departmanlar = true;
+  }
+};
+
+// Pozisyon detay fonksiyonu
+const handlePozisyonDetail = (row: any) => {
+  const pozisyon = pozisyonlar.value?.find((p) => p.id === row.id);
+  if (pozisyon) {
+    selectedPozisyon.value = pozisyon;
+    showDetailModal.value.pozisyonlar = true;
+  }
+};
+
+// Pozisyon düzenleme fonksiyonu
+const handlePozisyonEdit = (row: any) => {
+  const pozisyon = pozisyonlar.value?.find((p) => p.id === row.id);
+  if (pozisyon) {
+    selectedPozisyon.value = pozisyon;
+    editMode.value = true;
+    showModal.value.pozisyonlar = true;
+  }
+};
+
+// Detay modalından düzenleme moduna geçiş
+const handleEditFromDetail = (sirket: SirketModel) => {
+  selectedSirket.value = sirket;
+  showDetailModal.value.sirketler = false;
+  editMode.value = true;
+  showModal.value.sirketler = true;
+};
+
+// Şube detay modalından düzenleme moduna geçiş
+const handleEditFromSubeDetail = (sube: SubeModel) => {
+  selectedSube.value = sube;
+  showDetailModal.value.subeler = false;
+  editMode.value = true;
+  showModal.value.subeler = true;
+};
+
+// Departman detay modalından düzenleme moduna geçiş
+const handleEditFromDepartmanDetail = (departman: DepartmanModel) => {
+  selectedDepartman.value = departman;
+  showDetailModal.value.departmanlar = false;
+  editMode.value = true;
+  showModal.value.departmanlar = true;
+};
+
+// Pozisyon detay modalından düzenleme moduna geçiş
+const handleEditFromPozisyonDetail = (pozisyon: PozisyonModel) => {
+  selectedPozisyon.value = pozisyon;
+  showDetailModal.value.pozisyonlar = false;
+  editMode.value = true;
+  showModal.value.pozisyonlar = true;
+};
+
+// Modal kapatma işlemi
+const handleCloseModal = (type: string) => {
+  showModal.value[type as keyof typeof showModal.value] = false;
+  showDetailModal.value[type as keyof typeof showDetailModal.value] = false;
+  editMode.value = false;
+  selectedSirket.value = null;
+  selectedSube.value = null;
+  selectedDepartman.value = null;
+  selectedPozisyon.value = null;
+};
+
+// Yeni kayıt oluşturma modalını açma
+const handleNewRecord = (type: string) => {
+  editMode.value = false;
+  showModal.value[type as keyof typeof showModal.value] = true;
+};
 </script>
 
 <template>
@@ -194,15 +358,10 @@ const getPozisyonlar = async () => {
               {{ count.sirketler || 0 }}
             </div>
             <button
-              type="button"
-              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
-                () => {
-                  showModal.sirketler = !showModal.sirketler;
-                }
-              "
+              class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
+              @click="handleNewRecord('sirketler')"
             >
-              Yeni Ekle
+              Yeni Şirket
             </button>
           </div>
         </div>
@@ -212,15 +371,25 @@ const getPozisyonlar = async () => {
           ></div>
         </div>
         <SirketCreateModal
-          @close-modal="(p) => (showModal.sirketler = p)"
+          :edit-mode="editMode"
+          :sirket="selectedSirket as SirketModel"
+          @close-modal="(p) => handleCloseModal('sirketler')"
+          @refresh="getSirketler"
           v-if="showModal.sirketler"
+        />
+
+        <SirketDetailModal
+          :sirket="selectedSirket as SirketModel"
+          @close-modal="(p) => (showDetailModal.sirketler = p)"
+          @edit-sirket="handleEditFromDetail"
+          v-if="showDetailModal.sirketler && selectedSirket"
         />
 
         <TableLayout
           v-if="expand.sirketler && !loading.sirketler"
-          :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
+          :tableHeaders="['Ad', 'Eposta', 'Telefon', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
           :tableContent="filteredSirketler"
-          :islemler="['edit', 'detaylar']"
+          :islemler="['detail', 'edit']"
         />
       </div>
       <div
@@ -276,6 +445,13 @@ const getPozisyonlar = async () => {
           v-if="showModal.subeler"
         />
 
+        <SubeDetailModal
+          :sube="selectedSube as SubeModel"
+          @close-modal="(p) => (showDetailModal.subeler = p)"
+          @edit-sube="handleEditFromSubeDetail"
+          v-if="showDetailModal.subeler && selectedSube"
+        />
+
         <TableLayout
           v-if="expand.subeler && !loading.subeler"
           :tableHeaders="[
@@ -288,7 +464,7 @@ const getPozisyonlar = async () => {
             'Durum',
           ]"
           :tableContent="filteredSubeler"
-          :islemler="['edit', 'detaylar']"
+          :islemler="['detail', 'edit']"
         />
       </div>
       <div
@@ -345,11 +521,18 @@ const getPozisyonlar = async () => {
           v-if="showModal.departmanlar"
         />
 
+        <DepartmanDetailModal
+          :departman="selectedDepartman as DepartmanModel"
+          @close-modal="(p) => (showDetailModal.departmanlar = p)"
+          @edit-departman="handleEditFromDepartmanDetail"
+          v-if="showDetailModal.departmanlar && selectedDepartman"
+        />
+
         <TableLayout
           v-if="expand.departmanlar && !loading.departmanlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
           :tableContent="filteredDepartmanlar"
-          :islemler="['edit', 'detaylar']"
+          :islemler="['detail', 'edit']"
         />
       </div>
       <div
@@ -406,11 +589,18 @@ const getPozisyonlar = async () => {
           v-if="showModal.pozisyonlar"
         />
 
+        <PozisyonDetailModal
+          :pozisyon="selectedPozisyon as PozisyonModel"
+          @close-modal="(p) => (showDetailModal.pozisyonlar = p)"
+          @edit-pozisyon="handleEditFromPozisyonDetail"
+          v-if="showDetailModal.pozisyonlar && selectedPozisyon"
+        />
+
         <TableLayout
           v-if="expand.pozisyonlar && !loading.pozisyonlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
           :tableContent="filteredPozisyonlar"
-          :islemler="['edit', 'detaylar']"
+          :islemler="['detail', 'edit']"
         />
       </div>
     </div>
