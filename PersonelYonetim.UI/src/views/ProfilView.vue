@@ -2,15 +2,212 @@
 import { ref, computed, onMounted } from "vue";
 const activeTab = ref('profilim');
 const activeTab2 = ref('pozisyon');
+const activeTab3 = ref('izinler');
 const activeTab4 = ref('harcama');
+const activeTab5 = ref('egitimlerim');
 const setActiveTab = (tab: string) => {
   activeTab.value = tab;
 };
 const setActiveTab2 = (tab: string) => {
   activeTab2.value = tab;
 };
+const setActiveTab3 = (tab: string) => {
+  activeTab3.value = tab;
+};
+
 const setActiveTab4 = (tab: string) => {
   activeTab4.value = tab;
+};
+
+const setActiveTab5 = (tab: string) => {
+  activeTab5.value = tab;
+};
+
+// kariyerim-calısma takvimi kısmı
+const calismaTakvimiVeriler = ref([
+  { baslangic: "2020-10-13", bitis: "", calismaTakvimi: "Genel çalışma tablosu", atamaTarihi: "2023-01-16" },
+  { baslangic: "2019-08-02", bitis: "2020-10-12", calismaTakvimi: "Genel çalışma tablosu", atamaTarihi: "2023-02-07" }
+]);
+
+// Sıralama değişkenleri
+const calismaTakvimisiralamaAnahtari = ref("");
+const calismaTakvimisiralamaYon = ref(1);
+
+
+const calismaTakvimiSirala = (anahtar) => {
+  if (calismaTakvimisiralamaAnahtari.value === anahtar) {
+    calismaTakvimisiralamaYon.value *= -1;
+  } else {
+    calismaTakvimisiralamaAnahtari.value = anahtar;
+    calismaTakvimisiralamaYon.value = 1;
+  }
+  veriler.value.sort((a, b) => {
+    let degerA = new Date(a[anahtar]).getTime();
+    let degerB = new Date(b[anahtar]).getTime();
+    return degerA > degerB ? calismaTakvimisiralamaYon.value : -calismaTakvimisiralamaYon.value;
+  });
+};
+
+
+const calismaTakvimiTarihFormatla = (tarih) => {
+  if (!tarih) return "—";
+  return new Date(tarih).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+};
+
+
+const hesaplaSure = (baslangic, bitis) => {
+  const basTarih = new Date(baslangic);
+  const bitTarih = bitis ? new Date(bitis) : new Date();
+  
+  const farkMs = bitTarih - basTarih;
+  const gun = Math.floor(farkMs / (1000 * 60 * 60 * 24));
+  const ay = Math.floor(gun / 30);
+  const yil = Math.floor(ay / 12);
+
+  return `${yil} yıl ${ay % 12} ay ${gun % 30} gün`;
+};
+
+
+const calismaTakvimiFiltrelenmisVeri = computed(() => veriler.value);
+
+
+// fazla mesai kısmı
+const data = ref([
+  {
+    date: "2024-01-31",
+    description: "OCAK AYI MESAİ ÜCRETİ",
+    status: "Onaylandı",
+    amount: 738.89,
+    created_at: "2024-02-26T17:14",
+    payroll: "Dahil Değil",
+    paid: false,
+  },
+  {
+    date: "2023-12-31",
+    description: "ARALIK AYI MESAİ ÜCRETİ",
+    status: "Onaylandı",
+    amount: 4375.0,
+    created_at: "2024-02-26T17:13",
+    payroll: "Dahil Değil",
+    paid: true,
+  },
+]);
+const sortKey = ref("");
+const sortDirection = ref(1);
+
+const sortedData = computed(() => {
+  if (!sortKey.value) return data.value;
+  return [...data.value].sort((a, b) => {
+    let valueA = a[sortKey.value];
+    let valueB = b[sortKey.value];
+
+    if (typeof valueA === "string") valueA = valueA.toLowerCase();
+    if (typeof valueB === "string") valueB = valueB.toLowerCase();
+
+    return valueA > valueB ? sortDirection.value : -sortDirection.value;
+  });
+});
+const sortTable = (key) => {
+  if (sortKey.value === key) {
+    sortDirection.value *= -1;
+  } else {
+    sortKey.value = key;
+    sortDirection.value = 1;
+  }
+};
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatDateTime = (date) => {
+  return new Date(date).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("tr-TR", {
+    style: "currency",
+    currency: "TRY",
+  }).format(amount);
+};
+
+
+// mesailerim kısmı
+
+const veriler = ref([
+  { baslangicTarihi: "2024-11-20T21:00", sure: "3 saat", aciklama: "Bilet: 8105-YKS-Online kayıt başvurusu...", durum: "Onaylandı", olusturmaTarihi: "2024-11-21T01:16" },
+  { baslangicTarihi: "2024-11-10T18:30", sure: "1 saat", aciklama: "Tarsus Bilet No: 9241 HAZIRLIK DETAY BİLGİSİ...", durum: "Onaylandı", olusturmaTarihi: "2024-11-10T23:55" },
+  { baslangicTarihi: "2024-11-09T23:00", sure: "1 saat", aciklama: "Trakya hazırlık detay gitmeyenler 440 öğrenci...", durum: "Onaylandı", olusturmaTarihi: "2024-11-10T01:36" },
+  { baslangicTarihi: "2024-11-07T23:00", sure: "1 saat", aciklama: "Rize hazırlık detay listesinin gönderilmesi tamamlandı...", durum: "Onaylandı", olusturmaTarihi: "2024-11-08T00:01" },
+  { baslangicTarihi: "2024-10-21T23:00", sure: "2 saat", aciklama: "YÖS için uyruk program kontenjan görüntüleme...", durum: "Onaylandı", olusturmaTarihi: "2024-10-22T02:21" }
+]);
+// Filtreleme değişkenleri
+const secilenYil = ref("");
+const secilenAy = ref("");
+const secilenDurum = ref("");
+
+
+const aylar = [
+  { etiket: "Ocak", deger: "01" }, { etiket: "Şubat", deger: "02" }, { etiket: "Mart", deger: "03" },
+  { etiket: "Nisan", deger: "04" }, { etiket: "Mayıs", deger: "05" }, { etiket: "Haziran", deger: "06" },
+  { etiket: "Temmuz", deger: "07" }, { etiket: "Ağustos", deger: "08" }, { etiket: "Eylül", deger: "09" },
+  { etiket: "Ekim", deger: "10" }, { etiket: "Kasım", deger: "11" }, { etiket: "Aralık", deger: "12" }
+];
+
+const yillar = Array.from({ length: 2025 - 2007 + 1 }, (_, i) => (2025 - i).toString());
+
+// Filtrelenmiş veriyi hesaplama
+const filtrelenmisVeri = computed(() => {
+  return veriler.value.filter(kayit => {
+    const yil = kayit.baslangicTarihi.split("-")[0];
+    const ay = kayit.baslangicTarihi.split("-")[1];
+
+    return (
+      (secilenYil.value === "" || secilenYil.value === yil) &&
+      (secilenAy.value === "" || secilenAy.value === ay) &&
+      (secilenDurum.value === "" || secilenDurum.value === kayit.durum)
+    );
+  });
+});
+// Sıralama için değişkenler
+const siralamaAnahtari = ref("");
+const siralamaYon = ref(1);
+
+// Tablo sıralama fonksiyonu
+const sirala = (anahtar) => {
+  if (siralamaAnahtari.value === anahtar) {
+    siralamaYon.value *= -1;
+  } else {
+    siralamaAnahtari.value = anahtar;
+    siralamaYon.value = 1;
+  }
+  veriler.value.sort((a, b) => {
+    let degerA = new Date(a[anahtar]).getTime();
+    let degerB = new Date(b[anahtar]).getTime();
+    return degerA > degerB ? siralamaYon.value : -siralamaYon.value;
+  });
+};
+
+const tarihFormatla = (tarih) => {
+  return new Date(tarih).toLocaleDateString("tr-TR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 };
 </script>
 
@@ -568,33 +765,33 @@ const setActiveTab4 = (tab: string) => {
 <div v-if="activeTab === 'kariyerim'" class="space-y-6">
     <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab2('pozisyon')"
-            :class="activeTab2 === 'pozisyon' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab2 === 'pozisyon' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Pozisyon
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab2('maas')"
-            :class="activeTab2 === 'maas' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab2 === 'maas' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Maaş
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab2('calismaTakvimi')"
-            :class="activeTab2 === 'calismaTakvimi' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab2 === 'calismaTakvimi' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Çalışma Takvimi
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab2('performans')"
-            :class="activeTab2 === 'performans' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab2 === 'performans' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Performans
         </button>
@@ -623,6 +820,41 @@ const setActiveTab4 = (tab: string) => {
 
         </div>
 
+        <div v-if="activeTab2 === 'calismaTakvimi'" class="space-y-6">
+
+            <div class="kapsayici">
+    <!-- Tablo -->
+    <table>
+      <thead>
+        <tr>
+          <th @click="calismaTakvimiSirala('baslangic')">Başlangıç ⬇</th>
+          <th>Bitiş</th>
+          <th>Süre</th>
+          <th>Çalışma Takvimi</th>
+          <th>Atama Tarihi</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(kayit, index) in filtrelenmisVeri" :key="index">
+          <td>
+            {{ calismaTakvimiTarihFormatla(kayit.baslangic) }}
+            <span v-if="!kayit.bitis" class="etiket-guncel">Güncel</span>
+          </td>
+          <td>{{ kayit.bitis ? calismaTakvimiTarihFormatla(kayit.bitis) : "—" }}</td>
+          <td>{{ hesaplaSure(kayit.baslangic, kayit.bitis) }}</td>
+          <td>{{ kayit.calismaTakvimi }}</td>
+          <td>{{ calismaTakvimiTarihFormatla(kayit.atamaTarihi) }}</td>
+          <td>
+            <button class="menu-btn">⋮</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="toplam-kayit">Toplam {{ calismaTakvimiFiltrelenmisVeri.length }}</div>
+  </div>
+        </div>
+
         <div v-if="activeTab2 === 'performans'" class="space-y-6">
 
 <div class="flex justify-center items-center h-screen">
@@ -641,44 +873,73 @@ const setActiveTab4 = (tab: string) => {
 
 </div>
 
-<!-- ödemeler kısmı -->
+<!-- izinlerim kısmı -->
+<div v-if="activeTab === 'izinlerim'" class="space-y-6">
+    <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
+          <li class="mr-1">      
+            <button class="bg-sky-700 text-white  py-2 px-4 rounded flex items-center"
+            @click="setActiveTab3('izinler')"
+            :class="activeTab3 === 'izinler' ? 'bg-sky-900' : 'bg-sky-700 '"
+          >
+          İzinler
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
+            @click="setActiveTab3('ekstraIzinler')"
+            :class="activeTab3 === 'ekstraIzinler' ? 'bg-sky-900' : 'bg-sky-700 '"
+          >
+          Ekstra İzinler
+        </button>
+          </li>
+        </ul>
+        <div v-if="activeTab3 === 'izinler'" class="space-y-6">
+            
+        </div>
+
+        <div v-if="activeTab3 === 'ekstraIzinler'" class="space-y-6">
+            
+        </div>
+</div>
+
+<!-- ödemelerim kısmı -->
 <div v-if="activeTab === 'odemelerim'" class="space-y-6">
     <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white  py-2 px-4 rounded flex items-center"
             @click="setActiveTab4('harcama')"
-            :class="activeTab4 === 'harcama' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab4 === 'harcama' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Harcama
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab4('fazlaMesai')"
-            :class="activeTab4 === 'fazlaMesai' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab4 === 'fazlaMesai' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Fazla Mesai
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab4('ekOdemeler')"
-            :class="activeTab4 === 'ekOdemeler' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab4 === 'ekOdemeler' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Ek ödemeler
         </button>
           </li>
           <li class="mr-1">      
-            <button class="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
             @click="setActiveTab4('ozelKesintiler')"
-            :class="activeTab4 === 'ozelKesintiler' ? 'bg-sky-900' : 'bg-gray-400 '"
+            :class="activeTab4 === 'ozelKesintiler' ? 'bg-sky-900' : 'bg-sky-700 '"
           >
           Özel Kesintiler
         </button>
           </li>
         </ul>
 
-        <div v-if="activeTab4 === 'fazlaMesai'" class="space-y-6">
+        <div v-if="activeTab4 === 'ekOdemeler'" class="space-y-6">
 
             <div class="flex justify-center items-center h-screen">
   <div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
@@ -690,10 +951,7 @@ const setActiveTab4 = (tab: string) => {
       
       
        <br> <br>
-      <p class="text-gray-800 text-l mb-4" >Maaş bilgisi bulunamadı</p>
-      
-     
-      <p class="text-gray-700 text-sm">Bordro işlemleri için bir maaş bilgisi ekleyin</p>
+      <p class="text-gray-800 text-l mb-4" >Kayıtlı ödeme bulunamadı</p>
     </div>
   </div>
 </div>
@@ -710,17 +968,309 @@ const setActiveTab4 = (tab: string) => {
 
 
 <br> <br>
-<p class="text-gray-800 text-l mb-4" >Kayıtlı Ödeme Bulunamadı</p>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı ödeme bulunamadı</p>
+</div>
+</div>
+</div>
+
+       </div>
+
+
+       <div v-if="activeTab4 === 'harcama'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+    <i class="fa-solid fa-wallet fa-2xl" style="color: #3562b1;"></i>
+
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı ödeme bulunamadı</p>
+</div>
+</div>
+</div>
+
+       </div>
+
+
+        <!-- fazla mesai -->
+       <div v-if="activeTab4 === 'fazlaMesai'" class="space-y-6">
+
+        <div class="container">
+    <table>
+      <thead>
+        <tr>
+          <th @click="sortTable('date')">Tarih</th>
+          <th>Açıklama</th>
+          <th>Durum</th>
+          <th @click="sortTable('amount')">Miktar</th>
+          <th @click="sortTable('created_at')">Oluşturulma Tarihi</th>
+          <th>Bordro</th>
+          <th>Ödendi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in sortedData" :key="index">
+          <td>{{ formatDate(item.date) }}</td>
+          <td>{{ item.description }}</td>
+          <td>
+            <span class="status">{{ item.status }}</span>
+          </td>
+          <td>{{ formatCurrency(item.amount) }}</td>
+          <td>{{ formatDateTime(item.created_at) }}</td>
+          <td>{{ item.payroll }}</td>
+          <td>
+            <span v-if="item.paid" class="paid">✔</span>
+            <span v-else class="not-paid">✖</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+       </div>
+
+</div>
+        <!-- mesailerim -->
+<div v-if="activeTab === 'mesailerim'" class="space-y-6">
+
+    <div class="kapsayici">
+    <!-- Filtreleme Alanı -->
+    <div class="filtreler">
+      <select v-model="secilenYil">
+        <option value="">Yıl</option>
+        <option v-for="yil in yillar" :key="yil" :value="yil">{{ yil }}</option>
+      </select>
+
+      <select v-model="secilenAy">
+        <option value="">Ay</option>
+        <option v-for="ay in aylar" :key="ay.deger" :value="ay.deger">{{ ay.etiket }}</option>
+      </select>
+
+      <select v-model="secilenDurum" style="margin-left:1000px">
+        <option value="">Tümü</option>
+        <option value="Ekstra İzne Çevrildi">Ekstra İzne Çevrildi</option>
+        <option value="Onay Bekliyor">Onay Bekliyor</option>
+        <option value="Onaylandı">Onaylandı</option>
+        <option value="Ödemeye Çevrildi">Ödemeye Çevrildi</option>
+        <option value="Reddedildi">Reddedildi</option>
+      </select>
+    </div>
+
+    <!-- Tablo -->
+    <table>
+      <thead >
+        <tr>
+          <th @click="sirala('baslangicTarihi')">Başlangıç</th>
+          <th>Süre</th>
+          <th>Açıklama</th>
+          <th>Durum</th>
+          <th @click="sirala('olusturmaTarihi')">Oluşturulma Tarihi</th>
+        </tr>
+      </thead>
+      <tbody class="mesaiTablo">
+        <tr v-for="(kayit, index) in filtrelenmisVeri" :key="index">
+          <td>{{ tarihFormatla(kayit.baslangicTarihi) }}</td>
+          <td>{{ kayit.sure }}</td>
+          <td>{{ kayit.aciklama }}</td>
+          <td>
+            <span class="durum">{{ kayit.durum }}</span>
+          </td>
+          <td>{{ tarihFormatla(kayit.olusturmaTarihi) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+    
+</div>
+<!-- diğer -->
+<div v-if="activeTab === 'diger'" class="space-y-6">
+
+    <ul class="flex flex-wrap -mb-px" style="margin-left: 20px;">
+          <li class="mr-1">      
+            <button class="bg-sky-700 text-white  py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('egitimlerim')"
+            :class="activeTab4 === 'egitimlerim' ? 'bg-sky-900' : 'bg-sky-700 '"
+          >
+          Eğitimlerim
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('vizeBelgesiTaleplerim')"
+            :class="activeTab4 === 'vizeBelgesiTaleplerim' ? 'bg-sky-900' : 'bg-sky-700 '"
+          >
+          Vize Belgesi Taleplerim
+        </button>
+          </li>
+          <li class="mr-1">      
+            <button class="bg-sky-700 text-white py-2 px-4 rounded flex items-center"
+            @click="setActiveTab4('zimmetlerim')"
+            :class="activeTab4 === 'zimmetlerim' ? 'bg-sky-900' : 'bg-sky-700 '"
+          >
+          Zimmetlerim
+        </button>
+          </li>
+        </ul>
+
+
+        <div v-if="activeTab4 === 'egitimlerim'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+
+    <i class="fa-regular fa-chart-bar fa-rotate-270 fa-2xl"style="color: #3562b1;" ></i>
+
+
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı eğitim bilgisi bulunamadı</p>
 </div>
 </div>
 </div>
 
 </div>
 
+<div v-if="activeTab4 === 'vizeBelgesiTaleplerim'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+
+    <!-- <i class="fa-solid fa-file-invoice fa-2xl" style="color: #3562b1;"></i> -->
+    <i class="fa-solid fa-file fa-2xl" style="color: #3562b1;"></i>
+
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı vize belgesi süreci bulunamadı</p>
+ </div>
+    </div>
+    </div>
+
+    </div>
+
+    <div v-if="activeTab4 === 'zimmetlerim'" class="space-y-6">
+
+<div class="flex justify-center items-center h-screen">
+<div class="border-2 border-gray-200 p-6 bg-transparent rounded-lg w-96" style="width:1360px;height:200px; margin-top:-500px;">
+<div class="text-center" style="margin-top: 20px;">
+
+
+<i class="fa-solid fa-wallet fa-2xl" style="color: #3562b1;"></i>
+
+
+
+<br> <br>
+<p class="text-gray-800 text-l mb-4" >Kayıtlı zimmet bulunamadı</p>
+</div>
+</div>
+</div>
+
+</div>
 </div>
 
       
 
 
 </template>
+
+<style scoped>
+.container {
+  max-width: 1300px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  
+}
+th {
+  cursor: pointer;
+  font-size:13px;
+}
+td{
+    font-size:13px;
+}
+.status {
+  background: green;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.paid {
+  color: green;
+  font-size: 18px;
+}
+.not-paid {
+  color: red;
+  font-size: 18px;
+}
+
+
+.kapsayici {
+  max-width: 1400px;
+  margin: 20px auto;
+  margin-left:60px;
+  font-family: Arial, sans-serif;
+}
+
+.filtreler {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+select {
+  padding: 5px;
+}
+
+.durum {
+  background: green;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.mesaiTablo tr td {
+   padding-bottom:60px;
+}
+
+
+
+
+.etiket-guncel {
+  background-color: blue;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.toplam-kayit {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+</style>
 
