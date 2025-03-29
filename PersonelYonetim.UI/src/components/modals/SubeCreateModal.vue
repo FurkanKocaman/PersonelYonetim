@@ -35,7 +35,7 @@ const handleSubeCreate = async () => {
 </script>
 <template>
   <div
-    class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-50 backdrop-blur-sm bg-black/30 w-full h-full"
+    class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-10 backdrop-blur-sm bg-black/30 w-full h-full"
   >
     <div class="relative p-4 max-w-4xl w-full max-h-full">
       <div class="relative bg-white rounded-lg shadow-sm dark:bg-neutral-800 w-full">

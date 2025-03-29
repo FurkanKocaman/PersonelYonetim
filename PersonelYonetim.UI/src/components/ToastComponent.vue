@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useToastStore } from "@/stores/ToastStore";
 import { storeToRefs } from "pinia";
-import { onMounted, watch } from "vue";
 
 const toastStore = useToastStore();
 const { toasts } = storeToRefs(toastStore);
@@ -9,17 +8,6 @@ const { toasts } = storeToRefs(toastStore);
 const removeToast = (id: number) => {
   toastStore.removeToast(id);
 };
-onMounted(() => {
-  console.log(toasts);
-});
-
-watch(
-  toasts,
-  (newToasts) => {
-    console.log("Güncellenmiş Toast Listesi:", newToasts);
-  },
-  { deep: true }
-);
 
 const getToastClass = (type: "success" | "error" | "info" | "warning" | "confirmation") => {
   switch (type) {

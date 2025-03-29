@@ -4,7 +4,7 @@ export interface IzinKuralModel {
   aciklama: string;
   sirketId: string;
   sirketAd: string;
-  izinTur: string[];
+  izinTurler: IzinTurResponse[];
   isActive: boolean;
   isDeleted: boolean;
   createUserId: string;
@@ -14,4 +14,13 @@ export interface IzinKuralModel {
   updateAt: string | null;
   updateUserId: string | null;
   updateUserName: string | null;
+}
+
+export interface IzinTurResponse {
+  id: string;
+  ad: string;
+  aciklama?: string;
+  ucretliMi: boolean;
+  limitTipiName: string;
+  kalanGunSayisi: number;
 }

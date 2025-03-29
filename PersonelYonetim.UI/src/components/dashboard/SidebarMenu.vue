@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Roles from "@/models/Roles";
 import type { UserModel } from "@/models/UserModel";
 import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
@@ -128,18 +129,45 @@ const isMenuItemActive = (itemPath: string): boolean => {
               Şirket Sahibi
             </p> -->
             <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd != "" ? user.pozisyonAd + "|" : "" }}
-              {{ user.role }}
+              {{ user.pozisyonAd != "" ? user.pozisyonAd : Roles.getRoleByValue(user.role).name }}
             </p>
           </div>
         </div>
 
         <div class="mt-4 flex-grow">
           <div
+            class="flex items-center mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-sky-100 dark:hover:bg-neutral-700 relative group"
+            :class="{
+              'px-1 py-2 mx-2': sidebarOpen,
+              'px-0 py-3 justify-center mx-3': !sidebarOpen,
+            }"
+          >
+            <div
+              class="w-8 h-8 flex items-center justify-center text-lg"
+              :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
+            >
+              <i class="text-2xl text-sky-600" :class="`fas fa-square-plus`"></i>
+            </div>
+            <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
+            <span
+              class="whitespace-nowrap overflow-hidden transition-all duration-300 text-sm font-semibold text-sky-600"
+              :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
+            >
+              Talep
+            </span>
+            <div
+              v-if="!sidebarOpen"
+              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-50"
+            >
+              Talep
+            </div>
+          </div>
+
+          <div
             v-for="item in filteredMenuItems"
             :key="item.name"
             @click="handleMenuClick(item)"
-            class="flex items-center mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-neutral-700 relative group"
+            class="flex items-center mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-neutral-700 relative group"
             :class="{
               'px-1 py-2 mx-2': sidebarOpen,
               'px-0 py-3 justify-center mx-3': !sidebarOpen,
@@ -152,7 +180,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
               class="w-8 h-8 flex items-center justify-center text-lg"
               :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
             >
-              <i class="size-5" :class="`fas fa-${item.icon}`"></i>
+              <i class="text-base" :class="`fas fa-${item.icon}`"></i>
             </div>
             <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
             <span
@@ -163,7 +191,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
             </span>
             <div
               v-if="!sidebarOpen"
-              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-50"
+              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap"
             >
               {{ item.name }}
             </div>

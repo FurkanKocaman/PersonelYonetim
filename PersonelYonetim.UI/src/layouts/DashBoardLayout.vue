@@ -44,7 +44,14 @@ const menuItems = ref<MenuItem[]>([
     icon: "calendar-alt",
     active: false,
     path: "/dashboard/izin",
-    roles: [Roles.SirketYonetici.value, Roles.SirketYardimci.value, Roles.Admin.value],
+    roles: [
+      Roles.SirketYonetici.value,
+      Roles.SirketYardimci.value,
+      Roles.Admin.value,
+      Roles.DepartmanYonetici.value,
+      Roles.SubeYonetici.value,
+      Roles.SubeYardimci.value,
+    ],
   },
   {
     name: "Maaş Yönetimi",
