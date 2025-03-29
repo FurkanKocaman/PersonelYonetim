@@ -1,7 +1,9 @@
-﻿using GenericRepository;
+﻿
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.UnitOfWork;
 using System.Security.Claims;
 using TS.Result;
 
@@ -13,22 +15,30 @@ public sealed record IzinTalepOnayCommand(
 
 internal sealed class IzinTalepOnayCommandHandler(
     IIzinTalepRepository izinTalepRepository,
+    IHttpContextAccessor httpContextAccessor,
+    IPersonelRepository personelRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<IzinTalepOnayCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(IzinTalepOnayCommand request, CancellationToken cancellationToken)
     {
-        HttpContextAccessor httpContextAccessor = new();
-        string? userIdString = httpContextAccessor.HttpContext!.User.Claims.FirstOrDefault(p => p.Type == ClaimTypes.NameIdentifier)?.Value;
-        if (userIdString == null)
-            return Result<string>.Failure("Kullanıcı bulunamadı");
+        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdString))
+        {
+            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+        }
 
-        var izinTalep = await izinTalepRepository.FirstOrDefaultAsync(p => p.Id == request.Id);
-        if (izinTalep is null)
-            return Result<string>.Failure("İzin talebi bulunamadı");
+        var personel = personelRepository.GetAll()
+            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Select(p => new { p.Id })
+            .FirstOrDefault();
+
+        if (personel is null)
+            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+        IzinTalep izinTalep = await izinTalepRepository.FirstOrDefaultAsync(p => p.Id == request.Id);
 
         izinTalep.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
         izinTalep.DegerlendirilmeTarihi = DateTimeOffset.Now;
-        izinTalep.DegerlendirenId = Guid.Parse(userIdString);
+        izinTalep.DegerlendirenId = personel.Id;
         await unitOfWork.SaveChangesAsync();
         if(request.OnayDurum == 0)
             return Result<string>.Succeed("İzin talebi onaylandı.");

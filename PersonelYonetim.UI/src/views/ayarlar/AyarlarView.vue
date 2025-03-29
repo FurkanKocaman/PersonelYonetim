@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import IzinKuralComponent from "@/components/izinler/IzinKural.vue";
 import { ref, onMounted } from "vue";
 
 // Bileşen durumu

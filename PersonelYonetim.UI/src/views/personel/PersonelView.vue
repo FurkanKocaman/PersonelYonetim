@@ -125,7 +125,7 @@ const openEditModal = (personel: PersonelItem) => {
               id="sube"
               v-model="selectedSube"
               v-on:change="getDepartmanlar()"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
               :disabled="selectedSirket == ''"
             >
               <option :value="undefined" selected>Şube seçiniz</option>
@@ -139,7 +139,7 @@ const openEditModal = (personel: PersonelItem) => {
             <select
               id="departman"
               v-model="selectedDepartman"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
               :disabled="selectedSube == undefined"
             >
               <option :value="undefined" selected>Departman seçiniz</option>

@@ -15,10 +15,14 @@ const tableKeys = computed<string[]>(() => {
 
 const formatValue = (value: unknown) => {
   if (value instanceof Date) {
-    return value.toLocaleDateString();
-    // `${value.getDate()}.${
-    //   value.getMonth() < 10 ? "0" + value.getMonth() : value.getMonth()
-    // }.${value.getFullYear()} `;
+    return new Date(value).toLocaleString("tr-TR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   }
   if (typeof value === "object" && value !== null) {
     return JSON.stringify(value);
@@ -30,7 +34,7 @@ const formatValue = (value: unknown) => {
   return value;
 };
 
-const emit = defineEmits(["edit-click", "detail-click"]);
+const emit = defineEmits(["edit-click", "detail-click", "remove-click"]);
 
 const handleEdit = (item: unknown) => {
   emit("edit-click", item);
@@ -38,6 +42,9 @@ const handleEdit = (item: unknown) => {
 
 const handleDetail = (item: unknown) => {
   emit("detail-click", item);
+};
+const handleRemove = (item: unknown) => {
+  emit("remove-click", item);
 };
 </script>
 
@@ -96,7 +103,7 @@ const handleDetail = (item: unknown) => {
               <button
                 v-if="props.islemler.includes('detaylar')"
                 @click="handleDetail(row)"
-                class="text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 mr-3 cursor-pointer"
+                class="text-sky-600 dark:text-sky-400 mx-2 hover:text-sky-800 dark:hover:text-sky-300 cursor-pointer"
               >
                 <i class="fas fa-eye"></i>
               </button>
@@ -104,9 +111,16 @@ const handleDetail = (item: unknown) => {
               <button
                 v-if="props.islemler.includes('edit')"
                 @click="handleEdit(row)"
-                class="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 cursor-pointer"
+                class="text-amber-600 dark:text-amber-400 mx-2 hover:text-amber-800 dark:hover:text-amber-300 cursor-pointer"
               >
                 <i class="fas fa-edit"></i>
+              </button>
+              <button
+                v-if="props.islemler.includes('remove')"
+                @click="handleRemove(row)"
+                class="text-red-600 hover:text-red-800 cursor-pointer mx-2"
+              >
+                <i class="fas fa-trash"></i>
               </button>
             </td>
           </tr>

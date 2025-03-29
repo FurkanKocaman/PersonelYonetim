@@ -7,18 +7,18 @@ import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel"
 const izinKurallar: Ref<IzinKuralModel[] | undefined> = ref([]);
 
 onMounted(async () => {
-  const response = await IzinService.getIzinKurallar();
+  const response = await IzinService.getIzinKural();
   izinKurallar.value = response?.IzinKurallar;
 });
 
 const filteredIzinKurallar = computed<Record<string, unknown>[]>(() => {
   return (izinKurallar.value || []).map(
-    ({ ad, izinTur, aciklama, createUserName, createdAt, isActive }) => ({
+    ({ ad, izinTurler, aciklama, createUserName, createdAt, isActive }) => ({
       ad,
-      izinTur: izinTur.length,
+      izinTur: izinTurler.length,
       aciklama,
       createUserName,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       isActive: isActive ? "Aktif" : "Pasif",
     })
   );

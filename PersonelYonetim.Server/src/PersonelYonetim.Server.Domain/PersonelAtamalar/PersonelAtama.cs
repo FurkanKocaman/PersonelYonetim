@@ -1,4 +1,5 @@
 ﻿using Ardalis.SmartEnum;
+using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Izinler;
@@ -10,13 +11,8 @@ using PersonelYonetim.Server.Domain.Subeler;
 
 namespace PersonelYonetim.Server.Domain.PersonelAtamalar;
 
-public sealed class PersonelAtama
+public sealed class PersonelAtama : EntityDto
 {
-    public PersonelAtama()
-    {
-        Id = Guid.CreateVersion7();
-    }
-    public Guid Id { get; set; }
     public Guid PersonelId { get; set; }
     public Personel Personel { get; set; } = default!;
     public Guid? DepartmanId { get; set; }
@@ -29,7 +25,6 @@ public sealed class PersonelAtama
     public Sirket Sirket { get; set; } = default!;
     public Guid? YoneticiId { get; set; }
     public Personel? Yonetici { get; set; }
-    public bool IsActive { get; set; } = true;
     public RolTipiEnum RolTipi { get; set; } = default!;
     public SozlesmeTuruEnum SozlesmeTuru { get; set; } = default!;
     public DateTimeOffset? SozlesmeBitisTarihi { get; set; }

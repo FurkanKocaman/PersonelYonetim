@@ -1,4 +1,5 @@
 export interface IzinTurModel {
+  id: string;
   ad: string;
   aciklama?: string | null;
   ucretliMi: boolean;
