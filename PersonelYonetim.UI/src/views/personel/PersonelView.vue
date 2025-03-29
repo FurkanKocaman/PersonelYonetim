@@ -112,7 +112,7 @@ const openEditModal = (personel: PersonelItem) => {
               id="sirket"
               v-model="selectedSirket"
               v-on:change="getSubeler()"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded-sm text-sm"
+              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded-sm text-sm"
             >
               <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
                 {{ sirket.ad }}

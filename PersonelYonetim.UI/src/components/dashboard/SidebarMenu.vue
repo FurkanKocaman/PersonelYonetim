@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Roles from "@/models/Roles";
 import type { UserModel } from "@/models/UserModel";
 import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
@@ -129,7 +128,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
               Şirket Sahibi
             </p> -->
             <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd != "" ? user.pozisyonAd : Roles.getRoleByValue(user.role).name }}
+              {{ user.pozisyonAd != "" ? user.pozisyonAd : user.role }}
             </p>
           </div>
         </div>
