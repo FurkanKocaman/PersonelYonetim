@@ -3,15 +3,9 @@ import TableLayout from "@/components/TableLayout.vue";
 import type { IzinTurModel } from "@/models/entity-models/izin/IzinTurModel";
 import IzinService from "@/services/IzinService";
 import { onMounted, computed, type Ref, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
-const route = useRoute();
 const router = useRouter();
-const activeTab = computed(() => {
-  if (route.path.includes("/izin-kurallar")) return "izinkurallar";
-  if (route.path.includes("/izinler")) return "izinler";
-  return "";
-});
 
 const izinTurler: Ref<IzinTurModel[] | undefined> = ref([]);
 
@@ -39,8 +33,12 @@ const getIzinTurler = async () => {
   }
 };
 
+// Geri dön
+const goBack = () => {
+  router.push({ name: 'IzinKurallariKurallar' });
+};
+
 onMounted(() => {
-  console.log(activeTab);
   getIzinTurler();
 });
 </script>
@@ -51,11 +49,7 @@ onMounted(() => {
       <div class="flex items-center justify-start">
         <i
           class="fa-solid fa-arrow-left mr-4 cursor-pointer text-xl dark:text-neutral-300 dark:hover:text-neutral-100"
-          @click="
-            () => {
-              router.back();
-            }
-          "
+          @click="goBack"
         ></i>
         <h3 class="text-xl">Yeni Kural Oluştur</h3>
       </div>
@@ -114,14 +108,6 @@ onMounted(() => {
             </option>
             <option class="text-neutral-800 dark:text-neutral-200">Yıllık izin</option>
             <option class="text-neutral-800 dark:text-neutral-200">Mazeret İzni</option>
-            <!-- <option
-            v-for="sirket in props.sirketler"
-            :key="sirket.id"
-            :value="sirket.id"
-            class="text-neutral-800 dark:text-neutral-200"
-          >
-            {{ sirket.ad }}
-          </option> -->
           </select>
           <button
             type="button"
@@ -130,6 +116,22 @@ onMounted(() => {
             Ekle
           </button>
         </div>
+      </div>
+      
+      <!-- Kaydet ve İptal Butonları -->
+      <div class="flex justify-end mt-8 mb-4">
+        <button
+          @click="goBack"
+          class="px-6 py-2.5 bg-gray-200 text-gray-700 dark:bg-neutral-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-neutral-600 rounded-lg transition-colors duration-300 mr-4"
+        >
+          İptal
+        </button>
+        <button
+          type="button"
+          class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
+        >
+          Kaydet
+        </button>
       </div>
     </div>
   </div>

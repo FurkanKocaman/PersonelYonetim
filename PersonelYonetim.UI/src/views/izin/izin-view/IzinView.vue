@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 // Define valid status types
 type IzinDurumu = "Beklemede" | "Onaylandı" | "Reddedildi";
@@ -44,9 +44,11 @@ const statusColors: Record<IzinDurumu, string> = {
 
 // Route and active tab
 const route = useRoute();
+const router = useRouter();
+
 const activeTab = computed(() => {
-  if (route.path.includes("/izin-kurallar")) return "izinkurallar";
-  if (route.path.includes("/izinler")) return "izinler";
+  if (route.name === 'Izinler') return "izinler";
+  if (route.name === 'IzinKurallar') return "izinkurallar";
   return "";
 });
 
@@ -58,6 +60,14 @@ const filteredIzinList = computed(() => {
       !filterOptions.value.izinTipi || izin.izinTipi === filterOptions.value.izinTipi;
     return durumMatch && tipMatch;
   });
+});
+
+// Kurallar sayfasına ait mi kontrolü
+const isKurallarRoute = computed(() => {
+  return route.name === 'IzinKurallari' || 
+         route.name === 'IzinKurallariKurallar' || 
+         route.name === 'IzinKurallariRaporlar' || 
+         route.name === 'IzinKurallariOrnekSablonlar';
 });
 
 // Methods
@@ -74,6 +84,16 @@ const editIzin = (izin: IzinItem) => {
 const closeDetailModal = () => {
   showDetailModal.value = false;
   selectedIzin.value = null;
+};
+
+// Kurallar sayfasına yönlendir
+const goToRules = () => {
+  router.push({ name: 'IzinKurallari' });
+};
+
+// İzin talebi oluştur
+const createLeaveRequest = () => {
+  router.push({ name: 'IzinTalep' });
 };
 
 onMounted(() => {
@@ -97,6 +117,9 @@ defineExpose({
   viewIzinDetails,
   editIzin,
   closeDetailModal,
+  goToRules,
+  createLeaveRequest,
+  isKurallarRoute,
 });
 </script>
 
@@ -108,52 +131,39 @@ defineExpose({
       <ul class="flex flex-wrap -mb-px">
         <li class="mr-2">
           <router-link
-            to="/dashboard/izin/izinler"
+            :to="{ name: 'Izinler' }"
             class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg"
             :class="
-              activeTab === 'izinler'
+              route.name === 'Izinler'
                 ? 'text-sky-600 border-sky-600'
                 : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             "
           >
-            <i class="fas fa-cog mr-2"></i> İzinler
+            <i class="fas fa-calendar-alt mr-2"></i> İzin Talepleri
           </router-link>
         </li>
         <li class="mr-2">
-          <router-link
-            to="/dashboard/izin/izin-kurallar"
-            class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg"
+          <a
+            @click="goToRules"
+            class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg cursor-pointer"
             :class="
-              activeTab === 'izinkurallar'
+              isKurallarRoute
                 ? 'text-sky-600 border-sky-600'
                 : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             "
           >
-            <i class="fas fa-book mr-2"></i> Kurallar
-          </router-link>
-        </li>
-        <li class="mr-2">
-          <router-link
-            to="/dashboard/izin/onay-sürecleri"
-            class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg"
-            :class="
-              activeTab === ''
-                ? 'text-sky-600 border-sky-600'
-                : 'text-gray-500 border-transparent hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            "
-          >
-            <i class="fas fa-shield-alt mr-2"></i> Onay Süreçleri
-          </router-link>
+            <i class="fas fa-book mr-2"></i> İzin Kuralları
+          </a>
         </li>
       </ul>
-      <router-link
-        to="/dashboard/izin-kural-olustur"
-        type="button"
-        v-if="activeTab === 'izinkurallar'"
-        class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-      >
-        Kural Ekle
-      </router-link>
+      <div class="flex space-x-2">
+        <button
+          @click="createLeaveRequest"
+          class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300"
+        >
+          <i class="fas fa-plus mr-2"></i> İzin Talebi Oluştur
+        </button>
+      </div>
     </div>
     <!-- Sekmeler end -->
     <RouterView></RouterView>
