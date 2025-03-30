@@ -1,4 +1,4 @@
-import type { UserModel } from "@/models/UserModel";
+import type { UserModel } from "@/models/entity-models/UserModel";
 import { useUserStore } from "@/stores/user";
 import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 

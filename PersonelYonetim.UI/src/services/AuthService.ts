@@ -1,8 +1,8 @@
-import type { LoginRequest } from "@/models/LoginRequest";
+import type { LoginRequest } from "@/models/request-models/LoginRequest";
 import axios from "axios";
-import type { LoginResponse } from "@/models/LoginResponse";
-import type { RegisterRequest } from "@/models/RegisterRequest";
-import type { UserModel } from "@/models/UserModel";
+import type { LoginResponse } from "@/models/response-models/LoginResponse";
+import type { RegisterRequest } from "@/models/request-models/RegisterRequest";
+import type { UserModel } from "@/models/entity-models/UserModel";
 import api from "./Axios";
 
 class AuthService {

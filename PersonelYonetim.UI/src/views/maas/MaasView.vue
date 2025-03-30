@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import type { MaasItem, MaasRequest } from '@/models/MaasModels';
-import { MaasService } from '@/services/MaasService';
+import { ref, onMounted } from "vue";
+import type { MaasItem, MaasRequest } from "@/models/entity-models/MaasModels";
+import { MaasService } from "@/services/MaasService";
 
 // Maaş servisi örneği oluştur
 const maasService = new MaasService();
@@ -11,18 +11,18 @@ const isLoading = ref(true);
 const error = ref(false);
 const maasList = ref<MaasItem[]>([]);
 const showModal = ref(false);
-const modalType = ref<'new' | 'edit'>('new');
+const modalType = ref<"new" | "edit">("new");
 const currentItem = ref<MaasItem | null>(null);
 const showConfirmModal = ref(false);
 const itemToDelete = ref<number | null>(null);
 
 // Form durumu
 const formData = ref<Partial<MaasRequest>>({
-  personelAdi: '',
-  departman: '',
+  personelAdi: "",
+  departman: "",
   maas: 0,
-  odenmeTarihi: '',
-  durum: 'Beklemede'
+  odenmeTarihi: "",
+  durum: "Beklemede",
 });
 
 // Departman seçenekleri
@@ -42,7 +42,7 @@ const loadMaasList = async () => {
 
     isLoading.value = false;
   } catch (err) {
-    console.error('Maaş listesi yüklenirken hata oluştu:', err);
+    console.error("Maaş listesi yüklenirken hata oluştu:", err);
     error.value = true;
     isLoading.value = false;
   }
@@ -50,25 +50,25 @@ const loadMaasList = async () => {
 
 // Para birimini formatla
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(value);
+  return new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(value);
 };
 
 // Yeni maaş kaydı için modal aç
 const openNewModal = () => {
-  modalType.value = 'new';
+  modalType.value = "new";
   formData.value = {
-    personelAdi: '',
-    departman: '',
+    personelAdi: "",
+    departman: "",
     maas: 0,
-    odenmeTarihi: new Date().toISOString().split('T')[0],
-    durum: 'Beklemede'
+    odenmeTarihi: new Date().toISOString().split("T")[0],
+    durum: "Beklemede",
   };
   showModal.value = true;
 };
 
 // Maaş kaydı düzenlemek için modal aç
 const openEditModal = (item: MaasItem) => {
-  modalType.value = 'edit';
+  modalType.value = "edit";
   currentItem.value = item;
   formData.value = { ...item };
   showModal.value = true;
@@ -78,11 +78,11 @@ const openEditModal = (item: MaasItem) => {
 const closeModal = () => {
   showModal.value = false;
   formData.value = {
-    personelAdi: '',
-    departman: '',
+    personelAdi: "",
+    departman: "",
     maas: 0,
-    odenmeTarihi: '',
-    durum: 'Beklemede'
+    odenmeTarihi: "",
+    durum: "Beklemede",
   };
   currentItem.value = null;
 };
@@ -90,15 +90,15 @@ const closeModal = () => {
 // Maaş kaydını kaydet
 const saveSalaryRecord = async () => {
   if (!formData.value.personelAdi || !formData.value.departman || !formData.value.odenmeTarihi) {
-    alert('Lütfen tüm zorunlu alanları doldurun.');
+    alert("Lütfen tüm zorunlu alanları doldurun.");
     return;
   }
 
   try {
-    if (modalType.value === 'new') {
+    if (modalType.value === "new") {
       // Yeni kayıt oluştur
       await maasService.createMaas(formData.value as MaasRequest);
-    } else if (modalType.value === 'edit' && currentItem.value) {
+    } else if (modalType.value === "edit" && currentItem.value) {
       // Mevcut kaydı güncelle
       await maasService.updateMaas(currentItem.value.id, formData.value as MaasRequest);
     }
@@ -109,8 +109,8 @@ const saveSalaryRecord = async () => {
     // Modal kapat
     closeModal();
   } catch (error) {
-    console.error('Kayıt işlemi sırasında hata oluştu:', error);
-    alert('Kayıt işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    console.error("Kayıt işlemi sırasında hata oluştu:", error);
+    alert("Kayıt işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.");
   }
 };
 
@@ -134,8 +134,8 @@ const deleteSalaryRecord = async () => {
       showConfirmModal.value = false;
       itemToDelete.value = null;
     } catch (error) {
-      console.error('Silme işlemi sırasında hata oluştu:', error);
-      alert('Silme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error("Silme işlemi sırasında hata oluştu:", error);
+      alert("Silme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.");
     }
   }
 };
@@ -144,28 +144,28 @@ const deleteSalaryRecord = async () => {
 const exportData = () => {
   try {
     // CSV içeriği oluştur
-    const headers = ['ID', 'Personel Adı', 'Departman', 'Maaş', 'Ödenme Tarihi', 'Durum'];
+    const headers = ["ID", "Personel Adı", "Departman", "Maaş", "Ödenme Tarihi", "Durum"];
 
     // Verileri CSV formatına dönüştür
-    let csvContent = headers.join(',') + '\n';
+    let csvContent = headers.join(",") + "\n";
 
-    maasList.value.forEach(item => {
+    maasList.value.forEach((item) => {
       const row = [
         item.id,
         item.personelAdi,
         item.departman,
         item.maas,
         item.odenmeTarihi,
-        item.durum
+        item.durum,
       ];
-      csvContent += row.join(',') + '\n';
+      csvContent += row.join(",") + "\n";
     });
 
     // CSV içeriği ile bir Blob oluştur
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
 
     // İndirme bağlantısı oluştur
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
 
     // Bağlantıyı belgeye ekle, tıkla ve kaldır
@@ -178,8 +178,8 @@ const exportData = () => {
       URL.revokeObjectURL(url);
     }, 100);
   } catch (error) {
-    console.error('Dışa aktarma hatası:', error);
-    alert('Dışa aktarma sırasında bir hata oluştu.');
+    console.error("Dışa aktarma hatası:", error);
+    alert("Dışa aktarma sırasında bir hata oluştu.");
   }
 };
 
@@ -189,8 +189,8 @@ const generateReport = () => {
     // Özet istatistikleri hesapla
     const totalSalary = maasList.value.reduce((sum, item) => sum + item.maas, 0);
     const averageSalary = totalSalary / maasList.value.length;
-    const maxSalary = Math.max(...maasList.value.map(item => item.maas));
-    const minSalary = Math.min(...maasList.value.map(item => item.maas));
+    const maxSalary = Math.max(...maasList.value.map((item) => item.maas));
+    const minSalary = Math.min(...maasList.value.map((item) => item.maas));
 
     // Departmana göre sayım
     const departmentCounts = maasList.value.reduce((acc, item) => {
@@ -205,9 +205,11 @@ const generateReport = () => {
     }, {} as Record<string, number>);
 
     // Rapor için yeni bir pencere aç
-    const reportWindow = window.open('', '_blank');
+    const reportWindow = window.open("", "_blank");
     if (!reportWindow) {
-      alert('Lütfen tarayıcınızın açılır pencere engelleyicisini devre dışı bırakın ve tekrar deneyin.');
+      alert(
+        "Lütfen tarayıcınızın açılır pencere engelleyicisini devre dışı bırakın ve tekrar deneyin."
+      );
       return;
     }
 
@@ -216,7 +218,7 @@ const generateReport = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Maaş Raporu - ${new Date().toLocaleDateString('tr-TR')}</title>
+        <title>Maaş Raporu - ${new Date().toLocaleDateString("tr-TR")}</title>
         <meta charset="utf-8">
         <style>
           body {
@@ -336,7 +338,9 @@ const generateReport = () => {
 
         <div class="report-header">
           <h1>Maaş Raporu</h1>
-          <div class="report-date">Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')} ${new Date().toLocaleTimeString('tr-TR')}</div>
+          <div class="report-date">Oluşturulma Tarihi: ${new Date().toLocaleDateString(
+            "tr-TR"
+          )} ${new Date().toLocaleTimeString("tr-TR")}</div>
         </div>
 
         <div class="summary-section">
@@ -348,19 +352,31 @@ const generateReport = () => {
             </div>
             <div class="summary-item">
               <div class="summary-label">Toplam Maaş Ödemesi</div>
-              <div class="summary-value">${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(totalSalary)}</div>
+              <div class="summary-value">${new Intl.NumberFormat("tr-TR", {
+                style: "currency",
+                currency: "TRY",
+              }).format(totalSalary)}</div>
             </div>
             <div class="summary-item">
               <div class="summary-label">Ortalama Maaş</div>
-              <div class="summary-value">${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(averageSalary)}</div>
+              <div class="summary-value">${new Intl.NumberFormat("tr-TR", {
+                style: "currency",
+                currency: "TRY",
+              }).format(averageSalary)}</div>
             </div>
             <div class="summary-item">
               <div class="summary-label">En Yüksek Maaş</div>
-              <div class="summary-value">${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(maxSalary)}</div>
+              <div class="summary-value">${new Intl.NumberFormat("tr-TR", {
+                style: "currency",
+                currency: "TRY",
+              }).format(maxSalary)}</div>
             </div>
             <div class="summary-item">
               <div class="summary-label">En Düşük Maaş</div>
-              <div class="summary-value">${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(minSalary)}</div>
+              <div class="summary-value">${new Intl.NumberFormat("tr-TR", {
+                style: "currency",
+                currency: "TRY",
+              }).format(minSalary)}</div>
             </div>
           </div>
         </div>
@@ -376,13 +392,17 @@ const generateReport = () => {
               </tr>
             </thead>
             <tbody>
-              ${Object.entries(departmentCounts).map(([dept, count]) => `
+              ${Object.entries(departmentCounts)
+                .map(
+                  ([dept, count]) => `
                 <tr>
                   <td>${dept}</td>
                   <td>${count}</td>
                   <td>${((count / maasList.value.length) * 100).toFixed(2)}%</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -398,13 +418,17 @@ const generateReport = () => {
               </tr>
             </thead>
             <tbody>
-              ${Object.entries(statusCounts).map(([status, count]) => `
+              ${Object.entries(statusCounts)
+                .map(
+                  ([status, count]) => `
                 <tr>
                   <td>${status}</td>
                   <td>${count}</td>
                   <td>${((count / maasList.value.length) * 100).toFixed(2)}%</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -423,24 +447,33 @@ const generateReport = () => {
               </tr>
             </thead>
             <tbody>
-              ${maasList.value.map(item => `
+              ${maasList.value
+                .map(
+                  (item) => `
                 <tr>
                   <td>${item.id}</td>
                   <td>${item.personelAdi}</td>
                   <td>${item.departman}</td>
-                  <td>${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.maas)}</td>
+                  <td>${new Intl.NumberFormat("tr-TR", {
+                    style: "currency",
+                    currency: "TRY",
+                  }).format(item.maas)}</td>
                   <td>${item.odenmeTarihi}</td>
                   <td>
                     <span class="status-badge ${
-                      item.durum === 'Onaylandı' ? 'status-approved' :
-                      item.durum === 'Beklemede' ? 'status-pending' :
-                      'status-rejected'
+                      item.durum === "Onaylandı"
+                        ? "status-approved"
+                        : item.durum === "Beklemede"
+                        ? "status-pending"
+                        : "status-rejected"
                     }">
                       ${item.durum}
                     </span>
                   </td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -449,10 +482,9 @@ const generateReport = () => {
     `);
 
     reportWindow.document.close();
-
   } catch (error) {
-    console.error('Rapor oluşturma hatası:', error);
-    alert('Rapor oluşturulurken bir hata oluştu.');
+    console.error("Rapor oluşturma hatası:", error);
+    alert("Rapor oluşturulurken bir hata oluştu.");
   }
 };
 
@@ -466,19 +498,31 @@ onMounted(() => {
   <div class="container mx-auto px-4 py-8">
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Maaş Yönetimi</h1>
-      <p class="text-gray-600 dark:text-gray-400">Personel maaş bilgilerini görüntüleyin ve yönetin</p>
+      <p class="text-gray-600 dark:text-gray-400">
+        Personel maaş bilgilerini görüntüleyin ve yönetin
+      </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center h-64">
-      <div class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"></div>
+      <div
+        class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"
+      ></div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+    <div
+      v-else-if="error"
+      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6"
+    >
       <strong class="font-bold">Hata!</strong>
-      <span class="block sm:inline"> Maaş listesi yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.</span>
-      <button @click="loadMaasList" class="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+      <span class="block sm:inline">
+        Maaş listesi yüklenirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.</span
+      >
+      <button
+        @click="loadMaasList"
+        class="mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      >
         Yeniden Dene
       </button>
     </div>
@@ -487,13 +531,22 @@ onMounted(() => {
     <div v-else>
       <!-- Action Buttons -->
       <div class="flex flex-wrap gap-4 mb-6">
-        <button @click="openNewModal" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded flex items-center">
+        <button
+          @click="openNewModal"
+          class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded flex items-center"
+        >
           <i class="fas fa-plus mr-2"></i> Yeni Maaş Kaydı
         </button>
-        <button @click="exportData" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+        <button
+          @click="exportData"
+          class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center"
+        >
           <i class="fas fa-file-export mr-2"></i> Dışa Aktar
         </button>
-        <button @click="generateReport" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded flex items-center">
+        <button
+          @click="generateReport"
+          class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded flex items-center"
+        >
           <i class="fas fa-chart-bar mr-2"></i> Maaş Raporu
         </button>
       </div>
@@ -503,36 +556,63 @@ onMounted(() => {
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-neutral-700">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 ID
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 Personel
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 Departman
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 Maaş
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 Ödenme Tarihi
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 Durum
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+              >
                 İşlemler
               </th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-neutral-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="maas in maasList" :key="maas.id" class="hover:bg-gray-50 dark:hover:bg-neutral-700">
+            <tr
+              v-for="maas in maasList"
+              :key="maas.id"
+              class="hover:bg-gray-50 dark:hover:bg-neutral-700"
+            >
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 {{ maas.id }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ maas.personelAdi }}</div>
+                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                  {{ maas.personelAdi }}
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-500 dark:text-gray-400">{{ maas.departman }}</div>
@@ -549,17 +629,23 @@ onMounted(() => {
                   :class="{
                     'bg-green-100 text-green-800': maas.durum === 'Onaylandı',
                     'bg-yellow-100 text-yellow-800': maas.durum === 'Beklemede',
-                    'bg-red-100 text-red-800': maas.durum === 'Reddedildi'
+                    'bg-red-100 text-red-800': maas.durum === 'Reddedildi',
                   }"
                 >
                   {{ maas.durum }}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button @click="openEditModal(maas)" class="text-sky-600 hover:text-sky-900 dark:hover:text-sky-400 mr-3">
+                <button
+                  @click="openEditModal(maas)"
+                  class="text-sky-600 hover:text-sky-900 dark:hover:text-sky-400 mr-3"
+                >
                   <i class="fas fa-edit"></i>
                 </button>
-                <button @click="openDeleteConfirmation(maas.id)" class="text-red-600 hover:text-red-900 dark:hover:text-red-400">
+                <button
+                  @click="openDeleteConfirmation(maas.id)"
+                  class="text-red-600 hover:text-red-900 dark:hover:text-red-400"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -573,11 +659,15 @@ onMounted(() => {
           Toplam <span class="font-medium">{{ maasList.length }}</span> kayıt
         </div>
         <div class="flex space-x-2">
-          <button class="bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md">
+          <button
+            class="bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md"
+          >
             <i class="fas fa-chevron-left"></i>
           </button>
           <button class="bg-sky-600 text-white px-3 py-1 rounded-md">1</button>
-          <button class="bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md">
+          <button
+            class="bg-gray-200 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-md"
+          >
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
@@ -586,16 +676,24 @@ onMounted(() => {
   </div>
 
   <!-- Add/Edit Modal -->
-  <div v-if="showModal" class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 transition-all duration-300">
-    <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100">
+  <div
+    v-if="showModal"
+    class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 transition-all duration-300"
+  >
+    <div
+      class="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
+    >
       <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-          {{ modalType === 'new' ? 'Yeni Maaş Kaydı' : 'Maaş Kaydını Düzenle' }}
+          {{ modalType === "new" ? "Yeni Maaş Kaydı" : "Maaş Kaydını Düzenle" }}
         </h3>
       </div>
       <div class="px-6 py-4">
         <div class="mb-4">
-          <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="personelAdi">
+          <label
+            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
+            for="personelAdi"
+          >
             Personel Adı *
           </label>
           <input
@@ -604,10 +702,13 @@ onMounted(() => {
             type="text"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-neutral-700 dark:border-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Personel adını girin"
-          >
+          />
         </div>
         <div class="mb-4">
-          <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="departman">
+          <label
+            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
+            for="departman"
+          >
             Departman *
           </label>
           <select
@@ -630,10 +731,13 @@ onMounted(() => {
             min="0"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-neutral-700 dark:border-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Maaş miktarını girin"
-          >
+          />
         </div>
         <div class="mb-4">
-          <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="odenmeTarihi">
+          <label
+            class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2"
+            for="odenmeTarihi"
+          >
             Ödenme Tarihi *
           </label>
           <input
@@ -641,7 +745,7 @@ onMounted(() => {
             v-model="formData.odenmeTarihi"
             type="date"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-neutral-700 dark:border-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
-          >
+          />
         </div>
         <div class="mb-4">
           <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="durum">
@@ -652,11 +756,15 @@ onMounted(() => {
             v-model="formData.durum"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-white dark:bg-neutral-700 dark:border-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
           >
-            <option v-for="status in statusOptions" :key="status" :value="status">{{ status }}</option>
+            <option v-for="status in statusOptions" :key="status" :value="status">
+              {{ status }}
+            </option>
           </select>
         </div>
       </div>
-      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end space-x-2">
+      <div
+        class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end space-x-2"
+      >
         <button
           @click="closeModal"
           class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -674,19 +782,24 @@ onMounted(() => {
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div v-if="showConfirmModal" class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 transition-all duration-300">
-    <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100">
+  <div
+    v-if="showConfirmModal"
+    class="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 transition-all duration-300"
+  >
+    <div
+      class="bg-white dark:bg-neutral-800 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
+    >
       <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-          Kaydı Sil
-        </h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Kaydı Sil</h3>
       </div>
       <div class="px-6 py-4">
         <p class="text-gray-700 dark:text-gray-300">
           Bu maaş kaydını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
         </p>
       </div>
-      <div class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end space-x-2">
+      <div
+        class="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end space-x-2"
+      >
         <button
           @click="showConfirmModal = false"
           class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -710,7 +823,11 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

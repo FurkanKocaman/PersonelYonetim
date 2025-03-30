@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Infrastructure.Context;
 
@@ -41,5 +42,10 @@ class UnitOfWork : IUnitOfWork
     public void Dispose()
     {
         _context.Dispose();
+    }
+
+    public DbContext GetDbContext()
+    {
+        return _context;
     }
 }
