@@ -113,11 +113,11 @@ public class AppODataController(
         return response;
     }
 
-    [HttpGet("IzinTalepler/{DepartmanId}")]
+    [HttpGet("izin-talepler")]
     [Authorize(Permissions.ViewIzinler)]
-    public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(Guid DepartmanId, CancellationToken cancellationToken)
+    public async Task<IQueryable<IzinTalepGetAllQueryResponse>> GetAllIzinTalepler(CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new IzinTalepGetAllQuery(DepartmanId), cancellationToken);
+        var response = await sender.Send(new IzinTalepGetAllQuery(), cancellationToken);
         return response;
     }
     [HttpGet("calisma-takvim")]

@@ -128,81 +128,76 @@ const isMenuItemActive = (itemPath: string): boolean => {
               Şirket Sahibi
             </p> -->
             <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd != "" ? user.pozisyonAd + "|" : "" }}
-              {{ user.role }}
+              {{ user.pozisyonAd != "" ? user.pozisyonAd : user.role }}
             </p>
           </div>
         </div>
 
         <div class="mt-4 flex-grow">
           <div
+            class="flex items-center mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-sky-100 dark:hover:bg-neutral-700 relative group"
+            :class="{
+              'px-1 py-2 mx-2': sidebarOpen,
+              'px-0 py-3 justify-center mx-3': !sidebarOpen,
+            }"
+          >
+            <div
+              class="w-8 h-8 flex items-center justify-center text-lg"
+              :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
+            >
+              <i class="text-2xl text-sky-600" :class="`fas fa-square-plus`"></i>
+            </div>
+            <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
+            <span
+              class="whitespace-nowrap overflow-hidden transition-all duration-300 text-sm font-semibold text-sky-600"
+              :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
+            >
+              Talep
+            </span>
+            <div
+              v-if="!sidebarOpen"
+              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-50"
+            >
+              Talep
+            </div>
+          </div>
+
+          <div
             v-for="item in filteredMenuItems"
             :key="item.name"
-            class="flex flex-col mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-neutral-700 relative group"
+            @click="handleMenuClick(item)"
+            class="flex items-center mt-2 text-gray-700 dark:text-gray-300 rounded-lg cursor-pointer transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-neutral-700 relative group"
+            :class="{
+              'px-1 py-2 mx-2': sidebarOpen,
+              'px-0 py-3 justify-center mx-3': !sidebarOpen,
+              'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': isMenuItemActive(
+                item.path
+              ),
+            }"
           >
-            <!-- Main menu item -->
             <div
-              @click="handleMenuClick(item)"
-              :class="{
-                'px-1 py-2 mx-2': sidebarOpen,
-                'px-0 py-3 justify-center mx-3': !sidebarOpen,
-                'bg-sky-100 dark:bg-sky-900 text-sky-600 dark:text-sky-400': isMenuItemActive(
-                  item.path
-                ),
-              }"
-              class="flex items-center rounded-lg"
+              class="w-8 h-8 flex items-center justify-center text-lg"
+              :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
             >
-              <div
-                class="w-8 h-8 flex items-center justify-center text-lg"
-                :class="{ 'mr-3': sidebarOpen, 'mx-auto': !sidebarOpen }"
-              >
-                <i class="size-5" :class="`fas fa-${item.icon}`"></i>
-              </div>
-              <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
-              <span
-                class="whitespace-nowrap overflow-hidden transition-all duration-300 text-sm font-semibold"
-                :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
-              >
-                {{ item.name }}
-              </span>
-              <!-- Dropdown icon for items with subitems -->
-              <i 
-                v-if="item.subItems && item.subItems.length > 0 && sidebarOpen" 
-                class="fas fa-chevron-down ml-auto mr-2 text-xs transition-transform duration-300"
-                :class="{ 'transform rotate-180': isMenuItemActive(item.path) }"
-              ></i>
-              <div
-                v-if="!sidebarOpen"
-                class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap z-50"
-              >
-                {{ item.name }}
-              </div>
+              <i class="text-base" :class="`fas fa-${item.icon}`"></i>
             </div>
-            
-            <!-- Submenu items -->
-            <div 
-              v-if="item.subItems && item.subItems.length > 0 && sidebarOpen" 
-              class="pl-6 mt-1 space-y-1 overflow-hidden transition-all duration-300 max-h-60 border-l-2 border-sky-500 ml-4"
+            <!-- Metin - Yalnızca Sidebar Açıkken Görünür -->
+            <span
+              class="whitespace-nowrap overflow-hidden transition-all duration-300 text-sm font-semibold"
+              :class="{ 'opacity-100': sidebarOpen, 'opacity-0 w-0': !sidebarOpen }"
             >
-              <div
-                v-for="subItem in item.subItems"
-                :key="subItem.name"
-                @click="handleMenuClick(subItem)"
-                class="flex items-center py-2 px-2 text-sm transition-colors duration-200 hover:bg-sky-100 dark:hover:bg-sky-900/50 rounded-lg ml-1"
-                :class="{
-                  'bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 font-medium': isMenuItemActive(
-                    subItem.path
-                  ),
-                }"
-              >
-                <i class="fas fa-circle text-xs mr-2 text-sky-500" style="font-size: 5px;"></i>
-                <span>{{ subItem.name }}</span>
-              </div>
+              {{ item.name }}
+            </span>
+            <div
+              v-if="!sidebarOpen"
+              class="absolute left-full ml-6 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 whitespace-nowrap"
+            >
+              {{ item.name }}
             </div>
           </div>
         </div>
 
-        <!-- Sidebar Toggle Butonu - Sidebar’ın Ortasında Pozisyonlandırılmış -->
+        <!-- Sidebar Toggle Butonu - Sidebar'ın Ortasında Pozisyonlandırılmış -->
         <div class="absolute inset-y-12 -right-0 flex items-start justify-start">
           <button
             @click="toggleSidebar"

@@ -13,10 +13,7 @@ import SirketCreateModal from "@/components/modals/SirketCreateModal.vue";
 import SubeCreateModal from "@/components/modals/SubeCreateModal.vue";
 import DepartmanCreateModal from "@/components/modals/DepartmanCreateModal.vue";
 import PozisyonCreateModal from "@/components/modals/PozisyonCreateModal.vue";
-import SirketDetailModal from "@/components/modals/SirketDetailModal.vue";
-import SubeDetailModal from "@/components/modals/SubeDetailModal.vue";
-import DepartmanDetailModal from "@/components/modals/DepartmanDetailModal.vue";
-import PozisyonDetailModal from "@/components/modals/PozisyonDetailModal.vue";
+import { useToastStore } from "@/stores/ToastStore";
 
 const expand = ref({
   sirketler: false,
@@ -43,19 +40,6 @@ const showModal = ref({
   pozisyonlar: false,
 });
 
-const showDetailModal = ref({
-  sirketler: false,
-  subeler: false,
-  departmanlar: false,
-  pozisyonlar: false,
-});
-
-const editMode = ref(false);
-const selectedSirket = ref<SirketModel | null>(null);
-const selectedSube = ref<SubeModel | null>(null);
-const selectedDepartman = ref<DepartmanModel | null>(null);
-const selectedPozisyon = ref<PozisyonModel | null>(null);
-
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
 const subeler: Ref<SubeModel[] | undefined> = ref([]);
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
@@ -63,89 +47,67 @@ const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
 
 const filteredSirketler = computed<Record<string, unknown>[]>(() => {
   return (sirketler.value || []).map(
-    ({ id, ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
-      id,
+    ({ ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
       ad,
       eposta: iletisim.eposta,
-      telefon: iletisim.telefon,
-      adres: `${adres.ilce}, ${adres.sehir}`,
+      adres: adres.sehir,
+      createdAt: new Date(createdAt),
       createUserName,
-      createdAt: new Date(createdAt).toLocaleDateString("tr-TR"),
-      isActive: isActive ? "Aktif" : "Pasif",
-      actions: {
-        detail: (row: any) => handleSirketDetail(row),
-        edit: (row: any) => handleSirketEdit(row),
-      },
+      isActive: isActive ? "Aktif" : "Pasif", // "isActive" değerini metne dönüştür
     })
   );
 });
 
 const filteredSubeler = computed<Record<string, unknown>[]>(() => {
   return (subeler.value || []).map(
-    ({ id, ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
-      id,
+    ({ ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       createUserName: createUserName,
       sirketAd,
       isActive: isActive ? "Aktif" : "Pasif",
-      actions: {
-        detail: (row: any) => handleSubeDetail(row),
-        edit: (row: any) => handleSubeEdit(row),
-      },
     })
   );
 });
 const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
   return (departmanlar.value || []).map(
-    ({ id, ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
-      id,
+    ({ ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
       ad,
-      createdAt: new Date(createdAt).toDateString(),
+      createdAt: new Date(createdAt),
       createUserName: createUserName,
       subeAd,
       sirketAd,
       isActive: isActive ? "Aktif" : "Pasif",
-      actions: {
-        detail: (row: any) => handleDepartmanDetail(row),
-        edit: (row: any) => handleDepartmanEdit(row),
-      },
     })
   );
 });
 
 const filteredPozisyonlar = computed<Record<string, unknown>[]>(() => {
-  return (pozisyonlar.value || []).map(({ id, ad, createdAt, createUserName, sirketAd, isActive }) => ({
-    id,
+  return (pozisyonlar.value || []).map(({ ad, createdAt, createUserName, sirketAd, isActive }) => ({
     ad,
-    createdAt: new Date(createdAt).toDateString(),
+    createdAt: new Date(createdAt),
     createUserName: createUserName,
     sirketAd,
     isActive: isActive ? "Aktif" : "Pasif",
-    actions: {
-      detail: (row: any) => handlePozisyonDetail(row),
-      edit: (row: any) => handlePozisyonEdit(row),
-    },
   }));
 });
 
 onMounted(async () => {
-  console.log("mounted");
+  const toastStore = useToastStore();
+  console.log(toastStore.toasts);
   getSirketler();
   getSubeler();
   getDepartmanlar();
   getPozisyonlar();
 });
-
 const getSirketler = async () => {
   loading.value.sirketler = true;
   try {
     const res = await SirketService.sirketlerGet();
     count.value.sirketler = res!.count;
     sirketler.value = res?.Sirketler;
-    console.log("Sirketler", sirketler);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -159,7 +121,6 @@ const getSubeler = async () => {
     const res = await SubeService.subelerGet("");
     count.value.subeler = res!.count;
     subeler.value = res?.Subeler;
-    console.log(res);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -183,140 +144,13 @@ const getPozisyonlar = async () => {
   loading.value.pozisyonlar = true;
   try {
     const res = await PozisyonService.pozisyonlarGet("");
-    console.log(res);
     count.value.pozisyonlar = res!.count;
     pozisyonlar.value = res?.Pozisyonlar;
-    console.log(pozisyonlar.value);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
     loading.value.pozisyonlar = false;
   }
-};
-
-// Şirket detay fonksiyonu
-const handleSirketDetail = (row: any) => {
-  const sirket = sirketler.value?.find((s) => s.id === row.id);
-  if (sirket) {
-    selectedSirket.value = sirket;
-    showDetailModal.value.sirketler = true;
-  }
-};
-
-// Şirket düzenleme fonksiyonu
-const handleSirketEdit = (row: any) => {
-  const sirket = sirketler.value?.find((s) => s.id === row.id);
-  if (sirket) {
-    selectedSirket.value = sirket;
-    editMode.value = true;
-    showModal.value.sirketler = true;
-  }
-};
-
-// Şube detay fonksiyonu
-const handleSubeDetail = (row: any) => {
-  const sube = subeler.value?.find((s) => s.id === row.id);
-  if (sube) {
-    selectedSube.value = sube;
-    showDetailModal.value.subeler = true;
-  }
-};
-
-// Şube düzenleme fonksiyonu
-const handleSubeEdit = (row: any) => {
-  const sube = subeler.value?.find((s) => s.id === row.id);
-  if (sube) {
-    selectedSube.value = sube;
-    editMode.value = true;
-    showModal.value.subeler = true;
-  }
-};
-
-// Departman detay fonksiyonu
-const handleDepartmanDetail = (row: any) => {
-  const departman = departmanlar.value?.find((d) => d.id === row.id);
-  if (departman) {
-    selectedDepartman.value = departman;
-    showDetailModal.value.departmanlar = true;
-  }
-};
-
-// Departman düzenleme fonksiyonu
-const handleDepartmanEdit = (row: any) => {
-  const departman = departmanlar.value?.find((d) => d.id === row.id);
-  if (departman) {
-    selectedDepartman.value = departman;
-    editMode.value = true;
-    showModal.value.departmanlar = true;
-  }
-};
-
-// Pozisyon detay fonksiyonu
-const handlePozisyonDetail = (row: any) => {
-  const pozisyon = pozisyonlar.value?.find((p) => p.id === row.id);
-  if (pozisyon) {
-    selectedPozisyon.value = pozisyon;
-    showDetailModal.value.pozisyonlar = true;
-  }
-};
-
-// Pozisyon düzenleme fonksiyonu
-const handlePozisyonEdit = (row: any) => {
-  const pozisyon = pozisyonlar.value?.find((p) => p.id === row.id);
-  if (pozisyon) {
-    selectedPozisyon.value = pozisyon;
-    editMode.value = true;
-    showModal.value.pozisyonlar = true;
-  }
-};
-
-// Detay modalından düzenleme moduna geçiş
-const handleEditFromDetail = (sirket: SirketModel) => {
-  selectedSirket.value = sirket;
-  showDetailModal.value.sirketler = false;
-  editMode.value = true;
-  showModal.value.sirketler = true;
-};
-
-// Şube detay modalından düzenleme moduna geçiş
-const handleEditFromSubeDetail = (sube: SubeModel) => {
-  selectedSube.value = sube;
-  showDetailModal.value.subeler = false;
-  editMode.value = true;
-  showModal.value.subeler = true;
-};
-
-// Departman detay modalından düzenleme moduna geçiş
-const handleEditFromDepartmanDetail = (departman: DepartmanModel) => {
-  selectedDepartman.value = departman;
-  showDetailModal.value.departmanlar = false;
-  editMode.value = true;
-  showModal.value.departmanlar = true;
-};
-
-// Pozisyon detay modalından düzenleme moduna geçiş
-const handleEditFromPozisyonDetail = (pozisyon: PozisyonModel) => {
-  selectedPozisyon.value = pozisyon;
-  showDetailModal.value.pozisyonlar = false;
-  editMode.value = true;
-  showModal.value.pozisyonlar = true;
-};
-
-// Modal kapatma işlemi
-const handleCloseModal = (type: string) => {
-  showModal.value[type as keyof typeof showModal.value] = false;
-  showDetailModal.value[type as keyof typeof showDetailModal.value] = false;
-  editMode.value = false;
-  selectedSirket.value = null;
-  selectedSube.value = null;
-  selectedDepartman.value = null;
-  selectedPozisyon.value = null;
-};
-
-// Yeni kayıt oluşturma modalını açma
-const handleNewRecord = (type: string) => {
-  editMode.value = false;
-  showModal.value[type as keyof typeof showModal.value] = true;
 };
 </script>
 
@@ -329,16 +163,23 @@ const handleNewRecord = (type: string) => {
     </div>
     <div class="flex flex-col mt-5">
       <div
-        class="mx-10 my-3 p-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
+        class="mx-10 my-3 p-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.sirketler = !expand.sirketler;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.sirketler }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.sirketler = !expand.sirketler;
                 }
@@ -353,15 +194,20 @@ const handleNewRecord = (type: string) => {
           </div>
           <div class="flex items-center">
             <div
-              class="bg-blue-100 dark:bg-blue-700 text-blue-600 dark:text-blue-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
+              class="bg-blue-600 size-6 flex items-center justify-center text-neutral-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
             >
-              {{ count.sirketler || 0 }}
+              <span class="text-xs">{{ count.sirketler || 0 }}</span>
             </div>
             <button
-              class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
-              @click="handleNewRecord('sirketler')"
+              type="button"
+              class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+              @click.stop="
+                () => {
+                  showModal.sirketler = !showModal.sirketler;
+                }
+              "
             >
-              Yeni Şirket
+              Yeni Ekle
             </button>
           </div>
         </div>
@@ -371,38 +217,40 @@ const handleNewRecord = (type: string) => {
           ></div>
         </div>
         <SirketCreateModal
-          :edit-mode="editMode"
-          :sirket="selectedSirket as SirketModel"
-          @close-modal="(p) => handleCloseModal('sirketler')"
-          @refresh="getSirketler"
+          @close-modal="
+            (p) => {
+              showModal.sirketler = p;
+              getSirketler();
+            }
+          "
           v-if="showModal.sirketler"
-        />
-
-        <SirketDetailModal
-          :sirket="selectedSirket as SirketModel"
-          @close-modal="(p) => (showDetailModal.sirketler = p)"
-          @edit-sirket="handleEditFromDetail"
-          v-if="showDetailModal.sirketler && selectedSirket"
         />
 
         <TableLayout
           v-if="expand.sirketler && !loading.sirketler"
-          :tableHeaders="['Ad', 'Eposta', 'Telefon', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
+          :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
           :tableContent="filteredSirketler"
-          :islemler="['detail', 'edit']"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.subeler = !expand.subeler;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.subeler }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.subeler = !expand.subeler;
                 }
@@ -417,14 +265,14 @@ const handleNewRecord = (type: string) => {
           </div>
           <div class="flex items-center">
             <div
-              class="bg-blue-100 dark:bg-blue-700 text-blue-600 dark:text-blue-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
+              class="bg-blue-600 size-6 flex items-center justify-center text-neutral-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
             >
-              {{ count.subeler || 0 }}
+              <span class="text-xs">{{ count.subeler || 0 }}</span>
             </div>
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.subeler = !showModal.subeler;
                 }
@@ -441,15 +289,13 @@ const handleNewRecord = (type: string) => {
         </div>
         <SubeCreateModal
           :sirketler="sirketler!"
-          @close-modal="(p) => (showModal.subeler = p)"
+          @close-modal="
+            (p) => {
+              showModal.subeler = p;
+              getSubeler();
+            }
+          "
           v-if="showModal.subeler"
-        />
-
-        <SubeDetailModal
-          :sube="selectedSube as SubeModel"
-          @close-modal="(p) => (showDetailModal.subeler = p)"
-          @edit-sube="handleEditFromSubeDetail"
-          v-if="showDetailModal.subeler && selectedSube"
         />
 
         <TableLayout
@@ -464,20 +310,27 @@ const handleNewRecord = (type: string) => {
             'Durum',
           ]"
           :tableContent="filteredSubeler"
-          :islemler="['detail', 'edit']"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.departmanlar = !expand.departmanlar;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.departmanlar }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.departmanlar = !expand.departmanlar;
                 }
@@ -492,14 +345,14 @@ const handleNewRecord = (type: string) => {
           </div>
           <div class="flex items-center">
             <div
-              class="bg-blue-100 dark:bg-blue-700 text-blue-600 dark:text-blue-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
+              class="bg-blue-600 size-6 flex items-center justify-center text-neutral-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
             >
-              {{ count.departmanlar || 0 }}
+              <span class="text-xs">{{ count.departmanlar || 0 }}</span>
             </div>
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.departmanlar = !showModal.departmanlar;
                 }
@@ -517,35 +370,40 @@ const handleNewRecord = (type: string) => {
 
         <DepartmanCreateModal
           :subeler="subeler!"
-          @close-modal="(p) => (showModal.departmanlar = p)"
+          @close-modal="
+            (p) => {
+              showModal.departmanlar = p;
+              getDepartmanlar();
+            }
+          "
           v-if="showModal.departmanlar"
-        />
-
-        <DepartmanDetailModal
-          :departman="selectedDepartman as DepartmanModel"
-          @close-modal="(p) => (showDetailModal.departmanlar = p)"
-          @edit-departman="handleEditFromDepartmanDetail"
-          v-if="showDetailModal.departmanlar && selectedDepartman"
         />
 
         <TableLayout
           v-if="expand.departmanlar && !loading.departmanlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
           :tableContent="filteredDepartmanlar"
-          :islemler="['detail', 'edit']"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300"
+        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
-        <div class="flex justify-between items-center p-2">
+        <div
+          class="flex justify-between items-center p-2"
+          @click="
+            () => {
+              expand.pozisyonlar = !expand.pozisyonlar;
+            }
+          "
+        >
           <div class="flex items-center">
             <svg
               viewBox="0 0 1024 1024"
               class="size-6 cursor-pointer select-none transform transition-transform duration-200"
               :class="{ 'rotate-90': expand.pozisyonlar }"
               xmlns="http://www.w3.org/2000/svg"
-              @click="
+              @click.stop="
                 () => {
                   expand.pozisyonlar = !expand.pozisyonlar;
                 }
@@ -560,14 +418,14 @@ const handleNewRecord = (type: string) => {
           </div>
           <div class="flex items-center">
             <div
-              class="bg-blue-100 dark:bg-blue-700 text-blue-600 dark:text-blue-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
+              class="bg-blue-600 size-6 flex items-center justify-center text-neutral-200 py-1 px-2 rounded-full text-xs font-semibold mr-2"
             >
-              {{ count.pozisyonlar || 0 }}
+              <span class="text-xs">{{ count.pozisyonlar || 0 }}</span>
             </div>
             <button
               type="button"
               class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-              @click="
+              @click.stop="
                 () => {
                   showModal.pozisyonlar = !showModal.pozisyonlar;
                 }
@@ -585,22 +443,20 @@ const handleNewRecord = (type: string) => {
 
         <PozisyonCreateModal
           :sirketler="sirketler!"
-          @close-modal="(p) => (showModal.pozisyonlar = p)"
+          @close-modal="
+            (p) => {
+              showModal.pozisyonlar = p;
+              getPozisyonlar();
+            }
+          "
           v-if="showModal.pozisyonlar"
-        />
-
-        <PozisyonDetailModal
-          :pozisyon="selectedPozisyon as PozisyonModel"
-          @close-modal="(p) => (showDetailModal.pozisyonlar = p)"
-          @edit-pozisyon="handleEditFromPozisyonDetail"
-          v-if="showDetailModal.pozisyonlar && selectedPozisyon"
         />
 
         <TableLayout
           v-if="expand.pozisyonlar && !loading.pozisyonlar"
           :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
           :tableContent="filteredPozisyonlar"
-          :islemler="['detail', 'edit']"
+          :islemler="['edit', 'detaylar']"
         />
       </div>
     </div>

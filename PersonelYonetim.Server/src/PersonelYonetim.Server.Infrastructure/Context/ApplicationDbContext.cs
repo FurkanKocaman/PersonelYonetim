@@ -70,6 +70,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        modelBuilder.Entity<IzinTalep>()
+            .HasOne(p => p.IzinTur)
+            .WithMany()
+            .HasForeignKey(p => p.IzinTurId)
+            .OnDelete(DeleteBehavior.NoAction);
+
         modelBuilder.Entity<IzinTur>()
             .HasOne(p => p.Sirket)
             .WithMany()

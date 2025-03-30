@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import IzinTalepCreateModal from "@/components/modals/IzinTalepCreateModal.vue";
 import { onMounted, computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -19,6 +20,8 @@ interface FilterOptions {
   durum: string;
   izinTipi: string;
 }
+
+const izinTalepCreate = ref(false);
 
 // Component state
 const loading = ref(false);
@@ -64,9 +67,9 @@ const filteredIzinList = computed(() => {
 
 // Kurallar sayfasına ait mi kontrolü
 const isKurallarRoute = computed(() => {
-  return route.name === 'IzinKurallari' || 
-         route.name === 'IzinKurallariKurallar' || 
-         route.name === 'IzinKurallariRaporlar' || 
+  return route.name === 'IzinKurallari' ||
+         route.name === 'IzinKurallariKurallar' ||
+         route.name === 'IzinKurallariRaporlar' ||
          route.name === 'IzinKurallariOrnekSablonlar';
 });
 
@@ -165,7 +168,7 @@ defineExpose({
         </button>
       </div>
     </div>
-    <!-- Sekmeler end -->
+
     <RouterView></RouterView>
   </div>
 </template>

@@ -96,7 +96,7 @@ const router = createRouter({
             {
               path: "",
               name: "IzinKurallariKurallar",
-              component: () => import("../views/izin/izin-view/IzinKurallariKurallarView.vue"),
+              component: () => import("@/views/izin/izin-view/IzinKurallariKurallarViewNew.vue"),
               meta: { title: "İzin Kuralları" },
             },
             {

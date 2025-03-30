@@ -39,7 +39,7 @@ onMounted(() => {
       </transition>
     </RouterView>
   </div>
-  <div class="fixed z-50 right-0 top-0 flex flex-col">
+  <div class="fixed z-50 right-2 top-0 flex flex-col">
     <ToastComponent />
   </div>
 </template>

@@ -15,20 +15,32 @@
       </div>
 
       <!-- Hata Mesajı -->
-      <div v-else-if="error" class="bg-red-100 border border-red-200 text-red-700 dark:bg-red-900 dark:border-red-800 dark:text-red-300 rounded-lg p-4 mb-6">
+      <div
+        v-else-if="error"
+        class="bg-red-100 border border-red-200 text-red-700 dark:bg-red-900 dark:border-red-800 dark:text-red-300 rounded-lg p-4 mb-6"
+      >
         <div class="flex items-center">
           <i class="fas fa-exclamation-circle mr-2"></i>
-          <span>İzin şablonları yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.</span>
+          <span
+            >İzin şablonları yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.</span
+          >
         </div>
       </div>
 
       <!-- Şablonlar -->
-      <div v-else-if="templates.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="template in templates" :key="template.id" class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm overflow-hidden">
+      <div
+        v-else-if="templates.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <div
+          v-for="template in templates"
+          :key="template.id"
+          class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm overflow-hidden"
+        >
           <div class="p-6">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{{ template.name }}</h3>
             <p class="text-gray-600 dark:text-gray-400 mb-4">{{ template.description }}</p>
-            
+
             <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4">
               <span class="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full text-xs mr-2">
                 {{ template.entitlement }}
@@ -37,16 +49,16 @@
                 {{ template.paid ? 'Ücretli' : 'Ücretsiz' }}
               </span>
             </div>
-            
+
             <div class="flex justify-end space-x-2">
-              <button 
-                @click="useTemplate(template)" 
+              <button
+                @click="useTemplate(template)"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2 text-center transition-colors duration-300"
               >
                 Şablonu Kullan
               </button>
-              <button 
-                @click="copyTemplate(template)" 
+              <button
+                @click="copyTemplate(template)"
                 class="bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-neutral-700 dark:text-gray-300 dark:hover:bg-neutral-600 font-medium rounded-lg text-sm px-4 py-2 text-center transition-colors duration-300"
               >
                 Kopyala
@@ -96,15 +108,15 @@
               </div>
             </div>
             <div class="bg-gray-50 dark:bg-neutral-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 @click="applyTemplate"
                 class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
               >
                 Şablonu Uygula
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 @click="showTemplateModal = false"
                 class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-neutral-700 dark:border-neutral-600 dark:text-gray-200 dark:hover:bg-neutral-600"
               >
@@ -119,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 import IzinKurallariService, { type IzinKurali } from "@/services/IzinKurallariService";
 
 // Şablon için genişletilmiş tip tanımı
@@ -138,19 +150,19 @@ const showTemplateModal = ref(false);
 const loadTemplates = async () => {
   loading.value = true;
   error.value = false;
-  
+
   try {
     // API'den verileri al (mock veri kullanılıyor şimdilik)
     // const response = await IzinKurallariService.getTemplates();
     // templates.value = response.data;
-    
+
     // Mock veri
     templates.value = [
       { id: 1, name: 'Standart İzin Paketi', description: 'Temel izin hakları içeren standart paket', paid: true, entitlement: 'Yıllık', frequency: 'Yıllık', minDays: 14, maxDays: 14, days: 14, active: true, rules: [{ name: 'Yıllık İzin', description: 'Yılda 14 gün ücretli izin' }] },
       { id: 2, name: 'Genişletilmiş İzin Paketi', description: 'Daha fazla izin hakkı içeren genişletilmiş paket', paid: true, entitlement: 'Yıllık', frequency: 'Yıllık', minDays: 21, maxDays: 21, days: 21, active: true, rules: [{ name: 'Yıllık İzin', description: 'Yılda 21 gün ücretli izin' }] },
       { id: 3, name: 'Mazeret İzinleri Paketi', description: 'Çeşitli mazeret izinlerini içeren paket', paid: true, entitlement: 'Olay Bazlı', frequency: 'Gerektiğinde', minDays: 1, maxDays: 5, days: 5, active: true, rules: [{ name: 'Mazeret İzni', description: 'Yılda 5 gün ücretli mazeret izni' }] },
     ];
-    
+
     loading.value = false;
   } catch (err) {
     console.error("Şablonlar yüklenirken hata oluştu:", err);
@@ -169,14 +181,14 @@ const useTemplate = (template: IzinSablonu) => {
 const copyTemplate = (template: IzinSablonu) => {
   // Şablonu kopyala ve yeni kural oluştur
   console.log("Şablon kopyalanıyor:", template);
-  
+
   // Burada şablonu kopyalayarak yeni bir kural oluşturma işlemi yapılabilir
   // Örneğin:
   // const newRule = { ...template };
   // delete newRule.id;
   // newRule.name = `${template.name} (Kopya)`;
   // IzinKurallariService.createRule(newRule);
-  
+
   // Başarılı mesajı göster
   alert("Şablon başarıyla kopyalandı ve yeni kural oluşturuldu!");
 };
@@ -185,14 +197,14 @@ const copyTemplate = (template: IzinSablonu) => {
 const applyTemplate = () => {
   // Şablonu uygula
   console.log("Şablon uygulanıyor:", selectedTemplate.value);
-  
+
   // Burada şablonu uygulama işlemi yapılabilir
   // Örneğin:
   // IzinKurallariService.applyTemplate(selectedTemplate.value.id);
-  
+
   // Modalı kapat
   showTemplateModal.value = false;
-  
+
   // Başarılı mesajı göster
   alert("Şablon başarıyla uygulandı!");
 };

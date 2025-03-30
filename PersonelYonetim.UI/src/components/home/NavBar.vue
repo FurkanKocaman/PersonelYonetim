@@ -1,57 +1,57 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   transparent: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 const router = useRouter();
 const isScrolled = ref(false);
-const activeDropdown = ref('');
+const activeDropdown = ref("");
 const isMobileMenuOpen = ref(false);
 
 // Dropdown menüler
 const dropdowns = [
   {
-    id: 'applications',
-    title: 'Uygulamalar',
+    id: "applications",
+    title: "Uygulamalar",
     items: [
-      { name: 'Personel Yönetimi', icon: 'users', link: '#' },
-      { name: 'Bordro İşlemleri', icon: 'file-invoice-dollar', link: '#' },
-      { name: 'İzin Takibi', icon: 'calendar-alt', link: '#' },
-      { name: 'Performans Değerlendirme', icon: 'chart-line', link: '#' }
-    ]
+      { name: "Personel Yönetimi", icon: "users", link: "#" },
+      { name: "Bordro İşlemleri", icon: "file-invoice-dollar", link: "#" },
+      { name: "İzin Takibi", icon: "calendar-alt", link: "#" },
+      { name: "Performans Değerlendirme", icon: "chart-line", link: "#" },
+    ],
   },
   {
-    id: 'resources',
-    title: 'Kaynaklar',
+    id: "resources",
+    title: "Kaynaklar",
     items: [
-      { name: 'Blog', icon: 'blog', link: '#' },
-      { name: 'Destek', icon: 'headset', link: '#' },
-      { name: 'Eğitimler', icon: 'graduation-cap', link: '#' },
-      { name: 'SSS', icon: 'question-circle', link: '#' }
-    ]
-  }
+      { name: "Blog", icon: "blog", link: "#" },
+      { name: "Destek", icon: "headset", link: "#" },
+      { name: "Eğitimler", icon: "graduation-cap", link: "#" },
+      { name: "SSS", icon: "question-circle", link: "#" },
+    ],
+  },
 ];
 
 // Sayfa yüklendiğinde
 onMounted(() => {
   // Scroll event listener ekle
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener("scroll", handleScroll);
   // Click outside listener
-  window.addEventListener('click', handleClickOutside);
+  window.addEventListener("click", handleClickOutside);
 });
 
 // Component unmount olduğunda
 onUnmounted(() => {
   // Scroll event listener'ı kaldır
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
   // Click outside listener
-  window.removeEventListener('click', handleClickOutside);
+  window.removeEventListener("click", handleClickOutside);
 });
 
 // Scroll durumunu kontrol et
@@ -63,7 +63,7 @@ const handleScroll = () => {
 const toggleDropdown = (menu: string, event: Event) => {
   event.stopPropagation();
   if (activeDropdown.value === menu) {
-    activeDropdown.value = '';
+    activeDropdown.value = "";
   } else {
     activeDropdown.value = menu;
   }
@@ -71,17 +71,17 @@ const toggleDropdown = (menu: string, event: Event) => {
 
 // Dropdown dışına tıklandığında kapat
 const handleClickOutside = (event: Event) => {
-  const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+  const dropdownMenus = document.querySelectorAll(".dropdown-menu");
   let isClickInside = false;
 
-  dropdownMenus.forEach(menu => {
+  dropdownMenus.forEach((menu) => {
     if (menu.contains(event.target as HTMLElement)) {
       isClickInside = true;
     }
   });
 
   if (!isClickInside) {
-    activeDropdown.value = '';
+    activeDropdown.value = "";
   }
 };
 
@@ -92,38 +92,38 @@ const toggleMobileMenu = () => {
 
 // Giriş yap butonuna tıklama
 const handleLogin = () => {
-  router.push('/login');
+  router.push("/login");
 };
 
 // Kayıt ol butonuna tıklama
 const handleRegister = () => {
-  router.push('/register');
+  router.push("/register");
 };
 
 // Navbar arka plan sınıfı
 const navbarClass = computed(() => {
   if (props.transparent) {
     return isScrolled.value
-      ? 'bg-white dark:bg-neutral-800 shadow-md transition-all duration-300'
-      : 'bg-transparent transition-all duration-300';
+      ? "bg-white dark:bg-neutral-800 shadow-md transition-all duration-300"
+      : "bg-transparent transition-all duration-300";
   }
-  return 'bg-white dark:bg-neutral-800 shadow-md';
+  return "bg-white dark:bg-neutral-800 shadow-md";
 });
 
 // Metin rengi sınıfı
 const textColorClass = computed(() => {
   if (props.transparent && !isScrolled.value) {
-    return 'text-white';
+    return "text-white";
   }
-  return 'text-gray-800 dark:text-gray-200';
+  return "text-gray-800 dark:text-gray-200";
 });
 
 // Link rengi sınıfı
 const linkColorClass = computed(() => {
   if (props.transparent && !isScrolled.value) {
-    return 'text-white hover:text-gray-200';
+    return "text-white hover:text-gray-200";
   }
-  return 'text-gray-600 hover:text-sky-600 dark:text-gray-300 dark:hover:text-sky-400';
+  return "text-gray-600 hover:text-sky-600 dark:text-gray-300 dark:hover:text-sky-400";
 });
 </script>
 
@@ -149,8 +149,10 @@ const linkColorClass = computed(() => {
               :class="[linkColorClass, 'flex items-center space-x-1 focus:outline-none']"
             >
               <span>{{ dropdown.title }}</span>
-              <i class="fas fa-chevron-down text-xs transition-transform"
-                 :class="{'transform rotate-180': activeDropdown === dropdown.id}"></i>
+              <i
+                class="fas fa-chevron-down text-xs transition-transform"
+                :class="{ 'transform rotate-180': activeDropdown === dropdown.id }"
+              ></i>
             </button>
 
             <!-- Açılır Menü İçeriği -->
@@ -165,7 +167,9 @@ const linkColorClass = computed(() => {
                   :href="item.link"
                   class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
                 >
-                  <div class="w-8 h-8 bg-sky-100 dark:bg-sky-900 rounded-full flex items-center justify-center mr-3">
+                  <div
+                    class="w-8 h-8 bg-sky-100 dark:bg-sky-900 rounded-full flex items-center justify-center mr-3"
+                  >
                     <i :class="`fas fa-${item.icon} text-sky-600 dark:text-sky-400`"></i>
                   </div>
                   <span class="text-gray-800 dark:text-gray-200">{{ item.name }}</span>
@@ -180,18 +184,27 @@ const linkColorClass = computed(() => {
 
         <!-- İşlem Butonları -->
         <div class="hidden md:flex items-center space-x-4">
-          <button @click="handleLogin" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center">
+          <button
+            @click="handleLogin"
+            class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center"
+          >
             <i class="fas fa-sign-in-alt mr-2"></i>
             Giriş Yap
           </button>
-          <button @click="handleRegister" class="px-5 py-2.5 bg-white dark:bg-neutral-800 border-2 border-sky-500 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/30 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center">
+          <button
+            @click="handleRegister"
+            class="px-5 py-2.5 bg-white dark:bg-neutral-800 border-2 border-sky-500 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/30 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center"
+          >
             <i class="fas fa-user-plus mr-2"></i>
             Kayıt Ol
           </button>
         </div>
 
         <!-- Mobil Menü Butonu -->
-        <button @click="toggleMobileMenu" class="lg:hidden text-gray-800 dark:text-gray-200 focus:outline-none">
+        <button
+          @click="toggleMobileMenu"
+          class="lg:hidden text-gray-800 dark:text-gray-200 focus:outline-none"
+        >
           <i class="fas" :class="isMobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
         </button>
       </div>
@@ -202,7 +215,11 @@ const linkColorClass = computed(() => {
         class="lg:hidden mt-4 py-4 border-t border-gray-200 dark:border-neutral-700"
       >
         <nav class="flex flex-col space-y-4">
-          <a href="#features" class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400">Özellikler</a>
+          <a
+            href="#features"
+            class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400"
+            >Özellikler</a
+          >
 
           <!-- Mobil Açılır Menüler -->
           <div v-for="dropdown in dropdowns" :key="`mobile-${dropdown.id}`" class="space-y-2">
@@ -211,8 +228,10 @@ const linkColorClass = computed(() => {
               class="flex items-center justify-between w-full text-left text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400"
             >
               <span>{{ dropdown.title }}</span>
-              <i class="fas fa-chevron-down text-xs transition-transform"
-                 :class="{'transform rotate-180': activeDropdown === dropdown.id + '-mobile'}"></i>
+              <i
+                class="fas fa-chevron-down text-xs transition-transform"
+                :class="{ 'transform rotate-180': activeDropdown === dropdown.id + '-mobile' }"
+              ></i>
             </button>
 
             <div
@@ -231,15 +250,29 @@ const linkColorClass = computed(() => {
             </div>
           </div>
 
-          <a href="#testimonials" class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400">Referanslar</a>
-          <a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400">İletişim</a>
+          <a
+            href="#testimonials"
+            class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400"
+            >Referanslar</a
+          >
+          <a
+            href="#contact"
+            class="text-gray-600 dark:text-gray-300 hover:text-sky-600 dark:hover:text-sky-400"
+            >İletişim</a
+          >
 
           <div class="flex space-x-4 pt-2">
-            <button @click="handleLogin" class="flex-1 px-4 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center">
+            <button
+              @click="handleLogin"
+              class="flex-1 px-4 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg hover:from-sky-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center"
+            >
               <i class="fas fa-sign-in-alt mr-2"></i>
               Giriş Yap
             </button>
-            <button @click="handleRegister" class="flex-1 px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-sky-500 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/30 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center">
+            <button
+              @click="handleRegister"
+              class="flex-1 px-4 py-3 bg-white dark:bg-neutral-800 border-2 border-sky-500 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/30 shadow-md hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center"
+            >
               <i class="fas fa-user-plus mr-2"></i>
               Kayıt Ol
             </button>
