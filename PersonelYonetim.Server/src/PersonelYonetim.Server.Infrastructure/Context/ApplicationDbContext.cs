@@ -15,6 +15,7 @@ using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.Subeler;
+using PersonelYonetim.Server.Domain.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.Tokenler;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
@@ -41,6 +42,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<Token> Tokenler { get; set; }
     public DbSet<CalismaTakvimi> CalismaTakvimleri { get; set; }
     public DbSet<CalismaGun> CalismaGunleri { get; set; }
+    public DbSet<TakvimEtkinlik> TakvimEtkinlikler { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +50,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+
+        modelBuilder.Entity<TakvimEtkinlik>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<PersonelIzin>()
             .HasOne(p => p.Personel)

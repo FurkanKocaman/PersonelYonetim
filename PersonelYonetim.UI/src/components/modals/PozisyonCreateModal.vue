@@ -13,15 +13,15 @@ const props = defineProps({
   },
   editMode: {
     type: Boolean,
-    default: false
+    default: false,
   },
   pozisyon: {
     type: Object as PropType<PozisyonModel>,
-    default: null
-  }
+    default: null,
+  },
 });
 
-const emit = defineEmits(['closeModal', 'pozisyonCreated', 'pozisyonUpdated']);
+const emit = defineEmits(["closeModal", "pozisyonCreated", "pozisyonUpdated"]);
 
 const request: PozisyonCreateRequest = {
   ad: "",
@@ -39,18 +39,16 @@ onMounted(() => {
 });
 
 const handlePozisyonCreate = async () => {
-  let response;
-  
   try {
     if (props.editMode && props.pozisyon) {
-      response = await PozisyonService.pozisyonlarUpdate(Number(props.pozisyon.id), request);
-      emit('pozisyonUpdated', true);
+      await PozisyonService.pozisyonlarUpdate(Number(props.pozisyon.id), request);
+      emit("pozisyonUpdated", true);
     } else {
-      response = await PozisyonService.pozisyonlarCreate(request);
-      emit('pozisyonCreated', true);
+      await PozisyonService.pozisyonlarCreate(request);
+      emit("pozisyonCreated", true);
     }
-    
-    emit('closeModal', false);
+
+    emit("closeModal", false);
   } catch (error) {
     console.error(error);
   }
@@ -66,7 +64,7 @@ const handlePozisyonCreate = async () => {
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ props.editMode ? 'Pozisyon Düzenle' : 'Pozisyon Oluştur' }}
+            {{ props.editMode ? "Pozisyon Düzenle" : "Pozisyon Oluştur" }}
           </h3>
           <button
             type="button"
@@ -157,7 +155,7 @@ const handlePozisyonCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
+              {{ props.editMode ? "Güncelle" : "Oluştur" }}
             </button>
           </form>
         </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UserModel } from "@/models/UserModel";
+import type { UserModel } from "@/models/entity-models/UserModel";
 import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";

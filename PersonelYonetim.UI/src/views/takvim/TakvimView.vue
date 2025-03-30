@@ -1,300 +1,405 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { takvimService, Etkinlik } from "@/services/TakvimService";
+import FullCalendar from "@fullcalendar/vue3";
+import "@vuepic/vue-datepicker/dist/main.css";
+import Datepicker from "@vuepic/vue-datepicker";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import listPlugin from "@fullcalendar/list";
+import trLocale from "@fullcalendar/core/locales/tr";
+import { onMounted, ref, type Ref } from "vue";
+import type { EventClickArg, EventContentArg } from "@fullcalendar/core/index.js";
+import { TakvimService } from "@/services/TakvimService";
+import type { TakvimEtkinlikCreateCommand } from "@/models/request-models/TakvimEtkinlikCreateCommand";
+import { useUserStore } from "@/stores/user";
 
-// 🗓 Veriler
-const currentDate = ref(new Date());
-const etkinlikler = ref<Etkinlik[]>([]);
-const tatilGunleri = ref<{ [key: string]: string }>({});
+const events = ref<
+  {
+    id: string;
+    title: string;
+    start: string;
+    end: string | undefined;
+    description: string;
+    createBy: string;
+    creatorId: string;
+  }[]
+>([
+  {
+    id: "",
+    title: "",
+    start: "",
+    end: undefined,
+    description: "",
+    createBy: "",
+    creatorId: "",
+  },
+]);
 
-const showForm = ref(false);
-const newEvent = ref({
-  id: 0,
+const takvimEtkinlikRequest: Ref<TakvimEtkinlikCreateCommand> = ref({
+  etkinlikId: "",
   baslik: "",
-  tarih: "",
+  aciklama: undefined,
+  baslangicTarihi: new Date(),
+  bitisTarihi: undefined,
+  isPublic: true,
 });
 
-const dayNames = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
-const monthNames = [
-  "Ocak",
-  "Şubat",
-  "Mart",
-  "Nisan",
-  "Mayıs",
-  "Haziran",
-  "Temmuz",
-  "Ağustos",
-  "Eylül",
-  "Ekim",
-  "Kasım",
-  "Aralık",
-];
+const isEtkinlikEkle = ref(false);
 
-onMounted(async () => {
-  etkinlikler.value = await takvimService.getEtkinlikler();
-  tatilGunleri.value = await takvimService.getTatilGunleri();
+type ModalDurum = "ekle" | "guncelle";
+
+const modalDurum = ref<ModalDurum>("ekle");
+
+const calendarOptions = {
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
+  initialView: "dayGridMonth",
+  headerToolbar: {
+    left: "prev,next today",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay,addEventButton",
+  },
+  selectable: true,
+  editable: false,
+  locale: trLocale,
+  events: events.value,
+
+  businessHours: {
+    daysOfWeek: [1, 2, 3, 4, 5],
+
+    startTime: "09:00",
+    endTime: "18:00",
+  },
+  navLinks: true,
+  customButtons: {
+    addEventButton: {
+      text: "Etkinlik Ekle",
+      click() {
+        modalDurum.value = "ekle";
+        isEtkinlikEkle.value = true;
+      },
+    },
+  },
+  eventClick: (info: EventClickArg) => {
+    console.log("Extended", info.event.extendedProps);
+    console.log(useUserStore().user.userId);
+    if (info.event.extendedProps.creatorId == useUserStore().user.userId) {
+      isEtkinlikEkle.value = true;
+      modalDurum.value = "guncelle";
+      takvimEtkinlikRequest.value = {
+        etkinlikId: info.event.id,
+        baslik: info.event.title,
+        aciklama: info.event.extendedProps.description,
+        baslangicTarihi: info.event.start!,
+        bitisTarihi: info.event.end ?? undefined,
+        isPublic: info.event.extendedProps.isPublic,
+      };
+    }
+  },
+  eventContent: (arg: EventContentArg) => {
+    const createdBy = arg.event.extendedProps.createBy.substring(0, 12) + "..." || "Bilinmiyor";
+    return {
+      html: `<div>
+             <span>${
+               arg.event.start?.getHours() + ":" + arg.event.start?.getMinutes()
+             } </span> <strong>${arg.event.title}</strong>
+             <br>
+             <small class='event-createdby'>Oluşturan: ${createdBy}</small>
+           </div>`,
+    };
+  },
+};
+onMounted(() => {
+  getEtkinlikler();
 });
 
-const currentMonth = computed(() => currentDate.value.getMonth());
-const currentYear = computed(() => currentDate.value.getFullYear());
-
-const calendarDays = computed(() => {
-  const days = [];
-  const totalDays = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1).getDay();
-
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    days.push({ day: "", date: "" });
-  }
-
-  for (let day = 1; day <= totalDays; day++) {
-    const dateKey = `${currentMonth.value + 1}-${day}`;
-    days.push({ day, date: dateKey });
-  }
-
-  return days;
-});
-
-const etkinlikVarMi = (date: string) => {
-  return etkinlikler.value.some((event) => {
-    const [yil, ay, gun] = event.tarih.split("-").map(Number);
-    return `${ay}-${gun}` === date;
+const getEtkinlikler = async () => {
+  const res = await TakvimService.getEtkinlikler();
+  res!.forEach((element) => {
+    events.value.push({
+      id: element.id,
+      title: element.baslik,
+      start: new Date(element.baslangicTarihi).toISOString(),
+      end: new Date(element.bitisTarihi).toISOString(),
+      description: element.aciklama,
+      createBy: element.createUserName,
+      creatorId: element.createUserId,
+    });
   });
 };
 
-const tatilVarMi = (date: string) => {
-  return tatilGunleri.value[date] !== undefined;
+const openCreateModal = () => {
+  resetTakvimEtkinlikRequest();
+  isEtkinlikEkle.value = false;
+  modalDurum.value = "ekle";
 };
 
-const prevMonth = () => {
-  currentDate.value = new Date(currentYear.value, currentMonth.value - 1, 1);
+const createEtkinlik = async () => {
+  const res = await TakvimService.createEtkinlik(takvimEtkinlikRequest.value);
+  events.value.push({
+    id: res!,
+    title: takvimEtkinlikRequest.value.baslik,
+    start: takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
+    end: takvimEtkinlikRequest.value.bitisTarihi
+      ? takvimEtkinlikRequest.value.bitisTarihi.toISOString()
+      : undefined,
+    description: takvimEtkinlikRequest.value.aciklama ?? "",
+    createBy: useUserStore().user.fullName,
+    creatorId: useUserStore().user.userId,
+  });
+  console.log("Events.value", events.value);
+  isEtkinlikEkle.value = false;
+  resetTakvimEtkinlikRequest();
 };
-const nextMonth = () => {
-  currentDate.value = new Date(currentYear.value, currentMonth.value + 1, 1);
+const guncelleEtkinlik = async () => {
+  console.log(takvimEtkinlikRequest.value);
+  const res = await TakvimService.updateEtkinlik(takvimEtkinlikRequest.value);
+  console.log("RES", res);
+
+  if (res) {
+    const eventIndex = events.value.findIndex(
+      (event) => event.id === takvimEtkinlikRequest.value.etkinlikId
+    );
+
+    if (eventIndex !== -1) {
+      events.value[eventIndex] = {
+        ...events.value[eventIndex],
+        title: takvimEtkinlikRequest.value.baslik,
+        start: takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
+        end: takvimEtkinlikRequest.value.bitisTarihi
+          ? takvimEtkinlikRequest.value.bitisTarihi.toISOString()
+          : takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
+        description: takvimEtkinlikRequest.value.aciklama ?? "",
+      };
+    }
+  }
+
+  isEtkinlikEkle.value = false;
+  resetTakvimEtkinlikRequest();
 };
 
-const addEvent = async () => {
-  const newEventData = {
-    id: Date.now(),
-    baslik: newEvent.value.baslik,
-    tarih: newEvent.value.tarih,
+const silEtkinlik = async () => {
+  const res = await TakvimService.deleteEtkinlik(takvimEtkinlikRequest.value.etkinlikId);
+
+  if (res) {
+    const index = events.value.findIndex(
+      (event) => event.id === takvimEtkinlikRequest.value.etkinlikId
+    );
+
+    if (index !== -1) {
+      events.value.splice(index, 1); // Silme işlemi
+    }
+  }
+  resetTakvimEtkinlikRequest();
+  isEtkinlikEkle.value = false;
+};
+const resetTakvimEtkinlikRequest = () => {
+  takvimEtkinlikRequest.value = {
+    etkinlikId: "",
+    baslik: "",
+    aciklama: undefined,
+    baslangicTarihi: new Date(),
+    bitisTarihi: undefined,
+    isPublic: true,
   };
-
-  await takvimService.ekleEtkinlik(newEventData);
-  etkinlikler.value = await takvimService.getEtkinlikler();
-  showForm.value = false;
-  // Formu temizliyoruz
-  newEvent.value = { id: 0, baslik: "", tarih: "" };
-};
-
-const removeEvent = async (date: string) => {
-  const eventToRemove = etkinlikler.value.find((event) => {
-    const [yil, ay, gun] = event.tarih.split("-").map(Number);
-    return `${ay}-${gun}` === date;
-  });
-
-  if (eventToRemove) {
-    takvimService.silEtkinlik(eventToRemove.id);
-    etkinlikler.value = await takvimService.getEtkinlikler();
-  }
-};
-
-const toggleForm = () => {
-  showForm.value = !showForm.value;
 };
 </script>
 
 <template>
-  <div class="calendar">
-    <div class="calendar-header">
-      <button @click="prevMonth" class="button">&lt;</button>
-      <h2 style="font-size: 22px; color: #141414">
-        {{ currentYear }} - {{ monthNames[currentMonth] }}
-      </h2>
-      <button @click="nextMonth" class="button">&gt;</button>
+  <div class="w-full">
+    <FullCalendar :options="calendarOptions" />
+  </div>
 
-      <button @click="toggleForm" class="button add-button">Ekle</button>
-    </div>
+  <div
+    v-if="isEtkinlikEkle"
+    class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-50 backdrop-blur-sm bg-black/30 w-full h-full"
+  >
+    <div class="relative p-4 max-w-4xl w-full max-h-full">
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-neutral-800 w-full">
+        <div
+          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            {{ takvimEtkinlikRequest.etkinlikId == "" ? "Etkinlik Oluştur" : "Etkinlik Düzenle" }}
+          </h3>
+          <button
+            type="button"
+            class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            @click="
+              () => {
+                openCreateModal();
+              }
+            "
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
 
-    <div v-if="showForm" class="event-form">
-      <h3>Yeni Etkinlik Ekle</h3>
-      <label for="eventType">Etkinlik Türü:</label>
-      <select v-model="newEvent.type" id="eventType">
-        <option value="Doğum Günü">Doğum Günü</option>
-        <option value="İzin">İzin</option>
-        <option value="Etkinlik">Etkinlik</option>
-      </select>
+        <div class="p-4 md:p-5 w-full">
+          <form
+            class="space-y-4 w-full"
+            @submit.prevent="modalDurum == 'ekle' ? createEtkinlik() : guncelleEtkinlik()"
+          >
+            <div class="flex">
+              <div class="flex flex-col mr-2 w-full">
+                <div class="mb-2 flex flex-col">
+                  <div class="flex justify-between">
+                    <label
+                      for="baslik"
+                      class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >Etkinlik Baslığı</label
+                    >
+                    <button
+                      type="button"
+                      class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-1.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+                      @click="silEtkinlik()"
+                    >
+                      Etkinliği sil
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    name="baslik"
+                    id="baslik"
+                    v-model="takvimEtkinlikRequest.baslik"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                    placeholder="Toplantı"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    for="aciklama"
+                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >Açıklama <span class="text-neutral-400">(Opsiyonel)</span></label
+                  >
+                  <textarea
+                    type="text"
+                    id="aciklama"
+                    v-model="takvimEtkinlikRequest.aciklama"
+                    class="bg-gray-50 border max-h-20 min-h-20 border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                    placeholder=""
+                  ></textarea>
+                </div>
+                <div class="flex">
+                  <div class="w-full mr-2">
+                    <label for="baslangicTarih" class="block text-sm/5 font-semibold my-2"
+                      >Başlangıç Tarihi</label
+                    >
+                    <Datepicker
+                      id="baslangicTarih"
+                      locale="TR"
+                      v-model="takvimEtkinlikRequest.baslangicTarihi"
+                      :enable-time-picker="true"
+                      :format="'dd-MM-yyyy'"
+                    />
+                  </div>
+                  <div class="w-full mr-2">
+                    <label for="baslangicTarih" class="block text-sm/5 font-semibold my-2"
+                      >Bitiş Tarihi</label
+                    >
+                    <Datepicker
+                      id="baslangicTarih"
+                      locale="TR"
+                      v-model="takvimEtkinlikRequest.bitisTarihi"
+                      :enable-time-picker="true"
+                      :format="'dd-MM-yyyy'"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label class="inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="takvimEtkinlikRequest.isPublic"
+                  class="sr-only peer"
+                  checked
+                />
+                <div
+                  class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"
+                ></div>
+                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >Herkese açık</span
+                >
+              </label>
+            </div>
+            <div v-if="takvimEtkinlikRequest.isPublic">
+              <label
+                for="aciklama"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Katılımcılar <span class="text-neutral-400">(Opsiyonel)</span></label
+              >
+              <textarea
+                type="text"
+                name="aciklama"
+                id="aciklama"
+                class="bg-gray-50 border max-h-20 min-h-20 border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                placeholder=""
+              ></textarea>
+            </div>
 
-      <label for="eventName">Başlık:</label>
-      <input v-model="newEvent.baslik" type="text" id="eventName" placeholder="Başlık" required />
-
-      <label for="eventDate">Tarih:</label>
-      <input v-model="newEvent.tarih" type="date" id="eventDate" required />
-
-      <button @click="addEvent" class="button">Kaydet</button>
-      <button @click="toggleForm" class="button">İptal</button>
-    </div>
-    <div class="day-names">
-      <div v-for="(day, index) in dayNames" :key="index" class="day-name">{{ day }}</div>
-    </div>
-
-    <div class="days">
-      <div
-        v-for="day in calendarDays"
-        :key="day.date"
-        class="day"
-        :class="{ holiday: tatilVarMi(day.date), 'event-day': etkinlikVarMi(day.date) }"
-      >
-        <span class="day-number">{{ day.day }}</span>
-        <div v-if="tatilVarMi(day.date)" class="tatil">{{ tatilGunleri[day.date] }}</div>
-        <div v-if="etkinlikVarMi(day.date)" class="etkinlik">
-          📌 Etkinlik Var
-          <button @click="removeEvent(day.date)" class="button remove-button">X</button>
+            <button
+              type="submit"
+              class="w-full text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+            >
+              {{ takvimEtkinlikRequest.etkinlikId == "" ? "Oluştur" : "Güncelle" }}
+            </button>
+          </form>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.calendar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  padding: 20px;
-  margin-left: 220px;
+<style>
+.fc-toolbar-title {
+  color: #525252;
 }
 
-.day-names {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  font-weight: bold;
-  font-size: 12px;
-  padding-bottom: 10px;
-  margin-bottom: 2px;
-  margin-left: 20px;
+.dark .fc-toolbar-title {
+  color: #d9d9d9;
 }
 
-.day-name {
-  margin-left: -13px;
+.fc-button {
+  background-color: #274ea2 !important;
+  color: white !important;
+  border-radius: 3px !important;
+  margin: 5px 1px 0 1px !important;
+  padding: 6px 12px !important;
 }
 
-.days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0px;
-  margin-left: 10px;
-  height: 1100px;
+.dark .fc {
+  background-color: rgb(39, 39, 39);
+}
+.dark .fc-daygrid {
+  background-color: rgb(47, 47, 47) !important;
+  outline: none !important;
+}
+.fc-daygrid {
+  background-color: rgb(245, 245, 255) !important;
+  outline: none !important;
+}
+.fc-day-today {
+  background-color: rgb(0, 100, 255) !important;
 }
 
-.day {
-  padding: 10px;
-  border: 1px solid #ebeaea;
-  text-align: center;
-  min-height: 140px;
-  font-size: 16px;
-  font-weight: bold;
-  background-color: #f8f8f8;
-  position: relative;
-  margin: 0;
-}
-
-.day-number {
-  position: absolute;
-  top: 12px;
-  padding-left: 81px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.button {
-  background-color: #007bff;
-  color: white;
-  padding: 4px 10px;
-  border: none;
-  cursor: pointer;
-  border-radius: 8px;
-  font-size: 22px;
-}
-
-.button:hover {
-  background-color: #036cdc;
-}
-
-.add-button {
-  font-size: 12px;
-  padding: 10px 15px;
-}
-
-/*.remove-button {
-  background-color: #9b9b9b;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 9px;
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-}*/
-
-.remove-button {
-  background-color: #e1e1e1;
-  color: rgb(97, 95, 95);
-  padding: 4px 7px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 9px;
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-}
-
-.remove-button:hover {
-  background-color: #b9b5b5;
-}
-
-.event-form {
-  background-color: #f8f8f8;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.event-form label {
-  font-weight: bold;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.event-form input,
-.event-form select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.event-form button {
-  background-color: #007bff;
-  color: white;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 10px;
-  margin-left: 3px;
-  font-weight: bold;
-}
-
-.event-form button:hover {
-  background-color: #036cdc;
+.fc-scrollgrid {
+  border: none !important;
 }
 </style>

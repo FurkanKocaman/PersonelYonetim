@@ -5,20 +5,16 @@ import SidebarMenu from "@/components/dashboard/SidebarMenu.vue";
 import TopBar from "../components/dashboard/TopBar.vue";
 import type { MenuItem } from "@/types/menu";
 import { useUserStore } from "@/stores/user";
-import type { UserModel } from "@/models/UserModel";
+import type { UserModel } from "@/models/entity-models/UserModel";
 import Roles from "@/models/Roles";
 
-// Router
 const router = useRouter();
 const route = useRoute();
 
-// Kenar çubuğu durumu
 const sidebarOpen = ref(true);
 
-// Yükleniyor durumu
 const isLoading = ref(false);
 
-// Menü öğeleri
 const menuItems = ref<MenuItem[]>([
   {
     name: "Ana Sayfa",
@@ -87,9 +83,7 @@ const handleMenuClick = (item: MenuItem) => {
   }
 };
 
-// Mevcut rotaya göre aktif menü öğesini güncelle
 const updateActiveMenuItem = () => {
-  // Tüm öğeleri sıfırla
   menuItems.value.forEach((item) => {
     item.active = false;
     if (item.subItems) {
@@ -99,7 +93,6 @@ const updateActiveMenuItem = () => {
     }
   });
 
-  // En spesifik eşleşen rotayı bul
   let bestMatch: MenuItem | null = null;
   let bestMatchLength = 0;
 
@@ -118,12 +111,9 @@ const updateActiveMenuItem = () => {
     }
   });
 
-  // En iyi eşleşmeyi aktif olarak ayarla
   if (bestMatch) {
     (bestMatch as MenuItem).active = true;
-  }
-  // Eşleşme bulunamazsa ve dashboard kökündeysek, dashboard öğesini etkinleştir
-  else if (route.path === "/dashboard") {
+  } else if (route.path === "/dashboard") {
     const dashboardItem = menuItems.value.find((item) => item.path === "/dashboard");
     if (dashboardItem) {
       (dashboardItem as MenuItem).active = true;
@@ -131,7 +121,6 @@ const updateActiveMenuItem = () => {
   }
 };
 
-// Aktif menü öğesini güncellemek için rota değişikliklerini izle
 watch(
   () => route.path,
   () => {
@@ -140,7 +129,6 @@ watch(
   { immediate: true }
 );
 
-// Bileşen bağlandığında başlat
 onMounted(() => {
   userStore.getUser();
   updateActiveMenuItem();

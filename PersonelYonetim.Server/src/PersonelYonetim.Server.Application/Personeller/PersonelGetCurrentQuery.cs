@@ -33,6 +33,7 @@ public sealed class PersonelGetCurrentQueryResponse : EntityDto
     public string TamAdres { get; set; } = default!;
     public string? Yonetici { get; set; }
     public string Role { get; set; } = default!;
+    public Guid UserId { get; set; } = default!;
 }
 public sealed class PersonelGetCurrentQueryHandler(
     IPersonelRepository personelRepository,
@@ -78,6 +79,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                 PozisyonAd = entity.PersonelAtamalar
                     .Select(pa => pa.Pozisyon!.Ad)
                     .FirstOrDefault() ?? "",
+                UserId = entity.UserId,
                 //Yonetici = entity.Yonetici != null ? entity.Yonetici.FullName : "",
                 IsActive = entity.IsActive,
                 CreatedAt = entity.CreatedAt,

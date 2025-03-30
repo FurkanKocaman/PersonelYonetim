@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { type UserModel } from "@/models/UserModel";
+import { type UserModel } from "@/models/entity-models/UserModel";
 import { reactive } from "vue";
 import AuthService from "@/services/AuthService";
 
@@ -19,6 +19,7 @@ export const useUserStore = defineStore("user", () => {
     ilce: "",
     tamAdres: "",
     role: -1,
+    userId: "",
   });
 
   const getUser = async () => {
@@ -43,8 +44,9 @@ export const useUserStore = defineStore("user", () => {
       ilce: "",
       tamAdres: "",
       role: "",
+      userId: "",
     });
-    
+
     // Token'ı localStorage'dan kaldır
     localStorage.removeItem("token");
   };

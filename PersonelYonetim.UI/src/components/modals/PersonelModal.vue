@@ -7,7 +7,7 @@ import type { SubeModel } from "@/models/entity-models/SubeModel";
 import type { PersonelItem } from "@/models/PersonelModels";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import Roles from "@/models/Roles";
-import { SozlesmeTuru } from "@/models/UserModel";
+import { SozlesmeTuru } from "@/models/entity-models/UserModel";
 import CalismaTakvimService from "@/services/CalismaTakvimService";
 import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";

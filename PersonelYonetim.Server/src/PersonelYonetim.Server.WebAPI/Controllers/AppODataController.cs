@@ -14,6 +14,7 @@ using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Sirketler;
 using PersonelYonetim.Server.Application.Subeler;
+using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.RoleClaim;
 
 namespace PersonelYonetim.Server.WebAPI.Controllers;
@@ -37,6 +38,7 @@ public class AppODataController(
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
+        builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         return builder.GetEdmModel();
     }
 
@@ -125,6 +127,13 @@ public class AppODataController(
     public async Task<IQueryable<CalismaTakvimiGetQueryResponse>> GetCalismaTakvim(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new CalismaTakvimiGetQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("takvim-etkinlikler")]
+    [Authorize]
+    public async Task<IQueryable<TakvimEtkinlikGetAllQueryResponse>> GetTakvimEtkinlikler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new TakvimEtkinlikGetAllQuery(), cancellationToken);
         return response;
     }
 

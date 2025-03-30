@@ -13,6 +13,7 @@ export interface UserModel {
   ilce: string;
   tamAdres: string;
   role: number;
+  userId: string;
 }
 
 interface NameValue {

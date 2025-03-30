@@ -2,15 +2,12 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import IzinService from "@/services/IzinService";
-import { PersonelService } from "@/services/PersonelService";
-import type { IzinRequest, IzinItem } from "@/models/IzinModels";
-import type PersonelItem from "@/models/PersonelModels";
+import PersonelService from "@/services/PersonelService";
+import type { IzinRequest } from "@/models/IzinModels";
+import type { PersonelItem } from "@/models/PersonelModels";
 
 const router = useRouter();
 const route = useRoute();
-
-// Create an instance of PersonelService
-const personelService = new PersonelService();
 
 // Düzenleme modu kontrolü
 const isEditMode = computed(() => {
@@ -110,7 +107,7 @@ const loadExistingIzin = async () => {
 const loadPersonelList = async () => {
   try {
     loadingPersonel.value = true;
-    const response = await personelService.getPersonelList();
+    const response = await PersonelService.getPersonelList("", "", "");
     personelList.value = response.items;
   } catch (error) {
     console.error("Personel listesi yüklenirken hata oluştu:", error);

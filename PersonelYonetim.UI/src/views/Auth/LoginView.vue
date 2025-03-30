@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { LoginRequest } from "@/models/LoginRequest";
+import type { LoginRequest } from "@/models/request-models/LoginRequest";
 import AuthService from "@/services/AuthService";
 import { useRouter } from "vue-router";
 
