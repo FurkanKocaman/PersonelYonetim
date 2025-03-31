@@ -43,7 +43,7 @@ const personel = {
     isEposta: 'erkan.demir@elasoft.com.tr',
     isTelefon: null,
     kisiselEposta: null,
-    kisiselTelefon: '+90 551 159 1957'
+    kisiselTelefon: '+90 551 159 19 57'
   },
   vatandaslik: {
     dogumTarihi: '1 Mayıs 1989',
@@ -84,22 +84,78 @@ const personel = {
   }
 };
 
-const iletisimModal = ref(false);
-const iletisimForm = ref({
-  isEposta: '',
-  isTelefon: '',
-  kisiselEposta: '',
-  kisiselTelefon: ''
-});
-const iletisimDuzenle = () => {
-  // iletisimForm.value = { ...personel.value.iletisim };
-  iletisimModal.value = true;
+const iletisimForm = ref(false);
+const personelEmail = ref("");
+const personelTelefon = ref(personel.iletisim.kisiselTelefon);
+
+const iletisimFormKaydet = () => {
+  personel.iletisim.kisiselTelefon=personelTelefon.value;
+  personel.iletisim.kisiselEposta=personelEmail.value;
+  iletisimForm.value = false; 
 };
 
-const kaydetIletisim = () => {
-  personel.value.iletisim = { ...iletisimForm.value };
-  iletisimModal.value = false;
+const acilDurumForm = ref(false);
+const acilDurumAdSoyad = ref(personel.acilDurum.adSoyad);
+const acilDurumTelefon = ref(personel.acilDurum.telefon);
+const acilDurumYakinlikDerecesi=ref(personel.acilDurum.yakinlikDerece)
+
+const acilDurumFormKaydet = () => {
+  personel.acilDurum.adSoyad=acilDurumAdSoyad.value;
+  personel.acilDurum.telefon=acilDurumTelefon.value;
+  personel.acilDurum.yakinlikDerece=acilDurumYakinlikDerecesi.value;
+  acilDurumForm.value = false; 
 };
+
+const aileForm = ref(false);
+const aileMedeniHal = ref(personel.aile.medeniHal);
+const aileEsCalismaDurumu = ref(personel.aile.esCalismaDurumu);
+const aileCocoukSayisi=ref(personel.aile.cocukSayisi);
+
+const aileFormKaydet = () => {
+  personel.aile.medeniHal=aileMedeniHal.value;
+  personel.aile.esCalismaDurumu=aileEsCalismaDurumu.value;
+  personel.aile.cocukSayisi=aileCocoukSayisi.value;
+  aileForm.value = false; 
+};
+
+const bankaForm = ref(false);
+const bankaAdi = ref(personel.bankaHesabi.bankaAdi);
+const bankaHesapTipi = ref(personel.bankaHesabi.hesapTipi);
+const bankaHesapNumarasi=ref(personel.bankaHesabi.hesapNumarasi);
+const bankaIBAN=ref(personel.bankaHesabi.iban);
+
+const bankaFormKaydet = () => {
+  personel.bankaHesabi.bankaAdi=bankaAdi.value;
+  personel.bankaHesabi.hesapTipi=bankaHesapTipi.value;
+  personel.bankaHesabi.hesapNumarasi=bankaHesapNumarasi.value;
+  personel.bankaHesabi.iban=bankaIBAN.value;
+  bankaForm.value = false; 
+};
+
+const vatandaslikForm = ref(false);
+const vatandaslikDogumTarihi = ref(personel.vatandaslik.dogumTarihi);
+const vatandaslikCinsiyet = ref(personel.vatandaslik.cinsiyet);
+const vatandaslikEngelDerecisi=ref(personel.vatandaslik.engelDerecesi);
+const vatandaslikUyruk=ref(personel.vatandaslik.uyrugu);
+const vatandaslikKimlikNumarasi=ref(personel.vatandaslik.kimlikNumarasi);
+const vatandaslikAskerlikDurumu=ref(personel.vatandaslik.askerlikDurumu);
+
+const vatandaslikFormKaydet = () => {
+  personel.vatandaslik.dogumTarihi=vatandaslikDogumTarihi.value;
+  personel.vatandaslik.cinsiyet=vatandaslikCinsiyet.value;
+  personel.vatandaslik.engelDerecesi=vatandaslikEngelDerecisi.value;
+  personel.vatandaslik.uyrugu=vatandaslikUyruk.value;
+  personel.vatandaslik.kimlikNumarasi=vatandaslikKimlikNumarasi.value;
+  personel.vatandaslik.askerlikDurumu=vatandaslikAskerlikDurumu.value;
+  vatandaslikForm.value = false; 
+};
+
+
+
+
+
+
+
 
 // izinlerim kısmı
 
@@ -613,7 +669,7 @@ const tarihFormatla = (tarih) => {
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-96 " style="margin-left: 780px; width:560px;" >
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">İletişim</h2>
-        <button  @click="iletisimDuzenle">
+        <button  @click="iletisimForm=true">
            <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
            
         </button>
@@ -635,7 +691,7 @@ const tarihFormatla = (tarih) => {
           <i class="fa-solid fa-phone" style="color: #3562b1;"></i>
             <div class="flex-1">
                 <p class="text-gray-600 text-sm">Telefon (İş)</p>
-                <p class="text-gray-400">{{ personel.iletisim.isTelefon || '—' }}</p>    
+                <p class="text-blue-600 font-medium">{{ personel.iletisim.isTelefon || '—' }}</p>    
             </div>
         </div>
         <hr class="my-4 border-gray-300 dark:border-gray-600">
@@ -644,7 +700,7 @@ const tarihFormatla = (tarih) => {
           <i class="fa-solid fa-eye-slash" style="color: #3562b1;"title="iş arkadaşlarına gösterilmez"></i>
             <div class="flex-1">
                 <p class="text-gray-600 text-sm">E-Posta (Kişisel)</p>
-                <p class="text-gray-400">{{ personel.iletisim.kisiselEposta || '—' }}</p>
+                <p class="text-blue-600 font-medium">{{ personel.iletisim.kisiselEposta || '—' }}</p>
             </div>
         </div>
         <hr class="my-4 border-gray-300 dark:border-gray-600">
@@ -660,21 +716,76 @@ const tarihFormatla = (tarih) => {
     </div>
     
 </div>
-<div v-if="iletisimModal" class="modal">
-      <div class="modal-content">
-        <h3>İletişim Bilgileri</h3>
-        <label>E-Posta (İş)</label>
-        <input v-model="iletisimForm.isEposta" type="text" />
-        <label>Telefon (İş)</label>
-        <input v-model="iletisimForm.isTelefon" type="text" />
-        <label>E-Posta (Kişisel)</label>
-        <input v-model="iletisimForm.kisiselEposta" type="text" />
-        <label>Telefon (Kişisel)</label>
-        <input v-model="iletisimForm.kisiselTelefon" type="text" />
-        <button @click="kaydetIletisim">Kaydet</button>
-        <button @click="iletisimModal = false">İptal</button>
+
+<div >
+    <!-- Modal Aç Butonu -->
+ 
+
+    <!-- Modal Penceresi -->
+    <div v-if="iletisimForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">İletişim</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <!-- İş E-Posta ve Telefon -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">E-Posta (İş)</label>
+            <input 
+              type="text" 
+              value="erkan.demir@elasoft.com.tr"
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+              disabled
+            />
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Telefon (İş)</label>
+            <div class="flex items-center border border-gray-300 rounded px-3 py-2 bg-gray-100">
+              <span class="mr-2">🇹🇷</span>
+              <input
+                type="text" 
+                value=""
+                class="w-full bg-gray-100 outline-none cursor-not-allowed" 
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Kişisel E-Posta ve Telefon -->
+        <h3 class="text-md font-semibold  mb-4 text-sky-600">Kişisel</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">E-Posta (Kişisel)</label>
+            <input 
+              v-model="personelEmail" 
+              type="email" 
+              class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300" 
+              placeholder="E-posta (Kişisel)"
+            />
+          </div>
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Telefon (Kişisel)</label>
+            <div class="flex items-center border border-gray-300 rounded px-3 py-2 focus-within:ring-2 focus-within:ring-blue-300">
+              <span class="mr-2">🇹🇷</span>
+              <input 
+                v-model="personelTelefon" 
+                type="text" 
+                class="w-full outline-none" 
+                placeholder="Telefon (Kişisel)" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="iletisimForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="iletisimFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
       </div>
     </div>
+  </div>
 
 
 
@@ -735,7 +846,10 @@ const tarihFormatla = (tarih) => {
       <div class="bg-gray-100 p-4 rounded-lg shadow-md w-[750px]" style="margin-left: 60px;">
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">Vatandaşlık</h2>
-        <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i>
+        <button  @click="vatandaslikForm=true">
+           <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
+           
+        </button>
     </div>
     <div class="bg-white p-4 rounded-lg space-y-3" style="height: 310px;">
         <!-- Doğum Tarihi - Cinsiyet -->
@@ -780,6 +894,94 @@ const tarihFormatla = (tarih) => {
         </div>
     </div>
 </div>
+<div v-if="vatandaslikForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">Vatandaşlık</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <!-- İş E-Posta ve Telefon -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Doğum Tarihi</label>
+             <input disabled
+            v-model="vatandaslikDogumTarihi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />       
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Cinsiyet</label>
+
+              <select disabled v-model="vatandaslikCinsiyet"  id="vatandaslikCinsiyet" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed">       
+                <option value="">—</option>
+                <option value="Erkek">Erkek</option>
+                <option value="Kadın">Kadın</option>
+              </select>    
+           
+          </div>
+        </div>
+      
+        <div>
+          <label class="block text-gray-600 text-sm font-semibold mb-1">Engel Derecesi</label>
+
+<select  v-model="vatandaslikEngelDerecisi"  id="engelDerece" class="w-[318px] border border-gray-300 rounded px-3 py-2 bg-gray-100" >       
+  <option value="">—</option>
+  <option value="yok">yok</option>
+  <option value="1.derece">1.derece</option>
+  <option value="2.derece">2.derece</option>
+  <option value="3.derece">3.derece</option>
+  
+</select>   
+          </div>
+          <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+          <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Uyruğu</label>
+             <input disabled
+            v-model="vatandaslikUyruk" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />
+
+                     
+          </div>
+          <div >
+            <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Kimlik Numarası</label>
+             <input disabled
+            v-model="vatandaslikKimlikNumarasi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" />
+
+                     
+          </div>
+           
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-600 text-sm font-semibold mb-1">Askerlik Durumu</label>
+
+<select disabled  v-model="vatandaslikAskerlikDurumu"  id="askerlik" class="w-[318px] border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed" >       
+  <option value="">—</option>
+  <option value="Tamamlandı">Tamamlandı</option>
+  <option value="Tamamlanmadı">Tamamlanmadı</option>
+  
+  
+</select>   
+          </div>
+
+          <br>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="vatandaslikForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="vatandaslikFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
+      </div>
+    </div>
 
 
 <br>
@@ -816,7 +1018,10 @@ const tarihFormatla = (tarih) => {
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-[750px]" style="margin-left: 60px;">
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">Aile</h2>
-        <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i>
+        <button  @click="aileForm=true">
+           <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
+           
+        </button>
      
     </div>
     <div class="bg-white p-4 rounded-lg space-y-3" style="height: 150px;">
@@ -841,6 +1046,60 @@ const tarihFormatla = (tarih) => {
     </div>
    
 </div>
+
+<div v-if="aileForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">Aile</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Medeni Hal</label>
+            <!-- <input 
+            v-model="acilDurumAdSoyad" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" -->
+
+              <select v-model="aileMedeniHal"  id="seçenekler" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100">
+                
+      <option value="Evli">Evli</option>
+      <option value="Bekar">Bekar</option>
+      <option value="Boşanmış">Boşanmış</option>
+      <option value="Belirtilmemiş">Belirtilmemiş</option>
+    </select>           
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Eş Çalışma Durumu</label>
+
+              <select v-model="aileEsCalismaDurumu"  id="seçenekler" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100">       
+                <option value="">—</option>
+                <option value="Çalışıyor">Çalışıyor</option>
+                <option value="Çalışmıyor">Çalışmıyor</option>
+              </select>    
+           
+          </div>
+        </div>
+
+        <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Çocuk Sayısı</label>
+            <input 
+            v-model="aileCocoukSayisi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+          <br>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="aileForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="aileFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
+      </div>
+    </div>
 <br>
    <!-- Adres -->
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-[750px]" style="margin-left: 60px;">
@@ -899,7 +1158,10 @@ const tarihFormatla = (tarih) => {
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-[750px]" style="margin-left: 60px;">
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">Banka Hesabı</h2>
-        <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i>
+        <button  @click="bankaForm=true">
+           <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
+           
+        </button>
      
     </div>
     <div class="bg-white p-4 rounded-lg space-y-3" style="height: 150px;">
@@ -938,12 +1200,78 @@ const tarihFormatla = (tarih) => {
     </div>
    
 </div>
+
+<div v-if="bankaForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">Banka Hesabı</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Banka Adı</label>
+            <input 
+            v-model="aileCocoukSayisi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Hesap Tipi</label>
+
+              <select v-model="aileEsCalismaDurumu"  id="seçenekler" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" style="height:43px;">       
+                <option value="">—</option>
+                <option value="Vadesiz">Vadesiz</option>
+                <option value="Vadeli">Vadeli</option>
+                <option value="Çek">Çek</option>
+                <option value="Diğer">Diğer</option>
+              </select>    
+           
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Hesap Numarası</label>
+            <input 
+            v-model="bankaHesapNumarasi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">IBAN</label>
+            <input 
+            v-model="bankaIBAN" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+        </div>
+       
+          <br>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="bankaForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="bankaFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
+      </div>
+    </div>
 <br>
     <!-- İletişim -->
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-96 " style="margin-left: 850px; width:560px; margin-top:-1622px; " >
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">İletişim</h2>
-        <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i>
+        <button  @click="iletisimForm=true">
+           <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
+           
+        </button>
     </div>
     <div class="bg-white p-4 rounded-lg space-y-3">
 
@@ -968,12 +1296,85 @@ const tarihFormatla = (tarih) => {
     </div>
 </div>
 
+<div >
+    <!-- Modal Aç Butonu -->
+ 
+
+    <!-- Modal Penceresi -->
+    <div v-if="iletisimForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">İletişim</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <!-- İş E-Posta ve Telefon -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">E-Posta (İş)</label>
+            <input 
+              type="text" 
+              value="erkan.demir@elasoft.com.tr"
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+              disabled
+            />
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Telefon (İş)</label>
+            <div class="flex items-center border border-gray-300 rounded px-3 py-2 bg-gray-100">
+              <span class="mr-2">🇹🇷</span>
+              <input
+                type="text" 
+                value=""
+                class="w-full bg-gray-100 outline-none cursor-not-allowed" 
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Kişisel E-Posta ve Telefon -->
+        <h3 class="text-md font-semibold  mb-4 text-sky-600">Kişisel</h3>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">E-Posta (Kişisel)</label>
+            <input 
+              v-model="personelEmail" 
+              type="email" 
+              class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-300" 
+              placeholder="E-posta (Kişisel)"
+            />
+          </div>
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Telefon (Kişisel)</label>
+            <div class="flex items-center border border-gray-300 rounded px-3 py-2 focus-within:ring-2 focus-within:ring-blue-300">
+              <span class="mr-2">🇹🇷</span>
+              <input 
+                v-model="personelTelefon" 
+                type="text" 
+                class="w-full outline-none" 
+                placeholder="Telefon (Kişisel)" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="iletisimForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="iletisimFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <!-- Acil Durum -->
 
 <div class="bg-gray-100 p-4 rounded-lg shadow-md w-[560px]" style="margin-left: 850px;">
     <div class="flex justify-between items-center mb-2">
         <h2 class="text-lg font-semibold text-gray-700">Acil Durum</h2>
-        <i class="fa-solid fa-pen cursor-pointer" @click="acilDurumDuzenle" style="color: #3562b1;"></i>
+        <button  @click="acilDurumForm=true">
+           <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1;"></i> 
+           
+        </button>
      
     </div>
     <div class="bg-white p-4 rounded-lg space-y-3" style="height: 220px;">
@@ -1002,6 +1403,63 @@ const tarihFormatla = (tarih) => {
 
     </div>
 </div>
+
+<div >
+    <!-- Modal Aç Butonu -->
+ 
+
+    <!-- Modal Penceresi -->
+    <div v-if="acilDurumForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
+      <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
+        <h2 class="text-xl mb-6">Acil Durum</h2>
+        <hr class="my-4 border-gray-300 dark:border-gray-600">
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Adı Soyadı</label>
+            <input 
+            v-model="acilDurumAdSoyad" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+          <div >
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Telefon</label>
+            <div class="flex items-center border border-gray-300 rounded px-3 py-2 bg-gray-100">
+              <span class="mr-2">🇹🇷</span>
+              <input
+              v-model="acilDurumTelefon" 
+                type="text" 
+                value=""
+                class="w-full bg-gray-100 outline-none" 
+                
+              />
+            </div>
+          </div>
+        </div>
+      
+        <div>
+            <label class="block text-gray-600 text-sm font-semibold mb-1">Yakınlık Derecesi</label>
+            <input 
+            v-model="acilDurumYakinlikDerecesi" 
+              type="text" 
+              value=""
+              class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
+              
+            />
+          </div>
+          <br>
+
+        <!-- Butonlar -->
+        <div class="flex justify-end gap-2">
+          <button @click="acilDurumForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
+          <button @click="acilDurumFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 <br>
