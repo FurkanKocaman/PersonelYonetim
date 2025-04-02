@@ -66,6 +66,12 @@ const menuItems = ref<MenuItem[]>([
     active: false,
     path: "/dashboard/ayarlar",
   },
+  {
+    name: "Profil",
+    icon: "cog",
+    active: false,
+    path: "/dashboard/profil",
+  },
 ]);
 
 const userStore = useUserStore();
