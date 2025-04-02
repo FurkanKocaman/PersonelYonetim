@@ -23,11 +23,11 @@ internal sealed class SubeCreateCommandHandler(
 {
     public async Task<Result<string>> Handle(SubeCreateCommand request, CancellationToken cancellationToken)
     {
-        var subeVarMi = await subeRepository.AnyAsync(p => p.Ad == request.Ad);
-        if (subeVarMi)
+        var subeVarMi = await subeRepository.FirstOrDefaultAsync(p => (p.Ad == request.Ad || p.Iletisim.Eposta == request.Iletisim.Eposta || p.Iletisim.Telefon == request.Iletisim.Telefon) && p.IsDeleted == false);
+        if (subeVarMi is not null)
             return Result<string>.Failure("Bu isme sahip şube zaten var");
 
-        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId);
+        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId && !p.IsDeleted);
         if (!sirketVarMi)
             return Result<string>.Failure("Şirket bulunamadı");
 

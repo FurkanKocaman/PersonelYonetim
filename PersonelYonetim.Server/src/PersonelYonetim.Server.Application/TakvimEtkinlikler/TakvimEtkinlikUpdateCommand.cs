@@ -23,7 +23,7 @@ internal sealed class TakvimEtkinlikUpdateCommandHandler(
     public async Task<Result<string>> Handle(TakvimEtkinlikUpdateCommand request, CancellationToken cancellationToken)
     {
         TakvimEtkinlik? takvimEtkinlik = await takvimEtkinlikRepository
-            .WhereWithTracking(p => p.Id == request.EtkinlikId)
+            .WhereWithTracking(p => p.Id == request.EtkinlikId && !p.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
         if (takvimEtkinlik is null)
         {

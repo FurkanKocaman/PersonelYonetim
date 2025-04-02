@@ -3,19 +3,22 @@ import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCr
 import IzinService from "@/services/IzinService";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Datepicker from "@vuepic/vue-datepicker";
-import { onMounted, ref, type Ref } from "vue";
+import { onMounted, reactive, ref, watch, type Ref } from "vue";
 import type { IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
 
-const request: IzinTalepCreateCommand = {
+const request: IzinTalepCreateCommand = reactive({
   izinTurId: "",
   baslangicTarihi: new Date(),
   bitisTarihi: new Date(),
-};
+  aciklama: undefined,
+});
+// const mesaiBaslangic = ref(new Date());
+// const toplamGun: number = ref(0);
 const izinTurler: Ref<IzinTurResponse[] | undefined> = ref([]);
 const emit = defineEmits(["closeModal"]);
 const handleIzinTalepCreate = async () => {
-  const response = await IzinService.createIzinTalep(request);
-  console.log(response);
+  await IzinService.createIzinTalep(request);
+
   emit("closeModal", false);
 };
 onMounted(() => {
@@ -25,8 +28,20 @@ onMounted(() => {
 const getIzinKural = async () => {
   const response = await IzinService.getIzinKural();
   izinTurler.value = response?.IzinKurallar[0].izinTurler;
-  console.log(response?.IzinKurallar);
 };
+
+const mesaiBaslangicHesapla = () => {
+  if (!request.baslangicTarihi || !request.bitisTarihi) return;
+
+  const diffTime = request.bitisTarihi.getTime() - request.baslangicTarihi.getTime();
+  console.log("DiffTime:", diffTime);
+
+  const diffDays = (diffTime / (1000 * 60 * 60 * 24)).toFixed(2); // Gün farkını 2 basamaklı al
+  console.log("DiffDays:", diffDays);
+};
+
+watch(() => request.baslangicTarihi, mesaiBaslangicHesapla);
+watch(() => request.bitisTarihi, mesaiBaslangicHesapla);
 </script>
 <template>
   <div
@@ -75,6 +90,7 @@ const getIzinKural = async () => {
                   <select
                     id="countries"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
+                    v-model="request.izinTurId"
                   >
                     <option
                       class="text-neutral-800 dark:text-neutral-200"
@@ -86,7 +102,7 @@ const getIzinKural = async () => {
                     <option
                       v-for="izinTur in izinTurler"
                       :key="izinTur.id"
-                      :value="izinTur"
+                      :value="izinTur.id"
                       class="text-neutral-800 dark:text-neutral-200 flex justify-between"
                     >
                       <span>{{ izinTur.ad }}</span>
@@ -122,7 +138,7 @@ const getIzinKural = async () => {
                     />
                   </div>
                 </div>
-                <div class="flex">
+                <!-- <div class="flex">
                   <div class="w-full mr-2">
                     <label for="mesaiBaslangicTarih" class="block text-sm/5 font-semibold my-2"
                       >Mesai Başlangıç Tarihi</label
@@ -144,7 +160,7 @@ const getIzinKural = async () => {
                       >5 gün</span
                     >
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -158,6 +174,7 @@ const getIzinKural = async () => {
                 type="text"
                 name="aciklama"
                 id="aciklama"
+                v-model="request.aciklama"
                 class="bg-gray-50 border max-h-20 min-h-20 border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                 placeholder=""
               ></textarea>

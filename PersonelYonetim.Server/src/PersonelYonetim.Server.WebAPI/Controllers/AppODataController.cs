@@ -37,6 +37,7 @@ public class AppODataController(
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
+        builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         return builder.GetEdmModel();
@@ -78,7 +79,7 @@ public class AppODataController(
     }
 
     [HttpGet("subeler")]
-    [Authorize(Permissions.ViewSube)]
+    //[Authorize(Permissions.ViewSube)]
     public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);

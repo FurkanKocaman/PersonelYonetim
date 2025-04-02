@@ -8,7 +8,7 @@ export interface DepartmanModel {
   sirketId: string;
   sirketAd: string;
   aciklama: string | undefined;
-  iletisim: Iletisim;
+  iletisim?: Iletisim;
   isActive: boolean;
   createdAt: Date;
   createUserId: string;

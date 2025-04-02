@@ -35,12 +35,12 @@ internal sealed class SirketlerGetQueryHandler(
         {
             throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
         }
-        var personel = personelRepository.FirstOrDefault(p => p.UserId == Guid.Parse(userIdString));
+        var personel = personelRepository.FirstOrDefault(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted);
         if (personel == null) { 
         }
 
         var result = (from personelAtama in personelAtamaRepository.GetAll()
-                      where personel!.Id == personelAtama.PersonelId
+                      where personel!.Id == personelAtama.PersonelId && !personelAtama.IsDeleted
                       join sirket in sirketRepository.GetAll() on personelAtama.SirketId equals sirket.Id
                       join create_user in userManager.Users.AsQueryable() on sirket.CreateUserId equals create_user.Id
                       join update_user in userManager.Users.AsQueryable() on sirket.UpdateUserId equals update_user.Id

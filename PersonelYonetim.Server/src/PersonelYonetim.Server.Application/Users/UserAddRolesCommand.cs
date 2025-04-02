@@ -31,14 +31,10 @@ internal sealed class UserAddRolesCommandHandler(
     public async Task<Result<string>> Handle(UserAddRolesCommand request, CancellationToken cancellationToken)
     {
         AppUser? user = await userManager.FindByIdAsync(request.Id.ToString());
-        if (user == null)
+        if (user == null || user!.IsDeleted)
             return Result<string>.Failure("Kullanıcı bulunamadı");
         foreach (var role in request.Roles)
         {
-            //if (!await roleManager.RoleExistsAsync(role.ToString()))
-            //{
-            //    return Result<string>.Failure($"Rol:{role} bulunamadı");
-            //}
             var roleInDb = await roleManager.FindByNameAsync(role.ToString());
             if(await userRoleRepository.AnyAsync(p => p.UserId == request.Id && p.RoleId == roleInDb!.Id && p.SirketId == request.SirketId))
             {

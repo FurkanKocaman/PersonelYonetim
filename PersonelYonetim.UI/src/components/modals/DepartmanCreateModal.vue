@@ -3,7 +3,7 @@ import type { DepartmanCreateRequest } from "@/models/request-models/DepartmanCr
 import type { SubeModel } from "@/models/entity-models/SubeModel";
 import DepartmanService from "@/services/DepartmanService";
 import type { PropType } from "vue";
-import { onMounted } from "vue";
+import { onMounted, reactive } from "vue";
 import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
 
 const props = defineProps({
@@ -13,50 +13,40 @@ const props = defineProps({
   },
   editMode: {
     type: Boolean,
-    default: false
+    default: false,
   },
   departman: {
     type: Object as PropType<DepartmanModel>,
-    default: null
-  }
+    default: null,
+  },
 });
 
-const emit = defineEmits(['closeModal', 'departmanCreated', 'departmanUpdated']);
+const emit = defineEmits(["closeModal", "departmanCreated", "departmanUpdated"]);
 
-const request: DepartmanCreateRequest = {
+const request: DepartmanCreateRequest = reactive({
   ad: "",
   aciklama: null,
   subeId: "",
-  iletisim: {
-    eposta: "",
-    telefon: "",
-  },
-};
+  iletisim: undefined,
+});
 
-// Düzenleme modunda ise mevcut departman bilgilerini forma dolduruyoruz
 onMounted(() => {
   if (props.editMode && props.departman) {
     request.ad = props.departman.ad;
     request.aciklama = props.departman.aciklama || null;
     request.subeId = props.departman.subeId.toString();
-    request.iletisim.eposta = props.departman.iletisim.eposta;
-    request.iletisim.telefon = props.departman.iletisim.telefon;
   }
 });
 
 const handleDepartmanCreate = async () => {
-  let response;
-  
   try {
     if (props.editMode && props.departman) {
-      response = await DepartmanService.departmanlarUpdate(Number(props.departman.id), request);
-      emit('departmanUpdated', true);
+      await DepartmanService.departmanlarUpdate(props.departman.id, request);
     } else {
-      response = await DepartmanService.departmanlarCreate(request);
-      emit('departmanCreated', true);
+      await DepartmanService.departmanlarCreate(request);
     }
-    
-    emit('closeModal', false);
+
+    emit("closeModal", false);
   } catch (error) {
     console.error(error);
   }
@@ -72,7 +62,7 @@ const handleDepartmanCreate = async () => {
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ props.editMode ? 'Departman Düzenle' : 'Departman Oluştur' }}
+            {{ props.editMode ? "Departman Düzenle" : "Departman Oluştur" }}
           </h3>
           <button
             type="button"
@@ -128,7 +118,6 @@ const handleDepartmanCreate = async () => {
                     type="email"
                     name="email"
                     id="email"
-                    v-model="request.iletisim.eposta"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="info@sirket1.com"
                   />
@@ -143,7 +132,6 @@ const handleDepartmanCreate = async () => {
                     type="phone"
                     name="telefon"
                     id="telefon"
-                    v-model="request.iletisim.telefon"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="0850 000 00 00"
                   />
@@ -195,7 +183,7 @@ const handleDepartmanCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
+              {{ props.editMode ? "Güncelle" : "Oluştur" }}
             </button>
           </form>
         </div>

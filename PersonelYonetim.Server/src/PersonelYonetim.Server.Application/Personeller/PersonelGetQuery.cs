@@ -40,7 +40,7 @@ internal sealed class PersonelGetQueryHandler(
     public Task<IQueryable<PersonelGetQueryResponse>> Handle(PersonelGetQuery request, CancellationToken cancellationToken)
     {
         var response = (from entity in personelRepository.GetAll()
-                        where entity.Id == request.Id
+                        where entity.Id == request.Id && !entity.IsDeleted
                         join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
                         join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id
                         join pozisyon in pozisyonRepository.GetAll() on personel_departman.PozisyonId equals pozisyon.Id

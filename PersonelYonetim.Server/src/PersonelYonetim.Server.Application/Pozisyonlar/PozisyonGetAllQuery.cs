@@ -38,7 +38,7 @@ internal sealed class PozisyonGetAllQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
@@ -47,7 +47,7 @@ internal sealed class PozisyonGetAllQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var pozisyonlar = pozisyonRepository.GetAll();
+        var pozisyonlar = pozisyonRepository.GetAll().Where(p => !p.IsDeleted);
         if(request.SirketId is not null)
         {
             pozisyonlar = pozisyonlar.Where(p => p.SirketId == request.SirketId);
@@ -57,7 +57,7 @@ internal sealed class PozisyonGetAllQueryHandler(
                     pozisyon => pozisyon.SirketId,
                     personelAtama => personelAtama.SirketId,
                     (pozisyon, personelAtama) => new { pozisyon, personelAtama })
-            .Where(pp => pp.personelAtama.PersonelId == personel.Id)
+            .Where(pp => pp.personelAtama.PersonelId == personel.Id && !pp.personelAtama.IsDeleted)
             .Join(userManager.Users,
                   dp => dp.pozisyon.CreateUserId,
                   createUser => createUser.Id,

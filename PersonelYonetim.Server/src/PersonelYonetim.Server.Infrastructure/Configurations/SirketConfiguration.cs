@@ -27,7 +27,6 @@ internal sealed class SirketConfiguration : IEntityTypeConfiguration<Sirket>
         {
             builder.Property(i => i.Eposta).HasColumnName("Eposta");
             builder.Property(i => i.Telefon).HasColumnName("Telefon");
-            builder.HasIndex(i => i.Eposta).IsUnique();
         });
     }
 }

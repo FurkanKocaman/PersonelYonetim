@@ -2,6 +2,7 @@ import api from "./Axios";
 import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
 import type { IzinTurModel } from "@/models/entity-models/izin/IzinTurModel";
 import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCreateCommand";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
 import { useToastStore } from "@/stores/ToastStore";
 
@@ -38,6 +39,7 @@ export class IzinService {
   }
 
   async createIzinTalep(request: IzinTalepCreateCommand): Promise<string | undefined> {
+    console.log("REUQETS", request);
     try {
       const response = await api.post(`${import.meta.env.VITE_API_URL}/izin-talep/create`, request);
       if (response.status == 200) {
@@ -51,11 +53,37 @@ export class IzinService {
     }
   }
 
-  async getIzinTalepler(): Promise<IzinTalepGetResponse[] | undefined> {
+  async getIzinTalepler(
+    paginationParams: PaginationParams
+  ): Promise<
+    | { items: IzinTalepGetResponse[]; count: number; pageSize: number; pageNumber: number }
+    | undefined
+  > {
+    const { pageNumber, pageSize, orderBy, filter } = paginationParams;
+
+    const queryParams = new URLSearchParams();
+    queryParams.append("$top", pageSize.toString());
+    queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
+
+    if (orderBy) queryParams.append("$orderby", orderBy);
+    if (filter) queryParams.append("$filter", filter);
+
     try {
-      const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/izin-talepler`);
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/odata/izin-talepler?${queryParams}`,
+        {
+          params: {
+            $count: true,
+          },
+        }
+      );
       console.log(response);
-      return response.data;
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: pageSize,
+        pageNumber: pageNumber,
+      };
     } catch (error) {
       console.error(error);
     }

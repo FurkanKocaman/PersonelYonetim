@@ -27,7 +27,7 @@ internal sealed class UserUpdateCommanHandler(
     public async Task<Result<string>> Handle(UserUpdateCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(request.Id.ToString());
-        if (user is null)
+        if (user is null || user.IsDeleted)
             return Result<string>.Failure("Kullanıcı bulunamadı");
 
         bool nameChanged = false;

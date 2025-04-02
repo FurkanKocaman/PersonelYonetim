@@ -6,13 +6,13 @@ import { useUserStore } from "@/stores/user";
 
 const route = useRoute();
 const activeTab = computed(() => {
-  if (route.path.includes("/sirket")) return "sirket";
-  if (route.path.includes("/personel")) return "personel";
-  if (route.path.includes("/izin")) return "izin";
-  if (route.path.includes("/maas")) return "maas";
-  if (route.path.includes("/takvim")) return "takvim";
-  if (route.path.includes("/ayarlar")) return "ayarlar";
-  if (route.path.includes("/dashboard")) return "dashboard";
+  if (route.path.includes("/sirket")) return "Sirket Yönetimi";
+  if (route.path.includes("/personel")) return "Personel Yönetimi";
+  if (route.path.includes("/izin")) return "İzin Yönetimi";
+  if (route.path.includes("/maas")) return "Maaş Yönetimi";
+  if (route.path.includes("/takvim")) return "Takvim";
+  if (route.path.includes("/ayarlar")) return "Ayarlar";
+  if (route.path.includes("/dashboard")) return "Ana Sayfa";
   return "";
 });
 
@@ -50,26 +50,6 @@ const notifications = ref([
   },
 ]);
 
-// Örnek mesajlar
-const messages = ref([
-  {
-    id: 1,
-    sender: "Ahmet Yılmaz",
-    message: "Merhaba, raporları gönderebilir misiniz?",
-    time: "10 dk önce",
-    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-    read: false,
-  },
-  {
-    id: 2,
-    sender: "Ayşe Demir",
-    message: "Toplantı saati değişti, bilginize",
-    time: "2 saat önce",
-    avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-    read: false,
-  },
-]);
-
 onMounted(() => {
   // Dropdown'ları kapatmak için dışarı tıklama olayını dinle
   document.addEventListener("click", closeDropdowns);
@@ -78,7 +58,6 @@ onMounted(() => {
 // Event'ler
 const emit = defineEmits(["toggle-sidebar"]);
 
-// Kenar çubuğunu aç/kapat
 const toggleSidebar = () => {
   emit("toggle-sidebar");
 };
@@ -88,14 +67,6 @@ const toggleNotifications = (event: Event) => {
   event.stopPropagation();
   notificationsOpen.value = !notificationsOpen.value;
   messagesOpen.value = false;
-  userMenuOpen.value = false;
-};
-
-// Mesajları aç/kapat
-const toggleMessages = (event: Event) => {
-  event.stopPropagation();
-  messagesOpen.value = !messagesOpen.value;
-  notificationsOpen.value = false;
   userMenuOpen.value = false;
 };
 
@@ -125,14 +96,6 @@ const markNotificationAsRead = (id: number) => {
   }
 };
 
-// Mesajı okundu olarak işaretle
-const markMessageAsRead = (id: number) => {
-  const message = messages.value.find((m) => m.id === id);
-  if (message) {
-    message.read = true;
-  }
-};
-
 // Çıkış yap
 const logout = () => {
   userStore.logout();
@@ -147,11 +110,13 @@ const logout = () => {
       <div class="flex items-center">
         <button
           @click="toggleSidebar"
-          class="lg:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 focus:outline-none"
+          class="xl:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 focus:outline-none"
         >
           <i class="fas fa-bars"></i>
         </button>
-        <span class="ml-2 text-gray-700 dark:text-gray-200 font-medium">{{ activeTab }}</span>
+        <span class="ml-2 text-gray-700 dark:text-gray-200 font-medium text-xl">{{
+          activeTab
+        }}</span>
       </div>
 
       <!-- Sağ taraf - Kullanıcı işlemleri -->
@@ -262,90 +227,6 @@ const logout = () => {
             >
               <button class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">
                 Tümünü Gör
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mesajlar -->
-        <div class="relative dropdown-container">
-          <button
-            @click="toggleMessages"
-            class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 focus:outline-none"
-          >
-            <i class="fas fa-envelope"></i>
-            <span
-              v-if="messages.filter((m) => !m.read).length > 0"
-              class="absolute top-0 right-0 bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-              >{{ messages.filter((m) => !m.read).length }}</span
-            >
-          </button>
-
-          <!-- Mesajlar Dropdown -->
-          <div
-            v-if="messagesOpen"
-            class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-xl z-10 overflow-hidden border border-gray-200 dark:border-neutral-700 animate-fadeIn"
-          >
-            <div
-              class="p-3 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center"
-            >
-              <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Mesajlar</h3>
-              <span
-                class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full"
-              >
-                {{ messages.filter((m) => !m.read).length }} yeni
-              </span>
-            </div>
-            <div class="max-h-96 overflow-y-auto">
-              <div
-                v-for="message in messages"
-                :key="message.id"
-                @click="markMessageAsRead(message.id)"
-                class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
-                :class="{ 'bg-green-50 dark:bg-green-900/20': !message.read }"
-              >
-                <div class="flex items-start">
-                  <img
-                    :src="message.avatar"
-                    alt="Avatar"
-                    class="w-10 h-10 rounded-full mr-3 border-2 border-white dark:border-neutral-600 shadow-sm"
-                  />
-                  <div class="flex-1">
-                    <div class="flex justify-between items-center">
-                      <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {{ message.sender }}
-                      </p>
-                      <div class="flex items-center">
-                        <i class="fas fa-clock text-xs text-gray-500 dark:text-gray-500 mr-1"></i>
-                        <p class="text-xs text-gray-500 dark:text-gray-500">{{ message.time }}</p>
-                      </div>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                      {{ message.message }}
-                    </p>
-                  </div>
-                  <div v-if="!message.read" class="w-2 h-2 bg-green-500 rounded-full ml-1"></div>
-                </div>
-              </div>
-              <div
-                v-if="messages.length === 0"
-                class="p-3 text-center text-gray-500 dark:text-gray-400"
-              >
-                Mesaj bulunmuyor
-              </div>
-            </div>
-            <div
-              class="p-2 border-t border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-700/50 flex justify-between items-center"
-            >
-              <button
-                class="text-xs text-green-600 dark:text-green-400 hover:underline font-medium"
-              >
-                Tüm Mesajlar
-              </button>
-              <button
-                class="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full transition-colors duration-150"
-              >
-                <i class="fas fa-plus mr-1"></i> Yeni Mesaj
               </button>
             </div>
           </div>

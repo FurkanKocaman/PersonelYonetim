@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import DashboardLayout from "@/layouts/DashBoardLayout.vue";
 import Roles from "@/models/Roles";
 import { authGuard } from "./authGuard";
 
@@ -12,8 +11,8 @@ const router = createRouter({
     },
     {
       path: "/dashboard",
-      component: DashboardLayout,
-      beforeEnter: authGuard, // Add auth guard to entire dashboard
+      component: () => import("@/layouts/DashBoardLayout.vue"),
+      beforeEnter: authGuard,
       children: [
         {
           path: "",
@@ -64,6 +63,7 @@ const router = createRouter({
           name: "Izin",
           component: () => import("@/views/izin/izin-view/IzinView.vue"),
           meta: { title: "İzin Yönetimi" },
+          redirect: "/dashboard/izin/izinler",
           children: [
             {
               path: "izinler",
@@ -79,7 +79,7 @@ const router = createRouter({
             },
           ],
         },
-        // İzin Talebi Sayfası
+        // İzin Talebi Sayfası 0
         {
           path: "izin/talep",
           name: "IzinTalep",
@@ -141,20 +141,20 @@ const router = createRouter({
         {
           path: "/unauthorized",
           name: "Unauthorized",
-          component: () => import("@/views/auth/UnauthorizedView.vue"),
+          component: () => import("@/views/Auth/UnauthorizedView.vue"),
         },
       ],
     },
     {
       path: "/login",
       name: "login",
-      component: () => import("@/views/auth/LoginView.vue"),
+      component: () => import("@/views/Auth/LoginView.vue"),
       meta: { title: "Giriş", public: true },
     },
     {
       path: "/register",
       name: "register",
-      component: () => import("@/views/auth/RegisterView.vue"),
+      component: () => import("@/views/Auth/RegisterView.vue"),
       meta: { title: "Kayıt ol", public: true },
     },
     {

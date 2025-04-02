@@ -29,11 +29,11 @@ internal sealed class PozisyonCreateCommandHandler(
 {
     public async Task<Result<string>> Handle(PozisyonCreateCommand request, CancellationToken cancellationToken)
     {
-        var pozisyonVarMi = await pozisyonRepository.AnyAsync(p => p.Ad == request.Ad);
+        var pozisyonVarMi = await pozisyonRepository.AnyAsync(p => p.Ad == request.Ad && !p.IsDeleted);
         if (pozisyonVarMi)
             return Result<string>.Failure("Pozisyon zaten mevcut");
 
-        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId);
+        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId && !p.IsDeleted);
         if(!sirketVarMi)
         {
             return Result<string>.Failure("Şirket bulunamadı");

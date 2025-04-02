@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onActivated, computed } from "vue";
+import { ref, onMounted, onActivated, computed, type Ref } from "vue";
 import IzinService from "@/services/IzinService";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
 import TableLayout from "@/components/TableLayout.vue";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 const izinList = ref<IzinTalepGetResponse[]>([]);
 const selectedIzin = ref<IzinTalepGetResponse | undefined>(undefined);
@@ -11,6 +12,13 @@ const loading = ref(true);
 const error = ref(false);
 
 const showDetailModal = ref(false);
+
+const pagination: Ref<PaginationParams> = ref({
+  pageNumber: 1,
+  pageSize: 5,
+  orderBy: "createdAt desc",
+  filter: "",
+});
 
 const statusColors: Record<string, string> = {
   Onaylandı: "text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-300",
@@ -45,6 +53,8 @@ const filteredIzinTalepler = computed<Record<string, unknown>[]>(() => {
       toplamSure,
       izinTuru,
       degerlendirmeDurumu,
+      degerlendirenAd,
+      aciklama,
     }) => ({
       id,
       personelFullName,
@@ -54,6 +64,8 @@ const filteredIzinTalepler = computed<Record<string, unknown>[]>(() => {
       toplamSure,
       izinTuru,
       degerlendirmeDurumu,
+      degerlendirenAd,
+      aciklama,
     })
   );
 });
@@ -67,8 +79,8 @@ onActivated(() => {
 });
 
 const getIzinTalepler = async () => {
-  const response = await IzinService.getIzinTalepler();
-  izinList.value = response!;
+  const response = await IzinService.getIzinTalepler(pagination.value);
+  izinList.value = response!.items;
   loading.value = false;
   console.log(response);
 };
@@ -87,7 +99,7 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
 </script>
 <template>
   <!-- İçerik Alanı -->
-  <main class="p-6">
+  <main class="p-2 flex flex-col max-w[80dvw]">
     <!-- Üst Kontroller -->
     <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <!-- Filtreler -->
@@ -131,10 +143,7 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
       </div>
     </div>
 
-    <div
-      v-else-if="izinList.length > 0"
-      class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm overflow-hidden"
-    >
+    <div v-else-if="izinList.length > 0" class="overflow-auto">
       <TableLayout
         :table-headers="[
           'Personel',

@@ -4,7 +4,7 @@ import type { SirketModel } from "@/models/entity-models/SirketModel";
 import type { SubeModel } from "@/models/entity-models/SubeModel";
 
 import SubeService from "@/services/SubeService";
-import { reactive, onMounted, type PropType } from "vue";
+import { reactive, onMounted, type PropType, ref } from "vue";
 
 const props = defineProps({
   sirketler: {
@@ -13,15 +13,16 @@ const props = defineProps({
   },
   editMode: {
     type: Boolean,
-    default: false
+    default: false,
   },
   sube: {
     type: Object as PropType<SubeModel>,
-    default: null
-  }
+    default: null,
+  },
 });
 
-// Modal'ı kapatmak ve işlem sonrası yenileme için emit tanımlıyoruz
+const deleteSubeModal = ref(false);
+
 const emit = defineEmits(["closeModal", "refresh"]);
 
 const request: SubeCreateRequest = reactive({
@@ -40,7 +41,6 @@ const request: SubeCreateRequest = reactive({
   },
 });
 
-// Düzenleme modunda ise mevcut şube bilgilerini forma dolduruyoruz
 onMounted(() => {
   if (props.editMode && props.sube) {
     request.ad = props.sube.ad;
@@ -57,21 +57,23 @@ onMounted(() => {
 
 const handleSubeCreate = async () => {
   try {
-    let response;
-    
     if (props.editMode && props.sube) {
-      // Düzenleme modunda güncelleme işlemi yapılıyor
-      response = await SubeService.subelerUpdate(Number(props.sube.id), request);
+      await SubeService.subelerUpdate(props.sube.id, request);
     } else {
-      // Yeni şube oluşturma işlemi yapılıyor
-      response = await SubeService.subelerCreate(request);
+      await SubeService.subelerCreate(request);
     }
-    
-    console.log(response);
-    emit("refresh"); // Listeyi yenilemek için emit
-    emit("closeModal", false); // Modal'ı kapatmak için emit
+
+    emit("refresh");
+    emit("closeModal", false);
   } catch (error) {
     console.error("Şube işlemi sırasında hata oluştu:", error);
+  }
+};
+const handleSubeDelete = async () => {
+  if (props.sube) {
+    await SubeService.subelerDelete(props.sube.id);
+    emit("refresh");
+    emit("closeModal", false);
   }
 };
 </script>
@@ -85,7 +87,7 @@ const handleSubeCreate = async () => {
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ props.editMode ? 'Şube Düzenle' : 'Şube Oluştur' }}
+            {{ props.editMode ? "Şube Düzenle" : "Şube Oluştur" }}
           </h3>
           <button
             type="button"
@@ -256,13 +258,94 @@ const handleSubeCreate = async () => {
               ></textarea>
             </div>
 
-            <button
-              type="submit"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            <div
+              class="flex items-center"
+              :class="props.editMode ? 'justify-between' : 'justify-end'"
             >
-              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
-            </button>
+              <button
+                type="button"
+                v-if="props.editMode"
+                class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+                @click.self="
+                  () => {
+                    deleteSubeModal = true;
+                  }
+                "
+              >
+                Şubeyi sil
+              </button>
+
+              <button
+                type="submit"
+                class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+              >
+                {{ props.editMode ? "Güncelle" : "Oluştur" }}
+              </button>
+            </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="relative z-10" v-if="deleteSubeModal">
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div
+          class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+        >
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div
+                class="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10"
+              >
+                <svg
+                  class="size-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  data-slot="icon"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                  />
+                </svg>
+              </div>
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Şubeyi Sil</h3>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500">
+                    {{
+                      props.sube.ad +
+                      " isimli şubeyi silmek istediğinize emin misiniz? Bu şubeye bağlı departmanlar da silinecektir."
+                    }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <button
+              type="button"
+              class="inline-flex w-full justify-center rounded-md bg-red-600 px-10 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto"
+              @click.stop="handleSubeDelete()"
+            >
+              Sil
+            </button>
+            <button
+              type="button"
+              class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+              @click="deleteSubeModal = false"
+            >
+              İptal
+            </button>
+          </div>
         </div>
       </div>
     </div>

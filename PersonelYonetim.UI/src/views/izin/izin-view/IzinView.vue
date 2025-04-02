@@ -50,8 +50,8 @@ const route = useRoute();
 const router = useRouter();
 
 const activeTab = computed(() => {
-  if (route.name === 'Izinler') return "izinler";
-  if (route.name === 'IzinKurallar') return "izinkurallar";
+  if (route.name === "Izinler") return "izinler";
+  if (route.name === "IzinKurallar") return "izinkurallar";
   return "";
 });
 
@@ -67,10 +67,12 @@ const filteredIzinList = computed(() => {
 
 // Kurallar sayfasına ait mi kontrolü
 const isKurallarRoute = computed(() => {
-  return route.name === 'IzinKurallari' ||
-         route.name === 'IzinKurallariKurallar' ||
-         route.name === 'IzinKurallariRaporlar' ||
-         route.name === 'IzinKurallariOrnekSablonlar';
+  return (
+    route.name === "IzinKurallar" ||
+    route.name === "IzinKurallariKurallar" ||
+    route.name === "IzinKurallariRaporlar" ||
+    route.name === "IzinKurallariOrnekSablonlar"
+  );
 });
 
 // Methods
@@ -91,20 +93,22 @@ const closeDetailModal = () => {
 
 // Kurallar sayfasına yönlendir
 const goToRules = () => {
-  router.push({ name: 'IzinKurallari' });
+  router.push({ name: "IzinKurallari" });
 };
 
 // İzin talebi oluştur
 const createLeaveRequest = () => {
-  router.push({ name: 'IzinTalep' });
+  router.push({ name: "IzinTalep" });
 };
 
 onMounted(() => {
   // Implement API call to fetch izin list
   console.log(activeTab.value);
 });
+const closeIzinTalep = (res: boolean) => {
+  izinTalepCreate.value = res;
+};
 
-// Expose necessary variables to template
 defineExpose({
   loading,
   error,
@@ -146,8 +150,8 @@ defineExpose({
           </router-link>
         </li>
         <li class="mr-2">
-          <a
-            @click="goToRules"
+          <router-link
+            :to="{ name: 'IzinKurallar' }"
             class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg cursor-pointer"
             :class="
               isKurallarRoute
@@ -156,12 +160,16 @@ defineExpose({
             "
           >
             <i class="fas fa-book mr-2"></i> İzin Kuralları
-          </a>
+          </router-link>
         </li>
       </ul>
       <div class="flex space-x-2">
         <button
-          @click="createLeaveRequest"
+          @click="
+            () => {
+              izinTalepCreate = true;
+            }
+          "
           class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300"
         >
           <i class="fas fa-plus mr-2"></i> İzin Talebi Oluştur
@@ -171,6 +179,7 @@ defineExpose({
 
     <RouterView></RouterView>
   </div>
+  <IzinTalepCreateModal v-if="izinTalepCreate" @closeModal="closeIzinTalep" />
 </template>
 
 <style scoped>

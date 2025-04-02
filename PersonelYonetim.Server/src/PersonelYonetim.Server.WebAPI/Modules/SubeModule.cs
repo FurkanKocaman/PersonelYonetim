@@ -17,5 +17,16 @@ public static class SubeModule
             var response = await sender.Send(request, cancellationToken);
             return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
         }).RequireAuthorization(Permissions.CreateSube).Produces<Result<string>>().WithName("SubeCreate");
+        group.MapPut("/update", async (ISender sender, SubeUpdateCommand request, CancellationToken cancellationToken) =>
+        {
+            var response = await sender.Send(request, cancellationToken);
+            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        }).RequireAuthorization(Permissions.EditSube).Produces<Result<string>>().WithName("SubeUpdate");
+        group.MapDelete("/delete/{id}", async (ISender sender, Guid id, CancellationToken cancellationToken) =>
+        {
+            SubeDeleteCommand request = new(id);
+            var response = await sender.Send(request, cancellationToken);
+            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        }).RequireAuthorization(Permissions.DeleteSube).Produces<Result<string>>().WithName("SubeDelete");
     }
 }

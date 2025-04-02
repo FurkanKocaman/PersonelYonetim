@@ -1,8 +1,8 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css");
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Font Awesome CDN */
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css");
 
 /* Temel stiller */
 @layer base {

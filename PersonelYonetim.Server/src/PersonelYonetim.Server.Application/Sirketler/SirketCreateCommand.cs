@@ -29,7 +29,7 @@ internal sealed class SirketCreateCommandHandler(
 {
     public async Task<Result<string>> Handle(SirketCreateCommand request, CancellationToken cancellationToken)
     {
-        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Ad == request.Ad);
+        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Ad == request.Ad && !p.IsDeleted);
         if (sirketVarMi)
             return Result<string>.Failure("Bu isme sahip şirket zaten mevcut.");
 

@@ -9,7 +9,7 @@ public static class UserModule
 {
     public static void RegisterUserRoutes(this IEndpointRouteBuilder app)
     {
-        RouteGroupBuilder group = app.MapGroup("/users").WithTags("Users").RequireAuthorization();
+        RouteGroupBuilder group = app.MapGroup("/users").WithTags("Users");
         group.MapPost("create",
             async (ISender sender, UserCreateCommand request, CancellationToken cancellationToken) =>
             {

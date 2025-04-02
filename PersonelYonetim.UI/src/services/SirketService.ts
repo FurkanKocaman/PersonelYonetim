@@ -26,23 +26,22 @@ class SirketService {
     }
     return response.data;
   }
-  
-  // Şirket güncelleme metodu
-  async sirketlerUpdate(id: number, request: SirketCreateRequest): Promise<string> {
-    const response = await api.put(`${import.meta.env.VITE_API_URL}/sirketler/update/${id}`, request);
-    console.log(response);
 
-    return "a";
+  async sirketlerUpdate(id: string, request: SirketCreateRequest): Promise<string> {
+    request.id = id;
+    const response = await api.put(`${import.meta.env.VITE_API_URL}/sirketler/update`, request);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
+
+    return response.data.data;
   }
-  
-  // Şirket silme metodu
-  async sirketlerDelete(id: number): Promise<string> {
+
+  async sirketlerDelete(id: string): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/sirketler/delete/${id}`);
-    console.log(response);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
 
-    return "a";
+    return response.data.data;
   }
-  
+
   // Şirket detaylarını getirme metodu
   async sirketlerGetById(id: number): Promise<SirketModel | undefined> {
     try {
