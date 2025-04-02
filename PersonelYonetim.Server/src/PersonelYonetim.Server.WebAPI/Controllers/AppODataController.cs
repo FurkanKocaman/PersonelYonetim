@@ -79,7 +79,7 @@ public class AppODataController(
     }
 
     [HttpGet("subeler")]
-    [Authorize(Permissions.ViewSube)]
+    //[Authorize(Permissions.ViewSube)]
     public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);

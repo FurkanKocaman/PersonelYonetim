@@ -40,12 +40,11 @@ class SubeService {
     return response.data.data;
   }
 
-  // Şube silme metodu
-  async subelerDelete(id: number): Promise<string> {
+  async subelerDelete(id: string): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/subeler/delete/${id}`);
-    console.log(response);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
 
-    return "a";
+    return response.data.data;
   }
 
   // Şube detaylarını getirme metodu

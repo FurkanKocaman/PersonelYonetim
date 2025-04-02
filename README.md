@@ -1,96 +1,89 @@
 # PersonelYonetim
 
-PersonelYonetim is a personnel management system built using .NET 9 and C# 13.0. This project includes various functionalities for managing personnel, departments, positions, and leave requests.
+PersonelYonetim, **.NET 9** ve **C# 13.0** kullanılarak geliştirilen bir **personel yönetim sistemi**dir. Bu proje, personel, departmanlar, pozisyonlar ve izin taleplerini yönetmek için çeşitli işlevler içerir.
 
-## Project Structure
+## 📁 Proje Yapısı
 
-The project is organized into several layers:
+Proje birkaç katmana ayrılmıştır:
 
-- **Domain**: Contains the core business logic and domain entities.
-- **Application**: Contains the application logic, including commands, queries, and handlers.
-- **Infrastructure**: Contains the implementation of repositories and other infrastructure-related code.
-- **WebAPI**: Contains the API controllers and endpoint definitions.
+- **Domain:** Temel iş mantığını ve alan varlıklarını içerir.
+- **Application:** Komutlar, sorgular ve işleyiciler gibi uygulama mantığını içerir.
+- **Infrastructure:** Depoların uygulanması ve diğer altyapı ile ilgili kodları içerir.
+- **WebAPI:** API denetleyicilerini ve uç noktaların tanımlarını içerir.
 
-## Domain Layer
+## 🏗 Alan (Domain) Katmanı
 
-### Entities
+### 📌 Varlıklar
 
-- **Personel**: Represents a personnel entity with properties like `Ad`, `Soyad`, `Iletisim`, `Adres`, `UserId`, etc.
-- **IzinTalep**: Represents a leave request entity with properties like `PersonelId`, `BaslangicTarihi`, `BitisTarihi`, `IzinTurId`, etc.
-- **PersonelAtama**: Represents personnel assignment details.
-- **IzinTur**: Represents the type of leave.
-- **DegerlendirmeDurumEnum**: Represents the evaluation status of a leave request.
+- **Personel:** Ad, Soyad, İletişim, Adres, UserId gibi özelliklere sahip personel varlığını temsil eder.
+- **İzinTalep:** PersonelId, BaşlangıçTarihi, BitişTarihi, İzinTürId gibi özelliklere sahip izin talebi varlığını temsil eder.
+- **PersonelAtama:** Personel atama detaylarını temsil eder.
+- **İzinTür:** İzin türlerini temsil eder.
+- **DeğerlendirmeDurumEnum:** İzin talebinin değerlendirme durumunu temsil eder.
 
-### Repositories
+### 📂 Depolar (Repositories)
 
-- **IPersonelRepository**: Interface for personnel repository.
-- **IIzinTalepRepository**: Interface for leave request repository.
-- **ISirketRepository**: Interface for company repository.
-- **ISubeRepository**: Interface for branch repository.
-- **IDepartmanRepository**: Interface for department repository.
-- **IPozisyonRepository**: Interface for position repository.
+- `IPersonelRepository`: Personel deposu arayüzü.
+- `IIzinTalepRepository`: İzin talep deposu arayüzü.
+- `ISirketRepository`: Şirket deposu arayüzü.
+- `ISubeRepository`: Şube deposu arayüzü.
+- `IDepartmanRepository`: Departman deposu arayüzü.
+- `IPozisyonRepository`: Pozisyon deposu arayüzü.
 
-## Application Layer
+## ⚙ Uygulama (Application) Katmanı
 
-### Commands
+### 📝 Komutlar (Commands)
 
-- **PersonelCreateCommand**: Command for creating a new personnel.
-- **PersonelUpdateCommand**: Command for updating personnel details.
-- **PersonelDeleteCommand**: Command for deleting a personnel.
-- **IzinTalepCreateCommand**: Command for creating a new leave request.
-- **IzinTalepUpdateCommand**: Command for updating a leave request.
-- **IzinTalepDeleteCommand**: Command for deleting a leave request.
+- `PersonelCreateCommand`: Yeni personel oluşturma komutu.
+- `PersonelUpdateCommand`: Personel bilgilerini güncelleme komutu.
+- `PersonelDeleteCommand`: Personel silme komutu.
+- `IzinTalepCreateCommand`: Yeni izin talebi oluşturma komutu.
+- `IzinTalepUpdateCommand`: İzin talebi güncelleme komutu.
+- `IzinTalepDeleteCommand`: İzin talebi silme komutu.
 
-### Queries
+### 🔍 Sorgular (Queries)
 
-- **IzinTalepGetAllQuery**: Query for retrieving all leave requests.
+- `IzinTalepGetAllQuery`: Tüm izin taleplerini getiren sorgu.
 
-### Handlers
+## 🌐 WebAPI Katmanı
 
-- **PersonelCreateCommandHandler**: Handles the creation of a new personnel.
-- **PersonelUpdateCommandHandler**: Handles the updating of personnel details.
-- **PersonelDeleteCommandHandler**: Handles the deletion of a personnel.
-- **IzinTalepCreateCommandHandler**: Handles the creation of a new leave request.
-- **IzinTalepUpdateCommandHandler**: Handles the updating of a leave request.
-- **IzinTalepDeleteCommandHandler**: Handles the deletion of a leave request.
-- **IzinTalepGetAllQueryHandler**: Handles the retrieval of all leave requests.
+### 🎮 Denetleyiciler (Controllers)
 
-## WebAPI Layer
+- **PersonelController**: Personel yönetimi için API denetleyicisi.
+- **İzinTalepController**: İzin taleplerini yönetmek için API denetleyicisi.
+- **AppODataController**: OData uç noktaları için API denetleyicisi.
 
-### Controllers
+### 📌 Uç Noktalar (Endpoints)
 
-- **PersonelController**: API controller for managing personnel.
-- **IzinTalepController**: API controller for managing leave requests.
+- `POST /personeller/create` - Yeni personel oluştur.
+- `PUT /personeller/update` - Personel bilgilerini güncelle.
+- `DELETE /personeller/delete` - Personel sil.
+- `POST /izintalepler/create` - Yeni izin talebi oluştur.
+- `PUT /izintalepler/update` - İzin talebini güncelle.
+- `DELETE /izintalepler/delete` - İzin talebini sil.
+- `GET /izintalepler/getall` - Tüm izin taleplerini getir.
 
-### Endpoints
+## 🔒 Yetkilendirme ve Kimlik Doğrulama
 
-- **/personeller/create**: Endpoint for creating a new personnel.
-- **/personeller/update**: Endpoint for updating personnel details.
-- **/personeller/delete**: Endpoint for deleting a personnel.
-- **/izintalepler/create**: Endpoint for creating a new leave request.
-- **/izintalepler/update**: Endpoint for updating a leave request.
-- **/izintalepler/delete**: Endpoint for deleting a leave request.
-- **/izintalepler/getall**: Endpoint for retrieving all leave requests.
+Uygulama, **JWT tabanlı kimlik doğrulama** ve **kullanıcı rolleri** ile yetkilendirme kullanır.
 
-## Getting Started
+### 🔑 JWT Kimlik Doğrulama
 
-### Prerequisites
+Kullanıcılar **JSON Web Token (JWT)** kullanarak kimlik doğrulama yapar.
 
-- .NET 9 SDK
-- Visual Studio 2022
+### 👥 Kullanıcı Rolleri
 
-### Running the Application
+- **Admin**: Tüm kaynaklara tam erişim.
+- **Yönetici**: Personel ve izin taleplerini yönetme erişimi.
+- **Çalışan**: Sadece kendi izin taleplerini görüntüleme ve yönetme erişimi.
 
-1. Clone the repository.
-2. Open the solution in Visual Studio 2022.
-3. Restore the NuGet packages.
-4. Update the database connection string in `appsettings.json`.
-5. Run the application.
+## 🗄 Veritabanı
 
-### Contributing
+Uygulama **Microsoft SQL Server (MSSQL)** veritabanını kullanır.
 
-Contributions are welcome! Please open an issue or submit a pull request.
+### 🔄 Veritabanı Göçlerini Çalıştırma (Migrations)
 
-### License
-
-This project is licensed under the MIT License.
+```bash
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+```

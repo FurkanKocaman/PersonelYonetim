@@ -247,9 +247,11 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
           @close-modal="
             (p) => {
               showModal.sirketler = p;
-              getSirketler();
+
+              selectedSirket = undefined;
             }
           "
+          @refresh="getSirketler"
           v-if="showModal.sirketler"
         />
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -323,9 +325,10 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
           @close-modal="
             (p) => {
               showModal.subeler = p;
-              getSubeler();
+              selectedSube = undefined;
             }
           "
+          @refresh="getSubeler"
           v-if="showModal.subeler"
         />
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">

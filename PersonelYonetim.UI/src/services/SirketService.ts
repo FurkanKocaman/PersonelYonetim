@@ -35,12 +35,11 @@ class SirketService {
     return response.data.data;
   }
 
-  // Şirket silme metodu
-  async sirketlerDelete(id: number): Promise<string> {
+  async sirketlerDelete(id: string): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/sirketler/delete/${id}`);
-    console.log(response);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
 
-    return "a";
+    return response.data.data;
   }
 
   // Şirket detaylarını getirme metodu

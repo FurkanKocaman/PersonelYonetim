@@ -102,7 +102,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
   >
     <!-- Sidebar -->
     <aside
-      class="h-[100dvh] inset-y-0 left-0 z-30 fixed xl:relative xl:flex flex-col bg-neutral-300 shadow-lg dark:bg-neutral-900 dark:shadow-neutral-800 shadow-neutral-300 transition-all duration-300 ease-in-out"
+      class="h-[100dvh] inset-y-0 left-0 fixed xl:relative xl:flex flex-col z-10 bg-neutral-300 shadow-lg dark:bg-neutral-900 dark:shadow-neutral-800 shadow-neutral-300 transition-all duration-300 ease-in-out"
       :class="{
         'block w-[50dvw] lg:w-[20dvw] xl:w-[15dvw]': sidebarOpen,
         'md:w-[5dvw] hidden': !sidebarOpen,
