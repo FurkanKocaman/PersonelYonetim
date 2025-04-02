@@ -170,19 +170,18 @@ const vatandaslikFormKaydet = () => {
 // }
 
 // izinlerin üst kısmı
-// **Dinamik İzin Bilgileri**
+
 const izinBakiyesi = ref(42.51);
 const hakEdisBaslangic = ref("2 Ağu 2024");
 const hakEdisBitis = ref("1 Ağu 2025");
 const kullanilanIzin = ref(2.61);
 const ileriTarihli = ref(0);
 
-// **Yüzdelik Oranlar**
+
 const toplamIzin = computed(() => izinBakiyesi.value + kullanilanIzin.value);
 const kullanilanOran = computed(() => (kullanilanIzin.value / toplamIzin.value) * 100);
 const kalanOran = computed(() => (izinBakiyesi.value / toplamIzin.value) * 100);
 // izinlerin alt kısmı
-// **Başlıklar (Tıklanabilir)**
 
 const basliklar = ref([
   { kolon: "baslangic", ad: "Başlangıç" },
@@ -249,11 +248,10 @@ const izinler = ref([
   }
 ]);
 
-// **Sıralama Durumları**
+
 const siralananKolon = ref("baslangic");
 const izinSiralamaYon = ref("asc");
 
-// **Sıralama Fonksiyonu**
 const izinSirala = (kolon) => {
   if (siralananKolon.value === kolon) {
     izinSiralamaYon.value = izinSiralamaYon.value === "asc" ? "desc" : "asc";
@@ -263,7 +261,6 @@ const izinSirala = (kolon) => {
   }
 };
 
-// **Sıralı Veriyi Döndüren Computed Property**
 const siraliVeriler = computed(() => {
   return [...izinler.value].sort((a, b) => {
     const degerA = a[siralananKolon.value];
@@ -434,7 +431,7 @@ const veriler = ref([
   { baslangicTarihi: "2024-11-07T23:00", sure: "1 saat", aciklama: "Rize hazırlık detay listesinin gönderilmesi tamamlandı...", durum: "Onaylandı", olusturmaTarihi: "2024-11-08T00:01" },
   { baslangicTarihi: "2024-10-21T23:00", sure: "2 saat", aciklama: "YÖS için uyruk program kontenjan görüntüleme...", durum: "Onaylandı", olusturmaTarihi: "2024-10-22T02:21" }
 ]);
-// Filtreleme değişkenleri
+
 const secilenYil = ref("");
 const secilenAy = ref("");
 const secilenDurum = ref("");
@@ -449,7 +446,6 @@ const aylar = [
 
 const yillar = Array.from({ length: 2025 - 2007 + 1 }, (_, i) => (2025 - i).toString());
 
-// Filtrelenmiş veriyi hesaplama
 const filtrelenmisVeri = computed(() => {
   return veriler.value.filter(kayit => {
     const yil = kayit.baslangicTarihi.split("-")[0];
@@ -462,21 +458,20 @@ const filtrelenmisVeri = computed(() => {
     );
   });
 });
-// Sıralama için değişkenler
+
 const siralamaAnahtari = ref("");
 const siralamaYon = ref(1);
 
-// Tablo sıralama fonksiyonu
-const sirala = (anahtar) => {
-  if (siralamaAnahtari.value === anahtar) {
+const sirala = (key) => {
+  if (siralamaAnahtari.value === key) {
     siralamaYon.value *= -1;
   } else {
-    siralamaAnahtari.value = anahtar;
+    siralamaAnahtari.value = key;
     siralamaYon.value = 1;
   }
   veriler.value.sort((a, b) => {
-    let degerA = new Date(a[anahtar]).getTime();
-    let degerB = new Date(b[anahtar]).getTime();
+    let degerA = new Date(a[key]).getTime();
+    let degerB = new Date(b[key]).getTime();
     return degerA > degerB ? siralamaYon.value : -siralamaYon.value;
   });
 };
@@ -718,10 +713,8 @@ const tarihFormatla = (tarih) => {
 </div>
 
 <div >
-    <!-- Modal Aç Butonu -->
+    <!-- iletişim form -->
  
-
-    <!-- Modal Penceresi -->
     <div v-if="iletisimForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">İletişim</h2>
@@ -778,7 +771,6 @@ const tarihFormatla = (tarih) => {
           </div>
         </div>
 
-        <!-- Butonlar -->
         <div class="flex justify-end gap-2">
           <button @click="iletisimForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="iletisimFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -894,6 +886,8 @@ const tarihFormatla = (tarih) => {
         </div>
     </div>
 </div>
+
+  <!-- vatandaşlık form -->
 <div v-if="vatandaslikForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">Vatandaşlık</h2>
@@ -975,7 +969,6 @@ const tarihFormatla = (tarih) => {
 
           <br>
 
-        <!-- Butonlar -->
         <div class="flex justify-end gap-2">
           <button @click="vatandaslikForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="vatandaslikFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -1046,7 +1039,7 @@ const tarihFormatla = (tarih) => {
     </div>
    
 </div>
-
+    <!-- aile form -->
 <div v-if="aileForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">Aile</h2>
@@ -1093,7 +1086,7 @@ const tarihFormatla = (tarih) => {
           </div>
           <br>
 
-        <!-- Butonlar -->
+       
         <div class="flex justify-end gap-2">
           <button @click="aileForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="aileFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -1200,7 +1193,7 @@ const tarihFormatla = (tarih) => {
     </div>
    
 </div>
-
+    <!-- banka form -->
 <div v-if="bankaForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">Banka Hesabı</h2>
@@ -1210,7 +1203,7 @@ const tarihFormatla = (tarih) => {
           <div>
             <label class="block text-gray-600 text-sm font-semibold mb-1">Banka Adı</label>
             <input 
-            v-model="aileCocoukSayisi" 
+            v-model="bankaAdi" 
               type="text" 
               value=""
               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
@@ -1220,7 +1213,7 @@ const tarihFormatla = (tarih) => {
           <div >
             <label class="block text-gray-600 text-sm font-semibold mb-1">Hesap Tipi</label>
 
-              <select v-model="aileEsCalismaDurumu"  id="seçenekler" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" style="height:43px;">       
+              <select v-model="bankaHesapTipi"  id="seçenekler" class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" style="height:43px;">       
                 <option value="">—</option>
                 <option value="Vadesiz">Vadesiz</option>
                 <option value="Vadeli">Vadeli</option>
@@ -1256,7 +1249,7 @@ const tarihFormatla = (tarih) => {
        
           <br>
 
-        <!-- Butonlar -->
+       
         <div class="flex justify-end gap-2">
           <button @click="bankaForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="bankaFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -1280,7 +1273,7 @@ const tarihFormatla = (tarih) => {
           <i class="fa-solid fa-eye-slash" style="color: #3562b1;"title="iş arkadaşlarına gösterilmez"></i>
             <div class="flex-1">
                 <p class="text-gray-600 text-sm">E-Posta (Kişisel)</p>
-                <p class="text-gray-400">{{ personel.iletisim.kisiselEposta || '—'}}</p>
+                <p class="text-blue-600 font-medium">{{ personel.iletisim.kisiselEposta || '—'}}</p>
             </div>
         </div>
         <hr class="my-4 border-gray-300 dark:border-gray-600">
@@ -1297,10 +1290,8 @@ const tarihFormatla = (tarih) => {
 </div>
 
 <div >
-    <!-- Modal Aç Butonu -->
- 
 
-    <!-- Modal Penceresi -->
+    <!--iletişim form -->
     <div v-if="iletisimForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">İletişim</h2>
@@ -1357,7 +1348,7 @@ const tarihFormatla = (tarih) => {
           </div>
         </div>
 
-        <!-- Butonlar -->
+       
         <div class="flex justify-end gap-2">
           <button @click="iletisimForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="iletisimFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -1405,10 +1396,8 @@ const tarihFormatla = (tarih) => {
 </div>
 
 <div >
-    <!-- Modal Aç Butonu -->
  
-
-    <!-- Modal Penceresi -->
+    <!-- acil durum form -->
     <div v-if="acilDurumForm" class="fixed inset-0 flex items-center justify-center bg-gray-800/30">
       <div class="bg-white p-6 rounded-lg shadow-xl w-[700px]">
         <h2 class="text-xl mb-6">Acil Durum</h2>
@@ -1452,7 +1441,6 @@ const tarihFormatla = (tarih) => {
           </div>
           <br>
 
-        <!-- Butonlar -->
         <div class="flex justify-end gap-2">
           <button @click="acilDurumForm = false" class="bg-gray-300 px-4 py-2 rounded text-gray-700 hover:bg-gray-400">İptal</button>
           <button @click="acilDurumFormKaydet" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Kaydet</button>
@@ -1571,8 +1559,8 @@ const tarihFormatla = (tarih) => {
           <th class="px-4 py-2 text-left">Atama Tarihi</th>
         </tr>
       </thead>
-      <tbody>
-        <tr v-for="(item, index) in calismaTakvimiData" :key="index" class="border-b">
+      <tbody >
+        <tr v-for="(item, index) in calismaTakvimiData" :key="index" class="border-b" style="height: 55px;" >
           <td class="px-4 py-2 " >{{ item.baslangic }} <span v-if="item.guncel" class="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded">Güncel</span></td>
           <td class="px-4 py-2">{{ item.bitis || '—' }}</td>
           <td class="px-4 py-2">{{ item.sure }}</td>
@@ -1669,19 +1657,16 @@ const tarihFormatla = (tarih) => {
 
     <!-- İzin Progress Bar -->
     <div class="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-      <!-- Yeşil: Kalan izin -->
       <div
         class="absolute h-full bg-green-600"
         :style="{ width: kalanOran + '%' }"
       ></div>
-      <!-- Kırmızı: Kullanılan izin -->
       <div
         class="absolute h-full bg-red-500"
         :style="{ width: kullanilanOran + '%', left: kalanOran + '%' }"
       ></div>
     </div>
 
-    <!-- Açıklamalar -->
     <div class="flex justify-between text-sm mt-2">
       <div class="flex items-center">
         <span class="w-3 h-3 bg-yellow-400 inline-block rounded-full mr-1"></span>
@@ -1715,7 +1700,7 @@ const tarihFormatla = (tarih) => {
         <tr
           v-for="(izin, index) in siraliVeriler"
           :key="index"
-          class="hover:bg-gray-50" style="height:50px;"
+          class="hover:bg-gray-50" style="height:60px;" 
         >
           <td class=" px-4 py-2">{{ izin.baslangic }}</td>
           <td class=" px-4 py-2">{{ izin.bitis }}</td>
@@ -1891,7 +1876,7 @@ const tarihFormatla = (tarih) => {
 <div v-if="activeTab === 'mesailerim'" class="space-y-6">
 
     <div class="kapsayici">
-    <!-- Filtreleme Alanı -->
+
     <div class="filtreler">
       <select v-model="secilenYil">
         <option value="">Yıl</option>
@@ -1913,7 +1898,6 @@ const tarihFormatla = (tarih) => {
       </select>
     </div>
 
-    <!-- Tablo -->
     <table>
       <thead >
         <tr>
