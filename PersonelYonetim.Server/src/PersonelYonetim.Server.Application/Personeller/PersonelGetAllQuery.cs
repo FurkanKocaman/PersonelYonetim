@@ -56,11 +56,13 @@ internal sealed class PersonelGetAllQueryHandler(
 
 
         var response = personelRepository.GetAll()
+            .Where(p => !p.IsDeleted)
             .Join(personelAtamaRepository.GetAll(),
                     personel => personel.Id,
                     personelAtama => personelAtama.PersonelId,
                     (personel, personelAtama) => new { personel, personelAtama })
-            .Where(pp => pp.personelAtama.SirketId == request.SirketId &&
+            .Where(pp => !pp.personelAtama.IsDeleted &&
+                    pp.personelAtama.SirketId == request.SirketId &&
                     (request.SubeId == null || pp.personelAtama.SubeId == request.SubeId) &&
                     (request.DepartmanId == null || pp.personelAtama.DepartmanId == request.DepartmanId) &&
                     (request.PozisyonId == null || pp.personelAtama.PozisyonId == request.PozisyonId))

@@ -50,7 +50,7 @@ internal sealed class IzinKuralGetAllQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
@@ -58,9 +58,10 @@ internal sealed class IzinKuralGetAllQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
         var izinKurallar = izinKuralRepository.GetAll()
+            .Where(p => !p.IsDeleted)
             .Include(p => p.IzinTurler);
 
-        var izinTalepler = izinTalepRepository.Where(p => p.PersonelId == personel.Id && p.BitisTarihi.Year == DateTime.Now.Year );
+        var izinTalepler = izinTalepRepository.Where(p => p.PersonelId == personel.Id && p.BitisTarihi.Year == DateTime.Now.Year && !p.IsDeleted );
 
 
         var response = izinKurallar

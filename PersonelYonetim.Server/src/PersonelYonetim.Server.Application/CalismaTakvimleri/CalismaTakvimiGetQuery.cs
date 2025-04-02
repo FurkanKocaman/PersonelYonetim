@@ -37,14 +37,14 @@ internal sealed class CalismaTakvimiGetQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-        var takvimler = calismaTakvimRepository.GetAll();
+        var takvimler = calismaTakvimRepository.GetAll().Where(p => !p.IsDeleted);
         var response = calismaTakvimRepository.GetAll()
             .Where(t => personelAtamaRepository.GetAll()
                 .Any(p => p.SirketId == t.SirketId && p.PersonelId == personel.Id))

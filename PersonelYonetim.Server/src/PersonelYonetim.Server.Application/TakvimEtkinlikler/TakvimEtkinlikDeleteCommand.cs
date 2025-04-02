@@ -14,13 +14,12 @@ internal sealed class TakvimEtkinlikDeleteCommandHandler(
 {
     public async Task<Result<string>> Handle(TakvimEtkinlikDeleteCommand request, CancellationToken cancellationToken)
     {
-        TakvimEtkinlik takvimEtkinlik = await takvimEtkinlikRepository.FirstOrDefaultAsync(p => p.Id == request.Id);
+        TakvimEtkinlik takvimEtkinlik = await takvimEtkinlikRepository.FirstOrDefaultAsync(p => p.Id == request.Id && !p.IsDeleted);
 
         if (takvimEtkinlik == null)
             return Result<string>.Failure("Etkinlik bulunamadı");
 
         takvimEtkinlik.IsDeleted = true;
-        takvimEtkinlik.IsActive = false;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

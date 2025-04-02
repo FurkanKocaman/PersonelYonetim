@@ -44,7 +44,7 @@ internal sealed class TakvimEtkinlikGetAllQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id, p.PersonelAtamalar })
             .FirstOrDefault();
 

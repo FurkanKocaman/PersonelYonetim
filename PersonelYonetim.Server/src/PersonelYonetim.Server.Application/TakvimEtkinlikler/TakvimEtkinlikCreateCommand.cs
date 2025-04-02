@@ -43,7 +43,7 @@ internal sealed class TakvimEtkinlikCreateCommandHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
@@ -52,7 +52,7 @@ internal sealed class TakvimEtkinlikCreateCommandHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
         var sirket = personelAtamaRepository
-            .Where(p => p.PersonelId == personel.Id)
+            .Where(p => p.PersonelId == personel.Id && !p.IsDeleted)
             .Select(p => new { p.SirketId })
             .FirstOrDefault();
 

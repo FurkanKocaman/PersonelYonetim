@@ -40,7 +40,7 @@ internal sealed class SubelerGetQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id, p.PersonelAtamalar })
             .FirstOrDefault();
 
@@ -49,7 +49,8 @@ internal sealed class SubelerGetQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var subeler = subeRepository.GetAll();
+        var subeler = subeRepository.GetAll()
+                .Where(p => !p.IsDeleted);
         if(request.SirketId is not null)
         {
             subeler = subeler.Where(s => s.SirketId == request.SirketId);
@@ -60,7 +61,7 @@ internal sealed class SubelerGetQueryHandler(
                   sube => sube.SirketId,
                   personelAtama => personelAtama.SirketId,
                   (sube, personelAtama) => new { sube, personelAtama })
-            .Where(sp => sp.personelAtama.PersonelId == personel.Id)
+            .Where(sp => !sp.personelAtama.IsDeleted &&  sp.personelAtama.PersonelId == personel.Id)
             .Join(userManager.Users,
                   sp => sp.sube.CreateUserId,
                   createUser => createUser.Id,

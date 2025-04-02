@@ -58,11 +58,11 @@ internal sealed class PersonelUpdateCommandHandler(
     public async Task<Result<string>> Handle(PersonelUpdateCommand request, CancellationToken cancellationToken)
     {
         var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.Id);
-        if (personel is null)
+        if (personel is null || personel!.IsDeleted)
             return Result<string>.Failure("Personel bulunamadı");
 
         var user = await userManager.FindByEmailAsync(personel.Iletisim.Eposta);
-        if (user is null)
+        if (user is null || user!.IsDeleted)
             return Result<string>.Failure("Kullanıcı bulunamadı");
 
         var userUpdateCommand = new UserUpdateCommand(user.Id, request.Ad, request.Soyad, request.Iletisim.Eposta);

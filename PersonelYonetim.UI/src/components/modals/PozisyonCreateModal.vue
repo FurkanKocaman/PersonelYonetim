@@ -2,7 +2,7 @@
 import type { SirketModel } from "@/models/entity-models/SirketModel";
 import type { PozisyonCreateRequest } from "@/models/request-models/PozisyonlarCreateRequest";
 import PozisyonService from "@/services/PozisyonService";
-import { defineProps, type PropType } from "vue";
+import { defineProps, reactive, type PropType } from "vue";
 import { onMounted } from "vue";
 import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
 
@@ -23,11 +23,11 @@ const props = defineProps({
 
 const emit = defineEmits(["closeModal", "pozisyonCreated", "pozisyonUpdated"]);
 
-const request: PozisyonCreateRequest = {
+const request: PozisyonCreateRequest = reactive({
   ad: "",
   aciklama: null,
   sirketId: "",
-};
+});
 
 // Düzenleme modunda ise mevcut pozisyon bilgilerini forma dolduruyoruz
 onMounted(() => {
@@ -41,7 +41,7 @@ onMounted(() => {
 const handlePozisyonCreate = async () => {
   try {
     if (props.editMode && props.pozisyon) {
-      await PozisyonService.pozisyonlarUpdate(Number(props.pozisyon.id), request);
+      await PozisyonService.pozisyonlarUpdate(props.pozisyon.id, request);
       emit("pozisyonUpdated", true);
     } else {
       await PozisyonService.pozisyonlarCreate(request);

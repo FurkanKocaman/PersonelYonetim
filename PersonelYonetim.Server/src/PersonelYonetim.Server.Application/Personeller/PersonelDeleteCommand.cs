@@ -20,7 +20,6 @@ internal sealed class PersonelDeleteCommandHandler(
         if (personel is null)
             return Result<string>.Failure("Personel bulunamadı");
         personel.IsDeleted = true;
-        personel.IsActive = false;
 
         var userResult = await sender.Send(new UserDeleteCommand(personel.Iletisim.Eposta), cancellationToken);
         if (!userResult.IsSuccessful){

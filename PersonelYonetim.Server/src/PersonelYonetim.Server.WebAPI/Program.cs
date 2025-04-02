@@ -8,12 +8,28 @@ using Microsoft.AspNetCore.RateLimiting;
 using Scalar.AspNetCore;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
+using Grpc.Net.Compression;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddResponseCompression(opt =>
 {
+    opt.Providers.Clear();
+    opt.Providers.Add<BrotliCompressionProvider>();
+    opt.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
     opt.EnableForHttps = true;
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Optimal; 
 });
 
 builder.AddServiceDefaults();
@@ -64,6 +80,8 @@ app.RegisterRoutes();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.UseResponseCompression();
 

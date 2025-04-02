@@ -38,7 +38,7 @@ internal sealed class IzinTurGetAllQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
@@ -46,11 +46,12 @@ internal sealed class IzinTurGetAllQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
         var response = izinTurRepository.GetAll()
+                .Where(p => !p.IsDeleted)
                 .Join(personelAtamaRepository.GetAll(),
                     izinTur => izinTur.SirketId,
                     personelAtama => personelAtama.SirketId,
                     (izinTur, personelAtama) => new { izinTur, personelAtama })
-                .Where(ip => ip.personelAtama.PersonelId == personel.Id)
+                .Where(ip => ip.personelAtama.PersonelId == personel.Id && !ip.personelAtama.IsDeleted)
                 .Select(ip => new IzinTurGetAllQueryResponse
                 {
                     Id = ip.izinTur.Id,

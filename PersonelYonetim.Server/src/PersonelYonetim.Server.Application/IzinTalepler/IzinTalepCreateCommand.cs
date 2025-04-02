@@ -75,8 +75,12 @@ internal sealed class IzinTalepCreateCommandHandler(
         }
         
         decimal toplamGun = 0;
-        DateTime baslangicGun = request.BaslangicTarihi.Date;
-        DateTime bitisGun = request.BitisTarihi.Date;
+
+        DateTimeOffset baslangic = request.BaslangicTarihi.ToLocalTime();
+        DateTimeOffset bitis = request.BitisTarihi.ToLocalTime();
+
+        DateTimeOffset baslangicGun = baslangic.Date;
+        DateTimeOffset bitisGun = bitis.Date;
 
         while (baslangicGun <= bitisGun)
         {
@@ -84,13 +88,14 @@ internal sealed class IzinTalepCreateCommandHandler(
 
             if (calismaGun is not null && calismaGun.IsCalismaGunu)
             {
-                if (baslangicGun == request.BaslangicTarihi.Date && request.BaslangicTarihi.TimeOfDay > (calismaGun.CalismaBaslangic ?? TimeSpan.Zero))
+
+                if (baslangicGun == baslangic.Date && baslangic.TimeOfDay > (calismaGun.CalismaBaslangic ?? TimeSpan.Zero))
                 {
-                    toplamGun += (decimal)((calismaGun.CalismaBitis - request.BaslangicTarihi.TimeOfDay)?.TotalHours ?? 0) / 8;
+                    toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 8;
                 }
-                else if (baslangicGun == request.BaslangicTarihi.Date && request.BitisTarihi.TimeOfDay < (calismaGun.CalismaBitis ?? TimeSpan.FromHours(17)))
+                else if (baslangicGun == bitis.Date && bitis.TimeOfDay < (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
                 {
-                    toplamGun += (decimal)((request.BitisTarihi.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 8;
+                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 8;
                 }
                 else
                 {
@@ -103,41 +108,46 @@ internal sealed class IzinTalepCreateCommandHandler(
         if ((((DateTimeOffset.Now.Year - personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - personelAtama.PozisyonBaslamaTarihi.Year)) * izinTur.LimitGunSayisi) < toplamGun + toplamIzinGun && izinTur.LimitTipi != LimitTipiEnum.Limitsiz && izinTur.EksiBakiyeHakkı != EksiBakiyeHakkıEnum.Limitsiz && !(izinTur.EksiBakiyeHakkı == EksiBakiyeHakkıEnum.Limitli && izinTur.EksiBakiyeHakkı > (toplamGun - toplamIzinGun)-izinTur.LimitGunSayisi) )
             return Result<string>.Failure("İzin hakkı dolmuştur");
 
-        var izinBitisGun = calismaGunler.FirstOrDefault(g => g.Gun == request.BitisTarihi.DayOfWeek);
-        DateTimeOffset mesaibaslangic = request.BitisTarihi;
+        var izinBitisGun = calismaGunler.FirstOrDefault(g => g.Gun == bitis.DayOfWeek);
+        DateTimeOffset mesaibaslangic = bitis;
         
         if(izinBitisGun != null && izinBitisGun.IsCalismaGunu)
         {
-            if(request.BitisTarihi.TimeOfDay < (izinBitisGun.CalismaBitis ?? TimeSpan.FromHours(18)))
+            if(bitis.TimeOfDay < (izinBitisGun.CalismaBitis ?? TimeSpan.FromHours(18)))
             {
-                mesaibaslangic = request.BitisTarihi;
+                mesaibaslangic = bitis;
             }
             else
             {
-                CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > request.BitisTarihi.DayOfWeek)!;
+                CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
                 if (sonrakiCalismaGun != null)
                 {
-                    mesaibaslangic = request.BitisTarihi.AddDays((int)(sonrakiCalismaGun.Gun - request.BitisTarihi.DayOfWeek))
+                    mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
                         .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
                 }
             }
         }
         else
         {
-            CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > request.BitisTarihi.DayOfWeek)!;
+            CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
             if (sonrakiCalismaGun != null)
             {
-                mesaibaslangic = request.BitisTarihi.AddDays((int)(sonrakiCalismaGun.Gun - request.BitisTarihi.DayOfWeek))
+                mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
                     .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
             }
         }
 
 
-        IzinTalep izinTalep = request.Adapt<IzinTalep>();
-        izinTalep.PersonelId = personel.Id;
-        izinTalep.ToplamSure = toplamGun;
-        izinTalep.MesaiBaslangicTarihi = mesaibaslangic;
-        izinTalep.DegerlendirmeDurumu = DegerlendirmeDurumEnum.Beklemede;
+        IzinTalep izinTalep = new()
+        {
+            IzinTurId = request.IzinTurId,
+            BaslangicTarihi = baslangic,
+            BitisTarihi = bitis,
+            PersonelId = personel.Id,
+            ToplamSure = toplamGun,
+            MesaiBaslangicTarihi = mesaibaslangic,
+            DegerlendirmeDurumu = DegerlendirmeDurumEnum.Beklemede
+        };
 
         izinTalepRepository.Add(izinTalep);
         await unitOfWork.SaveChangesAsync();

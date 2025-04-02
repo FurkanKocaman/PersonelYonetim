@@ -14,7 +14,7 @@ internal sealed class UserDeleteCommandHandler(
     public async Task<Result<string>> Handle(UserDeleteCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByEmailAsync(request.Email);
-        if (user is null)
+        if (user is null || user.IsDeleted)
             return Result<string>.Failure("Kullanıcı bulunamadı");
 
         user.IsDeleted = true;

@@ -1,42 +1,14 @@
 <script setup lang="ts">
-import FullCalendar from "@fullcalendar/vue3";
+import { ref, type Ref } from "vue";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Datepicker from "@vuepic/vue-datepicker";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import listPlugin from "@fullcalendar/list";
-import trLocale from "@fullcalendar/core/locales/tr";
-import { onMounted, ref, type Ref } from "vue";
-import type { EventClickArg, EventContentArg } from "@fullcalendar/core/index.js";
 import { TakvimService } from "@/services/TakvimService";
 import type { TakvimEtkinlikCreateCommand } from "@/models/request-models/TakvimEtkinlikCreateCommand";
-import { useUserStore } from "@/stores/user";
 
-const events = ref<
-  {
-    id: string;
-    title: string;
-    start: string;
-    end: string | undefined;
-    description: string;
-    createBy: string;
-    creatorId: string;
-    isPublic: boolean;
-  }[]
->([
-  {
-    id: "",
-    title: "",
-    start: "",
-    end: undefined,
-    description: "",
-    createBy: "",
-    creatorId: "",
-    isPublic: true,
-  },
-]);
-
+const props = defineProps<{
+  editMode?: boolean;
+  event?: TakvimEtkinlikCreateCommand;
+}>();
 const takvimEtkinlikRequest: Ref<TakvimEtkinlikCreateCommand> = ref({
   etkinlikId: "",
   baslik: "",
@@ -45,172 +17,27 @@ const takvimEtkinlikRequest: Ref<TakvimEtkinlikCreateCommand> = ref({
   bitisTarihi: undefined,
   isPublic: true,
 });
-
-const isEtkinlikEkle = ref(false);
-
-type ModalDurum = "ekle" | "guncelle";
-
-const modalDurum = ref<ModalDurum>("ekle");
-
-const calendarOptions = {
-  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
-  initialView: "dayGridMonth",
-  headerToolbar: {
-    left: "prev,next today",
-    center: "title",
-    right: "dayGridMonth,timeGridWeek,timeGridDay,addEventButton",
-  },
-  selectable: true,
-  editable: false,
-  locale: trLocale,
-  events: events.value,
-
-  businessHours: {
-    daysOfWeek: [1, 2, 3, 4, 5],
-
-    startTime: "09:00",
-    endTime: "18:00",
-  },
-  navLinks: true,
-  customButtons: {
-    addEventButton: {
-      text: "Etkinlik Ekle",
-      click() {
-        modalDurum.value = "ekle";
-        isEtkinlikEkle.value = true;
-      },
-    },
-  },
-  eventClick: (info: EventClickArg) => {
-    if (info.event.extendedProps.creatorId == useUserStore().user.userId) {
-      isEtkinlikEkle.value = true;
-      modalDurum.value = "guncelle";
-      takvimEtkinlikRequest.value = {
-        etkinlikId: info.event.id,
-        baslik: info.event.title,
-        aciklama: info.event.extendedProps.description,
-        baslangicTarihi: info.event.start!,
-        bitisTarihi: info.event.end ?? undefined,
-        isPublic: info.event.extendedProps.isPublic,
-      };
-    }
-  },
-  eventContent: (arg: EventContentArg) => {
-    const createdBy = arg.event.extendedProps.createBy.substring(0, 12) + "..." || "Bilinmiyor";
-    return {
-      html: `<div>
-             <span>${
-               arg.event.start?.getHours() + ":" + arg.event.start?.getMinutes()
-             } </span> <strong>${arg.event.title}</strong>
-             <br>
-             <small class='event-createdby'>Oluşturan: ${createdBy}</small>
-           </div>`,
-    };
-  },
-};
-onMounted(() => {
-  getEtkinlikler();
-});
-
-const getEtkinlikler = async () => {
-  const res = await TakvimService.getEtkinlikler();
-  res!.forEach((element) => {
-    events.value.push({
-      id: element.id,
-      title: element.baslik,
-      start: new Date(element.baslangicTarihi).toISOString(),
-      end: new Date(element.bitisTarihi).toISOString(),
-      description: element.aciklama,
-      createBy: element.createUserName,
-      creatorId: element.createUserId,
-      isPublic: element.isPublic,
-    });
-  });
-};
-
-const openCreateModal = () => {
-  resetTakvimEtkinlikRequest();
-  isEtkinlikEkle.value = false;
-  modalDurum.value = "ekle";
-};
+const emit = defineEmits(["closeModal", "refresh"]);
 
 const createEtkinlik = async () => {
-  const res = await TakvimService.createEtkinlik(takvimEtkinlikRequest.value);
-  events.value.push({
-    id: res!,
-    title: takvimEtkinlikRequest.value.baslik,
-    start: takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
-    end: takvimEtkinlikRequest.value.bitisTarihi
-      ? takvimEtkinlikRequest.value.bitisTarihi.toISOString()
-      : undefined,
-    description: takvimEtkinlikRequest.value.aciklama ?? "",
-    createBy: useUserStore().user.fullName,
-    creatorId: useUserStore().user.userId,
-    isPublic: takvimEtkinlikRequest.value.isPublic,
-  });
-  console.log("Events.value", events.value);
-  isEtkinlikEkle.value = false;
-  resetTakvimEtkinlikRequest();
+  await TakvimService.createEtkinlik(takvimEtkinlikRequest.value);
+  emit("refresh");
+  emit("closeModal", false);
 };
 const guncelleEtkinlik = async () => {
-  const res = await TakvimService.updateEtkinlik(takvimEtkinlikRequest.value);
-
-  if (res) {
-    const eventIndex = events.value.findIndex(
-      (event) => event.id === takvimEtkinlikRequest.value.etkinlikId
-    );
-
-    if (eventIndex !== -1) {
-      events.value[eventIndex] = {
-        ...events.value[eventIndex],
-        title: takvimEtkinlikRequest.value.baslik,
-        start: takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
-        end: takvimEtkinlikRequest.value.bitisTarihi
-          ? takvimEtkinlikRequest.value.bitisTarihi.toISOString()
-          : takvimEtkinlikRequest.value.baslangicTarihi.toISOString(),
-        description: takvimEtkinlikRequest.value.aciklama ?? "",
-      };
-    }
-  }
-
-  isEtkinlikEkle.value = false;
-  resetTakvimEtkinlikRequest();
+  await TakvimService.updateEtkinlik(takvimEtkinlikRequest.value);
+  emit("refresh");
+  emit("closeModal", false);
 };
 
 const silEtkinlik = async () => {
-  const res = await TakvimService.deleteEtkinlik(takvimEtkinlikRequest.value.etkinlikId);
-
-  if (res) {
-    const index = events.value.findIndex(
-      (event) => event.id === takvimEtkinlikRequest.value.etkinlikId
-    );
-
-    if (index !== -1) {
-      events.value.splice(index, 1); // Silme işlemi
-    }
-  }
-  resetTakvimEtkinlikRequest();
-  isEtkinlikEkle.value = false;
-};
-const resetTakvimEtkinlikRequest = () => {
-  takvimEtkinlikRequest.value = {
-    etkinlikId: "",
-    baslik: "",
-    aciklama: undefined,
-    baslangicTarihi: new Date(),
-    bitisTarihi: undefined,
-    isPublic: true,
-  };
+  await TakvimService.deleteEtkinlik(takvimEtkinlikRequest.value.etkinlikId);
+  emit("refresh");
+  emit("closeModal", false);
 };
 </script>
-
 <template>
-  <div class="w-full">
-    <FullCalendar :options="calendarOptions" />
-  </div>
-
   <div
-    v-if="isEtkinlikEkle"
     class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-50 backdrop-blur-sm bg-black/30 w-full h-full"
   >
     <div class="relative p-4 max-w-4xl w-full max-h-full">
@@ -226,7 +53,7 @@ const resetTakvimEtkinlikRequest = () => {
             class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
             @click="
               () => {
-                openCreateModal();
+                emit('closeModal', false);
               }
             "
           >
@@ -252,7 +79,7 @@ const resetTakvimEtkinlikRequest = () => {
         <div class="p-4 md:p-5 w-full">
           <form
             class="space-y-4 w-full"
-            @submit.prevent="modalDurum == 'ekle' ? createEtkinlik() : guncelleEtkinlik()"
+            @submit.prevent="props.editMode ? guncelleEtkinlik() : createEtkinlik()"
           >
             <div class="flex">
               <div class="flex flex-col mr-2 w-full">
@@ -264,7 +91,7 @@ const resetTakvimEtkinlikRequest = () => {
                       >Etkinlik Baslığı</label
                     >
                     <button
-                      v-if="modalDurum != 'ekle'"
+                      v-if="props.editMode"
                       type="button"
                       class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-3 py-1.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                       @click="silEtkinlik()"
@@ -367,40 +194,3 @@ const resetTakvimEtkinlikRequest = () => {
     </div>
   </div>
 </template>
-
-<style>
-.fc-toolbar-title {
-  color: #525252;
-}
-
-.dark .fc-toolbar-title {
-  color: #d9d9d9;
-}
-
-.fc-button {
-  background-color: #274ea2 !important;
-  color: white !important;
-  border-radius: 3px !important;
-  margin: 5px 1px 0 1px !important;
-  padding: 6px 12px !important;
-}
-
-.dark .fc {
-  background-color: rgb(39, 39, 39);
-}
-.dark .fc-daygrid {
-  background-color: rgb(47, 47, 47) !important;
-  outline: none !important;
-}
-.fc-daygrid {
-  background-color: rgb(245, 245, 255) !important;
-  outline: none !important;
-}
-.fc-day-today {
-  background-color: rgb(0, 100, 255) !important;
-}
-
-.fc-scrollgrid {
-  border: none !important;
-}
-</style>

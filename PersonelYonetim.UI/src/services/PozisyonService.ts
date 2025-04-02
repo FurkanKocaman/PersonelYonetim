@@ -31,15 +31,15 @@ class PozisyonService {
     }
     return response.data;
   }
-  
-  // Pozisyon güncelleme metodu
-  async pozisyonlarUpdate(id: number, request: PozisyonCreateRequest): Promise<string> {
-    const response = await api.put(`${import.meta.env.VITE_API_URL}/pozisyonlar/update/${id}`, request);
-    console.log(response);
 
-    return "a";
+  async pozisyonlarUpdate(id: string, request: PozisyonCreateRequest): Promise<string> {
+    request.id = id;
+    const response = await api.put(`${import.meta.env.VITE_API_URL}/pozisyonlar/update/`, request);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
+
+    return response.data.data;
   }
-  
+
   // Pozisyon silme metodu
   async pozisyonlarDelete(id: number): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/pozisyonlar/delete/${id}`);
@@ -47,7 +47,7 @@ class PozisyonService {
 
     return "a";
   }
-  
+
   // Pozisyon detaylarını getirme metodu
   async pozisyonlarGetById(id: number): Promise<PozisyonModel | undefined> {
     try {

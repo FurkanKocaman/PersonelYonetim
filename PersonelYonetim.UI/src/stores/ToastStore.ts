@@ -31,16 +31,13 @@ export const useToastStore = defineStore("toast", () => {
     toasts.value.push(toast);
 
     setTimeout(() => removeToast(toast.id), duration);
-    console.log(toasts);
   };
   const removeToast = (id: number) => {
-    console.log("Toast kaldırılıyor:", id);
     const index = toasts.value.findIndex((toast) => toast.id === id);
     if (index !== -1) {
       toasts.value.splice(index, 1);
       // toasts.value = [...toasts];
     }
-    console.log(toasts);
   };
 
   return { toasts, addToast, removeToast };

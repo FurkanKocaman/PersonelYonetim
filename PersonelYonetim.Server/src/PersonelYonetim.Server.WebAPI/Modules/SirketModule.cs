@@ -16,5 +16,16 @@ public static class SirketModule
             var response = await sender.Send(request, cancellationToken);
             return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
         }).RequireAuthorization(Permissions.CreateSirket).Produces<Result<string>>().WithName("SirketCreate");
+        group.MapPut("/update", async (ISender sender, SirketUpdateCommand request, CancellationToken cancellationToken) =>
+        {
+            var response = await sender.Send(request, cancellationToken);
+            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        }).RequireAuthorization(Permissions.EditSirket).Produces<Result<string>>().WithName("SirketUpdate");
+        group.MapDelete("/delete/{id}", async (ISender sender, Guid id, CancellationToken cancellationToken) =>
+        {
+            SirketDeleteCommand request = new(id);
+            var response = await sender.Send(request, cancellationToken);
+            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        }).RequireAuthorization(Permissions.DeleteSirket).Produces<Result<string>>().WithName("SirketDelete");
     }
 }

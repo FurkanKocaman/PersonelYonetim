@@ -13,7 +13,6 @@ import SirketCreateModal from "@/components/modals/SirketCreateModal.vue";
 import SubeCreateModal from "@/components/modals/SubeCreateModal.vue";
 import DepartmanCreateModal from "@/components/modals/DepartmanCreateModal.vue";
 import PozisyonCreateModal from "@/components/modals/PozisyonCreateModal.vue";
-import { useToastStore } from "@/stores/ToastStore";
 
 const expand = ref({
   sirketler: false,
@@ -45,9 +44,15 @@ const subeler: Ref<SubeModel[] | undefined> = ref([]);
 const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
 
+const selectedSirket: Ref<SirketModel | undefined> = ref(undefined);
+const selectedSube: Ref<SubeModel | undefined> = ref(undefined);
+const selectedDepartman: Ref<DepartmanModel | undefined> = ref(undefined);
+const selectedPozisyon: Ref<PozisyonModel | undefined> = ref(undefined);
+
 const filteredSirketler = computed<Record<string, unknown>[]>(() => {
   return (sirketler.value || []).map(
-    ({ ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
+    ({ id, ad, iletisim, adres, createUserName, createdAt, isActive }) => ({
+      id,
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
@@ -60,7 +65,8 @@ const filteredSirketler = computed<Record<string, unknown>[]>(() => {
 
 const filteredSubeler = computed<Record<string, unknown>[]>(() => {
   return (subeler.value || []).map(
-    ({ ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
+    ({ id, ad, iletisim, adres, createdAt, createUserName, sirketAd, isActive }) => ({
+      id,
       ad,
       eposta: iletisim.eposta,
       adres: adres.sehir,
@@ -73,7 +79,8 @@ const filteredSubeler = computed<Record<string, unknown>[]>(() => {
 });
 const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
   return (departmanlar.value || []).map(
-    ({ ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
+    ({ id, ad, createdAt, createUserName, subeAd, sirketAd, isActive }) => ({
+      id,
       ad,
       createdAt: new Date(createdAt),
       createUserName: createUserName,
@@ -85,21 +92,23 @@ const filteredDepartmanlar = computed<Record<string, unknown>[]>(() => {
 });
 
 const filteredPozisyonlar = computed<Record<string, unknown>[]>(() => {
-  return (pozisyonlar.value || []).map(({ ad, createdAt, createUserName, sirketAd, isActive }) => ({
-    ad,
-    createdAt: new Date(createdAt),
-    createUserName: createUserName,
-    sirketAd,
-    isActive: isActive ? "Aktif" : "Pasif",
-  }));
+  return (pozisyonlar.value || []).map(
+    ({ id, ad, createdAt, createUserName, sirketAd, isActive }) => ({
+      id,
+      ad,
+      createdAt: new Date(createdAt),
+      createUserName: createUserName,
+      sirketAd,
+      isActive: isActive ? "Aktif" : "Pasif",
+    })
+  );
 });
 
 onMounted(async () => {
-  const toastStore = useToastStore();
-  console.log(toastStore.toasts);
   getSirketler();
   getSubeler();
   getDepartmanlar();
+
   getPozisyonlar();
 });
 const getSirketler = async () => {
@@ -151,6 +160,22 @@ const getPozisyonlar = async () => {
   } finally {
     loading.value.pozisyonlar = false;
   }
+};
+const openSirketModal = (sirket: SirketModel) => {
+  selectedSirket.value = sirketler.value?.find((p) => p.id == sirket.id);
+  showModal.value.sirketler = true;
+};
+const openSubeModal = (sube: SubeModel) => {
+  selectedSube.value = subeler.value?.find((p) => p.id == sube.id);
+  showModal.value.subeler = true;
+};
+const openDepartmanModal = (departman: DepartmanModel) => {
+  selectedDepartman.value = departmanlar.value?.find((p) => p.id == departman.id);
+  showModal.value.departmanlar = true;
+};
+const openPozisyonModal = (pozisyon: PozisyonModel) => {
+  selectedPozisyon.value = pozisyonlar.value?.find((p) => p.id == pozisyon.id);
+  showModal.value.pozisyonlar = true;
 };
 </script>
 
@@ -217,6 +242,8 @@ const getPozisyonlar = async () => {
           ></div>
         </div>
         <SirketCreateModal
+          :sirket="selectedSirket"
+          :edit-mode="selectedSirket ? true : false"
           @close-modal="
             (p) => {
               showModal.sirketler = p;
@@ -225,13 +252,15 @@ const getPozisyonlar = async () => {
           "
           v-if="showModal.sirketler"
         />
-
-        <TableLayout
-          v-if="expand.sirketler && !loading.sirketler"
-          :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
-          :tableContent="filteredSirketler"
-          :islemler="['edit', 'detaylar']"
-        />
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <TableLayout
+            v-if="expand.sirketler && !loading.sirketler"
+            :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
+            :tableContent="filteredSirketler"
+            :islemler="['edit', 'detaylar']"
+            @edit-click="openSirketModal"
+          />
+        </div>
       </div>
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
@@ -289,6 +318,8 @@ const getPozisyonlar = async () => {
         </div>
         <SubeCreateModal
           :sirketler="sirketler!"
+          :sube="selectedSube"
+          :edit-mode="selectedSube ? true : false"
           @close-modal="
             (p) => {
               showModal.subeler = p;
@@ -297,21 +328,23 @@ const getPozisyonlar = async () => {
           "
           v-if="showModal.subeler"
         />
-
-        <TableLayout
-          v-if="expand.subeler && !loading.subeler"
-          :tableHeaders="[
-            'Ad',
-            'Eposta',
-            'Adres',
-            'Oluşturulma Tarihi',
-            'Oluşturan',
-            'Şirket',
-            'Durum',
-          ]"
-          :tableContent="filteredSubeler"
-          :islemler="['edit', 'detaylar']"
-        />
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <TableLayout
+            v-if="expand.subeler && !loading.subeler"
+            :tableHeaders="[
+              'Ad',
+              'Eposta',
+              'Adres',
+              'Oluşturulma Tarihi',
+              'Oluşturan',
+              'Şirket',
+              'Durum',
+            ]"
+            :tableContent="filteredSubeler"
+            :islemler="['edit', 'detaylar']"
+            @edit-click="openSubeModal"
+          />
+        </div>
       </div>
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
@@ -370,6 +403,8 @@ const getPozisyonlar = async () => {
 
         <DepartmanCreateModal
           :subeler="subeler!"
+          :departman="selectedDepartman"
+          :edit-mode="selectedDepartman ? true : false"
           @close-modal="
             (p) => {
               showModal.departmanlar = p;
@@ -378,13 +413,15 @@ const getPozisyonlar = async () => {
           "
           v-if="showModal.departmanlar"
         />
-
-        <TableLayout
-          v-if="expand.departmanlar && !loading.departmanlar"
-          :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
-          :tableContent="filteredDepartmanlar"
-          :islemler="['edit', 'detaylar']"
-        />
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <TableLayout
+            v-if="expand.departmanlar && !loading.departmanlar"
+            :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
+            :tableContent="filteredDepartmanlar"
+            :islemler="['edit', 'detaylar']"
+            @edit-click="openDepartmanModal"
+          />
+        </div>
       </div>
       <div
         class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
@@ -443,6 +480,8 @@ const getPozisyonlar = async () => {
 
         <PozisyonCreateModal
           :sirketler="sirketler!"
+          :pozisyon="selectedPozisyon"
+          :edit-mode="selectedPozisyon ? true : false"
           @close-modal="
             (p) => {
               showModal.pozisyonlar = p;
@@ -451,13 +490,15 @@ const getPozisyonlar = async () => {
           "
           v-if="showModal.pozisyonlar"
         />
-
-        <TableLayout
-          v-if="expand.pozisyonlar && !loading.pozisyonlar"
-          :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
-          :tableContent="filteredPozisyonlar"
-          :islemler="['edit', 'detaylar']"
-        />
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <TableLayout
+            v-if="expand.pozisyonlar && !loading.pozisyonlar"
+            :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
+            :tableContent="filteredPozisyonlar"
+            :islemler="['edit', 'detaylar']"
+            @edit-click="openPozisyonModal"
+          />
+        </div>
       </div>
     </div>
   </div>

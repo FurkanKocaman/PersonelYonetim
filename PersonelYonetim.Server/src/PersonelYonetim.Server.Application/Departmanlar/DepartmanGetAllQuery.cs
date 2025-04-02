@@ -19,6 +19,7 @@ public sealed class DepartmanGetAllQueryResponse : EntityDto
     public string? Aciklama { get; set; }
     public string? SubeAd { get; set; } = default!;
     public Guid? SubeId { get; set; } = default!;
+
     public string SirketAd { get; set; } = default!;
     public Guid SirketId { get; set; } = default!;
 }
@@ -39,7 +40,7 @@ internal sealed class DepartmanGetAllQueryHandler(
         }
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
             .Select(p => new { p.Id, p.PersonelAtamalar })
             .FirstOrDefault();
 
@@ -48,10 +49,10 @@ internal sealed class DepartmanGetAllQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var departmanlar = departmanRepository.GetAll();
+        var departmanlar = departmanRepository.GetAll().Where(p => !p.IsDeleted);
         if (request.SubeId is not null)
         {
-            departmanlar = departmanlar.Where(d => d.SubeId == request.SubeId);
+            departmanlar = departmanlar.Where(d => d.SubeId == request.SubeId && !d.IsDeleted);
         }
 
         var response = departmanlar

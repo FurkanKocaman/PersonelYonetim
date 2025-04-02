@@ -149,8 +149,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-screen bg-gray-100 dark:bg-neutral-900">
-    <!-- Kenar Çubuğu -->
+  <div class="flex h-[100dvh] w-[100dvw] bg-gray-100 dark:bg-neutral-900">
     <SidebarMenu
       :menuItems="menuItems"
       :user="user"
@@ -159,14 +158,13 @@ onMounted(() => {
       @toggle-sidebar="toggleSidebar"
     />
 
-    <!-- Ana İçerik -->
-    <div class="flex-1 flex flex-col transition-all duration-300 bg-neutral-50 dark:bg-neutral-900">
-      <!-- Üst Çubuk -->
+    <div
+      class="w-full flex flex-col transition-all duration-300 bg-neutral-50 dark:bg-neutral-900"
+      :class="sidebarOpen ? ' max-w-[100dvw] xl:max-w-[85dvw]' : 'xl:max-w-[95dvw]'"
+    >
       <TopBar :sidebarOpen="sidebarOpen" :header="route.path" @toggle-sidebar="toggleSidebar" />
 
-      <!-- İçerik Alanı -->
       <div class="flex-1 overflow-x-hidden overflow-y-auto relative">
-        <!-- Yükleme Göstergesi -->
         <div
           v-if="isLoading"
           class="absolute inset-0 flex flex-col items-center justify-center bg-opacity-80 dark:bg-opacity-80 z-50"
@@ -187,7 +185,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Sayfa değişimleri için geçişler */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.2s ease;

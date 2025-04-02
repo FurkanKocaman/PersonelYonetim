@@ -19,7 +19,7 @@ class SubeService {
       console.error(error);
     }
   }
-  
+
   async subelerCreate(request: SubeCreateRequest): Promise<string> {
     const response = await api.post(`${import.meta.env.VITE_API_URL}/subeler/create`, request);
     console.log(response);
@@ -31,15 +31,15 @@ class SubeService {
 
     return response.data;
   }
-  
-  // Şube güncelleme metodu
-  async subelerUpdate(id: number, request: SubeCreateRequest): Promise<string> {
-    const response = await api.put(`${import.meta.env.VITE_API_URL}/subeler/update/${id}`, request);
-    console.log(response);
 
-    return "a";
+  async subelerUpdate(id: string, request: SubeCreateRequest): Promise<string> {
+    request.id = id;
+    const response = await api.put(`${import.meta.env.VITE_API_URL}/subeler/update`, request);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
+
+    return response.data.data;
   }
-  
+
   // Şube silme metodu
   async subelerDelete(id: number): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/subeler/delete/${id}`);
@@ -47,7 +47,7 @@ class SubeService {
 
     return "a";
   }
-  
+
   // Şube detaylarını getirme metodu
   async subelerGetById(id: number): Promise<SubeModel | undefined> {
     try {

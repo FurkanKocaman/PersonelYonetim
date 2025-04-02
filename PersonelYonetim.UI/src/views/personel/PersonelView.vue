@@ -47,7 +47,6 @@ const getPersoneller = async () => {
 };
 
 const filterPersoneller = () => {
-  console.log(selectedDepartman.value, selectedSube.value);
   filteredPersonellerList.value = personeller.value?.filter(
     (p) =>
       (selectedSube.value == undefined || selectedSube.value == p.subeId) &&

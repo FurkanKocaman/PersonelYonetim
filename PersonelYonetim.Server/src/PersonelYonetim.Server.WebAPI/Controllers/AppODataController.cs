@@ -37,6 +37,7 @@ public class AppODataController(
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
+        builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         return builder.GetEdmModel();

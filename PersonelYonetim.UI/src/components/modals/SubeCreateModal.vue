@@ -13,15 +13,14 @@ const props = defineProps({
   },
   editMode: {
     type: Boolean,
-    default: false
+    default: false,
   },
   sube: {
     type: Object as PropType<SubeModel>,
-    default: null
-  }
+    default: null,
+  },
 });
 
-// Modal'ı kapatmak ve işlem sonrası yenileme için emit tanımlıyoruz
 const emit = defineEmits(["closeModal", "refresh"]);
 
 const request: SubeCreateRequest = reactive({
@@ -40,7 +39,6 @@ const request: SubeCreateRequest = reactive({
   },
 });
 
-// Düzenleme modunda ise mevcut şube bilgilerini forma dolduruyoruz
 onMounted(() => {
   if (props.editMode && props.sube) {
     request.ad = props.sube.ad;
@@ -58,15 +56,15 @@ onMounted(() => {
 const handleSubeCreate = async () => {
   try {
     let response;
-    
+
     if (props.editMode && props.sube) {
       // Düzenleme modunda güncelleme işlemi yapılıyor
-      response = await SubeService.subelerUpdate(Number(props.sube.id), request);
+      response = await SubeService.subelerUpdate(props.sube.id, request);
     } else {
       // Yeni şube oluşturma işlemi yapılıyor
       response = await SubeService.subelerCreate(request);
     }
-    
+
     console.log(response);
     emit("refresh"); // Listeyi yenilemek için emit
     emit("closeModal", false); // Modal'ı kapatmak için emit
@@ -85,7 +83,7 @@ const handleSubeCreate = async () => {
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ props.editMode ? 'Şube Düzenle' : 'Şube Oluştur' }}
+            {{ props.editMode ? "Şube Düzenle" : "Şube Oluştur" }}
           </h3>
           <button
             type="button"
@@ -260,7 +258,7 @@ const handleSubeCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
+              {{ props.editMode ? "Güncelle" : "Oluştur" }}
             </button>
           </form>
         </div>

@@ -58,7 +58,7 @@ public sealed class PersonelGetCurrentQueryHandler(
 
         var response = personelRepository
             .GetAll()
-            .Where(p => p.UserId == userId)
+            .Where(p => p.UserId == userId && !p.IsDeleted)
             .Select(entity => new PersonelGetCurrentQueryResponse
             {
                 Id = entity.Id,

@@ -70,8 +70,6 @@ onMounted(() => {
   // getDepartmanlar();
   // getPozisyonlar();
   getCalismaTakvimler();
-  console.log(request);
-  if (request.sirketId != "") getPersoneller();
 });
 
 const handlePersonel = async () => {
@@ -94,6 +92,7 @@ const getSirketler = async () => {
     request.sirketId = sirketler.value![0].id;
     getSubeler(request.sirketId);
     getPozisyonlar(request.sirketId);
+    getPersoneller();
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
@@ -130,6 +129,7 @@ const getPersoneller = async () => {
     if (request.sirketId != "") {
       console.log("here");
       const res = await PersonelService.getPersonelList(request.sirketId, "", "");
+      console.log(res);
       personeller.value = res.items;
     }
   } catch (error) {
@@ -269,7 +269,7 @@ const getCalismaTakvimler = async () => {
         <div class="p-4 md:p-5 w-full">
           <form class="space-y-4 w-full" @submit.prevent="handlePersonel()">
             <!-- Kişisel bilgiler start -->
-            <div v-if="currentStep == 0" class="flex">
+            <div v-if="currentStep == 0" class="flex md:flex-row flex-col">
               <div class="flex flex-col mr-2 w-full">
                 <div class="mb-2 flex flex-col">
                   <label
@@ -282,7 +282,7 @@ const getCalismaTakvimler = async () => {
                     name="ad"
                     id="ad"
                     v-model="request.ad"
-                    class="bg-gray-50 border border-neutral-900 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="Caesar"
                     required
                   />
@@ -298,7 +298,7 @@ const getCalismaTakvimler = async () => {
                     name="soyad"
                     id="soyad"
                     v-model="request.soyad"
-                    class="bg-gray-50 border border-neutral-900 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="Iulius"
                     required
                   />
@@ -382,7 +382,7 @@ const getCalismaTakvimler = async () => {
                     name="sehir"
                     id="sehir"
                     v-model="request.adres.sehir"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="Trabzon"
                     required
                   />
@@ -461,7 +461,7 @@ const getCalismaTakvimler = async () => {
             <!-- Kişisel bilgiler end -->
 
             <!-- Pozisyon bilgileri start -->
-            <div v-if="currentStep == 1" class="flex transition duration-300">
+            <div v-if="currentStep == 1" class="flex md:flex-row flex-col transition duration-300">
               <div class="flex flex-col mr-2 w-full">
                 <div class="mb-2 flex flex-col">
                   <label
@@ -697,7 +697,11 @@ const getCalismaTakvimler = async () => {
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
                     v-model="request.yoneticiId"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="null" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelden sorumlu yöneticiyi seçin
                     </option>
                     <option

@@ -11,24 +11,29 @@ const props = defineProps<{
 
 const emit = defineEmits(["closeModal", "refresh"]);
 
-const request: SirketCreateRequest = reactive({
-  ad: "",
-  aciklama: null,
-  logoUrl: null,
-  adres: {
-    ulke: "",
-    sehir: "",
-    ilce: "",
-    tamAdres: "",
-  },
-  iletisim: {
-    eposta: "",
-    telefon: "",
-  },
-});
+const request: SirketCreateRequest = reactive(
+  props.sirket
+    ? JSON.parse(JSON.stringify(props.sirket))
+    : {
+        ad: "",
+        aciklama: null,
+        logoUrl: null,
+        adres: {
+          ulke: "",
+          sehir: "",
+          ilce: "",
+          tamAdres: "",
+        },
+        iletisim: {
+          eposta: "",
+          telefon: "",
+        },
+      }
+);
 
 onMounted(() => {
   if (props.editMode && props.sirket) {
+    request.id = props.sirket.id;
     request.ad = props.sirket.ad;
     request.aciklama = props.sirket.aciklama || null;
     request.logoUrl = props.sirket.logoUrl || null;
@@ -44,16 +49,16 @@ onMounted(() => {
 const handleSirketCreate = async () => {
   try {
     let response;
-    
+
     if (props.editMode && props.sirket) {
-      response = await SirketService.sirketlerUpdate(Number(props.sirket.id), request);
+      response = await SirketService.sirketlerUpdate(props.sirket.id, request);
     } else {
       response = await SirketService.sirketlerCreate(request);
     }
-    
+
     console.log(response);
-    emit("refresh"); 
-    emit("closeModal", false); 
+    emit("refresh");
+    emit("closeModal", false);
   } catch (error) {
     console.error("Şirket işlemi sırasında hata oluştu:", error);
   }
@@ -69,7 +74,7 @@ const handleSirketCreate = async () => {
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-            {{ props.editMode ? 'Şirket Düzenle' : 'Şirket Oluştur' }}
+            {{ props.editMode ? "Şirket Düzenle" : "Şirket Oluştur" }}
           </h3>
           <button
             type="button"
@@ -235,7 +240,7 @@ const handleSirketCreate = async () => {
               type="submit"
               class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
-              {{ props.editMode ? 'Güncelle' : 'Oluştur' }}
+              {{ props.editMode ? "Güncelle" : "Oluştur" }}
             </button>
           </form>
         </div>

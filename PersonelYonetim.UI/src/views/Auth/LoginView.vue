@@ -34,15 +34,15 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="flex justify-end h-dvh">
+  <div class="flex xl:justify-end h-dvh w-full bg-red-500">
     <div
-      class="w-full h-full flex items-center justify-center bg-gradient-to-r from-sky-600 to-sky-700"
+      class="hidden xl:flex w-full h-full items-center justify-center bg-gradient-to-r from-sky-600 to-sky-700"
     ></div>
 
     <div
-      class="flex flex-col items-center justify-center md:w-1/2 h-full bg-neutral-200 dark:bg-neutral-700"
+      class="flex flex-col items-center justify-center w-full xl:w-[50dvw] h-full bg-neutral-200 dark:bg-neutral-700"
     >
-      <form @submit.prevent="handleLogin" class="space-y-4 w-full px-16">
+      <form @submit.prevent="handleLogin" class="w-full px-5 md:px-10">
         <div>
           <h1 class="text-2xl font-semibold text-center mb-6">Giriş Sayfası</h1>
           <div>
