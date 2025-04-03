@@ -20,6 +20,7 @@ const router = createRouter({
           component: () => import("@/views/dashboard/DashboardView.vue"),
           meta: { title: "Ana Sayfa" },
         },
+
         {
           path: "sirket",
           name: "Sirket",
@@ -139,12 +140,64 @@ const router = createRouter({
           meta: { title: "Ayarlar" },
         },
         {
+          path: "profile",
+          name: "Profile",
+          component: () => import("@/layouts/ProfileLayout.vue"),
+          meta: { title: "Profil", public: false },
+          children: [
+            {
+              path: "",
+              name: "ProfileDefault",
+              component: () => import("@/views/profile/ProfileView.vue"),
+              meta: { title: "Profilim" },
+            },
+            {
+              path: "kisisel-bilgiler",
+              name: "ProfilKisiselBilgiler",
+              component: () => import("@/views/profile/KisiselBilgilerView.vue"),
+              meta: { title: "Kişisel Bilgiler" },
+            },
+            {
+              path: "kariyerim",
+              name: "ProfilKariyer",
+              component: () => import("@/views/profile/KariyerView.vue"),
+              meta: { title: "Kariyerim" },
+            },
+            {
+              path: "izinlerim",
+              name: "ProfilIzinler",
+              component: () => import("@/views/profile/IzinView.vue"),
+              meta: { title: "İzinlerim" },
+            },
+            {
+              path: "odemelerim",
+              name: "ProfilOdemeler",
+              component: () => import("@/views/profile/OdemelerView.vue"),
+              meta: { title: "Odemelerim" },
+            },
+            {
+              path: "mesailerim",
+              name: "ProfilMesailer",
+              component: () => import("@/views/profile/MesailerView.vue"),
+              meta: { title: "Mesailerim" },
+            },
+            {
+              path: "diger",
+              name: "ProfilDiger",
+              component: () => import("@/views/profile/DigerView.vue"),
+              meta: { title: "Diger" },
+            },
+          ],
+        },
+
+        {
           path: "/unauthorized",
           name: "Unauthorized",
           component: () => import("@/views/Auth/UnauthorizedView.vue"),
         },
       ],
     },
+
     {
       path: "/login",
       name: "login",

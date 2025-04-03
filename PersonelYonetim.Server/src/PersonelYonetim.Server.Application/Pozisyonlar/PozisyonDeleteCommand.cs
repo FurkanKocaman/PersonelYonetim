@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
@@ -11,6 +12,7 @@ public sealed record PozisyonDeleteCommand(
 
 internal sealed class PozisyonDeleteCommandHandler(
     IPozisyonRepository pozisyonRepository,
+    IPersonelAtamaRepository personelAtamaRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<PozisyonDeleteCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PozisyonDeleteCommand request, CancellationToken cancellationToken)
@@ -18,8 +20,15 @@ internal sealed class PozisyonDeleteCommandHandler(
         Pozisyon pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.Id && !p.IsDeleted);
         if (pozisyon == null)
             return Result<string>.Failure("Pozisyon bulunamadı");
-
         pozisyon.IsDeleted = true;
+
+        var personelAtamalar = personelAtamaRepository.WhereWithTracking(p => p.PozisyonId == request.Id).ToList();
+
+        foreach (var personelAtama in personelAtamalar)
+        {
+            personelAtama.PozisyonId = null;
+        }
+
         pozisyonRepository.Update(pozisyon);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

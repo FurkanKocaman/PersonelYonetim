@@ -177,7 +177,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
             </span>
           </div>
           <ul
-            class="fixed left-20 top-40 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 rounded-md text-sm py-2 font-medium z-50 transition-all duration-300"
+            class="fixed left-20 top-40 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-md text-sm py-2 font-medium z-50 transition-all duration-300"
             :class="sidebarOpen ? 'left-56 lg:left-54 xl:left-60' : 'left-20'"
             v-if="isAddMenuOpen"
           >

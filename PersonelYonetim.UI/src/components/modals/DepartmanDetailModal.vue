@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
-import { ref } from "vue";
 
 // Seçilen departman bilgilerini props olarak alıyoruz
 const props = defineProps<{
@@ -47,7 +46,7 @@ defineEmits<{
             <span class="sr-only">Kapat</span>
           </button>
         </div>
-        
+
         <div class="p-4 md:p-5 w-full">
           <div class="space-y-4 w-full">
             <!-- Departman Bilgileri -->
@@ -58,36 +57,50 @@ defineEmits<{
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Şirket</p>
-                <p class="text-base text-gray-900 dark:text-white">{{ props.departman.sirketAd }}</p>
+                <p class="text-base text-gray-900 dark:text-white">
+                  {{ props.departman.sirketAd }}
+                </p>
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Durum</p>
                 <p class="text-base text-gray-900 dark:text-white">
-                  <span 
-                    :class="props.departman.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
+                  <span
+                    :class="
+                      props.departman.isActive
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                    "
                     class="px-2 py-1 rounded-full text-xs font-medium"
                   >
-                    {{ props.departman.isActive ? 'Aktif' : 'Pasif' }}
+                    {{ props.departman.isActive ? "Aktif" : "Pasif" }}
                   </span>
                 </p>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Oluşturulma Tarihi</p>
-                <p class="text-base text-gray-900 dark:text-white">{{ new Date(props.departman.createdAt).toLocaleDateString('tr-TR') }}</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Oluşturulma Tarihi
+                </p>
+                <p class="text-base text-gray-900 dark:text-white">
+                  {{ new Date(props.departman.createdAt).toLocaleDateString("tr-TR") }}
+                </p>
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Oluşturan</p>
-                <p class="text-base text-gray-900 dark:text-white">{{ props.departman.createUserName }}</p>
+                <p class="text-base text-gray-900 dark:text-white">
+                  {{ props.departman.createUserName }}
+                </p>
               </div>
             </div>
-            
+
             <div v-if="props.departman.aciklama" class="mt-4">
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Açıklama</p>
               <p class="text-base text-gray-900 dark:text-white">{{ props.departman.aciklama }}</p>
             </div>
-            
+
             <!-- Düğmeler -->
-            <div class="flex justify-end space-x-2 pt-4 border-t dark:border-gray-600 border-gray-200">
+            <div
+              class="flex justify-end space-x-2 pt-4 border-t dark:border-gray-600 border-gray-200"
+            >
               <button
                 type="button"
                 class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"

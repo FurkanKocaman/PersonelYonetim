@@ -12,6 +12,7 @@ const activeTab = computed(() => {
   if (route.path.includes("/maas")) return "Maaş Yönetimi";
   if (route.path.includes("/takvim")) return "Takvim";
   if (route.path.includes("/ayarlar")) return "Ayarlar";
+  if (route.path.includes("/profile")) return "Profil";
   if (route.path.includes("/dashboard")) return "Ana Sayfa";
   return "";
 });

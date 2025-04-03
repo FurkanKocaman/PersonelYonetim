@@ -15,5 +15,6 @@ public static class RouteRegistrar
         app.RegisterIzinRoutes();
         app.RegisterCalismaTakvimRoutes();
         app.RegisterTakvimEtkinlikRoutes();
+        app.RegisterFileRoutes();
     }
 }

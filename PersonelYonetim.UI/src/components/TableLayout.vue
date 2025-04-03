@@ -6,7 +6,7 @@ const props = defineProps<{
   tableContent: Array<Record<string, unknown>>;
   islemler: string[];
 }>();
-const hiddenColumns = ["id"];
+const hiddenColumns = ["id", "yoneticiResim"];
 
 const tableKeys = computed<string[]>(() => {
   if (props.tableContent.length === 0) return [];

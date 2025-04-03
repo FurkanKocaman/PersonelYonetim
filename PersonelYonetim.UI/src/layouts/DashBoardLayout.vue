@@ -68,9 +68,9 @@ const menuItems = ref<MenuItem[]>([
   },
   {
     name: "Profil",
-    icon: "cog",
+    icon: "user",
     active: false,
-    path: "/dashboard/profil",
+    path: "/dashboard/profile",
   },
 ]);
 
