@@ -71,7 +71,8 @@ internal sealed class IzinTalepCreateCommandHandler(
 
         foreach(var izin in izinTalepler)
         {
-            toplamIzinGun += izin.ToplamSure;
+            if(izin.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi)
+                toplamIzinGun += izin.ToplamSure;
         }
         
         decimal toplamGun = 0;
@@ -91,11 +92,14 @@ internal sealed class IzinTalepCreateCommandHandler(
 
                 if (baslangicGun == baslangic.Date && baslangic.TimeOfDay > (calismaGun.CalismaBaslangic ?? TimeSpan.Zero))
                 {
-                    toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 8;
+                    if(baslangic.TimeOfDay <= (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
+                    {
+                        toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 9;
+                    }
                 }
                 else if (baslangicGun == bitis.Date && bitis.TimeOfDay < (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
                 {
-                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 8;
+                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 9;
                 }
                 else
                 {
@@ -119,21 +123,27 @@ internal sealed class IzinTalepCreateCommandHandler(
             }
             else
             {
-                CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
+                CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
                 if (sonrakiCalismaGun != null)
                 {
-                    mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
-                        .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+                    while (mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+                    {
+                        mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                    }
+                    mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
                 }
             }
         }
         else
         {
-            CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
+            CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
             if (sonrakiCalismaGun != null)
             {
-                mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
-                    .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+                while(mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+                {
+                   mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                }
+                mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
             }
         }
 

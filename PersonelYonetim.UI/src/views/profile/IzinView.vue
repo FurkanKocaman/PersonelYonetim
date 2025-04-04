@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import TableLayout from "@/components/TableLayout.vue";
-import { computed, ref } from "vue";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
+import IzinService from "@/services/IzinService";
+import { computed, onMounted, ref, type Ref } from "vue";
 
 const izinBakiyesi = ref(42.51);
 const hakEdisBaslangic = ref("2 Ağu 2024");
@@ -11,6 +14,77 @@ const ileriTarihli = ref(0);
 const toplamIzin = computed(() => izinBakiyesi.value + kullanilanIzin.value);
 const kullanilanOran = computed(() => (kullanilanIzin.value / toplamIzin.value) * 100);
 const kalanOran = computed(() => (izinBakiyesi.value / toplamIzin.value) * 100);
+
+const izinList = ref<IzinTalepGetResponse[]>([]);
+const selectedIzin = ref<IzinTalepGetResponse | undefined>(undefined);
+
+const loading = ref(true);
+const error = ref(false);
+
+const showDetailModal = ref(false);
+
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
+
+onMounted(() => {
+  personelGetIzinTalepler();
+});
+
+const personelGetIzinTalepler = async () => {
+  const res = await IzinService.getPersonelIzinTalepler(paginationParams.value);
+  izinList.value = res!.items;
+  console.log(res);
+  paginationParams.value.count = res!.count;
+};
+
+const setPageNumber = (pageNumber: number) => {
+  paginationParams.value.pageNumber = pageNumber;
+  personelGetIzinTalepler();
+};
+
+const filterOptions = ref({
+  durum: "",
+  izinTipi: "",
+});
+
+const filteredIzinList = computed(() => {
+  return izinList.value.filter((izin) => {
+    const durumMatch =
+      !filterOptions.value.durum || izin.degerlendirmeDurumu === filterOptions.value.durum;
+    const izinTipiMatch =
+      !filterOptions.value.izinTipi || izin.izinTuru === filterOptions.value.izinTipi;
+    return durumMatch && izinTipiMatch;
+  });
+});
+
+const filteredIzinTalepler = computed<Record<string, unknown>[]>(() => {
+  return (filteredIzinList.value || []).map(
+    ({
+      id,
+      personelFullName,
+      baslangicTarihi,
+      bitisTarihi,
+      mesaiBaslangicTarihi,
+      toplamSure,
+      izinTuru,
+      degerlendirmeDurumu,
+    }) => ({
+      id,
+      personelFullName,
+      baslangicTarihi: new Date(baslangicTarihi),
+      bitisTarihi: new Date(bitisTarihi),
+      mesaiBaslangicTarihi: new Date(mesaiBaslangicTarihi),
+      toplamSure,
+      izinTuru,
+      degerlendirmeDurumu,
+    })
+  );
+});
 
 const izinler = ref([
   {
@@ -107,20 +181,32 @@ const izinler = ref([
       </div>
     </div>
 
-    <div class="overflow-x-auto w-full flex items-center justify-center px-5">
+    <div class="overflow-x-auto w-full flex flex-col items-center justify-center px-5">
       <TableLayout
         :table-headers="[
-          'Baslangıç',
-          'Bitiş',
-          'Mesai Baslangıç',
-          'Süre',
-          'İzin Türü',
-          'Açıklama',
-          'Oluşturma Tarihi',
-          'Durum',
+          { key: 'personelFullName', value: 'Personel Adı' },
+          { key: 'baslangicTarihi', value: 'Başlangıç' },
+          { key: 'bitisTarihi', value: 'Bitiş' },
+          { key: 'mesaiBaslangicTarihi', value: 'Mesai Başlangıç' },
+          { key: 'toplamSure', value: 'Toplam Süre' },
+          { key: 'izinTuru', value: 'İzin Tipi' },
+          { key: 'degerlendirmeDurumu', value: 'Durum' },
         ]"
-        :table-content="izinler"
+        :table-content="filteredIzinTalepler"
         :islemler="['detaylar']"
+        :page-count="
+          Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
+            ? 1
+            : Math.ceil(paginationParams.count / paginationParams.pageSize)
+        "
+        :count="paginationParams.count"
+        :page-size="
+          paginationParams.pageSize > paginationParams.count
+            ? paginationParams.count
+            : paginationParams.pageSize
+        "
+        :current-page="paginationParams.pageNumber"
+        @set-page="setPageNumber"
       />
     </div>
   </div>

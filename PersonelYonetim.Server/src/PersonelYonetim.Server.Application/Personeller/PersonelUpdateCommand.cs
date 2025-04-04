@@ -1,11 +1,15 @@
 ﻿using FluentValidation;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Users;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
@@ -74,7 +78,10 @@ internal sealed class PersonelUpdateCommandHandler(
         personel.Soyad = request.Soyad;
         personel.DogumTarihi = request.DogumTarihi;
         personel.Cinsiyet = request.Cinsiyet;
-        personel.ProfilResimUrl = request.ProfilResimUrl;
+        if(request.ProfilResimUrl != null || request.ProfilResimUrl != "")
+        {
+            personel.ProfilResimUrl = request.ProfilResimUrl;
+        }
         personel.Iletisim = request.Iletisim;
         personel.Adres = request.Adres;
         
@@ -93,23 +100,24 @@ internal sealed class PersonelUpdateCommandHandler(
                 return Result<string>.Failure("Pozisyon bulunamadı");
         }
 
-        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id);
-        if (personelAtama is null)
-            return Result<string>.Failure("Personel departman bilgisi bulunamadı");
+        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id && pd.SirketId == request.SirketId && pd.IsDeleted == false);
+        if(request.SirketId != personelAtama.SirketId || request.SubeId != personelAtama.SubeId  || request.DepartmanId != personelAtama.DepartmanId || request.PozisyonId != personelAtama.PozisyonId || request.RolValue != personelAtama.RolTipi.Value || request.YoneticiId != personelAtama.YoneticiId)
+        {
+            personelAtama.IsDeleted = true;
 
-        personelAtama.DepartmanId = request.DepartmanId;
-        personelAtama.PozisyonId = request.PozisyonId;
-        personelAtama.SirketId = request.SirketId;
-        personelAtama.YoneticiId = request.YoneticiId;
-        personelAtama.SubeId = request.SubeId;
-        personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
-        personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
-        personelAtama.PozisyonBaslamaTarihi = request.PozisyonBaslangicTarih;
-        personelAtama.SozlesmeBitisTarihi = request.SozlesmeBitisTarihi;
-        personelAtama.IzinKuralId = request.IzinKuralId;
-        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolValue);
+            PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId == null ? personelAtama.IzinKuralId : request.IzinKuralId);
+            var result = await sender.Send(personelAtamaCreateCommand);
+        }
+        else
+        {
+            if(request.IzinKuralId is not null)
+                personelAtama.IzinKuralId = request.IzinKuralId;
+            if(request.CalismaTakvimiId is not null)
+                personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
+        }
 
-        personelRepository.Update(personel);
+
+            personelRepository.Update(personel);
         personelAtamaRepository.Update(personelAtama);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

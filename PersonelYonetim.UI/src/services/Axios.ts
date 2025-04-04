@@ -15,6 +15,14 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+
+    console.log(" Outgoing Request:", {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data,
+      params: config.params,
+    });
     return config;
   },
   (error) => {

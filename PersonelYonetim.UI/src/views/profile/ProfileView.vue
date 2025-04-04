@@ -69,7 +69,7 @@ const personelTelefon = ref(personel.iletisim.kisiselTelefon);
 
 const iletisimFormKaydet = () => {
   personel.iletisim.kisiselTelefon = personelTelefon.value;
-  personel.iletisim.kisiselEposta = personelEmail.value;
+  personel.iletisim.isEposta = personelEmail.value;
   iletisimForm.value = false;
 };
 </script>
@@ -81,7 +81,7 @@ const iletisimFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 rounded-lg shadow-sm p-6 flex-1 m-5">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <h2 class="text-xl font-semibold">{{ personel.adSoyad }}</h2>
+            <h2 class="text-xl font-semibold">{{ "aa" }}</h2>
             <br />
             <p class="text-gray-600 dark:text-gray-300">{{ personel.unvan }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ personel.departman }}</p>
@@ -287,7 +287,7 @@ const iletisimFormKaydet = () => {
               >
                 <span class="mr-2">🇹🇷</span>
                 <input
-                  v-model="personelTelefon"
+                  v-model="personel.iletisim.kisiselTelefon"
                   type="text"
                   class="w-full outline-none"
                   placeholder="Telefon (Kişisel)"
@@ -303,10 +303,7 @@ const iletisimFormKaydet = () => {
             >
               İptal
             </button>
-            <button
-              @click="iletisimFormKaydet"
-              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
+            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
               Kaydet
             </button>
           </div>

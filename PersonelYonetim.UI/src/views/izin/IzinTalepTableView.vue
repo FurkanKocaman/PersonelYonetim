@@ -26,7 +26,6 @@ const statusColors: Record<string, string> = {
   Beklemede: "text-amber-600 bg-amber-100 dark:bg-amber-900 dark:text-amber-300",
   Reddedildi: "text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300",
 };
-const izinDurumlar = ref(["Beklemede", "Onaylandı", "Reddedildi"]);
 
 const filterOptions = ref({
   durum: "",
@@ -98,39 +97,15 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
   selectedIzin.value = izinList.value.find((p) => p.id == item.id);
   showDetailModal.value = true;
 };
+
+const orderBy = (order: string) => {
+  paginationParams.value.orderBy = order;
+  getIzinTalepler();
+};
 </script>
 <template>
   <!-- İçerik Alanı -->
   <main class="p-2 flex flex-col max-w[80dvw]">
-    <!-- Üst Kontroller -->
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <!-- Filtreler -->
-      <div class="flex flex-wrap gap-4">
-        <div class="w-full sm:w-auto">
-          <select
-            v-model="filterOptions.durum"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
-          >
-            <option value="">Tüm Durumlar</option>
-            <option v-for="durum in izinDurumlar" :key="durum" :value="durum">
-              {{ durum }}
-            </option>
-          </select>
-        </div>
-        <div class="w-full sm:w-auto">
-          <select
-            v-model="filterOptions.izinTipi"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
-          >
-            <option value="">Tüm İzin Türleri</option>
-            <!-- <option v-for="izinTipi in izinTurleri" :key="izinTipi" :value="izinTipi">
-              {{ izinTipi }}
-            </option> -->
-          </select>
-        </div>
-      </div>
-    </div>
-
     <div v-if="loading" class="flex justify-center items-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
@@ -148,13 +123,13 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
     <div v-else-if="izinList.length > 0" class="overflow-auto">
       <TableLayout
         :table-headers="[
-          'Personel',
-          'Baslangic',
-          'Bitis',
-          'Mesai Baslangic',
-          'Süre',
-          'İzin Tipi',
-          'Durum',
+          { key: 'personelFullName', value: 'Personel' },
+          { key: 'baslangicTarihi', value: 'Başlangıç' },
+          { key: 'bitisTarihi', value: 'Bitiş' },
+          { key: 'mesaiBaslangicTarihi', value: 'Mesai Baslangic' },
+          { key: 'toplamSure', value: 'Süre' },
+          { key: 'izinTuru', value: 'İzin Tipi' },
+          { key: 'degerlendirmeDurumu', value: 'Durum' },
         ]"
         :table-content="filteredIzinTalepler"
         :islemler="['edit']"
@@ -172,6 +147,7 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
         "
         :current-page="paginationParams.pageNumber"
         @set-page="setPageNumber"
+        @order-by="orderBy"
       />
     </div>
 

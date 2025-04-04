@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref } from "vue";
-import TableLayout from "../../TableLayout.vue";
+import TableLayout from "../../components/TableLayout.vue";
 import IzinService from "@/services/IzinService";
 import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
@@ -41,19 +41,23 @@ const filteredIzinKurallar = computed<Record<string, unknown>[]>(() => {
     })
   );
 });
+// const orderBy = (order: string) => {
+//   paginationParams.value.orderBy = order;
+//   getIzinKurallar();
+// };
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="mx-10">
+    <div class="mx-2">
       <TableLayout
         :table-headers="[
-          'Ad',
-          'Izin Türleri',
-          'Açıklama',
-          'Oluşturan',
-          'Oluşturma Tarihi',
-          'Durum',
+          { key: 'ad', value: 'Ad' },
+          { key: 'izinTur', value: 'Izin Türleri' },
+          { key: 'aciklama', value: 'Açıklama' },
+          { key: 'createUserName', value: 'Oluşturan' },
+          { key: 'createdAt', value: 'Oluşturma Tarihi' },
+          { key: 'isActive', value: 'Durum' },
         ]"
         :table-content="filteredIzinKurallar"
         :islemler="['detaylar']"

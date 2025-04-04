@@ -2,19 +2,42 @@ import type { SubeModel } from "@/models/entity-models/SubeModel";
 import api from "./Axios";
 import type { SubeCreateRequest } from "@/models/request-models/SubeCreateRequest";
 import { useToastStore } from "@/stores/ToastStore";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 class SubeService {
-  async subelerGet(sirketId: string): Promise<{ Subeler: SubeModel[]; count: number } | undefined> {
+  async subelerGet(
+    sirketId: string,
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: SubeModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > {
     try {
+      const queryParams = new URLSearchParams();
+
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
+
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
+
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
+
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/subeler?sirketId=${sirketId}`,
+        `${import.meta.env.VITE_API_URL}/odata/subeler?sirketId=${sirketId}&${queryParams}`,
         {
           params: {
             $count: true,
           },
         }
       );
-      return { Subeler: response.data.value, count: response.data["@odata.count"] };
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
+      };
     } catch (error) {
       console.error(error);
     }

@@ -2,21 +2,42 @@ import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
 import api from "./Axios";
 import type { PozisyonCreateRequest } from "@/models/request-models/PozisyonlarCreateRequest";
 import { useToastStore } from "@/stores/ToastStore";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 class PozisyonService {
   async pozisyonlarGet(
-    sirketId: string
-  ): Promise<{ Pozisyonlar: PozisyonModel[]; count: number } | undefined> {
+    sirketId: string,
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: PozisyonModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > {
     try {
+      const queryParams = new URLSearchParams();
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
+
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
+
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
+
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/pozisyonlar?sirketId=${sirketId}`,
+        `${import.meta.env.VITE_API_URL}/odata/pozisyonlar?${queryParams}`,
         {
           params: {
             $count: true,
+            sirketId: sirketId,
           },
         }
       );
-      return { Pozisyonlar: response.data.value, count: response.data["@odata.count"] };
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
+      };
     } catch (error) {
       console.error(error);
     }

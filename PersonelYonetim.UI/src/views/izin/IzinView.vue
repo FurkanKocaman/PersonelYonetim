@@ -137,7 +137,7 @@ defineExpose({
     >
       <ul class="flex flex-wrap -mb-px">
         <li class="mr-2">
-          <router-link
+          <RouterLink
             :to="{ name: 'Izinler' }"
             class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg"
             :class="
@@ -147,10 +147,10 @@ defineExpose({
             "
           >
             <i class="fas fa-calendar-alt mr-2"></i> İzin Talepleri
-          </router-link>
+          </RouterLink>
         </li>
         <li class="mr-2">
-          <router-link
+          <Router-link
             :to="{ name: 'IzinKurallar' }"
             class="inline-block py-4 px-4 text-sm font-medium text-center border-b-2 rounded-t-lg cursor-pointer"
             :class="
@@ -160,20 +160,28 @@ defineExpose({
             "
           >
             <i class="fas fa-book mr-2"></i> İzin Kuralları
-          </router-link>
+          </Router-link>
         </li>
       </ul>
       <div class="flex space-x-2">
         <button
+          v-if="route.path == '/dashboard/izin/izinler'"
           @click="
             () => {
               izinTalepCreate = true;
             }
           "
-          class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-colors duration-300"
+          class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
         >
           <i class="fas fa-plus mr-2"></i> İzin Talebi Oluştur
         </button>
+        <RouterLink
+          v-if="route.path == '/dashboard/izin/izin-kurallar'"
+          to="/dashboard/izin/kural-create"
+          class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+        >
+          <i class="fas fa-plus mr-2"></i> İzin Kural Oluştur
+        </RouterLink>
       </div>
     </div>
 

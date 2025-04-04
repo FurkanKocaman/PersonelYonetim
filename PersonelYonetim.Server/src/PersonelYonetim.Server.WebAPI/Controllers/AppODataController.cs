@@ -10,6 +10,7 @@ using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
+using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Sirketler;
@@ -38,8 +39,10 @@ public class AppODataController(
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
+        builder.EntitySet<IzinTalepGetQueryResponse>("personel-izin-talepler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
+        builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
         return builder.GetEdmModel();
     }
 
@@ -123,6 +126,15 @@ public class AppODataController(
         var response = await sender.Send(new IzinTalepGetAllQuery(), cancellationToken);
         return response;
     }
+
+    [HttpGet("personel-izin-talepler")]
+    [Authorize]
+    public async Task<IQueryable<IzinTalepGetQueryResponse>> PersonelGetIzinTalepler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinTalepGetQuery(), cancellationToken);
+        return response;
+    }
+
     [HttpGet("calisma-takvim")]
     [Authorize]
     public async Task<IQueryable<CalismaTakvimiGetQueryResponse>> GetCalismaTakvim(CancellationToken cancellationToken)
@@ -135,6 +147,14 @@ public class AppODataController(
     public async Task<IQueryable<TakvimEtkinlikGetAllQueryResponse>> GetTakvimEtkinlikler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new TakvimEtkinlikGetAllQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("personel-atamalar")]
+    [Authorize]
+    public async Task<IQueryable<PersonelAtamaGetQueryResponse>> GetPersonelAtamalar(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new PersonelAtamaGetQuery(), cancellationToken);
         return response;
     }
 

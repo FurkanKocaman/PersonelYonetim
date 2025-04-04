@@ -11,7 +11,7 @@ using PersonelYonetim.Server.Domain.Subeler;
 
 namespace PersonelYonetim.Server.Domain.PersonelAtamalar;
 
-public sealed class PersonelAtama : EntityDto
+public sealed class PersonelAtama : Entity
 {
     public Guid PersonelId { get; set; }
     public Personel Personel { get; set; } = default!;

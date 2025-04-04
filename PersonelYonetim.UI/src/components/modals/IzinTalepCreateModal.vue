@@ -5,6 +5,15 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import Datepicker from "@vuepic/vue-datepicker";
 import { onMounted, reactive, ref, watch, type Ref } from "vue";
 import type { IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
+
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: undefined,
+  filter: undefined,
+});
 
 const request: IzinTalepCreateCommand = reactive({
   izinTurId: "",
@@ -12,8 +21,7 @@ const request: IzinTalepCreateCommand = reactive({
   bitisTarihi: new Date(),
   aciklama: undefined,
 });
-// const mesaiBaslangic = ref(new Date());
-// const toplamGun: number = ref(0);
+
 const izinTurler: Ref<IzinTurResponse[] | undefined> = ref([]);
 const emit = defineEmits(["closeModal"]);
 const handleIzinTalepCreate = async () => {
@@ -26,8 +34,8 @@ onMounted(() => {
 });
 
 const getIzinKural = async () => {
-  const response = await IzinService.getIzinKural();
-  izinTurler.value = response?.IzinKurallar[0].izinTurler;
+  const response = await IzinService.getIzinKural(paginationParams.value);
+  izinTurler.value = response?.items[0].izinTurler;
 };
 
 const mesaiBaslangicHesapla = () => {
@@ -180,12 +188,14 @@ watch(() => request.bitisTarihi, mesaiBaslangicHesapla);
               ></textarea>
             </div>
 
-            <button
-              type="submit"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Oluştur
-            </button>
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+              >
+                Oluştur
+              </button>
+            </div>
           </form>
         </div>
       </div>

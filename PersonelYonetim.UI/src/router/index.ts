@@ -62,65 +62,31 @@ const router = createRouter({
         {
           path: "izin",
           name: "Izin",
-          component: () => import("@/views/izin/izin-view/IzinView.vue"),
+          component: () => import("@/views/izin/IzinView.vue"),
           meta: { title: "İzin Yönetimi" },
           redirect: "/dashboard/izin/izinler",
           children: [
             {
               path: "izinler",
               name: "Izinler",
-              component: () => import("@/components/izin/izin-components/IzinlerTable.vue"),
+              component: () => import("@/views/izin/IzinTalepTableView.vue"),
               meta: { title: "İzin Listesi" },
             },
             {
               path: "izin-kurallar",
               name: "IzinKurallar",
-              component: () => import("@/components/izin/izin-components/IzinKural.vue"),
+              component: () => import("@/views/izin/IzinKuralTableView.vue"),
+              meta: { title: "İzin Kuralları" },
+            },
+            {
+              path: "kural-create",
+              name: "KurallarCreate",
+              component: () => import("@/views/izin/IzinKuralCreateView.vue"),
               meta: { title: "İzin Kuralları" },
             },
           ],
         },
-        // İzin Talebi Sayfası 0
-        {
-          path: "izin/talep",
-          name: "IzinTalep",
-          component: () => import("@/views/izin/izin-view/IzinTalepView.vue"),
-          meta: { title: "İzin Talebi" },
-        },
-        // İzin Kuralları Ana Sayfası
-        {
-          path: "izin/kurallar",
-          name: "IzinKurallari",
-          component: () => import("@/views/izin/izin-view/IzinKurallariView.vue"),
-          meta: { title: "İzin Kuralları" },
-          children: [
-            {
-              path: "",
-              name: "IzinKurallariKurallar",
-              component: () => import("@/views/izin/izin-view/IzinKurallariKurallarViewNew.vue"),
-              meta: { title: "İzin Kuralları" },
-            },
-            {
-              path: "raporlar",
-              name: "IzinKurallariRaporlar",
-              component: () => import("@/views/izin/izin-view/IzinKurallariRaporlarView.vue"),
-              meta: { title: "İzin Raporları" },
-            },
-            {
-              path: "orneksablonlar",
-              name: "IzinKurallariOrnekSablonlar",
-              component: () => import("@/views/izin/izin-view/IzinKurallariOrnekSablonlarView.vue"),
-              meta: { title: "İzin Kuralları Şablonları" },
-            },
-          ],
-        },
-        // İzin Kuralı Oluşturma Sayfası
-        {
-          path: "izin/kurallar/olustur",
-          name: "IzinKuralOlustur",
-          component: () => import("@/views/izin/izin-view/IzinKuralCreateView.vue"),
-          meta: { title: "İzin Kuralı Oluştur" },
-        },
+
         {
           path: "maas",
           name: "Maas",

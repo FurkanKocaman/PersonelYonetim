@@ -2,17 +2,40 @@ import type { SirketModel } from "@/models/entity-models/SirketModel";
 import api from "./Axios";
 import type { SirketCreateRequest } from "@/models/request-models/SirketCreateRequest";
 import { useToastStore } from "@/stores/ToastStore";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 class SirketService {
-  async sirketlerGet(): Promise<{ Sirketler: SirketModel[]; count: number } | undefined> {
+  async sirketlerGet(
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: SirketModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > {
     try {
-      const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/sirketler`, {
-        params: {
-          $count: true,
-        },
-      });
+      const queryParams = new URLSearchParams();
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
 
-      return { Sirketler: response.data.value, count: response.data["@odata.count"] };
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
+
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/odata/sirketler?${queryParams}`,
+        {
+          params: {
+            $count: true,
+          },
+        }
+      );
+
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
+      };
     } catch (error) {
       console.error(error);
     }
@@ -41,8 +64,6 @@ class SirketService {
 
     return response.data.data;
   }
-
-  // Şirket detaylarını getirme metodu
   async sirketlerGetById(id: number): Promise<SirketModel | undefined> {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/sirketler/${id}`);

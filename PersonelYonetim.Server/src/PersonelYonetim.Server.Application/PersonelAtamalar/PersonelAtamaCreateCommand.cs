@@ -16,7 +16,7 @@ using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelAtamalar;
 
-public sealed record PersonelAtamaCreateCommand(
+public sealed record PersonelAtamaCreateCommand( 
     Guid PersonelId,
     Guid SirketId,
     Guid? SubeId,
@@ -40,18 +40,15 @@ internal sealed class PersonelAtamaCreateCommandHandler(
     IPersonelIzinRepository personelIzinRepository,
     IIzinTurIzinKuralRepository izinTurIzinKuralRepository,
     ICalismaTakvimRepository calismaTakvimRepository,
+    IIzinKuralRepository izinKuralRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<PersonelAtamaCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelAtamaCreateCommand request, CancellationToken cancellationToken)
     {
-        //using (var transaction = unitOfWork.BeginTransaction())
-        //{
-        //    try
-        //    {
-        PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.IsActive == true);
-        if (personelAtamaEski != null)
+        PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false);
+        if (personelAtamaEski is not null)
         {
-            personelAtamaEski.IsActive = false;
+            personelAtamaEski.IsDeleted = true;
             personelAtamaEski.SozlesmeBitisTarihi = DateTimeOffset.Now;
             personelAtamaRepository.Update(personelAtamaEski);
             await unitOfWork.SaveChangesAsync();
@@ -118,6 +115,14 @@ internal sealed class PersonelAtamaCreateCommandHandler(
 
             personelAtama.CalismaTakvimId = defaultTakvim.Id;
         }
+        if(request.IzinKuralId == null)
+        {
+            var defaultIzinKural = await izinKuralRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.CreateUserId == Guid.Empty);
+            if (defaultIzinKural == null)
+                return Result<string>.Failure("IzinKural bulunamadı");
+
+            personelAtama.IzinKuralId = defaultIzinKural.Id;
+        }
 
        var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
         if (personel == null)
@@ -131,6 +136,16 @@ internal sealed class PersonelAtamaCreateCommandHandler(
         if (role == null)
             return Result<string>.Failure("Rol bulunamadı");
 
+        var appUserRoleInDb = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == user.Id && p.SirketId == personelAtama.SirketId);
+
+        if (appUserRoleInDb is not null)
+        {
+            userRoleRepository.Delete(appUserRoleInDb);
+            await unitOfWork.SaveChangesAsync();
+        }
+            
+
+        
         AppUserRole appUserRole = new()
         {
             UserId = user.Id,
@@ -138,16 +153,9 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             SirketId = request.SirketId,
         };
         userRoleRepository.Add(appUserRole);
+
         await unitOfWork.SaveChangesAsync();
-        //await unitOfWork.CommitTransactionAsync(transaction);
 
         return Result<string>.Succeed("Personel atama oluşturuldu");
-        //    }catch(Exception ex)
-        //    {
-        //        await unitOfWork.RollbackTransactionAsync(transaction);
-        //        return Result<string>.Failure("Hata oluştu:"+ex.ToString());
-        //    }
-        //}
-
     }
 }

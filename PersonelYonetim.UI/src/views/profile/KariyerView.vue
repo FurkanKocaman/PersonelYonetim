@@ -1,83 +1,70 @@
 <script setup lang="ts">
 import TableLayout from "@/components/TableLayout.vue";
-import { ref } from "vue";
+import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import PersonelService from "@/services/PersonelService";
+import { computed, onMounted, ref, type Ref } from "vue";
 
 const activeTab2 = ref("pozisyon");
 
 const setActiveTab2 = (tab: string) => {
   activeTab2.value = tab;
 };
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
 
-const pozisyonData = [
-  {
-    baslangic: "8 Ağustos 2024",
-    bitis: "8 Ağustos 2024",
-    calismaSekli: "Tam zamanlı",
-    yonetici: "",
+const personelAtamalar: Ref<PersonelAtamaModel[] | undefined> = ref([]);
 
-    sirket: "ELASOFT YAZILIM VE BİLİŞİM TEKNOLOJİLERİ SAN.TİC.LTD.ŞTİ",
-    sube: "",
-    departman: "Yazılım Üretim",
-    unvan: "Yazılım Personeli",
-    varsayilan: false,
-  },
-  {
-    baslangic: "8 Ağustos 2024",
-    bitis: null,
-    calismaSekli: "Tam zamanlı",
-    yonetici: "Adil Mert Şahin",
+onMounted(() => {
+  getPersonelAtamalar();
+});
 
-    sirket: "ELASOFT YAZILIM VE BİLİŞİM TEKNOLOJİLERİ SAN.TİC.LTD.ŞTİ",
-    sube: "",
-    departman: "Yazılım Üretim",
-    unvan: "Yazılım Personeli",
-    varsayilan: true,
-  },
-  {
-    baslangic: "7 Ağustos 2024",
-    bitis: "8 Ağustos 2024",
-    calismaSekli: "Tam zamanlı",
-    yonetici: "BAHAR SERDAR",
+const getPersonelAtamalar = async () => {
+  const res = await PersonelService.getPersonelAtamalar(paginationParams.value);
+  personelAtamalar.value = res?.items;
+  paginationParams.value.count = res?.count || 0;
+};
 
-    sirket: "ELASOFT YAZILIM VE BİLİŞİM TEKNOLOJİLERİ SAN.TİC.LTD.ŞTİ",
-    sube: "",
-    departman: "Yazılım Üretim",
-    unvan: "Yazılım Personeli",
-    varsayilan: false,
-  },
-  {
-    baslangic: "5 Nisan 2024",
-    bitis: "7 Ağustos 2024",
-    calismaSekli: "Tam zamanlı",
-    yonetici: "Adil Mert Şahin",
+const filteredPersonelAtamalar = computed<Record<string, unknown>[]>(() => {
+  return (personelAtamalar.value || []).map(
+    ({
+      id,
+      pozisyonBaslangicTarih,
+      pozisyonBitisTarih,
+      sirketAd,
+      subeAd,
+      departmanAd,
+      pozisyonAd,
+      isActive,
+    }) => ({
+      id,
+      pozisyonBaslangicTarih: new Date(pozisyonBaslangicTarih),
+      pozisyonBitisTarih: pozisyonBitisTarih != null ? new Date(pozisyonBitisTarih) : null,
+      sirketAd,
+      subeAd,
+      departmanAd,
+      pozisyonAd,
+      isActive: isActive ? "Aktif" : "Pasif",
+    })
+  );
+});
 
-    sirket: "ELASOFT YAZILIM VE BİLİŞİM TEKNOLOJİLERİ SAN.TİC.LTD.ŞTİ",
-    sube: "",
-    departman: "Yazılım Üretim",
-    unvan: "Yazılım Personeli",
-    varsayilan: false,
-  },
-];
+const setPageNumber = (pageNumber: number) => {
+  paginationParams.value.pageNumber = pageNumber;
+  getPersonelAtamalar();
+};
 
-// ÇALIŞMA TAKVİMİ
-const calismaTakvimiData = [
-  {
-    baslangic: "13 Eki 2020",
-    bitis: null,
-    sure: "4 yıl 5 ay 16 gün",
-    calismaTakvimi: "Genel çalışma tablosu",
-    atamaTarihi: "16 Oca 2023",
-    guncel: true,
-  },
-  {
-    baslangic: "2 Ağu 2019",
-    bitis: "12 Eki 2020",
-    sure: "1 yıl 2 ay 13 gün",
-    calismaTakvimi: "Genel çalışma tablosu",
-    atamaTarihi: "7 Şub 2023",
-    guncel: false,
-  },
-];
+const orderBy = (order: string) => {
+  paginationParams.value.orderBy = paginationParams.value.orderBy?.includes("desc")
+    ? order + " asc"
+    : order + " desc";
+  getPersonelAtamalar();
+};
 </script>
 
 <template>
@@ -111,7 +98,7 @@ const calismaTakvimiData = [
           Maaş
         </button>
       </li>
-      <li class="me-2">
+      <!-- <li class="me-2">
         <button
           @click="setActiveTab2('calismaTakvimi')"
           :class="
@@ -123,7 +110,7 @@ const calismaTakvimiData = [
         >
           Çalışma Takvimi
         </button>
-      </li>
+      </li> -->
       <li class="me-2">
         <button
           @click="setActiveTab2('performans')"
@@ -138,23 +125,34 @@ const calismaTakvimiData = [
         </button>
       </li>
     </ul>
-
     <div v-if="activeTab2 === 'pozisyon'" class="">
       <div class="overflow-x-auto mt-5">
         <TableLayout
           :table-headers="[
-            'Başlangıç',
-            'Bitiş',
-            'Çalışma Şekli',
-            'Yönetici',
-            'Şirket',
-            'Şube',
-            'Departman',
-            'Unvan',
-            'Durum',
+            { key: 'pozisyonBaslangicTarih', value: 'Baslangic', width: 'w-1/8' },
+            { key: 'pozisyonBitisTarih', value: 'Bitis', width: 'w-1/8' },
+            { key: 'sirketAd', value: 'Şirket' },
+            { key: 'subeAd', value: 'Şube' },
+            { key: 'departmanAd', value: 'Departman' },
+            { key: 'pozisyonAd', value: 'Pozisyon' },
+            { key: 'isActive', value: 'Durum' },
           ]"
-          :table-content="pozisyonData"
-          :islemler="['edit']"
+          :table-content="filteredPersonelAtamalar"
+          :islemler="['detaylar']"
+          :page-count="
+            Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
+              ? 1
+              : Math.ceil(paginationParams.count / paginationParams.pageSize)
+          "
+          :count="paginationParams.count"
+          :page-size="
+            paginationParams.pageSize > paginationParams.count
+              ? paginationParams.count
+              : paginationParams.pageSize
+          "
+          :current-page="paginationParams.pageNumber"
+          @set-page="setPageNumber"
+          @order-by="orderBy"
         />
       </div>
     </div>
@@ -181,7 +179,7 @@ const calismaTakvimiData = [
 
     <div v-if="activeTab2 === 'calismaTakvimi'" class="space-y-6">
       <div class="overflow-x-auto mt-10">
-        <TableLayout
+        <!-- <TableLayout
           :table-headers="[
             'Başlangıç',
             'Bitiş',
@@ -192,7 +190,7 @@ const calismaTakvimiData = [
           ]"
           :table-content="calismaTakvimiData"
           :islemler="['detaylar']"
-        />
+        /> -->
       </div>
     </div>
 

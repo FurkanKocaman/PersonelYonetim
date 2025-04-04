@@ -17,6 +17,8 @@ import SubeService from "@/services/SubeService";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { onMounted, reactive, ref, type Ref } from "vue";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import FileServie from "@/services/FileServie";
 
 const currentStep = ref(0);
 const sirketler: Ref<SirketModel[] | undefined> = ref([]);
@@ -26,9 +28,20 @@ const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
 const calismaTakvimler: Ref<CalismaTakvimModel[] | undefined> = ref([]);
 
+const fileInput: Ref<HTMLInputElement | undefined> = ref(undefined);
+const selectedFile: Ref<File | undefined> = ref(undefined);
+
 const props = defineProps<{
   personel?: PersonelCreateRequest;
 }>();
+
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 5,
+  orderBy: undefined,
+  filter: undefined,
+});
 
 const request: PersonelCreateRequest = reactive(
   props.personel
@@ -66,32 +79,38 @@ const request: PersonelCreateRequest = reactive(
 );
 onMounted(() => {
   getSirketler();
-  // getSubeler();
-  // getDepartmanlar();
-  // getPozisyonlar();
   getCalismaTakvimler();
 });
-
+const emit = defineEmits(["closeModal", "refresh"]);
 const handlePersonel = async () => {
+  const imageResponse =
+    selectedFile.value != undefined ? await FileServie.uploadProfileImage(selectedFile.value) : "";
+  request.profilResimUrl = imageResponse;
   if (props.personel) {
+    request.pozisyonBaslangicTarih = new Date();
     const response = await PersonelService.updatePersonel(request);
     console.log(response);
-    const emit = defineEmits(["closeModal"]);
+
     emit("closeModal", false);
+    emit("refresh");
   } else {
     const response = await PersonelService.createPersonel(request);
     console.log(response);
-    const emit = defineEmits(["closeModal"]);
+
     emit("closeModal", false);
+    emit("refresh");
   }
 };
 const getSirketler = async () => {
   try {
     const res = await SirketService.sirketlerGet();
-    sirketler.value = res?.Sirketler;
+    sirketler.value = res?.items;
     request.sirketId = sirketler.value![0].id;
     getSubeler(request.sirketId);
     getPozisyonlar(request.sirketId);
+    if (request.subeId) {
+      getDepartmanlar(request.subeId);
+    }
     getPersoneller();
   } catch (error) {
     console.error("Veri çekme hatası:", error);
@@ -101,7 +120,7 @@ const getSubeler = async (id: string) => {
   try {
     const res = await SubeService.subelerGet(id);
 
-    subeler.value = res?.Subeler;
+    subeler.value = res?.items;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
@@ -110,7 +129,7 @@ const getSubeler = async (id: string) => {
 const getDepartmanlar = async (id: string) => {
   try {
     const res = await DepartmanService.departmanlarGet(id);
-    departmanlar.value = res?.Departmanlar;
+    departmanlar.value = res?.items;
     console.log(res);
   } catch (error) {
     console.error("Veri çekme hatası:", error);
@@ -119,7 +138,7 @@ const getDepartmanlar = async (id: string) => {
 const getPozisyonlar = async (id: string) => {
   try {
     const res = await PozisyonService.pozisyonlarGet(id);
-    pozisyonlar.value = res?.Pozisyonlar;
+    pozisyonlar.value = res?.items;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
@@ -127,13 +146,18 @@ const getPozisyonlar = async (id: string) => {
 const getPersoneller = async () => {
   try {
     if (request.sirketId != "") {
-      console.log("here");
       const res = await PersonelService.getPersonelList(request.sirketId, "", "");
-      console.log(res);
-      personeller.value = res.items;
+      personeller.value = res!.items;
+      paginationParams.value.count = res!.count;
     }
   } catch (error) {
     console.error("Veri çekme hatası:", error);
+  }
+};
+const handleFileChange = () => {
+  if (fileInput.value?.files?.length) {
+    selectedFile.value = fileInput.value.files[0];
+    console.log("Seçilen dosya:", selectedFile.value.name);
   }
 };
 
@@ -453,6 +477,9 @@ const getCalismaTakvimler = async () => {
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer p-3 bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-neutral-700 dark:border-gray-600 dark:placeholder-gray-400"
                 id="file_input"
                 type="file"
+                ref="fileInput"
+                @change="handleFileChange"
+                accept="image/*"
               />
               <p class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">
                 SVG, PNG, JPG or GIF (MAX 4MB).
@@ -722,13 +749,28 @@ const getCalismaTakvimler = async () => {
             <!-- Onaylama start -->
 
             <!-- Onaylama end -->
+            <div class="flex items-center justify-center mt-4 w-full">
+              <button
+                v-if="currentStep == 0 || currentStep == 1"
+                type="button"
+                class="w-1/2 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+                @click="
+                  () => {
+                    currentStep++;
+                  }
+                "
+              >
+                İlerle
+              </button>
 
-            <button
-              type="submit"
-              class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Oluştur
-            </button>
+              <button
+                v-if="currentStep == 2"
+                type="submit"
+                class="w-1/2 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+              >
+                Oluştur
+              </button>
+            </div>
           </form>
         </div>
       </div>

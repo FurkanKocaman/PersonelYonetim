@@ -1,6 +1,9 @@
 ﻿using GenericRepository;
+using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using TS.Result;
 
@@ -16,13 +19,19 @@ public sealed record PersonelAtamaUpdateCommand(
 
 internal sealed class PersonelAtamaUpdateCommandHandler(
     IPersonelAtamaRepository personelAtamaRepository,
+    IUserRoleRepository userRoleRepository,
+    RoleManager<AppRole> roleManager,
     IUnitOfWork unitOfWork) : IRequestHandler<PersonelAtamaUpdateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelAtamaUpdateCommand request, CancellationToken cancellationToken)
     {
-        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsActive);
-        if (personelAtama == null)
+        var personelAtamaOld = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsActive && !p.IsDeleted);
+        if (personelAtamaOld == null)
             return Result<string>.Failure("Mevcut atama bulunamadı");
+
+        personelAtamaOld.IsDeleted = true;
+
+        PersonelAtama personelAtama = personelAtamaOld;
 
         if(request.SubeId is not null)
             personelAtama.SubeId = request.SubeId;
@@ -35,7 +44,29 @@ internal sealed class PersonelAtamaUpdateCommandHandler(
 
         personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
 
-        personelAtamaRepository.Update(personelAtama);
+        var role = await roleManager.FindByNameAsync(request.RolTipiValue.ToString());
+        if (role is null)
+            return Result<string>.Failure("Rol bulunamadı");
+
+        AppUserRole appUserRole = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == personelAtamaOld.Personel.UserId && p.SirketId == personelAtama.SirketId);
+        if (appUserRole is null)
+        {
+            appUserRole = new()
+            {
+                UserId = personelAtamaOld.Personel.UserId,
+                RoleId = role.Id,
+                SirketId = personelAtama.SirketId,
+            };
+
+            userRoleRepository.Add(appUserRole);
+        }
+        else
+        {
+            appUserRole.RoleId = role.Id;
+        }
+
+        personelAtamaRepository.Update(personelAtamaOld);
+        personelAtamaRepository.Add(personelAtama);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
