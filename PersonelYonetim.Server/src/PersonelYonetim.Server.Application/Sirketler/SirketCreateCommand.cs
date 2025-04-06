@@ -47,7 +47,7 @@ internal sealed class SirketCreateCommandHandler(
         IzinKural defaultIzinKural = new()
         {
             Ad = "Default İzin Kural",
-            Aciklama = "Şirket oluşturulduğunda otomatşk oluşan default izin kuralı",
+            Aciklama = "Şirket oluşturulduğunda otomatik oluşan default izin kuralı",
             SirketId = sirket.Id,
         };
         izinKuralRepository.Add(defaultIzinKural);

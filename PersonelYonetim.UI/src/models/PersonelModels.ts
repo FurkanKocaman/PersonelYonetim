@@ -16,7 +16,8 @@ export interface PersonelItem extends EntityDto {
   profilResimUrl: string | undefined;
   iletisim: Iletisim;
   adres: Adres;
-  yoneticiId: string | undefined;
+  yonetici: string | undefined;
+  yoneticiPozisyon: string | undefined;
   sirketId: string;
   sirketAd: string;
   subeId: string | undefined;
@@ -30,8 +31,7 @@ export interface PersonelItem extends EntityDto {
   pozisyonBaslangicTarih: Date;
   sozlesmeBitisTarihi: Date | undefined;
   izinKuralId: string | undefined;
-  rolValue: number;
-  rolAd: string;
+  role: number;
 }
 
 export interface PersonelPaginationParams {

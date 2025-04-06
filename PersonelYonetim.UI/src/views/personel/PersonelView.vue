@@ -10,7 +10,7 @@ import SubeService from "@/services/SubeService";
 import { computed, onMounted, ref, watch, type Ref } from "vue";
 import PersonelModal from "@/components/modals/PersonelModal.vue";
 import TableLayout from "@/components/TableLayout.vue";
-import Roles from "@/models/Roles";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 const selectedPersonel = ref<PersonelItem | undefined>(undefined);
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
@@ -26,44 +26,55 @@ const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
 const selectedDepartman: Ref<string | undefined> = ref(undefined);
 
 const showPersonelModal = ref(false);
+
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 5,
+  orderBy: undefined,
+  filter: undefined,
+});
+
 onMounted(async () => {
   const res = await SirketService.sirketlerGet();
-  sirketler.value = res?.Sirketler;
+  sirketler.value = res?.items;
   if (sirketler.value) {
     selectedSirket.value = sirketler.value[0].id;
   }
   getPersoneller();
 });
 
+const setPageNumber = (pageNumber: number) => {
+  if (paginationParams.value.pageNumber != pageNumber) {
+    paginationParams.value.pageNumber = pageNumber;
+    getPersoneller();
+  }
+};
+
 const getPersoneller = async () => {
   const response = await PersonelService.getPersonelList(
     selectedSirket.value,
     selectedSube.value,
-    selectedDepartman.value
+    selectedDepartman.value,
+    paginationParams.value
   );
-  personeller.value = response.items;
-  filteredPersonellerList.value = personeller.value;
-  filterPersoneller();
-};
-
-const filterPersoneller = () => {
-  filteredPersonellerList.value = personeller.value?.filter(
-    (p) =>
-      (selectedSube.value == undefined || selectedSube.value == p.subeId) &&
-      (selectedDepartman.value == undefined || selectedDepartman.value == p.departmanId)
-  );
+  if (response) {
+    paginationParams.value.count = response.count;
+    personeller.value = response.items;
+    filteredPersonellerList.value = personeller.value;
+  }
 };
 
 const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
   return (filteredPersonellerList.value || []).map(
-    ({ id, fullName, sirketAd, subeAd, departmanAd, pozisyonAd, rolAd, isActive }) => ({
+    ({ id, fullName, iletisim, subeAd, departmanAd, pozisyonAd, role, isActive }) => ({
       id,
       fullName,
-      sirketAd,
+      iletisim: iletisim.eposta,
       subeAd,
       departmanAd,
       pozisyonAd,
-      rolAd,
+      role,
       isActive: isActive ? "Aktif" : "Pasif",
     })
   );
@@ -71,7 +82,7 @@ const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
 
 const getSubeler = async () => {
   const res = await SubeService.subelerGet(selectedSirket.value);
-  subeler.value = res?.Subeler;
+  subeler.value = res?.items;
 };
 
 const getDepartmanlar = async () => {
@@ -79,19 +90,33 @@ const getDepartmanlar = async () => {
     selectedDepartman.value = undefined;
   } else {
     const res = await DepartmanService.departmanlarGet(selectedSube.value!);
-    departmanlar.value = res?.Departmanlar;
+    departmanlar.value = res?.items;
   }
 };
 
 watch(selectedSirket, getSubeler);
 watch(selectedSube, getDepartmanlar);
-watch(selectedSube, filterPersoneller);
-watch(selectedDepartman, filterPersoneller);
+watch(selectedSube, () => {
+  paginationParams.value.pageNumber = 1;
+  getPersoneller();
+});
+watch(selectedDepartman, () => {
+  paginationParams.value.pageNumber = 1;
+  getPersoneller();
+});
 
 const openEditModal = (personel: PersonelItem) => {
+  console.log(personeller.value);
   selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
-  selectedPersonel.value!.rolValue = Roles.getRoleByName(personel.rolAd).value;
+  selectedPersonel.value!.role = personel.role;
   showPersonelModal.value = true;
+};
+
+const orderBy = (order: string) => {
+  paginationParams.value.orderBy = paginationParams.value.orderBy?.includes("desc")
+    ? order + " asc"
+    : order + " desc";
+  getPersoneller();
 };
 </script>
 
@@ -167,15 +192,42 @@ const openEditModal = (personel: PersonelItem) => {
       <PersonelModal
         :personel="selectedPersonel"
         @close-modal="(p) => (showPersonelModal = p)"
+        @refresh="
+          () => {
+            getPersoneller();
+          }
+        "
         v-if="showPersonelModal"
       />
 
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <TableLayout
-          :table-headers="['ad', 'sirket', 'şube', 'departman', 'pozisyon', 'rol', 'durum']"
+          :table-headers="[
+            { key: 'fullName', value: 'Ad', width: 'w-1/7' },
+            { key: 'iletisim', value: 'Eposta', width: 'w-1/6' },
+            { key: 'subeAd', value: 'Şube', width: 'w-1/12' },
+            { key: 'departmanAd', value: 'Departman', width: 'w-1/10' },
+            { key: 'pozisyonAd', value: 'Pozisyon' },
+            { key: 'role', value: 'Rol' },
+            { key: 'isActive', value: 'Durum', width: 'w-1/12' },
+          ]"
           :table-content="filteredPersoneller"
           :islemler="['edit', 'detaylar']"
           @edit-click="openEditModal"
+          :page-count="
+            Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
+              ? 1
+              : Math.ceil(paginationParams.count / paginationParams.pageSize)
+          "
+          :count="paginationParams.count"
+          :page-size="
+            paginationParams.pageSize > paginationParams.count
+              ? paginationParams.count
+              : paginationParams.pageSize
+          "
+          :current-page="paginationParams.pageNumber"
+          @set-page="setPageNumber"
+          @order-by="orderBy"
         />
       </div>
     </main>

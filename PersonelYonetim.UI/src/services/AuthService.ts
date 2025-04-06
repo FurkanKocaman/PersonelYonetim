@@ -2,8 +2,8 @@ import type { LoginRequest } from "@/models/request-models/LoginRequest";
 import axios from "axios";
 import type { LoginResponse } from "@/models/response-models/LoginResponse";
 import type { RegisterRequest } from "@/models/request-models/RegisterRequest";
-import type { UserModel } from "@/models/entity-models/UserModel";
 import api from "./Axios";
+import type { PersonelItem } from "@/models/PersonelModels";
 
 class AuthService {
   async login(data: LoginRequest): Promise<{ success: boolean; message: string }> {
@@ -61,7 +61,8 @@ class AuthService {
   async getCurrentUser() {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-current`);
-      const User: UserModel = response.data[0];
+
+      const User: PersonelItem = response.data[0];
       User.role = Number(User.role);
       return User;
     } catch (error) {

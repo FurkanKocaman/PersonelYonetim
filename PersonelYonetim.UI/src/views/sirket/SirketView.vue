@@ -13,6 +13,7 @@ import SirketCreateModal from "@/components/modals/SirketCreateModal.vue";
 import SubeCreateModal from "@/components/modals/SubeCreateModal.vue";
 import DepartmanCreateModal from "@/components/modals/DepartmanCreateModal.vue";
 import PozisyonCreateModal from "@/components/modals/PozisyonCreateModal.vue";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 const expand = ref({
   sirketler: false,
@@ -48,6 +49,35 @@ const selectedSirket: Ref<SirketModel | undefined> = ref(undefined);
 const selectedSube: Ref<SubeModel | undefined> = ref(undefined);
 const selectedDepartman: Ref<DepartmanModel | undefined> = ref(undefined);
 const selectedPozisyon: Ref<PozisyonModel | undefined> = ref(undefined);
+
+const paginationParamsSirket: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
+const paginationParamsSube: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
+const paginationParamsDepartman: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
+const paginationParamsPozisyon: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
 
 const filteredSirketler = computed<Record<string, unknown>[]>(() => {
   return (sirketler.value || []).map(
@@ -108,15 +138,15 @@ onMounted(async () => {
   getSirketler();
   getSubeler();
   getDepartmanlar();
-
   getPozisyonlar();
 });
 const getSirketler = async () => {
   loading.value.sirketler = true;
   try {
-    const res = await SirketService.sirketlerGet();
+    const res = await SirketService.sirketlerGet(paginationParamsSirket.value);
     count.value.sirketler = res!.count;
-    sirketler.value = res?.Sirketler;
+    sirketler.value = res?.items;
+    paginationParamsSirket.value.count = res!.count;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -127,9 +157,10 @@ const getSirketler = async () => {
 const getSubeler = async () => {
   loading.value.subeler = true;
   try {
-    const res = await SubeService.subelerGet("");
+    const res = await SubeService.subelerGet("", paginationParamsSube.value);
     count.value.subeler = res!.count;
-    subeler.value = res?.Subeler;
+    subeler.value = res?.items;
+    paginationParamsSube.value.count = res!.count;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -140,9 +171,10 @@ const getSubeler = async () => {
 const getDepartmanlar = async () => {
   loading.value.departmanlar = true;
   try {
-    const res = await DepartmanService.departmanlarGet("");
+    const res = await DepartmanService.departmanlarGet("", paginationParamsDepartman.value);
     count.value.departmanlar = res!.count;
-    departmanlar.value = res?.Departmanlar;
+    departmanlar.value = res?.items;
+    paginationParamsDepartman.value.count = res!.count;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -152,9 +184,10 @@ const getDepartmanlar = async () => {
 const getPozisyonlar = async () => {
   loading.value.pozisyonlar = true;
   try {
-    const res = await PozisyonService.pozisyonlarGet("");
+    const res = await PozisyonService.pozisyonlarGet("", paginationParamsPozisyon.value);
     count.value.pozisyonlar = res!.count;
-    pozisyonlar.value = res?.Pozisyonlar;
+    pozisyonlar.value = res?.items;
+    paginationParamsPozisyon.value.count = res!.count;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   } finally {
@@ -177,6 +210,31 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
   selectedPozisyon.value = pozisyonlar.value?.find((p) => p.id == pozisyon.id);
   showModal.value.pozisyonlar = true;
 };
+
+const setPageNumberSirket = (pageNumber: number) => {
+  if (pageNumber != paginationParamsSirket.value.pageNumber) {
+    paginationParamsSirket.value.pageNumber = pageNumber;
+    getSirketler();
+  }
+};
+const setPageNumberSube = (pageNumber: number) => {
+  if (pageNumber != paginationParamsSube.value.pageNumber) {
+    paginationParamsSube.value.pageNumber = pageNumber;
+    getSubeler();
+  }
+};
+const setPageNumberDepartman = (pageNumber: number) => {
+  if (pageNumber != paginationParamsDepartman.value.pageNumber) {
+    paginationParamsDepartman.value.pageNumber = pageNumber;
+    getDepartmanlar();
+  }
+};
+const setPageNumberPozisyon = (pageNumber: number) => {
+  if (pageNumber != paginationParamsPozisyon.value.pageNumber) {
+    paginationParamsPozisyon.value.pageNumber = pageNumber;
+    getPozisyonlar();
+  }
+};
 </script>
 
 <template>
@@ -188,7 +246,7 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
     </div>
     <div class="flex flex-col mt-5">
       <div
-        class="mx-10 my-3 p-1 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
+        class="mx-10 my-3 p-1 bg-neutral-200/30 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
         <div
           class="flex justify-between items-center p-2"
@@ -257,15 +315,46 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
           <TableLayout
             v-if="expand.sirketler && !loading.sirketler"
-            :tableHeaders="['Ad', 'Eposta', 'Adres', 'Oluşturulma Tarihi', 'Oluşturan', 'Durum']"
+            {
+            id,
+            ad,
+            iletisim,
+            adres,
+            createdAt,
+            createUserName,
+            sirketAd,
+            isActive
+            }
+            :tableHeaders="[
+              { key: 'ad', value: 'Ad' },
+              { key: 'eposta', value: 'Eposta' },
+              { key: 'adres', value: 'Adres' },
+              { key: 'createdAt', value: 'Oluşturulma Tarihi' },
+              { key: 'createUserName', value: 'Oluşturan' },
+              { key: 'sirketAd', value: 'Şirket' },
+              { key: 'isActive', value: 'Durum' },
+            ]"
             :tableContent="filteredSirketler"
             :islemler="['edit', 'detaylar']"
             @edit-click="openSirketModal"
+            :page-count="
+              Math.ceil(paginationParamsSirket.count / paginationParamsSirket.pageSize) == 0
+                ? 1
+                : Math.ceil(paginationParamsSirket.count / paginationParamsSirket.pageSize)
+            "
+            :count="paginationParamsSirket.count"
+            :page-size="
+              paginationParamsSirket.pageSize > paginationParamsSirket.count
+                ? paginationParamsSirket.count
+                : paginationParamsSirket.pageSize
+            "
+            :current-page="paginationParamsSirket.pageNumber"
+            @set-page="setPageNumberSirket"
           />
         </div>
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
+        class="mx-10 p-1 my-3 bg-neutral-200/30 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
         <div
           class="flex justify-between items-center p-2"
@@ -331,26 +420,40 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
           @refresh="getSubeler"
           v-if="showModal.subeler"
         />
+
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
           <TableLayout
             v-if="expand.subeler && !loading.subeler"
             :tableHeaders="[
-              'Ad',
-              'Eposta',
-              'Adres',
-              'Oluşturulma Tarihi',
-              'Oluşturan',
-              'Şirket',
-              'Durum',
+              { key: 'ad', value: 'Ad' },
+              { key: 'eposta', value: 'Eposta' },
+              { key: 'adres', value: 'Adres' },
+              { key: 'createdAt', value: 'Oluşturulma Tarihi' },
+              { key: 'createUserName', value: 'Oluşturan' },
+              { key: 'sirketAd', value: 'Şirket' },
+              { key: 'isActive', value: 'Durum' },
             ]"
             :tableContent="filteredSubeler"
             :islemler="['edit', 'detaylar']"
             @edit-click="openSubeModal"
+            :page-count="
+              Math.ceil(paginationParamsSube.count / paginationParamsSube.pageSize) == 0
+                ? 1
+                : Math.ceil(paginationParamsSube.count / paginationParamsSube.pageSize)
+            "
+            :count="paginationParamsSube.count"
+            :page-size="
+              paginationParamsSube.pageSize > paginationParamsSube.count
+                ? paginationParamsSube.count
+                : paginationParamsSube.pageSize
+            "
+            :current-page="paginationParamsSube.pageNumber"
+            @set-page="setPageNumberSube"
           />
         </div>
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
+        class="mx-10 p-1 my-3 bg-neutral-200/30 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
         <div
           class="flex justify-between items-center p-2"
@@ -416,18 +519,39 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
           "
           v-if="showModal.departmanlar"
         />
+
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
           <TableLayout
             v-if="expand.departmanlar && !loading.departmanlar"
-            :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şube', 'Şirket', 'Durum']"
+            :tableHeaders="[
+              { key: 'ad', value: 'Ad' },
+              { key: 'createdAt', value: 'Oluşturulma Tarihi' },
+              { key: 'createUserName', value: 'Oluşturan' },
+              { key: 'subeAd', value: 'Şube' },
+              { key: 'sirketAd', value: 'Şirket' },
+              { key: 'isActive', value: 'Durum' },
+            ]"
             :tableContent="filteredDepartmanlar"
             :islemler="['edit', 'detaylar']"
             @edit-click="openDepartmanModal"
+            :page-count="
+              Math.ceil(paginationParamsDepartman.count / paginationParamsDepartman.pageSize) == 0
+                ? 1
+                : Math.ceil(paginationParamsDepartman.count / paginationParamsDepartman.pageSize)
+            "
+            :count="paginationParamsDepartman.count"
+            :page-size="
+              paginationParamsDepartman.pageSize > paginationParamsDepartman.count
+                ? paginationParamsDepartman.count
+                : paginationParamsDepartman.pageSize
+            "
+            :current-page="paginationParamsDepartman.pageNumber"
+            @set-page="setPageNumberDepartman"
           />
         </div>
       </div>
       <div
-        class="mx-10 p-1 my-3 bg-neutral-200 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
+        class="mx-10 p-1 my-3 bg-neutral-200/30 dark:bg-neutral-800 rounded-lg shadow-sm hover:shadow-md hover:shadow-neutral-400 dark:hover:shadow-neutral-700 transition-shadow duration-300 select-none"
       >
         <div
           class="flex justify-between items-center p-2"
@@ -496,10 +620,37 @@ const openPozisyonModal = (pozisyon: PozisyonModel) => {
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
           <TableLayout
             v-if="expand.pozisyonlar && !loading.pozisyonlar"
-            :tableHeaders="['Ad', 'Oluşturulma Tarihi', 'Oluşturan', 'Şirket', 'Durum']"
+            {
+            id,
+            ad,
+            createdAt,
+            createUserName,
+            sirketAd,
+            isActive
+            }
+            :tableHeaders="[
+              { key: 'ad', value: 'Ad' },
+              { key: 'createdAt', value: 'Oluşturma Tarihi' },
+              { key: 'createUserName', value: 'Oluşturan' },
+              { key: 'sirketAd', value: 'Şirket' },
+              { key: 'isActive', value: 'Durum' },
+            ]"
             :tableContent="filteredPozisyonlar"
             :islemler="['edit', 'detaylar']"
             @edit-click="openPozisyonModal"
+            :page-count="
+              Math.ceil(paginationParamsPozisyon.count / paginationParamsPozisyon.pageSize) == 0
+                ? 1
+                : Math.ceil(paginationParamsPozisyon.count / paginationParamsPozisyon.pageSize)
+            "
+            :count="paginationParamsPozisyon.count"
+            :page-size="
+              paginationParamsPozisyon.pageSize > paginationParamsPozisyon.count
+                ? paginationParamsPozisyon.count
+                : paginationParamsPozisyon.pageSize
+            "
+            :current-page="paginationParamsPozisyon.pageNumber"
+            @set-page="setPageNumberPozisyon"
           />
         </div>
       </div>

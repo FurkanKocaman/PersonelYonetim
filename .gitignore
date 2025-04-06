@@ -39,3 +39,4 @@ secrets.json
 .idea/
 PersonelYonetim.Server/src/PersonelYonetim.Server.WebAPI/appsettings.Development.json
 **/Migrations/
+**/wwwroot/

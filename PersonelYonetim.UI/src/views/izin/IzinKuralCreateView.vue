@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import TableLayout from "@/components/TableLayout.vue";
 import type { IzinTurModel } from "@/models/entity-models/izin/IzinTurModel";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import IzinService from "@/services/IzinService";
 import { onMounted, computed, type Ref, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -10,6 +11,14 @@ const router = useRouter();
 const selectedIzinTur: Ref<IzinTurModel | null> = ref(null);
 const izinTurler: Ref<IzinTurModel[] | undefined> = ref([]);
 const selectedIzinTurler: Ref<IzinTurModel[] | undefined> = ref([]);
+
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
+  pageNumber: 1,
+  pageSize: 10,
+  orderBy: "createdAt desc",
+  filter: "",
+});
 
 const filteredIzinTurler = computed<Record<string, unknown>[]>(() => {
   return (selectedIzinTurler.value || []).map(
@@ -26,8 +35,8 @@ const filteredIzinTurler = computed<Record<string, unknown>[]>(() => {
 
 const getIzinTurler = async () => {
   try {
-    const res = await IzinService.getIzinTurler();
-    izinTurler.value = res?.IzinTurler;
+    const res = await IzinService.getIzinTurler(paginationParams.value);
+    izinTurler.value = res!.items;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
@@ -35,7 +44,7 @@ const getIzinTurler = async () => {
 
 // Geri dön
 const goBack = () => {
-  router.push({ name: 'IzinKurallariKurallar' });
+  router.push({ name: "IzinKurallar" });
 };
 
 const addIzinTur = () => {
@@ -51,6 +60,11 @@ const removeIzinTur = (item: IzinTurModel) => {
 onMounted(() => {
   getIzinTurler();
 });
+
+const setPageNumber = (pageNumber: number) => {
+  paginationParams.value.pageNumber = pageNumber;
+  getIzinTurler();
+};
 </script>
 
 <template>
@@ -144,9 +158,22 @@ onMounted(() => {
           :table-content="filteredIzinTurler"
           :islemler="['remove', 'edit']"
           @remove-click="removeIzinTur"
+          :page-count="
+            Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
+              ? 1
+              : Math.ceil(paginationParams.count / paginationParams.pageSize)
+          "
+          :count="paginationParams.count"
+          :page-size="
+            paginationParams.pageSize > paginationParams.count
+              ? paginationParams.count
+              : paginationParams.pageSize
+          "
+          :current-page="paginationParams.pageNumber"
+          @set-page="setPageNumber"
         />
       </div>
-      
+
       <!-- Kaydet ve İptal Butonları -->
       <div class="flex justify-end mt-8 mb-4">
         <button

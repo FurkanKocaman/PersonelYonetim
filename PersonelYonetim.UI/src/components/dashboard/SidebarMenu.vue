@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { UserModel } from "@/models/entity-models/UserModel";
 import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import TakvimEtkinlikCreateModal from "../modals/TakvimEtkinlikCreateModal.vue";
 import IzinTalepCreateModal from "../modals/IzinTalepCreateModal.vue";
+import type { PersonelItem } from "@/models/PersonelModels";
+import Roles from "@/models/Roles";
 
 // Menü öğesi için tip tanımı
 
@@ -15,7 +16,7 @@ const props = defineProps({
     required: true,
   },
   user: {
-    type: Object as () => UserModel,
+    type: Object as () => PersonelItem,
     required: true,
   },
   sidebarOpen: {
@@ -23,6 +24,8 @@ const props = defineProps({
     default: true,
   },
 });
+
+const profilImageUrl = import.meta.env.VITE_API_URL + props.user.profilResimUrl;
 
 const isAddMenuOpen = ref(false);
 
@@ -68,8 +71,9 @@ const isMobile = ref(false);
 onMounted(() => {
   checkScreenWidth();
   window.addEventListener("resize", checkScreenWidth);
-
   if (isMobile.value) toggleSidebar();
+
+  console.log(props.user);
 });
 
 const checkScreenWidth = () => {
@@ -102,7 +106,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
   >
     <!-- Sidebar -->
     <aside
-      class="h-[100dvh] inset-y-0 left-0 fixed xl:relative xl:flex flex-col z-10 bg-neutral-300 shadow-lg dark:bg-neutral-900 dark:shadow-neutral-800 shadow-neutral-300 transition-all duration-300 ease-in-out"
+      class="h-[100dvh] inset-y-0 left-0 fixed xl:relative xl:flex flex-col z-10 bg-neutral-100 shadow-lg dark:bg-neutral-900 dark:shadow-neutral-800 shadow-neutral-300 transition-all duration-300 ease-in-out"
       :class="{
         'block w-[50dvw] lg:w-[20dvw] xl:w-[15dvw]': sidebarOpen,
         'md:w-[5dvw] hidden': !sidebarOpen,
@@ -128,13 +132,22 @@ const isMenuItemActive = (itemPath: string): boolean => {
         <!-- Kullanıcı Profili -->
         <div class="flex flex-col items-center mt-4 -mx-2" :class="{ 'px-2': !sidebarOpen }">
           <img
-            class="object-cover mx-2 rounded-full border-2 border-sky-500"
+            v-if="user.profilResimUrl"
+            class="object-cover mx-2 rounded-full border-1 border-sky-500"
             :class="{ 'w-16 h-16': sidebarOpen, 'w-10 h-10': !sidebarOpen }"
-            :src="user.profilResimUrl"
+            :src="profilImageUrl"
             alt="Avatar"
+            width="100"
+            height="100"
           />
+          <div
+            v-else
+            class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mx-2 rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
+          >
+            {{ user.fullName[0] }}
+          </div>
           <div :class="{ hidden: !sidebarOpen }">
-            <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
+            <h4 class="mx-2 mt-2 font-medium text-neutral-900 dark:text-gray-200">
               {{ user.fullName }}
             </h4>
             <!-- <p
@@ -143,8 +156,21 @@ const isMenuItemActive = (itemPath: string): boolean => {
             >
               Şirket Sahibi
             </p> -->
-            <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd != "" ? user.pozisyonAd : user.role }}
+            <p class="mx-2 mt-1 text-sm font-semibold text-neutral-800 dark:text-gray-400">
+              {{
+                props.user.pozisyonAd != undefined
+                  ? props.user.pozisyonAd
+                  : props.user.departmanAd != undefined
+                  ? props.user.departmanAd
+                  : props.user.subeAd != undefined
+                  ? props.user.subeAd
+                  : props.user.sirketAd != undefined
+                  ? props.user.sirketAd
+                  : ""
+              }}
+            </p>
+            <p class="mx-2 mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
+              ({{ props.user.role != 0 ? Roles.getRoleByValue(props.user.role).name : "" }})
             </p>
           </div>
         </div>
@@ -177,7 +203,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
             </span>
           </div>
           <ul
-            class="fixed left-20 top-40 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 rounded-md text-sm py-2 font-medium z-50 transition-all duration-300"
+            class="fixed left-20 top-40 bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-md text-sm py-2 font-medium z-50 transition-all duration-300"
             :class="sidebarOpen ? 'left-56 lg:left-54 xl:left-60' : 'left-20'"
             v-if="isAddMenuOpen"
           >

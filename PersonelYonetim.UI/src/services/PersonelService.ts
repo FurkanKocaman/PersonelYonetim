@@ -1,32 +1,47 @@
-import { type PersonelItem, type PersonelListResponse } from "@/models/PersonelModels";
+import { type PersonelItem } from "@/models/PersonelModels";
 import api from "./Axios";
 import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import { useToastStore } from "@/stores/ToastStore";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
   async getPersonelList(
     sirketId: string,
     subeId: string | undefined,
-    departmanId: string | undefined
-  ): Promise<PersonelListResponse> {
+    departmanId: string | undefined,
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: PersonelItem[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > {
     try {
-      const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personeller`, {
-        params: {
-          $count: true,
-          SirketId: sirketId,
-          SubeId: subeId,
-          DepartmanId: departmanId,
-        },
-      });
+      const queryParams = new URLSearchParams();
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
 
-      const personelList: PersonelItem[] = response.data.value;
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
 
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/odata/personeller?${queryParams}`,
+        {
+          params: {
+            $count: true,
+            SirketId: sirketId,
+            SubeId: subeId,
+            DepartmanId: departmanId,
+          },
+        }
+      );
       return {
-        items: personelList,
-        toplamSayfa: 1,
-        mevcutSayfa: 1,
-        toplamKayit: personelList.length,
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
       };
     } catch (error) {
       console.error("Personel listesi alınırken hata oluştu:", error);
@@ -63,56 +78,51 @@ class PersonelService {
       throw error;
     }
   }
+  getCurrentPersonel = async (): Promise<PersonelItem | undefined> => {
+    try {
+      const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-current`);
+      return response.data[0];
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  /**
-   * Belirli bir personelin detaylarını ID'ye göre getirir
-   * @param id Personel ID'si
-   * @returns Personel detayları
-   */
-  // async getPersonelById(id: number): Promise<PersonelItem> {
-  //   try {
-  //     // Gerçek API çağrısı:
-  //     // const response = await axios.get(`${this.baseUrl}/${id}`);
-  //     // return response.data;
+  getPersonelAtamalar = async (
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: PersonelAtamaModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > => {
+    try {
+      const queryParams = new URLSearchParams();
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
 
-  //     // Mock veri
-  //     const mockPersonelList: PersonelItem[] = [];
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
 
-  //     const personel = mockPersonelList.find((p) => p.id === id);
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
 
-  //     if (!personel) {
-  //       throw new Error("Personel bulunamadı");
-  //     }
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/odata/personel-atamalar?${queryParams}`,
+        {
+          params: {
+            $count: true,
+          },
+        }
+      );
 
-  //     return personel;
-  //   } catch (error) {
-  //     console.error(`ID: ${id} olan personel alınırken hata oluştu:`, error);
-  //     throw error;
-  //   }
-  // }
-
-  /**
-   * Mevcut bir personel kaydını günceller
-   * @param id Personel ID'si
-   * @param personelData Güncellenmiş personel verisi
-   * @returns Güncellenmiş personel kaydı
-   */
-  // async updatePersonel(id: number, personelData: PersonelRequest): Promise<PersonelItem> {
-  //   try {
-  //     // Gerçek API çağrısı:
-  //     // const response = await axios.put(`${this.baseUrl}/${id}`, personelData);
-  //     // return response.data;
-
-  //     // Mock yanıt
-  //     return {
-  //       id,
-  //       ...personelData,
-  //     };
-  //   } catch (error) {
-  //     console.error(`ID: ${id} olan personel güncellenirken hata oluştu:`, error);
-  //     throw error;
-  //   }
-  // }
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   /**
    * Bir personel kaydını siler

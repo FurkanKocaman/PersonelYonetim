@@ -1,7 +1,8 @@
 ﻿using FluentValidation;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
@@ -34,7 +35,8 @@ internal sealed class IzinTalepCreateCommandHandler(
     IPersonelRepository personelRepository,
     IIzinTurRepository izinTurRepository,
     IUnitOfWork unitOfWork,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    IBildirimService bildirimService
     ) : IRequestHandler<IzinTalepCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(IzinTalepCreateCommand request, CancellationToken cancellationToken)
@@ -56,7 +58,7 @@ internal sealed class IzinTalepCreateCommandHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == personel.Id && p.IsActive);
+        var personelAtama = personelAtamaRepository.Where(p => p.PersonelId == personel.Id && p.IsActive && p.IsDeleted == false).Include(p => p.Personel).FirstOrDefault();
         if (personelAtama is null)
             return Result<string>.Failure("Personel departmanı bulunamadı");
 
@@ -71,7 +73,8 @@ internal sealed class IzinTalepCreateCommandHandler(
 
         foreach(var izin in izinTalepler)
         {
-            toplamIzinGun += izin.ToplamSure;
+            if(izin.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi)
+                toplamIzinGun += izin.ToplamSure;
         }
         
         decimal toplamGun = 0;
@@ -91,11 +94,14 @@ internal sealed class IzinTalepCreateCommandHandler(
 
                 if (baslangicGun == baslangic.Date && baslangic.TimeOfDay > (calismaGun.CalismaBaslangic ?? TimeSpan.Zero))
                 {
-                    toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 8;
+                    if(baslangic.TimeOfDay <= (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
+                    {
+                        toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 9;
+                    }
                 }
                 else if (baslangicGun == bitis.Date && bitis.TimeOfDay < (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
                 {
-                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 8;
+                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 9;
                 }
                 else
                 {
@@ -119,21 +125,27 @@ internal sealed class IzinTalepCreateCommandHandler(
             }
             else
             {
-                CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
+                CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
                 if (sonrakiCalismaGun != null)
                 {
-                    mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
-                        .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+                    while (mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+                    {
+                        mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                    }
+                    mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
                 }
             }
         }
         else
         {
-            CalismaGun sonrakiCalismaGun = calismaGunler.FirstOrDefault(g => g.IsCalismaGunu && g.Gun > bitis.DayOfWeek)!;
+            CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
             if (sonrakiCalismaGun != null)
             {
-                mesaibaslangic = bitis.AddDays((int)(sonrakiCalismaGun.Gun - bitis.DayOfWeek))
-                    .Date.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+                while(mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+                {
+                   mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                }
+                mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
             }
         }
 
@@ -148,6 +160,18 @@ internal sealed class IzinTalepCreateCommandHandler(
             MesaiBaslangicTarihi = mesaibaslangic,
             DegerlendirmeDurumu = DegerlendirmeDurumEnum.Beklemede
         };
+
+        Bildirim bildirim = new()
+        {
+            Baslik = "Yeni İzin Talebi",
+            Aciklama = $"{personelAtama.Personel.Ad} {personelAtama.Personel.Soyad} tarafından yeni bir izin talebi oluşturuldu.",
+            CreatedAt = DateTimeOffset.Now,
+            BildirimTipi = BildirimTipiEnum.Onay,
+            AliciTipi = AliciTipiEnum.Personel,
+            AliciId = personelAtama.YoneticiId ?? personel.Id,
+        };
+
+        await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, personelAtama.YoneticiId ?? personel.Id);
 
         izinTalepRepository.Add(izinTalep);
         await unitOfWork.SaveChangesAsync();

@@ -33,8 +33,8 @@ internal sealed class RegisterCommandHandler(
 {
     public async Task<Result<LoginCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        using(var transaction  = unitOfWork.BeginTransaction())
-        {
+        //using(var transaction  = unitOfWork.BeginTransaction())
+        //{
             try
             {
                 SirketCreateCommand sirketCreateCommand = new(request.SirketAd, null, null, request.SirketAdres, request.SirketIletisim);
@@ -74,18 +74,18 @@ internal sealed class RegisterCommandHandler(
                         var loginRes = await sender.Send(login);
                         if (loginRes.IsSuccessful)
                         {
-                            await unitOfWork.CommitTransactionAsync(transaction);
+                            //await unitOfWork.CommitTransactionAsync(transaction);
                             return loginRes;
                         }
                         else
                         {
-                            await unitOfWork.RollbackTransactionAsync(transaction);
+                            //await unitOfWork.RollbackTransactionAsync(transaction);
                         }    
                     }
                 }
                 else
                 {
-                    await unitOfWork.RollbackTransactionAsync(transaction);
+                    //await unitOfWork.RollbackTransactionAsync(transaction);
                     return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
                 }
                 return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
@@ -93,10 +93,10 @@ internal sealed class RegisterCommandHandler(
             }
             catch (Exception ex)
             {
-                await unitOfWork.RollbackTransactionAsync(transaction);
+                //await unitOfWork.RollbackTransactionAsync(transaction);
                 return Result<LoginCommandResponse>.Failure("Hata oluştu: "+ex.Message);
             }
-        }
+        //}
         
     }
 }

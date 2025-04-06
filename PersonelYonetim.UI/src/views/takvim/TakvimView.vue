@@ -397,7 +397,10 @@ const resetTakvimEtkinlikRequest = () => {
   outline: none !important;
 }
 .fc-day-today {
-  background-color: rgb(0, 100, 255) !important;
+  background-color: rgb(158, 194, 246) !important;
+}
+.dark .fc-day-today {
+  background-color: rgb(35, 51, 74) !important;
 }
 
 .fc-scrollgrid {

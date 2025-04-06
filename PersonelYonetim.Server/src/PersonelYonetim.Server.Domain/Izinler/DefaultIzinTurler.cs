@@ -6,7 +6,7 @@ public static class DefaultIzinTurler
         {
             new IzinTur
             {
-                Ad = "Yıllık İzin",
+                Ad = "Yillik Izin",
                 Aciklama = "Çalışanın yıllık olarak hak edebileceği ücretli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.YılLimit,
@@ -28,7 +28,7 @@ public static class DefaultIzinTurler
             },
              new IzinTur
             {
-                Ad = "Mazeret İzni",
+                Ad = "Mazeret Izni",
                 Aciklama = "Kişisel ihtiyaçlar için ücretli izin",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.YılLimit,
@@ -42,7 +42,7 @@ public static class DefaultIzinTurler
             },
             new IzinTur
             {
-                Ad = "Hastalık İzni",
+                Ad = "Hastalik Izni",
                 Aciklama = "Çalışanın sağlık problemi nedeniyle alabileceği ücretli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.Limitsiz,
@@ -54,7 +54,7 @@ public static class DefaultIzinTurler
             },
             new IzinTur
             {
-                Ad = "Doğum İzni",
+                Ad = "Dogum Izni",
                 Aciklama = "Kadın çalışanlar için doğum öncesi ve sonrası kullanabilecekleri ücretli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.YılLimit,
@@ -66,7 +66,7 @@ public static class DefaultIzinTurler
             },
             new IzinTur
             {
-                Ad = "Babalık İzni",
+                Ad = "Babalik Izni",
                 Aciklama = "Baba olan çalışanlara verilen kısa süreli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.TalepLimit,
@@ -78,7 +78,7 @@ public static class DefaultIzinTurler
             },
             new IzinTur
             {
-                Ad = "Evlilik İzni",
+                Ad = "Evlilik Izni",
                 Aciklama = "Çalışanın evlenmesi durumunda verilen ücretli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.TalepLimit,
@@ -90,7 +90,7 @@ public static class DefaultIzinTurler
             },
             new IzinTur
             {
-                Ad = "Ölüm İzni",
+                Ad = "Olum Izni",
                 Aciklama = "Çalışanın birinci derece yakınını kaybetmesi durumunda verilen ücretli izin.",
                 UcretliMi = true,
                 LimitTipi = LimitTipiEnum.TalepLimit,
@@ -100,17 +100,7 @@ public static class DefaultIzinTurler
                 AciklamaZorunlu = false,
                 SirketId = sirketId
             },
-            new IzinTur
-            {
-                Ad = "Özel İzin",
-                Aciklama = "Çalışanın kişisel sebeplerle kullanabileceği izin (Ücretli veya ücretsiz olabilir).",
-                UcretliMi = false,
-                LimitTipi = LimitTipiEnum.Limitsiz,
-                HakEdis = HakEdisEnum.Gunluk,
-                HesapSekli = true,
-                AciklamaZorunlu = true,
-                SirketId = sirketId
-            }
+           
         };
         return defaultIzinTurleri;
 }

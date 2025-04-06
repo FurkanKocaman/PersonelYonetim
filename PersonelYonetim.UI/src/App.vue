@@ -5,18 +5,13 @@ import ToastComponent from "./components/ToastComponent.vue";
 const isLoading = ref(true);
 
 onMounted(() => {
-  // Simulate initial loading
-
   setTimeout(() => {
     isLoading.value = false;
   }, 500);
-
-  console.log("App mounted, router ready");
 });
 </script>
 
 <template>
-  <!-- Global Loading Screen (only shown on initial app load) -->
   <div
     v-if="isLoading"
     class="fixed inset-0 flex items-center justify-center bg-white dark:bg-neutral-900 z-50"
@@ -31,7 +26,6 @@ onMounted(() => {
     </div>
   </div>
 
-  <!-- Main App Container -->
   <div class="app-container">
     <RouterView v-slot="{ Component }">
       <transition name="fade" mode="out-in">
@@ -39,13 +33,13 @@ onMounted(() => {
       </transition>
     </RouterView>
   </div>
+
   <div class="fixed z-50 right-2 top-0 flex flex-col">
     <ToastComponent />
   </div>
 </template>
 
 <style>
-/* Global Styles */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
@@ -65,7 +59,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Fade transition */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -76,7 +69,6 @@ body {
   opacity: 0;
 }
 
-/* Loading animation */
 @keyframes spin {
   0% {
     transform: rotate(0deg);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
+using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Izinler;
@@ -43,6 +44,8 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<CalismaTakvimi> CalismaTakvimleri { get; set; }
     public DbSet<CalismaGun> CalismaGunleri { get; set; }
     public DbSet<TakvimEtkinlik> TakvimEtkinlikler { get; set; }
+    public DbSet<Bildirim> Bildirimler { get; set; }
+    public DbSet<PersonelBildirim> PersonelBildirimler { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +53,18 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+
+        modelBuilder.Entity<PersonelBildirim>()
+            .HasOne(p => p.Bildirim)
+            .WithMany(p => p.PersonelBildirimler)
+            .HasForeignKey(p => p.BildirimId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PersonelBildirim>()
+            .HasOne(p => p.Personel)
+            .WithMany(p => p.PersonelBildirimler)
+            .HasForeignKey(p => p.PersonelId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<TakvimEtkinlik>()
             .HasOne(p => p.Sirket)

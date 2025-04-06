@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Subeler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
@@ -12,6 +12,7 @@ public sealed record SubeDeleteCommand(
 
 internal sealed class SubeDeleteCommandHandler(
     ISubeRepository subeRepository,
+    IPersonelAtamaRepository personelAtamaRepository,
     IDepartmanRepository departmanRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<SubeDeleteCommand, Result<string>>
 {
@@ -26,6 +27,17 @@ internal sealed class SubeDeleteCommandHandler(
         foreach (var departman in departmanlar)
         {
             departman.IsDeleted = true;
+        }
+
+        List<Guid> departmanIds = departmanlar.Select(p => p.Id).ToList();
+
+        var personelAtamalar = await personelAtamaRepository.WhereWithTracking(p => p.SubeId == request.Id || (p.DepartmanId.HasValue && departmanIds.Contains(p.DepartmanId.Value))).ToListAsync(cancellationToken);
+        
+        foreach(var personelAtama in personelAtamalar)
+        {
+            personelAtama.SubeId = null;
+            personelAtama.DepartmanId = null;
+            personelAtama.PozisyonId = null;
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

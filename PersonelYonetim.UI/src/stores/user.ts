@@ -1,25 +1,52 @@
 import { defineStore } from "pinia";
-import { type UserModel } from "@/models/entity-models/UserModel";
 import { reactive } from "vue";
 import AuthService from "@/services/AuthService";
+import type { PersonelItem } from "@/models/PersonelModels";
 
 export const useUserStore = defineStore("user", () => {
-  const user: UserModel = reactive({
+  const user: PersonelItem = reactive({
     id: "",
+    ad: "",
+    soyad: "",
     fullName: "",
     dogumTarihi: new Date(),
     cinsiyet: undefined,
     profilResimUrl: undefined,
-    departmanAd: "",
-    pozisyonAd: "",
-    eposta: "",
-    telefon: "",
-    ulke: "",
-    sehir: "",
-    ilce: "",
-    tamAdres: "",
-    role: -1,
-    userId: "",
+    iletisim: {
+      eposta: "",
+      telefon: "",
+    },
+    adres: {
+      ulke: "",
+      sehir: "",
+      ilce: "",
+      tamAdres: "",
+    },
+    yonetici: undefined,
+    yoneticiPozisyon: undefined,
+    sirketId: "",
+    sirketAd: "",
+    subeId: undefined,
+    subeAd: undefined,
+    departmanId: undefined,
+    departmanAd: undefined,
+    pozisyonId: undefined,
+    pozisyonAd: undefined,
+    calismaTakvimiId: undefined,
+    sozlesmeTuruValue: 0,
+    pozisyonBaslangicTarih: new Date(),
+    sozlesmeBitisTarihi: undefined,
+    izinKuralId: undefined,
+    role: 0,
+    isActive: true,
+    createdAt: new Date(),
+    createUserId: "",
+    createUserName: undefined,
+    updateAt: undefined,
+    updateUserId: undefined,
+    updateUserName: undefined,
+    isDeleted: false,
+    deleteAt: undefined,
   });
 
   const getUser = async () => {
@@ -28,26 +55,8 @@ export const useUserStore = defineStore("user", () => {
   };
 
   const logout = () => {
-    // Kullanıcı bilgilerini sıfırla
-    Object.assign(user, {
-      id: "",
-      fullName: "",
-      dogumTarihi: new Date(),
-      cinsiyet: undefined,
-      profilResimUrl: undefined,
-      departmanAd: "",
-      pozisyonAd: "",
-      eposta: "",
-      telefon: "",
-      ulke: "",
-      sehir: "",
-      ilce: "",
-      tamAdres: "",
-      role: "",
-      userId: "",
-    });
+    Object.assign(user, {});
 
-    // Token'ı localStorage'dan kaldır
     localStorage.removeItem("token");
   };
 

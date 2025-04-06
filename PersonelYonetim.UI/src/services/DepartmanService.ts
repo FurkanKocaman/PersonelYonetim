@@ -2,21 +2,41 @@ import type { DepartmanCreateRequest } from "@/models/request-models/DepartmanCr
 import api from "./Axios";
 import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
 import { useToastStore } from "@/stores/ToastStore";
+import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 class DepartmanService {
   async departmanlarGet(
-    subeId: string
-  ): Promise<{ Departmanlar: DepartmanModel[]; count: number } | undefined> {
+    subeId: string,
+    paginationParams?: PaginationParams
+  ): Promise<
+    { items: DepartmanModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+  > {
     try {
+      const queryParams = new URLSearchParams();
+      if (paginationParams) {
+        const { pageNumber, pageSize, orderBy, filter } = paginationParams;
+
+        queryParams.append("$top", pageSize.toString());
+        queryParams.append("$skip", ((pageNumber - 1) * pageSize).toString());
+
+        if (orderBy) queryParams.append("$orderby", orderBy);
+        if (filter) queryParams.append("$filter", filter);
+      }
+
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/departmanlar?subeId=${subeId}`,
+        `${import.meta.env.VITE_API_URL}/odata/departmanlar?subeId=${subeId}&${queryParams}`,
         {
           params: {
             $count: true,
           },
         }
       );
-      return { Departmanlar: response.data.value, count: response.data["@odata.count"] };
+      return {
+        items: response.data.value,
+        count: response.data["@odata.count"],
+        pageSize: paginationParams?.pageSize ?? 0,
+        pageNumber: paginationParams?.pageNumber ?? 0,
+      };
     } catch (error) {
       console.error(error);
     }

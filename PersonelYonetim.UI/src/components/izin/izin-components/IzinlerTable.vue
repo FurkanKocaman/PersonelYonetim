@@ -13,9 +13,10 @@ const error = ref(false);
 
 const showDetailModal = ref(false);
 
-const pagination: Ref<PaginationParams> = ref({
+const paginationParams: Ref<PaginationParams> = ref({
+  count: 0,
   pageNumber: 1,
-  pageSize: 5,
+  pageSize: 10,
   orderBy: "createdAt desc",
   filter: "",
 });
@@ -53,8 +54,6 @@ const filteredIzinTalepler = computed<Record<string, unknown>[]>(() => {
       toplamSure,
       izinTuru,
       degerlendirmeDurumu,
-      degerlendirenAd,
-      aciklama,
     }) => ({
       id,
       personelFullName,
@@ -64,8 +63,6 @@ const filteredIzinTalepler = computed<Record<string, unknown>[]>(() => {
       toplamSure,
       izinTuru,
       degerlendirmeDurumu,
-      degerlendirenAd,
-      aciklama,
     })
   );
 });
@@ -78,11 +75,16 @@ onActivated(() => {
   getIzinTalepler();
 });
 
+const setPageNumber = (pageNumber: number) => {
+  paginationParams.value.pageNumber = pageNumber;
+  getIzinTalepler();
+};
+
 const getIzinTalepler = async () => {
-  const response = await IzinService.getIzinTalepler(pagination.value);
+  const response = await IzinService.getIzinTalepler(paginationParams.value);
   izinList.value = response!.items;
   loading.value = false;
-  console.log(response);
+  paginationParams.value.count = response!.count;
 };
 
 const izinDegerlendir = async (id: string, degerlendirme: number) => {
@@ -157,6 +159,19 @@ const openIzinEdit = (item: IzinTalepGetResponse) => {
         :table-content="filteredIzinTalepler"
         :islemler="['edit']"
         @edit-click="openIzinEdit"
+        :page-count="
+          Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
+            ? 1
+            : Math.ceil(paginationParams.count / paginationParams.pageSize)
+        "
+        :count="paginationParams.count"
+        :page-size="
+          paginationParams.pageSize > paginationParams.count
+            ? paginationParams.count
+            : paginationParams.pageSize
+        "
+        :current-page="paginationParams.pageNumber"
+        @set-page="setPageNumber"
       />
     </div>
 
