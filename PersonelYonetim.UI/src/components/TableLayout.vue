@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Roles from "@/models/Roles";
 import { computed, defineProps, onMounted } from "vue";
 
 const props = defineProps<{
@@ -76,15 +77,15 @@ const getColumnBgColor = (key: string, value: unknown) => {
 </script>
 
 <template>
-  <table class="table-fixed divide-y divide-gray-200 dark:divide-neutral-700 w-full">
-    <thead class="bg-gray-200/60 dark:bg-neutral-800">
+  <table class="divide-y divide-gray-200 dark:divide-neutral-700 w-full">
+    <thead class="bg-gray-200/60 dark:bg-neutral-800 w-full">
       <tr>
         <th
           v-for="header in props.tableHeaders"
           :key="header.key"
           scope="col"
-          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-          :class="header.width"
+          class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-full"
+          :class="header.width != undefined ? header.width : 'w-fit'"
         >
           <div class="flex cursor-pointer select-none" @click="orderBy(header.key)">
             {{ header.value }}
@@ -116,22 +117,20 @@ const getColumnBgColor = (key: string, value: unknown) => {
         v-for="(row, rowIndex) in tableContent"
         :key="rowIndex"
         class="hover:bg-gray-200 dark:hover:bg-neutral-900"
-        @click="
-          () => {
-            console.log(row);
-          }
-        "
       >
         <td
           v-for="key in tableKeys"
           :key="key"
-          class="px-2 py-2 overflow-hidden text-ellipsis text-sm text-gray-900 dark:text-gray-200"
+          class="px-2 py-2 overflow-hidden whitespace-nowrap text-ellipsis text-sm text-gray-900 dark:text-gray-200"
         >
           <span
             :style="{ backgroundColor: getColumnBgColor(key, row[key as string]) }"
             class="px-2 py-1 rounded-md"
-            :class="getColumnBgColor(key, row[key as string]) ? '' : ''"
-            >{{ formatValue(row[key as string]) }}</span
+            >{{
+              key == "role"
+                ? Roles.getRoleByValue(row[key as string] as number).name
+                : formatValue(row[key as string])
+            }}</span
           >
         </td>
 

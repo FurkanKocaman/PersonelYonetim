@@ -48,6 +48,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
         PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false);
         if (personelAtamaEski is not null)
         {
+            personelAtamaEski.IsActive = false;
             personelAtamaEski.IsDeleted = true;
             personelAtamaEski.SozlesmeBitisTarihi = DateTimeOffset.Now;
             personelAtamaRepository.Update(personelAtamaEski);
@@ -143,8 +144,6 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             userRoleRepository.Delete(appUserRoleInDb);
             await unitOfWork.SaveChangesAsync();
         }
-            
-
         
         AppUserRole appUserRole = new()
         {

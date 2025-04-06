@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/stores/ThemeStore";
-import { defineEmits, onMounted, ref, computed } from "vue";
+import { defineEmits, onMounted, ref, computed, type Ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
+import type { BildirimModel } from "@/models/entity-models/BildirimModel";
+import BildirimService from "@/services/BildirimService";
+import Roles from "@/models/Roles";
 
 const route = useRoute();
 const activeTab = computed(() => {
@@ -20,41 +23,25 @@ const activeTab = computed(() => {
 const router = useRouter();
 const themeStore = useThemeStore();
 const userStore = useUserStore();
+const apiUrl = import.meta.env.VITE_API_URL;
+
+const bildirimler: Ref<BildirimModel[] | undefined> = ref([]);
 
 // Dropdown durumları
 const notificationsOpen = ref(false);
 const messagesOpen = ref(false);
 const userMenuOpen = ref(false);
 
-// Örnek bildirimler
-const notifications = ref([
-  {
-    id: 1,
-    title: "Yeni izin talebi",
-    message: "İzin talebiniz onaylandı",
-    time: "5 dk önce",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "Toplantı hatırlatması",
-    message: "Yarın saat 10:00'da toplantı var",
-    time: "1 saat önce",
-    read: false,
-  },
-  {
-    id: 3,
-    title: "Maaş bildirimi",
-    message: "Maaşınız hesabınıza yatırıldı",
-    time: "2 gün önce",
-    read: false,
-  },
-]);
-
 onMounted(() => {
-  // Dropdown'ları kapatmak için dışarı tıklama olayını dinle
   document.addEventListener("click", closeDropdowns);
+
+  getBildirimler();
 });
+
+const getBildirimler = async () => {
+  const res = await BildirimService.getBildirimler();
+  bildirimler.value = res;
+};
 
 // Event'ler
 const emit = defineEmits(["toggle-sidebar"]);
@@ -89,11 +76,12 @@ const closeDropdowns = (event: Event) => {
   }
 };
 
-// Bildirimi okundu olarak işaretle
-const markNotificationAsRead = (id: number) => {
-  const notification = notifications.value.find((n) => n.id === id);
-  if (notification) {
-    notification.read = true;
+const markNotificationAsRead = async (id: string) => {
+  const bildirim = bildirimler.value!.find((n) => n.id == id);
+  if (bildirim) {
+    const res = await BildirimService.setBildirimOkundu(id);
+    console.log("Bildirim okundu", res);
+    bildirim.okunduMu = true;
   }
 };
 
@@ -162,9 +150,9 @@ const logout = () => {
           >
             <i class="fas fa-bell"></i>
             <span
-              v-if="notifications.filter((n) => !n.read).length > 0"
+              v-if="bildirimler!.filter((n) => !n.okunduMu).length > 0"
               class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-              >{{ notifications.filter((n) => !n.read).length }}</span
+              >{{ bildirimler!.filter((n) => !n.okunduMu).length }}</span
             >
           </button>
 
@@ -180,16 +168,16 @@ const logout = () => {
               <span
                 class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full"
               >
-                {{ notifications.filter((n) => !n.read).length }} yeni
+                {{ bildirimler!.filter((n) => !n.okunduMu).length }} yeni
               </span>
             </div>
             <div class="max-h-96 overflow-y-auto">
               <div
-                v-for="notification in notifications"
-                :key="notification.id"
-                @click="markNotificationAsRead(notification.id)"
+                v-for="bildirim in bildirimler"
+                :key="bildirim.id"
+                @click="markNotificationAsRead(bildirim.id)"
                 class="p-3 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer transition-colors duration-150"
-                :class="{ 'bg-blue-50 dark:bg-blue-900/20': !notification.read }"
+                :class="{ 'bg-blue-50 dark:bg-blue-900/20': !bildirim.okunduMu }"
               >
                 <div class="flex items-start">
                   <div class="flex-shrink-0 mr-3">
@@ -201,23 +189,32 @@ const logout = () => {
                   </div>
                   <div class="flex-1">
                     <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                      {{ notification.title }}
+                      {{ bildirim.baslik }}
                     </p>
                     <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {{ notification.message }}
+                      {{ bildirim.aciklama }}
                     </p>
                     <div class="flex items-center mt-1">
                       <i class="fas fa-clock text-xs text-gray-500 dark:text-gray-500 mr-1"></i>
                       <p class="text-xs text-gray-500 dark:text-gray-500">
-                        {{ notification.time }}
+                        {{
+                          new Date(bildirim.createdAt).toLocaleDateString("tr-TR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })
+                        }}
                       </p>
                     </div>
                   </div>
-                  <div v-if="!notification.read" class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div v-if="!bildirim.okunduMu" class="w-2 h-2 bg-blue-500 rounded-full"></div>
                 </div>
               </div>
               <div
-                v-if="notifications.length === 0"
+                v-if="bildirimler!.length === 0"
                 class="p-3 text-center text-gray-500 dark:text-gray-400"
               >
                 Bildirim bulunmuyor
@@ -234,16 +231,23 @@ const logout = () => {
         </div>
 
         <!-- Kullanıcı menüsü -->
-        <div class="relative dropdown-container">
+        <div class="relative dropdown-container z-20">
           <button
             @click="toggleUserMenu"
-            class="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-full p-1 focus:outline-none"
+            class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-full p-1 focus:outline-none"
           >
             <img
-              src="https://randomuser.me/api/portraits/men/1.jpg"
+              v-if="userStore.user?.profilResimUrl"
+              :src="apiUrl + userStore.user?.profilResimUrl"
               alt="Kullanıcı"
               class="w-8 h-8 rounded-full border border-gray-200 dark:border-neutral-600"
             />
+            <div
+              v-else
+              class="text-3xl font-semibold text-sky-600 transition-all duration-300 ease-in-out rounded-full border-1 border-sky-500 w-10 h-10 flex items-center justify-center"
+            >
+              {{ userStore.user.fullName[0] }}
+            </div>
           </button>
 
           <!-- Kullanıcı Menüsü Dropdown -->
@@ -254,13 +258,18 @@ const logout = () => {
             <div class="p-4 border-b border-gray-200 dark:border-neutral-700 text-center">
               <div class="relative mx-auto w-16 h-16 mb-3">
                 <img
-                  :src="
-                    userStore.user?.profilResimUrl ||
-                    'https://randomuser.me/api/portraits/men/1.jpg'
-                  "
+                  v-if="userStore.user?.profilResimUrl"
+                  :src="apiUrl + userStore.user?.profilResimUrl"
                   alt="Kullanıcı"
                   class="w-16 h-16 rounded-full border-2 border-white dark:border-neutral-600 shadow-md object-cover"
                 />
+                <div
+                  v-else
+                  class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
+                >
+                  {{ userStore.user.fullName[0] }}
+                </div>
+
                 <div
                   class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-neutral-800"
                 ></div>
@@ -269,17 +278,21 @@ const logout = () => {
                 {{ userStore.user?.fullName || "Kullanıcı" }}
               </h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {{ userStore.user?.eposta || "kullanici@ornek.com" }}
+                {{ userStore.user?.iletisim.eposta || "kullanici@ornek.com" }}
               </p>
               <div
                 class="mt-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 py-1 px-2 rounded-full inline-block"
               >
-                {{ userStore.user?.role || "Kullanıcı" }}
+                {{
+                  userStore.user.pozisyonAd != undefined
+                    ? userStore.user.pozisyonAd
+                    : Roles.getRoleByValue(userStore.user.role).name
+                }}
               </div>
             </div>
             <div class="py-1">
               <router-link
-                to="/dashboard/ayarlar"
+                to="/dashboard/profile"
                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i
@@ -288,7 +301,7 @@ const logout = () => {
                 Profil Ayarları
               </router-link>
               <router-link
-                to="/dashboard/izin/talep"
+                to="/dashboard/profile/izinlerim"
                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors duration-150"
               >
                 <i

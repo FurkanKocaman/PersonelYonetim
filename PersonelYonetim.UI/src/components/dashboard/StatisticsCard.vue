@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from "vue";
 
-// İstatistik öğesi için tip tanımı
 interface StatItem {
   title: string;
   value: number;

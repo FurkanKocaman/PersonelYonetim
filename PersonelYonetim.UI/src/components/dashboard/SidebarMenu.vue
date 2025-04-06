@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { UserModel } from "@/models/entity-models/UserModel";
 import type { MenuItem } from "@/types/menu";
 import { defineProps, defineEmits, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import TakvimEtkinlikCreateModal from "../modals/TakvimEtkinlikCreateModal.vue";
 import IzinTalepCreateModal from "../modals/IzinTalepCreateModal.vue";
+import type { PersonelItem } from "@/models/PersonelModels";
 import Roles from "@/models/Roles";
 
 // Menü öğesi için tip tanımı
@@ -16,7 +16,7 @@ const props = defineProps({
     required: true,
   },
   user: {
-    type: Object as () => UserModel,
+    type: Object as () => PersonelItem,
     required: true,
   },
   sidebarOpen: {
@@ -71,10 +71,9 @@ const isMobile = ref(false);
 onMounted(() => {
   checkScreenWidth();
   window.addEventListener("resize", checkScreenWidth);
-  setTimeout(() => {
-    console.log("Profil", profilImageUrl);
-  }, 3000);
   if (isMobile.value) toggleSidebar();
+
+  console.log(props.user);
 });
 
 const checkScreenWidth = () => {
@@ -148,7 +147,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
             {{ user.fullName[0] }}
           </div>
           <div :class="{ hidden: !sidebarOpen }">
-            <h4 class="mx-2 mt-2 font-medium text-gray-800 dark:text-gray-200">
+            <h4 class="mx-2 mt-2 font-medium text-neutral-900 dark:text-gray-200">
               {{ user.fullName }}
             </h4>
             <!-- <p
@@ -157,8 +156,21 @@ const isMenuItemActive = (itemPath: string): boolean => {
             >
               Şirket Sahibi
             </p> -->
-            <p class="mx-2 mt-1 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {{ user.pozisyonAd != "" ? user.pozisyonAd : Roles.getRoleByValue(user.role).name }}
+            <p class="mx-2 mt-1 text-sm font-semibold text-neutral-800 dark:text-gray-400">
+              {{
+                props.user.pozisyonAd != undefined
+                  ? props.user.pozisyonAd
+                  : props.user.departmanAd != undefined
+                  ? props.user.departmanAd
+                  : props.user.subeAd != undefined
+                  ? props.user.subeAd
+                  : props.user.sirketAd != undefined
+                  ? props.user.sirketAd
+                  : ""
+              }}
+            </p>
+            <p class="mx-2 mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
+              ({{ props.user.role != 0 ? Roles.getRoleByValue(props.user.role).name : "" }})
             </p>
           </div>
         </div>

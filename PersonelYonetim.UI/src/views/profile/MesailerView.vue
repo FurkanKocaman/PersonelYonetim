@@ -1,44 +1,5 @@
 <script setup lang="ts">
-import TableLayout from "@/components/TableLayout.vue";
-import { computed, ref } from "vue";
-
-const veriler = ref([
-  {
-    baslangicTarihi: "2024-11-20T21:00",
-    sure: "3 saat",
-    aciklama: "Bilet: 8105-YKS-Online kayıt başvurusu...",
-    durum: "Onaylandı",
-    olusturmaTarihi: "2024-11-21T01:16",
-  },
-  {
-    baslangicTarihi: "2024-11-10T18:30",
-    sure: "1 saat",
-    aciklama: "Tarsus Bilet No: 9241 HAZIRLIK DETAY BİLGİSİ...",
-    durum: "Onaylandı",
-    olusturmaTarihi: "2024-11-10T23:55",
-  },
-  {
-    baslangicTarihi: "2024-11-09T23:00",
-    sure: "1 saat",
-    aciklama: "Trakya hazırlık detay gitmeyenler 440 öğrenci...",
-    durum: "Onaylandı",
-    olusturmaTarihi: "2024-11-10T01:36",
-  },
-  {
-    baslangicTarihi: "2024-11-07T23:00",
-    sure: "1 saat",
-    aciklama: "Rize hazırlık detay listesinin gönderilmesi tamamlandı...",
-    durum: "Onaylandı",
-    olusturmaTarihi: "2024-11-08T00:01",
-  },
-  {
-    baslangicTarihi: "2024-10-21T23:00",
-    sure: "2 saat",
-    aciklama: "YÖS için uyruk program kontenjan görüntüleme...",
-    durum: "Onaylandı",
-    olusturmaTarihi: "2024-10-22T02:21",
-  },
-]);
+import { ref } from "vue";
 
 const secilenYil = ref("");
 const secilenAy = ref("");
@@ -59,20 +20,7 @@ const aylar = [
   { etiket: "Aralık", deger: "12" },
 ];
 
-const yillar = Array.from({ length: 2025 - 2007 + 1 }, (_, i) => (2025 - i).toString());
-
-const filtrelenmisVeri = computed(() => {
-  return veriler.value.filter((kayit) => {
-    const yil = kayit.baslangicTarihi.split("-")[0];
-    const ay = kayit.baslangicTarihi.split("-")[1];
-
-    return (
-      (secilenYil.value === "" || secilenYil.value === yil) &&
-      (secilenAy.value === "" || secilenAy.value === ay) &&
-      (secilenDurum.value === "" || secilenDurum.value === kayit.durum)
-    );
-  });
-});
+const yillar = Array.from({ length: 2025 - 2010 + 1 }, (_, i) => (2025 - i).toString());
 </script>
 
 <template>
@@ -107,12 +55,6 @@ const filtrelenmisVeri = computed(() => {
       </select>
     </div>
 
-    <div>
-      <TableLayout
-        :table-headers="['Başlangıç', 'Süre', 'Açıklama', 'Durum', 'Oluşturulma Tarihi']"
-        :table-content="filtrelenmisVeri"
-        :islemler="['detaylar']"
-      />
-    </div>
+    <div></div>
   </div>
 </template>

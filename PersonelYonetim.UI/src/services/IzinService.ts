@@ -5,6 +5,7 @@ import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCr
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
 import { useToastStore } from "@/stores/ToastStore";
+import type { IzinlerKalanResponse } from "@/models/response-models/izinler/İzinlerKalanResponse";
 
 export class IzinService {
   async getIzinKural(
@@ -169,13 +170,22 @@ export class IzinService {
           },
         }
       );
-      console.log(response);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
         pageSize: pageSize,
         pageNumber: pageNumber,
       };
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async getIzinlerKalan(): Promise<IzinlerKalanResponse | undefined> {
+    try {
+      const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/getkalanizinler`);
+
+      return response.data;
     } catch (error) {
       console.error(error);
     }

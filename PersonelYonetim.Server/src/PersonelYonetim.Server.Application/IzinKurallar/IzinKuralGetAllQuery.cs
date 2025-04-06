@@ -28,7 +28,6 @@ public sealed class IzinTurResponse
     public string? Aciklama { get; set; }
     public bool UcretliMi { get; set; } = false;
     public string LimitTipiName { get; set; } = default!;
-
     public decimal KalanGunSayisi { get; set; }
 }
 

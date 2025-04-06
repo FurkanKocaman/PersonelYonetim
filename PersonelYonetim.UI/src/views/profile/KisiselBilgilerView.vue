@@ -132,10 +132,10 @@ const vatandaslikFormKaydet = () => {
 </script>
 
 <template>
-  <div class="space-y-6 flex text-neutral-700 dark:text-neutral-100">
-    <div class="flex-3 flex flex-col py-10 pl-10">
+  <div class="space-y-6 flex flex-col md:flex-row text-neutral-700 dark:text-neutral-100">
+    <div class="md:flex-3 flex flex-col md:py-10 md:pl-10">
       <!-- Vatandaşlık -->
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Vatandaşlık</h2>
           <button @click="vatandaslikForm = true">
@@ -145,11 +145,11 @@ const vatandaslikFormKaydet = () => {
         <div class="p-4 rounded-lg space-y-3 dark:bg-neutral-700/20 shadow-md bg-neutral-200/40">
           <!-- Doğum Tarihi - Cinsiyet -->
           <div class="flex justify-between">
-            <div>
+            <div class="flex-1">
               <p class="text-sm">Doğum Tarihi</p>
-              <p class="text-sm">{{ personel.vatandaslik.dogumTarihi }}</p>
+              <p class="text-sm">01.01.2000</p>
             </div>
-            <div class="flex-grow" style="margin-left: 300px">
+            <div class="flex-1">
               <p class="text-sm">Cinsiyet</p>
               <p class="text-sm">{{ personel.vatandaslik.cinsiyet }}</p>
             </div>
@@ -164,15 +164,15 @@ const vatandaslikFormKaydet = () => {
           <hr class="my-4 border-gray-300 dark:border-gray-600" />
           <br />
           <!-- Uyruğu - Kimlik Numarası -->
-          <div class="flex justify-between">
-            <div>
+          <div class="flex justify-between w-full">
+            <div class="flex-1">
               <p class="text-sm">Uyruğu</p>
               <p class="text-sm">{{ personel.vatandaslik.uyrugu }}</p>
             </div>
-            <div class="flex-grow" style="margin-left: 339px">
+            <div class="flex-1">
               <div>
                 <p class="text-sm">Kimlik Numarası</p>
-                <p class="text-sm">{{ personel.vatandaslik.kimlikNumarasi }}</p>
+                <p class="text-sm">11111111111</p>
               </div>
               <br />
             </div>
@@ -187,17 +187,17 @@ const vatandaslikFormKaydet = () => {
       </div>
 
       <!-- Eğitim -->
-      <div class="bg-nwutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5">
+      <div class="bg-nwutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Eğitim</h2>
         </div>
         <div class="dark:bg-neutral-700/20 shadow-md bg-neutral-200/40 p-4 rounded-lg space-y-3">
           <div class="flex justify-between">
-            <div>
+            <div class="flex-1">
               <p class="text-base">Eğitim Durumu</p>
               <p class="text-sm">{{ personel.egitim.egitimDurumu }}</p>
             </div>
-            <div class="">
+            <div class="flex-1">
               <p class="text-base">Tamamlanan En Yüksek Eğitim Seviyesi</p>
               <p class="text-sm">{{ personel.egitim.enYuksekEgitim }}</p>
             </div>
@@ -212,7 +212,7 @@ const vatandaslikFormKaydet = () => {
       </div>
 
       <!-- Aile -->
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Aile</h2>
           <button @click="aileForm = true">
@@ -224,11 +224,11 @@ const vatandaslikFormKaydet = () => {
           style="height: 150px"
         >
           <div class="flex justify-between">
-            <div>
+            <div class="flex-1">
               <p class="text-base">Medeni Hal</p>
-              <p class="text-sm">{{ personel.aile.medeniHal || "—" }}</p>
+              <p class="text-sm">{{ "—" }}</p>
             </div>
-            <div class="mr-5">
+            <div class="flex-1">
               <p class="text-base">Eş Çalışma Durumu</p>
               <p class="text-sm">{{ personel.aile.esCalismaDurumu || "—" }}</p>
             </div>
@@ -243,7 +243,7 @@ const vatandaslikFormKaydet = () => {
       </div>
 
       <!-- Adres -->
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Adres</h2>
         </div>
@@ -251,7 +251,7 @@ const vatandaslikFormKaydet = () => {
           <div class="flex justify-between">
             <div>
               <p class="text-base">Adres</p>
-              <p class="text-sm">{{ personel.adres.adres || "—" }}</p>
+              <p class="text-sm">{{ "—" }}</p>
             </div>
           </div>
 
@@ -285,7 +285,7 @@ const vatandaslikFormKaydet = () => {
       </div>
       <!-- Banka hesabı -->
 
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Banka Hesabı</h2>
           <button @click="bankaForm = true">
@@ -313,15 +313,15 @@ const vatandaslikFormKaydet = () => {
             </div>
             <div class="">
               <p class="text-sm">IBAN</p>
-              <p class="text-sm">{{ personel.bankaHesabi.iban || "—" }}</p>
+              <p class="text-sm">{{ "—" }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="flex-2 flex flex-col px-10 py-5">
+    <div class="md:flex-2 flex flex-col md:px-10 md:py-5">
       <!-- İletişim -->
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 my-5 rounded-lg shadow-md">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 md:my-5 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">İletişim</h2>
           <button @click="iletisimForm = true">
@@ -358,7 +358,7 @@ const vatandaslikFormKaydet = () => {
 
       <!-- Acil Durum -->
 
-      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md">
+      <div class="bg-neutral-100 dark:bg-neutral-800 p-4 mt-4 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Acil Durum</h2>
           <button @click="acilDurumForm = true">

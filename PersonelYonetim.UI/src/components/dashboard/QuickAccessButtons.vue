@@ -6,55 +6,55 @@ const router = useRouter();
 
 // Hızlı erişim butonları için veriler
 const quickAccessButtons = ref([
-  { 
-    id: 1, 
-    title: "Personel Ekle", 
-    icon: "user-plus", 
+  {
+    id: 1,
+    title: "Personel Ekle",
+    icon: "user-plus",
     color: "bg-blue-500 hover:bg-blue-600",
-    route: "/dashboard/personel"
+    route: "/dashboard/personel",
   },
   {
     id: 2,
     title: "Şirket Yönetimi",
     icon: "building",
     color: "bg-teal-500 hover:bg-teal-600",
-    route: "/dashboard/sirket"
+    route: "/dashboard/sirket",
   },
   {
     id: 3,
     title: "Bordro Oluştur",
     icon: "file-invoice-dollar",
     color: "bg-green-500 hover:bg-green-600",
-    route: "/dashboard"
+    route: "/dashboard",
   },
   {
     id: 4,
     title: "İzin Talebi",
     icon: "calendar-plus",
     color: "bg-purple-500 hover:bg-purple-600",
-    route: "/dashboard/izin/talep"
+    route: "/dashboard/profile/izinlerim",
   },
-  { 
-    id: 5, 
-    title: "Rapor Oluştur", 
-    icon: "chart-line", 
+  {
+    id: 5,
+    title: "Rapor Oluştur",
+    icon: "chart-line",
     color: "bg-amber-500 hover:bg-amber-600",
-    route: "/dashboard"
+    route: "/dashboard",
   },
-  { 
-    id: 6, 
-    title: "Mesai Kaydet", 
-    icon: "clock", 
+  {
+    id: 6,
+    title: "Mesai Kaydet",
+    icon: "clock",
     color: "bg-red-500 hover:bg-red-600",
-    route: "/dashboard"
+    route: "/dashboard",
   },
   {
     id: 7,
     title: "İzin Yönetimi",
     icon: "calendar-alt",
     color: "bg-indigo-500 hover:bg-indigo-600",
-    route: "/dashboard/izin"
-  }
+    route: "/dashboard/izin",
+  },
 ]);
 
 // Butona tıklandığında yönlendirme

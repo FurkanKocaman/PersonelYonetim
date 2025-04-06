@@ -10,7 +10,6 @@ import SubeService from "@/services/SubeService";
 import { computed, onMounted, ref, watch, type Ref } from "vue";
 import PersonelModal from "@/components/modals/PersonelModal.vue";
 import TableLayout from "@/components/TableLayout.vue";
-import Roles from "@/models/Roles";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
 const selectedPersonel = ref<PersonelItem | undefined>(undefined);
@@ -46,8 +45,10 @@ onMounted(async () => {
 });
 
 const setPageNumber = (pageNumber: number) => {
-  paginationParams.value.pageNumber = pageNumber;
-  getPersoneller();
+  if (paginationParams.value.pageNumber != pageNumber) {
+    paginationParams.value.pageNumber = pageNumber;
+    getPersoneller();
+  }
 };
 
 const getPersoneller = async () => {
@@ -66,14 +67,14 @@ const getPersoneller = async () => {
 
 const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
   return (filteredPersonellerList.value || []).map(
-    ({ id, fullName, iletisim, subeAd, departmanAd, pozisyonAd, rolAd, isActive }) => ({
+    ({ id, fullName, iletisim, subeAd, departmanAd, pozisyonAd, role, isActive }) => ({
       id,
       fullName,
       iletisim: iletisim.eposta,
       subeAd,
       departmanAd,
       pozisyonAd,
-      rolAd,
+      role,
       isActive: isActive ? "Aktif" : "Pasif",
     })
   );
@@ -105,8 +106,9 @@ watch(selectedDepartman, () => {
 });
 
 const openEditModal = (personel: PersonelItem) => {
+  console.log(personeller.value);
   selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
-  selectedPersonel.value!.rolValue = Roles.getRoleByName(personel.rolAd).value;
+  selectedPersonel.value!.role = personel.role;
   showPersonelModal.value = true;
 };
 
@@ -206,7 +208,7 @@ const orderBy = (order: string) => {
             { key: 'subeAd', value: 'Şube', width: 'w-1/12' },
             { key: 'departmanAd', value: 'Departman', width: 'w-1/10' },
             { key: 'pozisyonAd', value: 'Pozisyon' },
-            { key: 'rolAd', value: 'Rol' },
+            { key: 'role', value: 'Rol' },
             { key: 'isActive', value: 'Durum', width: 'w-1/12' },
           ]"
           :table-content="filteredPersoneller"

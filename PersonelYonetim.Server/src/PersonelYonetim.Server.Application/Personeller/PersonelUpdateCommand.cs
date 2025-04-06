@@ -78,7 +78,7 @@ internal sealed class PersonelUpdateCommandHandler(
         personel.Soyad = request.Soyad;
         personel.DogumTarihi = request.DogumTarihi;
         personel.Cinsiyet = request.Cinsiyet;
-        if(request.ProfilResimUrl != null || request.ProfilResimUrl != "")
+        if(request.ProfilResimUrl != null && request.ProfilResimUrl != "")
         {
             personel.ProfilResimUrl = request.ProfilResimUrl;
         }

@@ -40,6 +40,7 @@ const filteredPersonelAtamalar = computed<Record<string, unknown>[]>(() => {
       subeAd,
       departmanAd,
       pozisyonAd,
+      yoneticiAd,
       isActive,
     }) => ({
       id,
@@ -49,6 +50,7 @@ const filteredPersonelAtamalar = computed<Record<string, unknown>[]>(() => {
       subeAd,
       departmanAd,
       pozisyonAd,
+      yoneticiAd,
       isActive: isActive ? "Aktif" : "Pasif",
     })
   );
@@ -135,6 +137,7 @@ const orderBy = (order: string) => {
             { key: 'subeAd', value: 'Şube' },
             { key: 'departmanAd', value: 'Departman' },
             { key: 'pozisyonAd', value: 'Pozisyon' },
+            { key: 'yoneticiAd', value: 'Yonetici' },
             { key: 'isActive', value: 'Durum' },
           ]"
           :table-content="filteredPersonelAtamalar"

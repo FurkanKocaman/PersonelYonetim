@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using PersonelYonetim.Server.Application.Bildirimler;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.IzinKurallar;
@@ -40,9 +41,11 @@ public class AppODataController(
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
         builder.EntitySet<IzinTalepGetQueryResponse>("personel-izin-talepler");
+        //builder.EntitySet<IzinlerGetKalanQueryResponse>("getkalanizinler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
+        builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
         return builder.GetEdmModel();
     }
 
@@ -155,6 +158,20 @@ public class AppODataController(
     public async Task<IQueryable<PersonelAtamaGetQueryResponse>> GetPersonelAtamalar(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PersonelAtamaGetQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("bildirimler")]
+    [Authorize]
+    public async Task<IQueryable<BildirimlerGetQueryResponse>> GetBildirimler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new BildirimlerGetQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("getkalanizinler")]
+    [Authorize]
+    public async Task<IzinlerGetKalanQueryResponse> GetKalanIzinler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinlerGetKalanQuery(), cancellationToken);
         return response;
     }
 

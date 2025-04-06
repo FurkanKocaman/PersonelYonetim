@@ -26,7 +26,6 @@ class PersonelService {
         if (orderBy) queryParams.append("$orderby", orderBy);
         if (filter) queryParams.append("$filter", filter);
       }
-
       const response = await api.get(
         `${import.meta.env.VITE_API_URL}/odata/personeller?${queryParams}`,
         {
@@ -38,7 +37,6 @@ class PersonelService {
           },
         }
       );
-
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
@@ -80,10 +78,10 @@ class PersonelService {
       throw error;
     }
   }
-  getCurrentPersonel = async () => {
+  getCurrentPersonel = async (): Promise<PersonelItem | undefined> => {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-current`);
-      return response.data;
+      return response.data[0];
     } catch (error) {
       console.error(error);
     }

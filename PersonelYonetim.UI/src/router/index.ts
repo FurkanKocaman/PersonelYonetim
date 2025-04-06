@@ -6,6 +6,11 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: "/home",
+      component: () => import("@/views/HomeView.vue"),
+      meta: { title: "Ana Sayfa", public: true },
+    },
+    {
       path: "/",
       redirect: "/dashboard",
     },

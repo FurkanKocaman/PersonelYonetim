@@ -32,7 +32,7 @@ const fileInput: Ref<HTMLInputElement | undefined> = ref(undefined);
 const selectedFile: Ref<File | undefined> = ref(undefined);
 
 const props = defineProps<{
-  personel?: PersonelCreateRequest;
+  personel?: PersonelItem;
 }>();
 
 const paginationParams: Ref<PaginationParams> = ref({
@@ -80,6 +80,9 @@ const request: PersonelCreateRequest = reactive(
 onMounted(() => {
   getSirketler();
   getCalismaTakvimler();
+  if (props.personel) {
+    request.rolValue = props.personel.role;
+  }
 });
 const emit = defineEmits(["closeModal", "refresh"]);
 const handlePersonel = async () => {

@@ -167,6 +167,15 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+  <div
+    v-else
+    class="absolute inset-0 flex flex-col items-center justify-center bg-opacity-80 dark:bg-opacity-80 z-50"
+  >
+    <div
+      class="w-16 h-16 border-4 border-sky-600 border-t-transparent rounded-full animate-spin"
+    ></div>
+    <p class="mt-4 text-gray-700 dark:text-gray-300 font-medium">Yükleniyor...</p>
+  </div>
 </template>
 
 <style scoped>

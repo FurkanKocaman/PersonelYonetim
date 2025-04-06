@@ -34,7 +34,7 @@ export interface IzinPaginationParams {
   sayfa: number;
   sayfaBoyutu: number;
   siralamaAlani?: string;
-  siralama?: 'asc' | 'desc';
+  siralama?: "asc" | "desc";
 }
 
 /**

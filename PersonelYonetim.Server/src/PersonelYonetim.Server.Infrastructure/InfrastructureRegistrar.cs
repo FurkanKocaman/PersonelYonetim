@@ -1,18 +1,17 @@
-﻿using PersonelYonetim.Server.Domain.Users;
-using PersonelYonetim.Server.Infrastructure.Context;
-using PersonelYonetim.Server.Infrastructure.Options;
-using GenericRepository;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Scrutor;
-using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.RoleClaim;
+using PersonelYonetim.Server.Domain.Rols;
+using PersonelYonetim.Server.Domain.Users;
+using PersonelYonetim.Server.Infrastructure.Context;
+using PersonelYonetim.Server.Infrastructure.Options;
 using PersonelYonetim.Server.Infrastructure.Repositories;
-using PersonelYonetim.Server.Domain.UnitOfWork;
-using Microsoft.Extensions.Options;
+using PersonelYonetim.Server.Infrastructure.Services;
+using Scrutor;
 
 namespace PersonelYonetim.Server.Infrastructure;
 
@@ -28,6 +27,7 @@ public static class InfrastructureRegistrar
         });
 
         services.AddScoped<Domain.UnitOfWork.IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IBildirimService, BildirimService>();
 
         services
             .AddIdentity<AppUser, AppRole>(opt =>
