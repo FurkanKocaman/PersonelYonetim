@@ -8,6 +8,7 @@ using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Bildirimler;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Departmanlar;
+using PersonelYonetim.Server.Application.Duyurular;
 using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
@@ -46,6 +47,7 @@ public class AppODataController(
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
         builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
+        builder.EntitySet<DuyuruGetAllQueryResponse>("duyurular");
         return builder.GetEdmModel();
     }
 
@@ -172,6 +174,14 @@ public class AppODataController(
     public async Task<IzinlerGetKalanQueryResponse> GetKalanIzinler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new IzinlerGetKalanQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("duyurular")]
+    [Authorize]
+    public async Task<IQueryable<DuyuruGetAllQueryResponse>> GetDuyurular(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new DuyuruGetAllQuery(), cancellationToken);
         return response;
     }
 

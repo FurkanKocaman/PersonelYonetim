@@ -23,4 +23,8 @@
     <ProjectReference Include="..\PersonelYonetim.Server.ServiceDefaults\PersonelYonetim.Server.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\profile_images\" />
+  </ItemGroup>
+
 </Project>

@@ -55,8 +55,6 @@ const apiUrl = ref(import.meta.env.VITE_API_URL);
 onMounted(async () => {
   const res = await PersonelService.getCurrentPersonel();
   Object.assign(personel, res);
-  console.log("Personel", personel);
-  console.log(res!.fullName);
 });
 
 const iletisimForm = ref(false);

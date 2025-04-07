@@ -20,13 +20,13 @@ const quickAccessButtons = ref([
     color: "bg-teal-500 hover:bg-teal-600",
     route: "/dashboard/sirket",
   },
-  {
-    id: 3,
-    title: "Bordro Oluştur",
-    icon: "file-invoice-dollar",
-    color: "bg-green-500 hover:bg-green-600",
-    route: "/dashboard",
-  },
+  // {
+  //   id: 3,
+  //   title: "Bordro Oluştur",
+  //   icon: "file-invoice-dollar",
+  //   color: "bg-green-500 hover:bg-green-600",
+  //   route: "/dashboard",
+  // },
   {
     id: 4,
     title: "İzin Talebi",

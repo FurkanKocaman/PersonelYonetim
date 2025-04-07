@@ -34,7 +34,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="flex xl:justify-end h-dvh w-full bg-red-500">
+  <div class="flex xl:justify-end h-dvh w-full">
     <div
       class="hidden xl:flex w-full h-full items-center justify-center bg-gradient-to-r from-sky-600 to-sky-700"
     ></div>
@@ -98,8 +98,10 @@ const handleLogin = async () => {
               <input type="checkbox" class="rounded border-gray-300 size-4 accent-sky-600" />
               <span class="ml-2 text-sm">Remember me</span>
             </label>
-            <a href="#" class="text-sm dark:hover:text-neutral-100 hover:text-neutral-900"
-              >Forgot password?</a
+            <RouterLink
+              to="/forgot-password"
+              class="text-sm dark:hover:text-neutral-100 hover:text-neutral-900"
+              >Şifremi unuttum?</RouterLink
             >
           </div>
 
@@ -124,6 +126,14 @@ const handleLogin = async () => {
             </svg>
             <span>Giriş Yap</span>
           </button>
+          <hr class="my-5" />
+          <div class="w-full flex justify-center">
+            <RouterLink
+              to="/register"
+              class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+              >Şirket Oluştur</RouterLink
+            >
+          </div>
         </div>
       </form>
     </div>

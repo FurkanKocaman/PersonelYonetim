@@ -68,7 +68,7 @@ internal sealed class IzinKuralGetAllQueryHandler(
                     izinKural => izinKural.SirketId,
                     personelAtama => personelAtama.SirketId,
                     (izinKural, personelAtama) => new { izinKural, personelAtama })
-                .Where(ip => ip.personelAtama.PersonelId == personel.Id)
+                .Where(ip => ip.personelAtama.PersonelId == personel.Id && ip.personelAtama.IsActive)
                 .GroupJoin(userManager.Users,
                     ip => ip.izinKural.CreateUserId,
                     createUser => createUser.Id,
@@ -110,7 +110,7 @@ internal sealed class IzinKuralGetAllQueryHandler(
                                 UcretliMi = it.IzinTur.UcretliMi,
                                 LimitTipiName = it.IzinTur.LimitTipi == LimitTipiEnum.Limitsiz ? LimitTipiEnum.Limitsiz.Name : $"{it.IzinTur.LimitTipi.Name} {it.IzinTur.LimitGunSayisi} gün",
                                 KalanGunSayisi = (((DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year)) * it.IzinTur.LimitGunSayisi) - izinTalepler.Where(p => p.IzinTurId == it.IzinTur.Id && p.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi).Sum(p => p.ToplamSure)
-                            }),
+                            }).ToList(),
                         });
         return Task.FromResult(response);
     }

@@ -6,6 +6,7 @@ import TakvimEtkinlikCreateModal from "../modals/TakvimEtkinlikCreateModal.vue";
 import IzinTalepCreateModal from "../modals/IzinTalepCreateModal.vue";
 import type { PersonelItem } from "@/models/PersonelModels";
 import Roles from "@/models/Roles";
+import DuyuruCreateModal from "../modals/DuyuruCreateModal.vue";
 
 // Menü öğesi için tip tanımı
 
@@ -28,6 +29,7 @@ const props = defineProps({
 const profilImageUrl = import.meta.env.VITE_API_URL + props.user.profilResimUrl;
 
 const isAddMenuOpen = ref(false);
+const isduyuruCreateModalOpen = ref(false);
 
 const isTakvimEtkinlik = ref(false);
 const isIzinTalep = ref(false);
@@ -72,8 +74,6 @@ onMounted(() => {
   checkScreenWidth();
   window.addEventListener("resize", checkScreenWidth);
   if (isMobile.value) toggleSidebar();
-
-  console.log(props.user);
 });
 
 const checkScreenWidth = () => {
@@ -170,7 +170,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
               }}
             </p>
             <p class="mx-2 mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-              ({{ props.user.role != 0 ? Roles.getRoleByValue(props.user.role).name : "" }})
+              ({{ Roles.getRoleByValue(props.user.role).name }})
             </p>
           </div>
         </div>
@@ -317,6 +317,26 @@ const isMenuItemActive = (itemPath: string): boolean => {
               </svg>
               Etkinlik
             </li>
+            <li
+              class="dark:hover:bg-neutral-800 hover:bg-neutral-300 px-8 py-3 rounded-md flex cursor-pointer"
+              @click="
+                () => {
+                  isduyuruCreateModalOpen = true;
+                }
+              "
+            >
+              <svg
+                class="size-5 mr-2 dark:fill-neutral-300 fill-neutral-700"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                data-name="Layer 1"
+              >
+                <path
+                  d="M7,10H9A1,1,0,0,0,9,8H7a1,1,0,0,0,0,2ZM21,4H13V3a1,1,0,0,0-2,0V4H3A1,1,0,0,0,2,5V15a3,3,0,0,0,3,3H9.59l-2.3,2.29a1,1,0,0,0,0,1.42,1,1,0,0,0,1.42,0L11,19.41V21a1,1,0,0,0,2,0V19.41l2.29,2.3a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42L14.41,18H19a3,3,0,0,0,3-3V5A1,1,0,0,0,21,4ZM20,15a1,1,0,0,1-1,1H5a1,1,0,0,1-1-1V6H20ZM7,14h6a1,1,0,0,0,0-2H7a1,1,0,0,0,0,2Z"
+                />
+              </svg>
+              Duyuru
+            </li>
           </ul>
           <div
             v-for="item in filteredMenuItems"
@@ -370,6 +390,14 @@ const isMenuItemActive = (itemPath: string): boolean => {
   </div>
   <TakvimEtkinlikCreateModal v-if="isTakvimEtkinlik" @close-modal="closeTakvimEtkinlik" />
   <IzinTalepCreateModal v-if="isIzinTalep" @close-modal="closeIzinTalep" />
+  <DuyuruCreateModal
+    v-if="isduyuruCreateModalOpen"
+    @close-modal="
+      () => {
+        isduyuruCreateModalOpen = false;
+      }
+    "
+  />
 </template>
 
 <style scoped>

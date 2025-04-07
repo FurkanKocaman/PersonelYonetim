@@ -25,7 +25,12 @@ const router = createRouter({
           component: () => import("@/views/dashboard/DashboardView.vue"),
           meta: { title: "Ana Sayfa" },
         },
-
+        {
+          path: "duyurular",
+          name: "Duyurular",
+          component: () => import("@/views/duyurular/DuyurularView.vue"),
+          meta: { title: "Duyurular" },
+        },
         {
           path: "sirket",
           name: "Sirket",
@@ -37,14 +42,6 @@ const router = createRouter({
               Roles.SirketYardimci.value,
               Roles.Admin.value,
             ],
-          },
-        },
-        {
-          path: "modal",
-          name: "Modal",
-          component: () => import("@/components/modals/DepartmanCreateModal.vue"),
-          meta: {
-            title: "Modal",
           },
         },
         {
@@ -115,6 +112,7 @@ const router = createRouter({
           name: "Profile",
           component: () => import("@/layouts/ProfileLayout.vue"),
           meta: { title: "Profil", public: false },
+          beforeEnter: authGuard,
           children: [
             {
               path: "",
@@ -180,6 +178,18 @@ const router = createRouter({
       name: "register",
       component: () => import("@/views/Auth/RegisterView.vue"),
       meta: { title: "Kayıt ol", public: true },
+    },
+    {
+      path: "/forgot-password",
+      name: "ForgotPassword",
+      component: () => import("@/views/Auth/ForgotPasswordView.vue"),
+      meta: { title: "Şifremi Unuttum", public: true },
+    },
+    {
+      path: "/reset-password",
+      name: "ResetPassword",
+      component: () => import("@/views/Auth/ResetPasswordView.vue"),
+      meta: { title: "Yeni Şifre", public: true },
     },
     {
       path: "/:pathMatch(.*)*",

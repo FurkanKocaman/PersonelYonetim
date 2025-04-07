@@ -60,7 +60,7 @@ internal sealed class DepartmanGetAllQueryHandler(
                   departman => departman.SirketId,
                   personelAtama => personelAtama.SirketId,
                   (departman, personelAtama) => new { departman, personelAtama })
-            .Where(dp => dp.personelAtama.PersonelId == personel.Id)
+            .Where(dp => dp.personelAtama.PersonelId == personel.Id && dp.personelAtama.IsActive && dp.personelAtama.IsDeleted == false)
             .Join(userManager.Users,
                   dp => dp.departman.CreateUserId,
                   createUser => createUser.Id,

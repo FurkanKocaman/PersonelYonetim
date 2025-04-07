@@ -1,84 +1,85 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import PayrollTable from "../../components/dashboard/PayrollTable.vue";
+import { onMounted, ref, type Ref } from "vue";
 import AnnouncementsCard from "../../components/dashboard/AnnouncementsCard.vue";
 import QuickAccessButtons from "../../components/dashboard/QuickAccessButtons.vue";
-import StatisticsCard from "@/components/dashboard/StatisticsCard.vue";
+// import StatisticsCard from "@/components/dashboard/StatisticsCard.vue";
+import DuyuruService from "@/services/DuyuruService";
+import type { DuyuruModel } from "@/models/entity-models/DuyuruModel";
+import PersonelService from "@/services/PersonelService";
+import { useUserStore } from "@/stores/user";
+import IzinBilgilerimCard from "@/components/dashboard/IzinBilgilerimCard.vue";
+import PersonelCard from "@/components/dashboard/PersonelCard.vue";
 
-const payrollItems = ref([
-  { id: 1, name: "Didem Deniz", department: "Pazarlama", status: "Onaylandı", date: "15.03.2025" },
-  { id: 2, name: "Mehmet Kaya", department: "Finans", status: "Beklemede", date: "16.03.2025" },
-  { id: 3, name: "Ayşe Demir", department: "İK", status: "Onaylandı", date: "14.03.2025" },
-  { id: 4, name: "Can Yılmaz", department: "Satış", status: "İşleniyor", date: "17.03.2025" },
-]);
+const duyurular: Ref<DuyuruModel[]> = ref([]);
+const personelCount = ref(0);
 
-// İstatistikler için örnek veriler
-const stats = ref([
-  { title: "Toplam Personel", value: 124, icon: "users", color: "bg-blue-500" },
-  { title: "Aktif Projeler", value: 8, icon: "briefcase", color: "bg-green-500" },
-  { title: "Bu Ay İzinler", value: 12, icon: "calendar", color: "bg-purple-500" },
-  { title: "Bekleyen Onaylar", value: 5, icon: "clock", color: "bg-amber-500" },
-]);
+onMounted(() => {
+  getDuyurular();
+  getPersoneller();
+});
 
-// Duyurular için örnek veriler
-const announcements = ref([
-  {
-    id: 1,
-    title: "Yeni Personel Yönetim Sistemi",
-    date: "12.03.2025",
-    content:
-      "Yeni personel yönetim sistemimiz kullanıma açılmıştır. Tüm personelimize hayırlı olsun.",
-  },
-  {
-    id: 2,
-    title: "Yıllık İzin Planlaması",
-    date: "10.03.2025",
-    content: "Yaz dönemi izin planlamaları için son başvuru tarihi 30 Mart 2025'tir.",
-  },
-]);
+const getDuyurular = async () => {
+  const res = await DuyuruService.getDuyurular();
+  duyurular.value = res!.items;
+};
+
+const getPersoneller = async () => {
+  const response = await PersonelService.getPersonelList(
+    useUserStore().user.sirketId,
+    undefined,
+    undefined
+  );
+  if (response) {
+    personelCount.value = response.count;
+  }
+};
+
+// const stats = computed(() => [
+//   { title: "Toplam Personel", value: personelCount.value, icon: "users", color: "bg-blue-500" },
+//   { title: "Aktif Projeler", value: 8, icon: "briefcase", color: "bg-green-500" },
+//   { title: "Bu Ay İzinler", value: 12, icon: "calendar", color: "bg-purple-500" },
+//   { title: "Bekleyen Onaylar", value: 5, icon: "clock", color: "bg-amber-500" },
+// ]);
 </script>
 
 <template>
   <!-- Ana İçerik Alanı -->
   <div class="flex-1 transition-all duration-300">
     <!-- Üst Başlık Alanı -->
-    <header class="bg-white dark:bg-neutral-800 shadow-sm">
+    <!-- <header class="bg-white dark:bg-neutral-800 shadow-sm">
       <div class="py-4 px-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Yönetim Paneli</h1>
       </div>
-    </header>
+    </header> -->
 
-    <!-- İçerik Alanı -->
     <main class="p-6">
-      <!-- İstatistik Kartları -->
-      <StatisticsCard :stats="stats" />
+      <!-- <StatisticsCard :stats="stats" /> -->
 
-      <!-- Ana İçerik Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Sol Kolon: Bordro İşlemleri -->
         <div class="lg:col-span-2">
+          <PersonelCard />
           <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Bordro İşlemleri</h2>
-              <button
+              <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">İzin Bilgilerim</h2>
+              <RouterLink
+                to="/dashboard/profile/izinlerim"
                 class="text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300"
               >
                 Tümünü Gör
-              </button>
+              </RouterLink>
             </div>
-            <PayrollTable :payrollItems="payrollItems" />
+
+            <IzinBilgilerimCard />
           </div>
 
-          <!-- Hızlı Erişim Butonları -->
           <div class="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-6">
             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Hızlı Erişim</h2>
             <QuickAccessButtons />
           </div>
         </div>
 
-        <!-- Sağ Kolon: Duyurular -->
         <div class="lg:col-span-1">
-          <AnnouncementsCard :announcements="announcements" />
+          <AnnouncementsCard :duyurular="duyurular" />
         </div>
       </div>
     </main>

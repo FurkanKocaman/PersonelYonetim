@@ -7,6 +7,7 @@ using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
+using PersonelYonetim.Server.Domain.Duyurular;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.PersonelIzinler;
@@ -46,6 +47,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<TakvimEtkinlik> TakvimEtkinlikler { get; set; }
     public DbSet<Bildirim> Bildirimler { get; set; }
     public DbSet<PersonelBildirim> PersonelBildirimler { get; set; }
+    public DbSet<Duyuru> Duyurular { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -67,6 +69,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<TakvimEtkinlik>()
+            .HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Duyuru>()
             .HasOne(p => p.Sirket)
             .WithMany()
             .HasForeignKey(p => p.SirketId)

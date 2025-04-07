@@ -17,5 +17,6 @@ public static class RouteRegistrar
         app.RegisterTakvimEtkinlikRoutes();
         app.RegisterFileRoutes();
         app.RegisterBildirimRoutes();
+        app.RegisterDuyuruRoutes();
     }
 }

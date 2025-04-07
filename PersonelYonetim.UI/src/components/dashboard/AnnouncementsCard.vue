@@ -1,47 +1,56 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import type { DuyuruModel } from "@/models/entity-models/DuyuruModel";
+import { defineProps } from "vue";
 
-// Duyuru öğesi için tip tanımı
-interface Announcement {
-  id: number;
-  title: string;
-  date: string;
-  content: string;
-}
-
-// Komponent prop'ları
 const props = defineProps({
-  announcements: {
-    type: Array as () => Announcement[],
-    required: true
-  }
+  duyurular: {
+    type: Array as () => DuyuruModel[],
+    required: true,
+  },
 });
 </script>
 
 <template>
-  <div class="lg:col-span-1 bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden hover-card">
+  <div
+    class="lg:col-span-1 bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden hover-card"
+  >
     <div class="px-6 py-4 bg-purple-600 dark:bg-purple-700">
       <h3 class="text-lg font-semibold text-white">Duyurular</h3>
       <p class="text-purple-100 text-sm">Güncel duyurular ve bildirimler</p>
     </div>
     <div class="p-6">
-      <div v-if="announcements.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
+      <div v-if="duyurular.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">
         Henüz duyuru bulunmamaktadır.
       </div>
       <div v-else class="space-y-4">
-        <div v-for="announcement in announcements" :key="announcement.id" 
-             class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0 last:pb-0 hover-item">
+        <div
+          v-for="duyuru in props.duyurular"
+          :key="duyuru.id"
+          class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0 last:pb-0 hover-item"
+        >
           <div class="flex justify-between items-start">
-            <h4 class="text-md font-medium text-gray-800 dark:text-white">{{ announcement.title }}</h4>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ announcement.date }}</span>
+            <h4 class="text-md font-medium text-gray-800 dark:text-white">{{ duyuru.baslik }}</h4>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{
+              new Date(duyuru.createdAt).toLocaleString("tr-TR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
+            }}</span>
           </div>
-          <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ announcement.content }}</p>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ duyuru.aciklama }}</p>
         </div>
       </div>
       <div class="mt-6 flex justify-center">
-        <button class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200 hover-button">
+        <RouterLink
+          to="/dashboard/duyurular"
+          class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors duration-200 hover-button"
+        >
           Tüm Duyurular
-        </button>
+        </RouterLink>
       </div>
     </div>
   </div>

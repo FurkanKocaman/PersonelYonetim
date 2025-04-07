@@ -61,7 +61,7 @@ internal sealed class SubelerGetQueryHandler(
                   sube => sube.SirketId,
                   personelAtama => personelAtama.SirketId,
                   (sube, personelAtama) => new { sube, personelAtama })
-            .Where(sp => !sp.personelAtama.IsDeleted &&  sp.personelAtama.PersonelId == personel.Id)
+            .Where(sp => sp.personelAtama.IsDeleted == false && sp.personelAtama.IsActive && sp.personelAtama.PersonelId == personel.Id)
             .Join(userManager.Users,
                   sp => sp.sube.CreateUserId,
                   createUser => createUser.Id,

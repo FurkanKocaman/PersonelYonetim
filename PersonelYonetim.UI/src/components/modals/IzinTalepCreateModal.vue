@@ -42,10 +42,8 @@ const mesaiBaslangicHesapla = () => {
   if (!request.baslangicTarihi || !request.bitisTarihi) return;
 
   const diffTime = request.bitisTarihi.getTime() - request.baslangicTarihi.getTime();
-  console.log("DiffTime:", diffTime);
 
-  const diffDays = (diffTime / (1000 * 60 * 60 * 24)).toFixed(2); // Gün farkını 2 basamaklı al
-  console.log("DiffDays:", diffDays);
+  const diffDays = (diffTime / (1000 * 60 * 60 * 24)).toFixed(2);
 };
 
 watch(() => request.baslangicTarihi, mesaiBaslangicHesapla);

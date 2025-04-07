@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import AuthService from "@/services/AuthService";
 import { useRouter } from "vue-router";
-import type { RegisterRequest } from "@/models/RegisterRequest";
+import type { RegisterRequest } from "@/models/request-models/RegisterRequest";
 import axios from "axios";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -96,9 +96,9 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center h-dvh">
+  <div class="flex justify-center items-center h-dvh dark:bg-neutral-900">
     <div
-      class="flex flex-col items-center justify-center md:w-[60dvw] w-[90dvh] md:h-[90dvh] h-[90dvh] bg-neutral-200/50 dark:bg-neutral-700 rounded-md"
+      class="flex flex-col items-center justify-center md:w-[60dvw] w-[90dvw] md:h-[90dvh] h-[90dvh] bg-neutral-200/40 dark:bg-neutral-800/50 rounded-md"
     >
       <form @submit.prevent="handleRegister" class="space-y-4 w-full px-16">
         <div>
@@ -409,8 +409,8 @@ const handleRegister = async () => {
           <!-- Şirket bilgileri end -->
 
           <!-- Onaylama start -->
-          <div v-if="currentStep == 2" class="flex w-full justify-between">
-            <div class="border-r flex-1">
+          <div v-if="currentStep == 2" class="flex xl:flex-row flex-col w-full justify-between">
+            <div class="xl:border-r flex-1">
               <h1>Kişisel Bilgiler</h1>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
                 {{ registerData.ad }} {{ registerData.soyad }}

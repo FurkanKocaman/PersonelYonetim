@@ -40,7 +40,7 @@ internal sealed class SirketlerGetQueryHandler(
         }
 
         var result = (from personelAtama in personelAtamaRepository.GetAll()
-                      where personel!.Id == personelAtama.PersonelId && !personelAtama.IsDeleted
+                      where personel!.Id == personelAtama.PersonelId && personelAtama.IsDeleted == false && personelAtama.IsActive
                       join sirket in sirketRepository.GetAll() on personelAtama.SirketId equals sirket.Id
                       join create_user in userManager.Users.AsQueryable() on sirket.CreateUserId equals create_user.Id
                       join update_user in userManager.Users.AsQueryable() on sirket.UpdateUserId equals update_user.Id

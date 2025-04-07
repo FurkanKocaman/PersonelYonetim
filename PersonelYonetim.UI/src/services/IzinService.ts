@@ -120,7 +120,6 @@ export class IzinService {
           },
         }
       );
-      console.log(response);
 
       return {
         items: response.data.value,
@@ -138,7 +137,6 @@ export class IzinService {
         id: id,
         onayDurum: onayDurum,
       });
-      console.log(response);
       useToastStore().addToast(response.data.data, "", "success", 5000, true);
       return response.data;
     } catch (error) {

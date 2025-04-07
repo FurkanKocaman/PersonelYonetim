@@ -1,4 +1,4 @@
-import type { UserModel } from "@/models/entity-models/UserModel";
+import type { PersonelItem } from "@/models/PersonelModels";
 import { useUserStore } from "@/stores/user";
 import type { NavigationGuardNext, RouteLocationNormalized } from "vue-router";
 
@@ -7,21 +7,23 @@ export async function authGuard(
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) {
-  document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
-  next();
-
-  /*
   await useUserStore().getUser();
-  const user: UserModel = useUserStore().user;
+  const userStore = useUserStore();
 
+  await userStore.getUser();
+
+  const user: PersonelItem = userStore.user;
   const requiredRoles: number[] = Array.isArray(to.meta.requiredRole) ? to.meta.requiredRole : [];
 
+  if (!user?.id || user.id === "") {
+    document.title = "Giriş Yap | Personel Yönetim Sistemi";
+    return next({ name: "login" });
+  }
   if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
     document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
-    next({ name: "Unauthorized" });
-  } else {
-    document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
-    next();
+    return next({ name: "Unauthorized" });
   }
-  */
+
+  document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
+  return next();
 }

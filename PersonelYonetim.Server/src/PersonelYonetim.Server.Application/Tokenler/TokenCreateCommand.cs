@@ -24,7 +24,7 @@ internal sealed class TokenCreateCommandHandler(
 
         Token token = new();
         token.UserId = user.Id;
-        token.TokenString = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        token.TokenString = await userManager.GenerateEmailConfirmationTokenAsync(user); 
         token.TokenType = request.TokenTypeEnum;
         token.Expires = DateTimeOffset.UtcNow.AddHours(1);
         token.UserId = user.Id;

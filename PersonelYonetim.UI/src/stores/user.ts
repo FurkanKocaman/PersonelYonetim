@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive } from "vue";
+import router from "@/router";
 import AuthService from "@/services/AuthService";
 import type { PersonelItem } from "@/models/PersonelModels";
 
@@ -50,14 +51,21 @@ export const useUserStore = defineStore("user", () => {
   });
 
   const getUser = async () => {
-    const response = await AuthService.getCurrentUser();
-    Object.assign(user, response);
+    try {
+      const response = await AuthService.getCurrentUser();
+      Object.assign(user, response);
+    } catch (error) {
+      console.error(error);
+      router.push({ name: "login" });
+    }
   };
 
   const logout = () => {
     Object.assign(user, {});
 
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    router.push({ name: "login" });
   };
 
   return { user, getUser, logout };

@@ -57,7 +57,7 @@ internal sealed class PozisyonGetAllQueryHandler(
                     pozisyon => pozisyon.SirketId,
                     personelAtama => personelAtama.SirketId,
                     (pozisyon, personelAtama) => new { pozisyon, personelAtama })
-            .Where(pp => pp.personelAtama.PersonelId == personel.Id && !pp.personelAtama.IsDeleted)
+            .Where(pp => pp.personelAtama.PersonelId == personel.Id && pp.personelAtama.IsDeleted == false && pp.personelAtama.IsActive)
             .Join(userManager.Users,
                   dp => dp.pozisyon.CreateUserId,
                   createUser => createUser.Id,

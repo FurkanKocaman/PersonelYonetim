@@ -4,6 +4,7 @@ import type { LoginResponse } from "@/models/response-models/LoginResponse";
 import type { RegisterRequest } from "@/models/request-models/RegisterRequest";
 import api from "./Axios";
 import type { PersonelItem } from "@/models/PersonelModels";
+import type { PasswordResetModel } from "@/models/request-models/PasswordResetModel";
 
 class AuthService {
   async login(data: LoginRequest): Promise<{ success: boolean; message: string }> {
@@ -28,7 +29,6 @@ class AuthService {
         }
         return { success: false, message: "Sunucuya bağlanılırken hata oluştu" };
       }
-      console.error(error);
       return { success: false, message: "Beklenmeyen bir hata oluştu" };
     }
   }
@@ -53,7 +53,6 @@ class AuthService {
         }
         return { success: false, message: "Sunucuya bağlanılırken hata oluştu" };
       }
-      console.error(error);
       return { success: false, message: "Beklenmeyen bir hata oluştu" };
     }
   }
@@ -66,7 +65,42 @@ class AuthService {
       User.role = Number(User.role);
       return User;
     } catch (error) {
-      console.error(error);
+      return error;
+    }
+  }
+
+  async SendPasswordResetMail(
+    email: string
+  ): Promise<
+    { data: string; errorMessages: string[]; isSuccessful: boolean; statusCode: number } | undefined
+  > {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/send-reset-password-token`,
+        { email: email }
+      );
+
+      return res.data;
+    } catch (error) {
+      return error.response.data;
+    }
+  }
+
+  async ResetPassword(
+    request: PasswordResetModel
+  ): Promise<
+    { data: string; errorMessages: string[]; isSuccessful: boolean; statusCode: number } | undefined
+  > {
+    try {
+      console.log("REQ", request);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/reset-password`,
+        request
+      );
+
+      return response.data;
+    } catch (error) {
+      return error.response.data;
     }
   }
 

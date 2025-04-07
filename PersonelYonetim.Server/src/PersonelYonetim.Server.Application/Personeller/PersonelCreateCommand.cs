@@ -2,7 +2,11 @@
 using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Application.PersonelAtamalar;
+using PersonelYonetim.Server.Application.Services;
+using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Application.Users;
+using PersonelYonetim.Server.Domain.Bildirimler;
+using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
@@ -46,7 +50,8 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
     }
 }
 internal sealed class PersonelCreateCommandHandler(
-    IPersonelRepository personelRepository,
+    IPersonelRepository personelRepository, 
+    IEmailService emailService,
     IUnitOfWork unitOfWork,
     ISender sender) : IRequestHandler<PersonelCreateCommand, Result<string>>
 {
@@ -81,6 +86,16 @@ internal sealed class PersonelCreateCommandHandler(
 
         if (!personelAtamaResult.IsSuccessful)
             Result<string>.Failure("Personel atama oluşturulamadı");
+
+        var currentYear = DateTimeOffset.Now.Year;
+        var dogumGunEtkinlikTarihi = new DateTimeOffset(
+            new DateTime(currentYear, personel.DogumTarihi.Month, personel.DogumTarihi.Day),
+            personel.DogumTarihi.Offset);
+
+        TakvimEtkinlikCreateCommand command = new($"{personel.FullName} doğum günü", null,dogumGunEtkinlikTarihi.Date, dogumGunEtkinlikTarihi.Date.AddHours(23), true, null);
+        await sender.Send(command, cancellationToken);
+
+        emailService.SendAsync(personel.Iletisim.Eposta, $"Personel Yönetim Sistemi", $"<p>Personel Yönetim sistemi hesabınız oluşturulmuştur. Giriş Bilgileri: E-posta:{personel.Iletisim.Eposta}</br> Şifre:{request.Ad}</p>Giriş sayfasına gitmek için<a href='http://localhost:5173/login'>Giriş sayfası</a>", cancellationToken).Wait();
 
         return Result<string>.Succeed(userResult.Data.ToString());
     }
