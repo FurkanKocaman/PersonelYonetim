@@ -48,12 +48,12 @@ internal sealed class PersonelAtamaUpdateCommandHandler(
         if (role is null)
             return Result<string>.Failure("Rol bulunamadı");
 
-        AppUserRole appUserRole = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == personelAtamaOld.Personel.UserId && p.SirketId == personelAtama.SirketId);
+        AppUserRole appUserRole = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == personelAtamaOld.Personel!.UserId && p.SirketId == personelAtama.SirketId);
         if (appUserRole is null)
         {
             appUserRole = new()
             {
-                UserId = personelAtamaOld.Personel.UserId,
+                UserId = personelAtamaOld.Personel!.UserId,
                 RoleId = role.Id,
                 SirketId = personelAtama.SirketId,
             };

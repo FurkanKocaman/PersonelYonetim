@@ -41,8 +41,8 @@ internal sealed class IzinTalepOnayCommandHandler(
         IzinTalep izinTalep = await izinTalepRepository.FirstOrDefaultAsync(p => p.Id == request.Id);
 
         izinTalep.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-        izinTalep.DegerlendirilmeTarihi = DateTimeOffset.Now;
-        izinTalep.DegerlendirenId = personel.Id; 
+        //izinTalep.DegerlendirilmeTarihi = DateTimeOffset.Now;
+        //izinTalep.DegerlendirenId = personel.Id; 
         await unitOfWork.SaveChangesAsync();
 
 

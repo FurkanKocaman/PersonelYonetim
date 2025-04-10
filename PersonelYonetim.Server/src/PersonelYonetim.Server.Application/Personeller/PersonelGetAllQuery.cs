@@ -85,7 +85,7 @@ internal sealed class PersonelGetAllQueryHandler(
                       DogumTarihi = ppuu.personel.DogumTarihi,
                       Cinsiyet = ppuu.personel.Cinsiyet,
                       SirketId = ppuu.personelAtama.SirketId,
-                      SirketAd = ppuu.personelAtama.Sirket.Ad,
+                      SirketAd = ppuu.personelAtama.Sirket!.Ad,
                       SubeId = ppuu.personelAtama.SubeId,
                       SubeAd = ppuu.personelAtama.Sube!.Ad,
                       DepartmanId = ppuu.personelAtama.DepartmanId,

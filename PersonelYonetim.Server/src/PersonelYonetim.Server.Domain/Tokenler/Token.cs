@@ -1,5 +1,4 @@
 ﻿using Ardalis.SmartEnum;
-using System.Security.Cryptography;
 
 namespace PersonelYonetim.Server.Domain.Tokenler;
 

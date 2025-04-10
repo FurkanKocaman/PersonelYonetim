@@ -52,13 +52,13 @@ internal sealed class IzinTalepGetAllQueryHandler(
             .Where(i => i.Personel.PersonelAtamalar.Any(p => p.YoneticiId == personel.Id) && !i.IsDeleted)
             .Include(i => i.Personel)
             .Include(i => i.IzinTur)
-            .Include(i => i.Degerlendiren)
+            //.Include(i => i.Degerlendiren)
             .AsQueryable();
 
         var users = userManager.Users.AsQueryable();
 
         var response = from entity in izinler
-                       join onay_user in users on entity.DegerlendirenId equals onay_user.Id into onay_user_join
+                       join onay_user in users on entity.Id equals onay_user.Id into onay_user_join
                        from onay_users in onay_user_join.DefaultIfEmpty()
                        join create_user in users on entity.CreateUserId equals create_user.Id
                        join update_user in users on entity.UpdateUserId equals update_user.Id into update_user_join
@@ -75,8 +75,8 @@ internal sealed class IzinTalepGetAllQueryHandler(
                            IzinTuru = entity.IzinTur.Ad,
                            Aciklama = entity.Aciklama!,
                            DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
-                           DegerlendirenId = entity.DegerlendirenId,
-                           DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
+                           //DegerlendirenId = entity.DegerlendirenId,
+                           //DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
                            IsActive = entity.IsActive,
                            CreatedAt = entity.CreatedAt,
                            CreateUserId = create_user.Id,

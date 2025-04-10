@@ -113,13 +113,13 @@ internal sealed class PersonelUpdateCommandHandler(
         {
             personelAtama.IsDeleted = true;
 
-            PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId == null ? personelAtama.IzinKuralId : request.IzinKuralId);
+            PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
             var result = await sender.Send(personelAtamaCreateCommand);
         }
         else
         {
             if (request.IzinKuralId is not null)
-                personelAtama.IzinKuralId = request.IzinKuralId;
+                //personelAtama.IzinKuralId = request.IzinKuralId;
             if (request.CalismaTakvimiId is not null)
                 personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
         }

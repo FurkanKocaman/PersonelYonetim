@@ -10,6 +10,6 @@ public sealed class IzinKural : Entity
     public string? Aciklama { get; set; }
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
-    public ICollection<PersonelAtama> PersonelAtamalar { get; set; } = new List<PersonelAtama>();
+    public ICollection<PersonelIzinKural> PersonelIzinKurallar { get; set; } = new List<PersonelIzinKural>();
     public ICollection<IzinTurIzinKural> IzinTurler { get; set; } = new List<IzinTurIzinKural>();
 }

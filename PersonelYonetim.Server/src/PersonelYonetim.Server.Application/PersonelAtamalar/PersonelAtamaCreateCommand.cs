@@ -98,7 +98,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
                     KullanilanIzin = 0
                 };
                 personelIzinRepository.Add(personelIzin);
-                personelAtama.IzinKuralId = izinTur.IzinKuralId;
+                //personelAtama.IzinKuralId = izinTur.IzinKuralId;
                 personelAtamaRepository.Update(personelAtama);
                 await unitOfWork.SaveChangesAsync();
             }
@@ -122,7 +122,7 @@ internal sealed class PersonelAtamaCreateCommandHandler(
             if (defaultIzinKural == null)
                 return Result<string>.Failure("IzinKural bulunamadı");
 
-            personelAtama.IzinKuralId = defaultIzinKural.Id;
+            //personelAtama.IzinKuralId = defaultIzinKural.Id;
         }
 
        var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);

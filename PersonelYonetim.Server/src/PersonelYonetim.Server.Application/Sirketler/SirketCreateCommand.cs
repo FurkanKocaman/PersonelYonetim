@@ -30,7 +30,7 @@ internal sealed class SirketCreateCommandHandler(
     public async Task<Result<string>> Handle(SirketCreateCommand request, CancellationToken cancellationToken)
     {
         var sirketVarMi = await sirketRepository.AnyAsync(p => p.Ad == request.Ad && !p.IsDeleted);
-        if (sirketVarMi)
+        if (sirketVarMi) 
             return Result<string>.Failure("Bu isme sahip şirket zaten mevcut.");
 
         Sirket sirket = request.Adapt<Sirket>();
@@ -52,7 +52,7 @@ internal sealed class SirketCreateCommandHandler(
         };
         izinKuralRepository.Add(defaultIzinKural);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
+        List<IzinTurIzinKural> IzinTurIzinKurallar = new();
         foreach (var izinTurId in defaultIzinTurler.Select(p => p.Id))
         {
             IzinTurIzinKural izinTurkural = new()
@@ -60,9 +60,9 @@ internal sealed class SirketCreateCommandHandler(
                 IzinTurId = izinTurId,
                 IzinKuralId = defaultIzinKural.Id,
             };
-            izinturIzinKuralRepository.Add(izinTurkural);
+            IzinTurIzinKurallar.Add(izinTurkural);
         }
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        izinturIzinKuralRepository.AddRange(IzinTurIzinKurallar);
 
         CalismaTakvimi defaultCalismaTakvim = DefaultCalismaTakvim.GetDefaultCalismaTakvim(sirket.Id);
         List<CalismaGun> defaultCalismaGunler = DefaultCalismaTakvim.GetDefaultCalismaGunler(defaultCalismaTakvim.Id);
@@ -70,10 +70,7 @@ internal sealed class SirketCreateCommandHandler(
         calismaTakvimRepository.Add(defaultCalismaTakvim);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        foreach(CalismaGun gun in defaultCalismaGunler)
-        {
-            calismaGunRepository.Add(gun);
-        }
+        calismaGunRepository.AddRange(defaultCalismaGunler);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Succeed(sirket.Id.ToString());

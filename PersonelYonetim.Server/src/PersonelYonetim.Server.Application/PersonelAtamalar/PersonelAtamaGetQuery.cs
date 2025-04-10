@@ -63,9 +63,9 @@ internal sealed class PersonelAtamaGetQueryHandler(
             .Select(p => new PersonelAtamaGetQueryResponse
             {
                 Id = p.Id,
-                FullName = p.Personel.FullName,
+                FullName = p.Personel!.FullName,
                 SirketId = p.SirketId,
-                SirketAd = p.Sirket.Ad,
+                SirketAd = p.Sirket!.Ad,
                 SubeId = p.SubeId,
                 SubeAd = p.Sube != null ? p.Sube.Ad : null,
                 DepartmanId = p.DepartmanId,
@@ -79,7 +79,7 @@ internal sealed class PersonelAtamaGetQueryHandler(
                 PozisyonBaslangicTarih = p.PozisyonBaslamaTarihi,
                 PozisyonBitisTarih = p.SozlesmeBitisTarihi,
                 CalismaTakvimAd = p.CalismaTakvimi != null ? p.CalismaTakvimi.Ad : "",
-                IzinKuralAd = p.IzinKural != null ? p.IzinKural.Ad : "",
+                //IzinKuralAd = p.IzinKural != null ? p.IzinKural!.Ad : "",
                 IsActive = p.IsActive,
                 CreatedAt = p.CreatedAt,
                 CreateUserId = p.CreateUserId,

@@ -50,7 +50,7 @@ internal sealed class IzinTalepGetQueryHandler(
 
 
         var response = (from entity in izinTalepRepository.Where(i => i.PersonelId == personel.Id && !i.IsDeleted)
-                        join onay_user in userManager.Users.AsQueryable() on entity.DegerlendirenId equals onay_user.Id
+                        join onay_user in userManager.Users.AsQueryable() on entity.Id equals onay_user.Id
                         into onay_user
                         from onay_users in onay_user.DefaultIfEmpty()
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
@@ -69,8 +69,8 @@ internal sealed class IzinTalepGetQueryHandler(
                             IzinTuru = entity.IzinTur.Ad,
                             Aciklama = entity.Aciklama!,
                             DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
-                            DegerlendirenId = entity.DegerlendirenId,
-                            DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
+                            //DegerlendirenId = entity.DegerlendirenId,
+                            //DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,
                             CreateUserId = create_user.Id,

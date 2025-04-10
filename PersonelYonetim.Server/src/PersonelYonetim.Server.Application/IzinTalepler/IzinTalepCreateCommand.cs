@@ -164,7 +164,7 @@ internal sealed class IzinTalepCreateCommandHandler(
         Bildirim bildirim = new()
         {
             Baslik = "Yeni İzin Talebi",
-            Aciklama = $"{personelAtama.Personel.Ad} {personelAtama.Personel.Soyad} tarafından yeni bir izin talebi oluşturuldu.",
+            Aciklama = $"{personelAtama.Personel!.Ad} {personelAtama.Personel.Soyad} tarafından yeni bir izin talebi oluşturuldu.",
             CreatedAt = DateTimeOffset.Now,
             BildirimTipi = BildirimTipiEnum.Onay,
             AliciTipi = AliciTipiEnum.Personel,
