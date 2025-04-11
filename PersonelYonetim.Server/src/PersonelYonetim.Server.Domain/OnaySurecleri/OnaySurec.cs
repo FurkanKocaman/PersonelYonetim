@@ -10,7 +10,7 @@ public class OnaySurec : Entity
     public string Ad { get; set; } = default!;
     public string? Aciklama { get; set; }
     public OnaySurecTuruEnum OnaySurecTuruEnum { get; set; } = default!;
-    public ICollection<OnaySureciAdimi> OnayAdimlari { get; set; } = new List<OnaySureciAdimi>();
+    public ICollection<OnaySureciAdimi> OnayAdimlari { get; set; } = new List<OnaySureciAdimi>(); 
     public Guid SirketId { get; set; }
     public Sirket? Sirket { get; set; }
 }

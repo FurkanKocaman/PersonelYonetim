@@ -14,6 +14,7 @@ public abstract class Entity
 
     #region Audit Log
     public bool IsActive { get; set; } = true;
+    public DateTimeOffset? InActiveDate { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public Guid CreateUserId { get; set; } = default!;
     public string CreateuserName => GetCreateUserName();

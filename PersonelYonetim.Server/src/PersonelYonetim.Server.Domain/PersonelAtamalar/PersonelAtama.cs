@@ -14,7 +14,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace PersonelYonetim.Server.Domain.PersonelAtamalar;
 
 public sealed class PersonelAtama : Entity
-{
+{ 
     public Guid PersonelId { get; set; }
     public Personel? Personel { get; set; } 
     public Guid? DepartmanId { get; set; }

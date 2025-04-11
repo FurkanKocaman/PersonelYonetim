@@ -1,9 +1,4 @@
 ﻿using PersonelYonetim.Server.Domain.Rols;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PersonelYonetim.Server.Domain.OnaySurecleri;
 public static class DefaultOnaySurec
@@ -14,47 +9,44 @@ public static class DefaultOnaySurec
         {
             new OnaySurec
             {
-                Ad = "Izin Onayi",
+                Ad = "Default izin talep onay süreci",
                 Aciklama = "Izin onayi icin kullanilan onay sureci",
                 OnaySurecTuruEnum = OnaySurecTuruEnum.Izin,
                 SirketId = sirketId
             },
             new OnaySurec
             {
-                Ad = "Mesai Onayi",
+                Ad = "Default mesai talep onay süreci",
                 Aciklama = "Mesai onayi icin kullanilan onay sureci",
                 OnaySurecTuruEnum = OnaySurecTuruEnum.Mesai,
                 SirketId = sirketId
             },
             new OnaySurec
             {
-                Ad = "Eşya Talebi",
+                Ad = "Default eşya talep onay süreci",
                 Aciklama = "Eşya talebi icin kullanilan onay sureci",
                 OnaySurecTuruEnum = OnaySurecTuruEnum.EsyaTalep,
                 SirketId = sirketId
             },
             new OnaySurec
             {
-                Ad = "Avans",
+                Ad = "Default avans talep onay süreci",
                 Aciklama = "Avans talebi icin kullanilan onay sureci",
-                OnaySurecTuruEnum = OnaySurecTuruEnum.EsyaTalep,
+                OnaySurecTuruEnum = OnaySurecTuruEnum.Avans,
                 SirketId = sirketId
             }
         };
         return defaultOnaySurecleri;
     }
-    public static List<OnaySureciAdimi> GetDefaultOnayItem(Guid onaySurecId, RolTipiEnum rolTipi)
+    public static OnaySureciAdimi GetDefaultOnayAdim(Guid onaySurecId, RolTipiEnum? rolTipi)
     {
-        var defaultOnayItems = new List<OnaySureciAdimi>
+        OnaySureciAdimi onaySureciAdimi = new OnaySureciAdimi
         {
-            new OnaySureciAdimi
-            {
-                Sira = 1,
-                PersonelId = null,
-                Rol = rolTipi,
-                OnaySurecId = onaySurecId,
-            },
+            Sira = 1,
+            PersonelId = null,
+            Rol = rolTipi ?? RolTipiEnum.DepartmanYonetici,
+            OnaySurecId = onaySurecId,
         };
-        return defaultOnayItems;
+        return onaySureciAdimi;
     }
 }

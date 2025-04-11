@@ -1,7 +1,7 @@
 ﻿namespace PersonelYonetim.Server.Domain.Izinler;
 public static class DefaultIzinTurler
 {
-    public static List<IzinTur> GetDefaultIzinTurler(Guid sirketId){
+    public static List<IzinTur> GetDefaultIzinTurler(Guid sirketId, Guid izinKuralId){
         var  defaultIzinTurleri = new List<IzinTur>
         {
             new IzinTur
@@ -24,7 +24,8 @@ public static class DefaultIzinTurler
                 HesapSekli = true,
                 AciklamaZorunlu = false,
                 YerineBakacakZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
              new IzinTur
             {
@@ -38,7 +39,8 @@ public static class DefaultIzinTurler
                 HakEdisBaslangic = false,
                 HesapSekli = true,
                 AciklamaZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
             new IzinTur
             {
@@ -50,7 +52,8 @@ public static class DefaultIzinTurler
                 DevretmeTipi = DevretmeTipiEnum.Sifirlama,
                 HesapSekli = true,
                 AciklamaZorunlu = true,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
             new IzinTur
             {
@@ -62,7 +65,8 @@ public static class DefaultIzinTurler
                 HakEdis = HakEdisEnum.Gunluk,
                 HesapSekli = true,
                 AciklamaZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
             new IzinTur
             {
@@ -74,7 +78,8 @@ public static class DefaultIzinTurler
                 HakEdis = HakEdisEnum.Gunluk,
                 HesapSekli = true,
                 AciklamaZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
             new IzinTur
             {
@@ -86,7 +91,8 @@ public static class DefaultIzinTurler
                 HakEdis = HakEdisEnum.Gunluk,
                 HesapSekli = true,
                 AciklamaZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
             new IzinTur
             {
@@ -98,7 +104,8 @@ public static class DefaultIzinTurler
                 HakEdis = HakEdisEnum.Gunluk,
                 HesapSekli = true,
                 AciklamaZorunlu = false,
-                SirketId = sirketId
+                SirketId = sirketId,
+                IzinKuralId = izinKuralId
             },
            
         };

@@ -10,8 +10,7 @@ namespace PersonelYonetim.Server.Application.Users;
 public sealed record UserCreateCommand(
     string FirstName,
     string LastName,
-    string Email,
-    Guid SirketId
+    string Email
     ) : IRequest<Result<Guid>>;
 
 public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCommand>

@@ -48,7 +48,6 @@ internal sealed class IzinTalepGetQueryHandler(
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-
         var response = (from entity in izinTalepRepository.Where(i => i.PersonelId == personel.Id && !i.IsDeleted)
                         join onay_user in userManager.Users.AsQueryable() on entity.Id equals onay_user.Id
                         into onay_user

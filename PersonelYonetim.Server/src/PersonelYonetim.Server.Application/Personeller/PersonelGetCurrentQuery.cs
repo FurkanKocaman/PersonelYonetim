@@ -83,7 +83,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                     FullName = personel.FullName,
                     DogumTarihi = personel.DogumTarihi,
                     PozisyonBaslangicTarih = pu.personelAtama.PozisyonBaslamaTarihi,
-                    ProfilResimUrl = personel.ProfilResimUrl,
+                    ProfilResimUrl = personel.AvatarUrl,
                     Cinsiyet = personel.Cinsiyet == null ? null : pu.personelAtama.Personel!.Cinsiyet == true ? "Erkek" : "Kadın",
                     SirketId = pu.personelAtama.SirketId,
                     SirketAd = pu.personelAtama.Sirket!.Ad,

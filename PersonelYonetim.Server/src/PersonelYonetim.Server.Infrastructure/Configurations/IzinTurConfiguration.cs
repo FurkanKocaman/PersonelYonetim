@@ -12,5 +12,15 @@ internal sealed class IzinTurConfiguration : IEntityTypeConfiguration<IzinTur>
         builder.Property(p => p.EksiBakiyeHakkı).HasConversion(tip => tip!.Value, value => EksiBakiyeHakkıEnum.FromValue(value));
         builder.Property(p => p.HakEdis).HasConversion(tip => tip!.Value, value => HakEdisEnum.FromValue(value));
         builder.Property(p => p.DevretmeTipi).HasConversion(tip => tip!.Value, value => DevretmeTipiEnum.FromValue(value));
+
+        builder.HasOne(p => p.IzinKural)
+            .WithMany(p => p.IzinTurler)
+            .HasForeignKey(p => p.IzinKuralId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne(p => p.Sirket)
+            .WithMany()
+            .HasForeignKey(p => p.SirketId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

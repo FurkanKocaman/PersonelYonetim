@@ -102,15 +102,15 @@ internal sealed class IzinKuralGetAllQueryHandler(
                           : null,
                             IsDeleted = iuu.izinKural.IsDeleted,
                             DeleteAt = iuu.izinKural.DeleteAt,
-                            IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTurResponse
-                            {
-                                Id = it.IzinTurId,
-                                Ad = it.IzinTur.Ad,
-                                Aciklama = it.IzinTur.Aciklama,
-                                UcretliMi = it.IzinTur.UcretliMi,
-                                LimitTipiName = it.IzinTur.LimitTipi == LimitTipiEnum.Limitsiz ? LimitTipiEnum.Limitsiz.Name : $"{it.IzinTur.LimitTipi.Name} {it.IzinTur.LimitGunSayisi} gün",
-                                KalanGunSayisi = (((DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year)) * it.IzinTur.LimitGunSayisi) - izinTalepler.Where(p => p.IzinTurId == it.IzinTur.Id && p.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi).Sum(p => p.ToplamSure)
-                            }).ToList(),
+                            //IzinTurler = iuu.izinKural.IzinTurler.Select(it => new IzinTurResponse
+                            //{
+                            //    Id = it.IzinTurId,
+                            //    Ad = it.IzinTur.Ad,
+                            //    Aciklama = it.IzinTur.Aciklama,
+                            //    UcretliMi = it.IzinTur.UcretliMi,
+                            //    LimitTipiName = it.IzinTur.LimitTipi == LimitTipiEnum.Limitsiz ? LimitTipiEnum.Limitsiz.Name : $"{it.IzinTur.LimitTipi.Name} {it.IzinTur.LimitGunSayisi} gün",
+                            //    KalanGunSayisi = (((DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - iuu.personelAtama.PozisyonBaslamaTarihi.Year)) * it.IzinTur.LimitGunSayisi) - izinTalepler.Where(p => p.IzinTurId == it.IzinTur.Id && p.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi).Sum(p => p.ToplamSure)
+                            //}).ToList(),
                         });
         return Task.FromResult(response);
     }

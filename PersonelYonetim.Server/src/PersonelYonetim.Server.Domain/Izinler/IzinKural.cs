@@ -11,5 +11,5 @@ public sealed class IzinKural : Entity
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
     public ICollection<PersonelIzinKural> PersonelIzinKurallar { get; set; } = new List<PersonelIzinKural>();
-    public ICollection<IzinTurIzinKural> IzinTurler { get; set; } = new List<IzinTurIzinKural>();
+    public ICollection<IzinTur> IzinTurler { get; set; } = new List<IzinTur>();
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.PersonelIzinler;
 using PersonelYonetim.Server.Domain.Personeller;
@@ -11,7 +12,6 @@ using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
-using System.Security.Cryptography;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelAtamalar;
@@ -25,10 +25,13 @@ public sealed record PersonelAtamaCreateCommand(
     Guid? YoneticiId,
     int RolTipiValue,
     Guid? CalismaTakvimId,
+    Guid? IzinKuralId,
+    Guid? MesaiOnaySurecId,
+    Guid? IzinOnaySurecId,
     int SozlesmeTuruValue,
+    int CalismaSekliValue,
     DateTimeOffset? SozlesmeBitisTarihi,
-    DateTimeOffset? PozisyonBaslamaTarihi,
-    Guid? IzinKuralId
+    DateTimeOffset? PozisyonBaslamaTarihi
     ) : IRequest<Result<string>>;
 
 internal sealed class PersonelAtamaCreateCommandHandler(
@@ -37,124 +40,160 @@ internal sealed class PersonelAtamaCreateCommandHandler(
     IUserRoleRepository userRoleRepository,
     RoleManager<AppRole> roleManager,
     IPersonelAtamaRepository personelAtamaRepository,
-    IPersonelIzinRepository personelIzinRepository,
-    IIzinTurIzinKuralRepository izinTurIzinKuralRepository,
     ICalismaTakvimRepository calismaTakvimRepository,
     IIzinKuralRepository izinKuralRepository,
+    IPersonelIzinKuralRepository personelIzinKuralRepository,
+    IOnaySurecRepository onaySurecRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<PersonelAtamaCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelAtamaCreateCommand request, CancellationToken cancellationToken)
     {
-        PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false);
-        if (personelAtamaEski is not null)
+        //using(var transaction = unitOfWork.BeginTransaction())
+        //{
+        try
         {
-            personelAtamaEski.IsActive = false;
-            personelAtamaEski.IsDeleted = true;
-            personelAtamaEski.SozlesmeBitisTarihi = DateTimeOffset.Now;
-            personelAtamaRepository.Update(personelAtamaEski);
-            await unitOfWork.SaveChangesAsync();
-        }
+            //PersonelAtama personelAtamaEski = personelAtamaRepository.FirstOrDefault(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false);
+            //if (personelAtamaEski is not null)
+            //{
+            //    personelAtamaEski.IsActive = false;
+            //    personelAtamaEski.IsDeleted = true;
+            //    personelAtamaEski.SozlesmeBitisTarihi = DateTimeOffset.Now;
+            //    personelAtamaRepository.Update(personelAtamaEski);
+            //    await unitOfWork.SaveChangesAsync();
+            //}
 
-        PersonelAtama personelAtama = request.Adapt<PersonelAtama>();
-        personelAtama.PersonelId = request.PersonelId;
-        personelAtama.IsActive = true;
-        personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
-        personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
+            PersonelAtama personelAtama = request.Adapt<PersonelAtama>();
+            //personelAtama.PersonelId = request.PersonelId;
+            //personelAtama.IsActive = true;
+            personelAtama.RolTipi = RolTipiEnum.FromValue(request.RolTipiValue);
+            personelAtama.SozlesmeTuru = SozlesmeTuruEnum.FromValue(request.SozlesmeTuruValue);
 
-        personelAtamaRepository.Add(personelAtama);
-        await unitOfWork.SaveChangesAsync();
 
-        var personelIzin = personelIzinRepository.GetAll()
-                .FirstOrDefault(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId);
 
-        if (personelIzin == null)
-        {
-            var izinTurIzinKural = request.IzinKuralId == null
-                ? await izinTurIzinKuralRepository.GetAll()
-                    .Include(p => p.IzinTur)
-                    .Include(p => p.IzinKural)
-                    .Where(p => p.IzinKural.SirketId == request.SirketId)
-                    .ToListAsync()
-                : await izinTurIzinKuralRepository.GetAll()
-                    .Include(p => p.IzinTur)
-                    .Where(p => p.IzinKuralId == request.IzinKuralId)
-                    .ToListAsync();
-
-            if (izinTurIzinKural == null || !izinTurIzinKural.Any())
+            //Personele izinKural atama
+            //Request.izinKuralId null değilse
+            if (request.IzinKuralId != null)
             {
-                return Result<string>.Failure("İzin türü ve/veya izin kuralı bulunamadı");
-            }
-
-            var izinTur = izinTurIzinKural
-                    .FirstOrDefault(p => p.IzinTur.Ad.Equals("Yillik Izin", StringComparison.OrdinalIgnoreCase));
-
-            if (izinTur != null)
-            {
-                personelIzin = new PersonelIzin
+                var personelIzinKural = await personelIzinKuralRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false && p.IsActive);
+                if (personelIzinKural != null && personelIzinKural.IzinKuralId != request.IzinKuralId)
                 {
-                    PersonelId = request.PersonelId,
-                    SirketId = request.SirketId,
-                    ToplamIzin = izinTur.IzinTur.LimitGunSayisi,
-                    KullanilanIzin = 0
-                };
-                personelIzinRepository.Add(personelIzin);
-                //personelAtama.IzinKuralId = izinTur.IzinKuralId;
-                personelAtamaRepository.Update(personelAtama);
-                await unitOfWork.SaveChangesAsync();
+                    personelIzinKural.IsActive = false;
+                    personelIzinKuralRepository.Update(personelIzinKural);
+
+                    PersonelIzinKural newPersonelIzinKural = new()
+                    {
+                        PersonelId = request.PersonelId,
+                        IzinKuralId = request.IzinKuralId.Value,
+                        SirketId = request.SirketId,
+                    };
+                    personelIzinKuralRepository.Add(newPersonelIzinKural);
+                }
+                else if (personelIzinKural == null)
+                {
+                    PersonelIzinKural newPersonelIzinKural = new()
+                    {
+                        PersonelId = request.PersonelId,
+                        IzinKuralId = request.IzinKuralId.Value,
+                        SirketId = request.SirketId,
+                    };
+                    personelIzinKuralRepository.Add(newPersonelIzinKural);
+                }
             }
+            //Request IzinKuralId null ise ve veritabanında personele ait izinKural yoksa o şirket için default olan izinKuralı, createUserId değeri boş olan kuralı bulup default olarak ata
             else
             {
-                return Result<string>.Failure("Yıllık izin türü bulunamadı");
+                var personelIzinKural = await personelIzinKuralRepository.FirstOrDefaultAsync(p => p.PersonelId == request.PersonelId && p.SirketId == request.SirketId && p.IsDeleted == false && p.IsActive);
+
+                if (personelIzinKural == null)
+                {
+                   
+                    IzinKural izinKural = await izinKuralRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.CreateUserId == Guid.Empty);
+                    PersonelIzinKural newPersonelIzinKural = new()
+                    {
+                        PersonelId = request.PersonelId,
+                        IzinKuralId = izinKural.Id,
+                        SirketId = request.SirketId,
+                        OnaySurecId = request.IzinOnaySurecId
+                    };
+
+                    if(request.IzinOnaySurecId == null)
+                    {
+                        var defaultIzinOnaySurec = await onaySurecRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.OnaySurecTuruEnum == OnaySurecTuruEnum.Izin && p.CreateUserId == Guid.Empty);
+                        if (defaultIzinOnaySurec == null)
+                            return Result<string>.Failure("Default Onay surec bulunamadı");
+
+                        newPersonelIzinKural.OnaySurecId = defaultIzinOnaySurec.Id;
+
+                    }
+                    personelIzinKuralRepository.Add(newPersonelIzinKural);
+                }
             }
-        }
 
-        if(request.CalismaTakvimId == null)
-        {
-            var defaultTakvim = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId);
-            if (defaultTakvim == null)
-                return Result<string>.Failure("Default takvim bulunamadı");
+            if (request.CalismaTakvimId == null)
+            {
+                //if (personelAtamaEski is not null && personelAtamaEski.CalismaTakvimId is not null)
+                //{
+                //    personelAtama.CalismaTakvimId = personelAtamaEski.CalismaTakvimId;
+                //}
+                //else
+                //{
+                var defaultTakvim = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.CreateUserId == Guid.Empty);
+                if (defaultTakvim == null)
+                    return Result<string>.Failure("Default takvim bulunamadı");
 
-            personelAtama.CalismaTakvimId = defaultTakvim.Id;
-        }
-        if(request.IzinKuralId == null)
-        {
-            var defaultIzinKural = await izinKuralRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.CreateUserId == Guid.Empty);
-            if (defaultIzinKural == null)
-                return Result<string>.Failure("IzinKural bulunamadı");
+                personelAtama.CalismaTakvimId = defaultTakvim.Id;
+                //}
+            }
+            if (request.MesaiOnaySurecId == null)
+            {
+                var defaultMesaiOnaySurec = await onaySurecRepository.FirstOrDefaultAsync(p => p.SirketId == request.SirketId && p.OnaySurecTuruEnum == OnaySurecTuruEnum.Mesai && p.CreateUserId == Guid.Empty);
+                if (defaultMesaiOnaySurec == null)
+                    return Result<string>.Failure("Default Onay surec bulunamadı");
 
-            //personelAtama.IzinKuralId = defaultIzinKural.Id;
-        }
+                personelAtama.MesaiOnaySurecId = defaultMesaiOnaySurec.Id;
+            }
 
-       var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
-        if (personel == null)
-            return Result<string>.Failure("Personel bulunamadı");
 
-        var user = await userManager.FindByIdAsync(personel.UserId.ToString());
-        if (user == null)
-            return Result<string>.Failure("User bulunamadı");
+            var personel = await personelRepository.FirstOrDefaultAsync(p => p.Id == request.PersonelId);
+            if (personel == null)
+                return Result<string>.Failure("Personel bulunamadı");
 
-        var role = await roleManager.FindByNameAsync(request.RolTipiValue.ToString());
-        if (role == null)
-            return Result<string>.Failure("Rol bulunamadı");
+            var user = await userManager.FindByIdAsync(personel.UserId.ToString());
+            if (user == null)
+                return Result<string>.Failure("User bulunamadı");
 
-        var appUserRoleInDb = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == user.Id && p.SirketId == personelAtama.SirketId);
+            var role = await roleManager.FindByNameAsync(request.RolTipiValue.ToString());
+            if (role == null)
+                return Result<string>.Failure("Rol bulunamadı");
 
-        if (appUserRoleInDb is not null)
-        {
-            userRoleRepository.Delete(appUserRoleInDb);
-            await unitOfWork.SaveChangesAsync();
-        }
-        
-        AppUserRole appUserRole = new()
-        {
-            UserId = user.Id,
-            RoleId = role.Id,
-            SirketId = request.SirketId,
-        };
-        userRoleRepository.Add(appUserRole);
+            var appUserRoleInDb = await userRoleRepository.FirstOrDefaultAsync(p => p.UserId == user.Id && p.SirketId == personelAtama.SirketId);
 
-        await unitOfWork.SaveChangesAsync();
+            if (appUserRoleInDb is not null)
+            {
+                userRoleRepository.Delete(appUserRoleInDb);
+                await unitOfWork.SaveChangesAsync();
+            }
 
-        return Result<string>.Succeed("Personel atama oluşturuldu");
+            AppUserRole appUserRole = new()
+            {
+                UserId = user.Id,
+                RoleId = role.Id,
+                SirketId = request.SirketId,
+            };
+            personelAtamaRepository.Add(personelAtama);
+            userRoleRepository.Add(appUserRole);
+
+                await unitOfWork.SaveChangesAsync();
+                //await unitOfWork.CommitTransactionAsync(transaction);
+
+                return Result<string>.Succeed("Personel atama oluşturuldu");
+    }
+            catch(Exception ex)
+            {
+                //await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<string>.Failure("Hata oluştu : "+ex);
+            }
+        //}
+       
     }
 }

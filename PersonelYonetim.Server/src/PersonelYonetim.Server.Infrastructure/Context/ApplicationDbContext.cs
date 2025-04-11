@@ -128,27 +128,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<PersonelIzinKural>()
-            .HasOne(p => p.Personel)
-            .WithMany()
-            .HasForeignKey(p => p.PersonelId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelIzinKural>()
-            .HasOne(p => p.IzinKural)
-            .WithMany(p => p.PersonelIzinKurallar)
-            .HasForeignKey(p => p.IzinKuralId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelIzinKural>()
-            .HasOne(p => p.OnaySurec)
-            .WithMany()
-            .HasForeignKey(p => p.OnaySurecId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelIzinKural>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
         modelBuilder.Entity<PersonelBildirim>()
             .HasOne(p => p.Bildirim)
             .WithMany(p => p.PersonelBildirimler)
@@ -162,12 +141,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<TakvimEtkinlik>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<Duyuru>()
             .HasOne(p => p.Sirket)
             .WithMany()
             .HasForeignKey(p => p.SirketId)
@@ -210,75 +183,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.IzinTur)
             .WithMany()
             .HasForeignKey(p => p.IzinTurId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<IzinTur>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<IzinTurIzinKural>()
-         .HasKey(ik => new { ik.IzinTurId, ik.IzinKuralId });
-
-        modelBuilder.Entity<IzinTurIzinKural>()
-            .HasOne(ik => ik.IzinTur)
-            .WithMany(i => i.IzinKurallar)
-            .HasForeignKey(ik => ik.IzinTurId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<IzinTurIzinKural>()
-            .HasOne(ik => ik.IzinKural)
-            .WithMany(i => i.IzinTurler)
-            .HasForeignKey(ik => ik.IzinKuralId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(p => p.Personel)
-            .WithMany(p => p.PersonelAtamalar)
-            .HasForeignKey(p => p.PersonelId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<PersonelAtama>()
-           .HasOne(pa => pa.Departman)
-           .WithMany()
-           .HasForeignKey(pa => pa.DepartmanId)
-           .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(pa => pa.Pozisyon)
-            .WithMany()
-            .HasForeignKey(pa => pa.PozisyonId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(pa => pa.Sube)
-            .WithMany()
-            .HasForeignKey(pa => pa.SubeId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(pa => pa.Sirket)
-            .WithMany()
-            .HasForeignKey(pa => pa.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(p => p.Yonetici)
-            .WithMany()
-            .HasForeignKey(p => p.YoneticiId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<PersonelAtama>()
-            .HasOne(p => p.CalismaTakvimi)
-            .WithMany(p => p.Personeller)
-            .HasForeignKey(p => p.CalismaTakvimId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<CalismaTakvimi>()
-            .HasMany(p => p.CalismaGunler)
-            .WithOne(p => p.CalismaTakvimi)
-            .HasForeignKey(p => p.CalismaTakvimId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<CalismaTakvimi>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Personel>()
@@ -324,22 +228,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<MaasPusula>()
-            .HasOne(p => p.BordroDonem)
-            .WithMany(p => p.MaasPusulalar)
-            .HasForeignKey(p => p.BordroDonemId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<MaasPusula>()
-            .HasOne(p => p.Personel)
-            .WithMany()
-            .HasForeignKey(p => p.PersonelId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<MaasPusula>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
         modelBuilder.Entity<KazancBilesen>()
             .HasOne(p => p.MaasPusula)
             .WithMany(p => p.KazancBilesenleri)
@@ -376,13 +264,18 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
                         entry.Property(p => p.DeleteAt).CurrentValue = DateTimeOffset.Now;
                         if (userId.HasValue)
                             entry.Property(p => p.DeleteUserId).CurrentValue = userId.Value;
+
                     }
                     else
                     {
+                        if (entry.Property(p => p.IsActive).CurrentValue == false)
+                        {
+                            entry.Property(p => p.InActiveDate).CurrentValue = DateTimeOffset.Now;
+                        }
                         entry.Property(p => p.UpdateAt).CurrentValue = DateTimeOffset.Now;
                         if (userId.HasValue)
                             entry.Property(p => p.UpdateUserId).CurrentValue = userId.Value;
-                    }
+                        }
 
                 }
                 if (entry.State == EntityState.Deleted)

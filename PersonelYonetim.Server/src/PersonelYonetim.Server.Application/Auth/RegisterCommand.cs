@@ -32,53 +32,60 @@ internal sealed class RegisterCommandHandler(
 {
     public async Task<Result<LoginCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var result = await sender.Send(request.SirketCreateCommand);
-            if (result.IsSuccessful)
+        //using (var transaction = unitOfWork.BeginTransaction())
+        //{
+            try
             {
-                var updatedPersonelCreateCommand = request.PersonelCreateCommand with
+                var result = await sender.Send(request.SirketCreateCommand);
+                if (result.IsSuccessful)
                 {
-                    SirketId = Guid.Parse(result.Data!),
-                    RolValue = RolTipiEnum.SirketYonetici.Value,
-                };
-
-                //request = request.WithUpdatedPersonelCreateCommand(updatedPersonelCreateCommand);
-
-                var response = await sender.Send(updatedPersonelCreateCommand);
-                if (response.IsSuccessful)
-                {
-                    var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
-                    sirket.CreateUserId = Guid.Parse(response.Data!);
-                    await unitOfWork.SaveChangesAsync();
-
-                    var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
-                    if (personel == null)
+                    var updatedPersonelCreateCommand = request.PersonelCreateCommand with
                     {
-                        return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
-                    }
+                        SirketId = Guid.Parse(result.Data!),
+                        RolValue = RolTipiEnum.SirketYonetici.Value,
+                    };
 
-                    var user = await userManager.FindByIdAsync(response.Data!);
-                    user!.CreateUserId = user.Id;
-                    await unitOfWork.SaveChangesAsync();
+                    //request = request.WithUpdatedPersonelCreateCommand(updatedPersonelCreateCommand);
 
-                    LoginCommand login = new(request.PersonelCreateCommand.Iletisim.Eposta, request.PersonelCreateCommand.Ad);
-                    var loginRes = await sender.Send(login);
-                    if (loginRes.IsSuccessful)
+                    var response = await sender.Send(updatedPersonelCreateCommand);
+                    if (response.IsSuccessful)
                     {
-                        return loginRes;
+                        var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
+                        sirket.CreateUserId = Guid.Parse(response.Data!);
+                        await unitOfWork.SaveChangesAsync();
+
+                        var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
+                        if (personel == null)
+                        {
+                            return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
+                        }
+
+                        var user = await userManager.FindByIdAsync(response.Data!);
+                        user!.CreateUserId = user.Id;
+                        await unitOfWork.SaveChangesAsync();
+                        //await unitOfWork.CommitTransactionAsync(transaction);
+
+                        LoginCommand login = new(request.PersonelCreateCommand.Iletisim.Eposta, request.PersonelCreateCommand.Ad);
+                        var loginRes = await sender.Send(login);
+                        if (loginRes.IsSuccessful)
+                        {
+                            return loginRes;
+                        }
                     }
                 }
-            }
-            else
-            {
+                else
+                {
+                    //await unitOfWork.RollbackTransactionAsync(transaction);
+                    return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
+                }
+                //await unitOfWork.RollbackTransactionAsync(transaction);
                 return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
             }
-            return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
-        }
-        catch (Exception ex)
-        {
-            return Result<LoginCommandResponse>.Failure("Hata oluştu: " + ex.Message);
-        }
+            catch (Exception ex)
+            {
+                //await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<LoginCommandResponse>.Failure("Hata oluştu: " + ex.Message);
+            }
+        //}
     }
 }

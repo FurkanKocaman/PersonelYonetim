@@ -48,4 +48,19 @@ class UnitOfWork : IUnitOfWork
     {
         return _context;
     }
+    //public async Task<TResult> ExecuteInTransactionAsync<TResult>(Func<Task<TResult>> action)
+    //{
+    //    await using var transaction = await BeginTransaction();
+    //    try
+    //    {
+    //        var result = await action();
+    //        await CommitTransactionAsync();
+    //        return result;
+    //    }
+    //    catch
+    //    {
+    //        await RollbackTransactionAsync();
+    //        throw;
+    //    }
+    //}
 }

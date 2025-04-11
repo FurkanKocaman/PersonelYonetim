@@ -30,8 +30,8 @@ public sealed class IzinTur : Entity
     public bool YerineBakacakZorunlu { get; set; } = false;
     public Guid SirketId { get; set; }
     public Sirket Sirket { get; set; } = default!;
-
-    public ICollection<IzinTurIzinKural> IzinKurallar {  get; set; } = new List<IzinTurIzinKural>();
+    public Guid IzinKuralId { get; set; }
+    public IzinKural? IzinKural { get; set; }
 }
 
 public sealed class LimitTipiEnum : SmartEnum<LimitTipiEnum>

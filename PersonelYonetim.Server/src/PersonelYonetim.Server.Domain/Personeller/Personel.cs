@@ -12,7 +12,7 @@ public sealed class Personel : Entity
     public string FullName => string.Join(" ", Ad, Soyad);
     public DateTimeOffset DogumTarihi { get; set; }
     public bool? Cinsiyet { get; set; }
-    public string? ProfilResimUrl { get; set; }
+    public string? AvatarUrl { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
     public Adres Adres { get; set; } = default!;
     public Guid UserId { get; set; } = default!;

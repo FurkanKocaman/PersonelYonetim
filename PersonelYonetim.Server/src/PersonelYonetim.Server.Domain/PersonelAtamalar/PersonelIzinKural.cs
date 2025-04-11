@@ -11,8 +11,9 @@ public class PersonelIzinKural : Entity
     public Personel? Personel { get; set; }
     public Guid IzinKuralId { get; set; }
     public IzinKural? IzinKural { get; set; }
-    public Guid OnaySurecId { get; set; }
+    public Guid? OnaySurecId { get; set; }
     public OnaySurec? OnaySurec { get; set; }
     public Guid SirketId { get; set; }
     public Sirket? Sirket { get; set; }
+
 }

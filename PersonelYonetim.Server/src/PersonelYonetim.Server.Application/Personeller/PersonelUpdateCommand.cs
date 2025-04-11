@@ -78,9 +78,9 @@ internal sealed class PersonelUpdateCommandHandler(
         personel.Cinsiyet = request.Cinsiyet;
         if (request.ProfilResimUrl != null && request.ProfilResimUrl != "")
         {
-            if (personel.ProfilResimUrl != null && request.ProfilResimUrl != null)
+            if (personel.AvatarUrl != null && request.ProfilResimUrl != null)
             {
-                var filePath = Path.Combine(env.WebRootPath, "profile_images", Path.GetFileName(personel.ProfilResimUrl));
+                var filePath = Path.Combine(env.WebRootPath, "profile_images", Path.GetFileName(personel.AvatarUrl));
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
@@ -88,7 +88,7 @@ internal sealed class PersonelUpdateCommandHandler(
 
             }
 
-            personel.ProfilResimUrl = request.ProfilResimUrl;
+            personel.AvatarUrl = request.ProfilResimUrl;
         }
         personel.Iletisim = request.Iletisim;
         personel.Adres = request.Adres;
@@ -113,8 +113,8 @@ internal sealed class PersonelUpdateCommandHandler(
         {
             personelAtama.IsDeleted = true;
 
-            PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
-            var result = await sender.Send(personelAtamaCreateCommand);
+            //PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
+            //var result = await sender.Send(personelAtamaCreateCommand);
         }
         else
         {
