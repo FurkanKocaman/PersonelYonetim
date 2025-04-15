@@ -15,6 +15,6 @@ internal class OnaySurecAdimConfiguration : IEntityTypeConfiguration<OnaySureciA
 {
     public void Configure(EntityTypeBuilder<OnaySureciAdimi> builder)
     {
-        builder.Property(p => p.Rol).HasConversion(tip => tip!.Value, value => RolTipiEnum.FromValue(value));
+        //builder.Property(p => p.Rol).HasConversion(tip => tip!.Value, value => RolTipiEnum.FromValue(value));
     }
 }

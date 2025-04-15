@@ -13,6 +13,7 @@ public class BordroDonem : Entity
     public ICollection<MaasPusula> MaasPusulalar { get; set; } = new List<MaasPusula>();
     public Guid SirketId { get; set; }
     public Sirket? Sirket { get; set; }
+    public Guid TenantId { get; set; }
 }
 
 public sealed class BordroDonemDurumEnum : SmartEnum<BordroDonemDurumEnum>

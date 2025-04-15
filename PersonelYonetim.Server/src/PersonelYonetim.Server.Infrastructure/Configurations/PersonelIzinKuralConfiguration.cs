@@ -13,11 +13,6 @@ internal class PersonelIzinKuralConfiguration : IEntityTypeConfiguration<Persone
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
         builder
-            .HasOne(p => p.IzinKural)
-            .WithMany(p => p.PersonelIzinKurallar)
-            .HasForeignKey(p => p.IzinKuralId)
-            .OnDelete(DeleteBehavior.NoAction);
-        builder
             .HasOne(p => p.OnaySurec)
             .WithMany()
             .HasForeignKey(p => p.OnaySurecId)

@@ -18,9 +18,5 @@ internal sealed class IzinTurConfiguration : IEntityTypeConfiguration<IzinTur>
             .HasForeignKey(p => p.IzinKuralId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

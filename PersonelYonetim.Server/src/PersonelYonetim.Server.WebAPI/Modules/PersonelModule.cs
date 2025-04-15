@@ -17,7 +17,7 @@ public static class PersonelModule
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
-            .RequireAuthorization(Permissions.CreatePersonel).Produces<Result<string>>().WithName("PersonelCreate");
+            .RequireAuthorization().Produces<Result<string>>().WithName("PersonelCreate");
 
         group.MapPut("update",
             async (ISender sender, PersonelUpdateCommand request, CancellationToken cancellationToken) =>

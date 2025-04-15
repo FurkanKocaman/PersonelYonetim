@@ -1,13 +1,9 @@
 ﻿using FluentValidation;
 using Mapster;
 using MediatR;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
+using PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Application.Services;
-using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Application.Users;
-using PersonelYonetim.Server.Domain.Bildirimler;
-using PersonelYonetim.Server.Domain.Izinler;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
@@ -23,20 +19,20 @@ public sealed record PersonelCreateCommand(
     string? AvatarUrl,
     Iletisim Iletisim,
     Adres Adres,
-    Guid? YoneticiId,
-    Guid SirketId,
-    Guid? SubeId,
-    Guid? DepartmanId,
-    Guid? PozisyonId,
-    Guid? CalismaTavimiId,
-    Guid? IzinKuralId,
-    Guid? MesaiOnaySurecId,
-    Guid? IzinOnaySurecId,
-    int SozlesmeTuruValue,
+
+    Guid KurumsalBirimId,
+    Guid PozisyonId,
+    Guid RoleId,
+    DateTimeOffset BaslangicTarihi,
+    DateTimeOffset? BitisTarihi,
+    bool BirincilGorevMi,
+    int GorevlendirmeTipiValue,
     int CalismaSekliValue,
-    DateTimeOffset? PozisyonBaslangicTarih,
-    DateTimeOffset? SozlesmeBitisTarihi,
-    int RolValue = 0
+    Guid? RaporlananGorevlendirmeId,
+    Guid? IzinKuralId,
+    Guid? CalismaTakvimId,
+    decimal BrutUcret,
+    Guid TenantId
     ) : IRequest<Result<string>>;
 
 public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelCreateCommand>
@@ -83,16 +79,12 @@ internal sealed class PersonelCreateCommandHandler(
 
         personelRepository.Add(personel);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-         
-        PersonelAtamaCreateCommand personelAtamaCreateCommand =
-            new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId,
-            request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTavimiId, request.IzinKuralId,
-            request.MesaiOnaySurecId, request.IzinOnaySurecId,request.SozlesmeTuruValue, request.CalismaSekliValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih ?? DateTimeOffset.Now);
 
-        var personelAtamaResult = await sender.Send(personelAtamaCreateCommand, cancellationToken);
+        PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id,request.KurumsalBirimId,request.PozisyonId,request.RoleId,request.BaslangicTarihi,request.BitisTarihi,request.BirincilGorevMi,request.GorevlendirmeTipiValue,request.CalismaSekliValue,request.RaporlananGorevlendirmeId,request.IzinKuralId,request.CalismaTakvimId,request.BrutUcret,request.TenantId);
 
-        if (!personelAtamaResult.IsSuccessful)
-            return Result<string>.Failure("Personel atama oluşturulamadı");
+        var gorevlendirmeCreateRes = await sender.Send(personelGorevlendirmeCreateCommand);
+        if (!gorevlendirmeCreateRes.IsSuccessful)
+            return Result<string>.Failure("Görevlendirilme oluşturulurken hata oluştu");
 
         var currentDate = DateTimeOffset.Now;
 
@@ -108,7 +100,7 @@ internal sealed class PersonelCreateCommandHandler(
 
         List<GunlukCalisma> GunlukCalismalar = new();
         int toplamGun = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
-        for (int gun = 1; gun <= toplamGun; gun++)
+        for (int gun = currentDate.Day; gun <= toplamGun; gun++)
         {
             var tarih = new DateTimeOffset(new DateTime(currentDate.Year, currentDate.Month, gun));
             var gunlukCalisma = new GunlukCalisma
@@ -129,8 +121,8 @@ internal sealed class PersonelCreateCommandHandler(
             new DateTime(currentYear, personel.DogumTarihi.Month, personel.DogumTarihi.Day),
             personel.DogumTarihi.Offset);
 
-        TakvimEtkinlikCreateCommand command = new($"{personel.FullName} doğum günü", null,dogumGunEtkinlikTarihi, dogumGunEtkinlikTarihi.AddHours(23), true,request.SirketId, null);
-        await sender.Send(command, cancellationToken);
+        //TakvimEtkinlikCreateCommand command = new($"{personel.FullName} doğum günü", null,dogumGunEtkinlikTarihi, dogumGunEtkinlikTarihi.AddHours(23), true,request.SirketId, null);
+        //await sender.Send(command, cancellationToken);
 
         emailService.SendAsync(personel.Iletisim.Eposta, $"Personel Yönetim Sistemi", $"<p>Personel Yönetim sistemi hesabınız oluşturulmuştur. Giriş Bilgileri: E-posta:{personel.Iletisim.Eposta}</br> Şifre:{request.Ad}</p>Giriş sayfasına gitmek için<a href='http://localhost:5173/login'>Giriş sayfası</a>", cancellationToken).Wait();
 

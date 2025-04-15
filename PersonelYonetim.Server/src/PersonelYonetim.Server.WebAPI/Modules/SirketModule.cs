@@ -11,11 +11,11 @@ public static class SirketModule
     {
         RouteGroupBuilder group = app.MapGroup("/sirketler").WithTags("Sirketler").RequireAuthorization();
 
-        group.MapPost("/create", async(ISender sender, SirketCreateCommand request, CancellationToken cancellationToken) =>
-        {
-            var response = await sender.Send(request, cancellationToken);
-            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        }).RequireAuthorization(Permissions.CreateSirket).Produces<Result<string>>().WithName("SirketCreate");
+        //group.MapPost("/create", async(ISender sender, SirketCreateCommand request, CancellationToken cancellationToken) =>
+        //{
+        //    var response = await sender.Send(request, cancellationToken);
+        //    return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        //}).RequireAuthorization(Permissions.CreateSirket).Produces<Result<string>>().WithName("SirketCreate");
         group.MapPut("/update", async (ISender sender, SirketUpdateCommand request, CancellationToken cancellationToken) =>
         {
             var response = await sender.Send(request, cancellationToken);

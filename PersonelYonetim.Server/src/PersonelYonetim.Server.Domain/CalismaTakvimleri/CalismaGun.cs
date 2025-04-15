@@ -9,10 +9,11 @@ public sealed class CalismaGun
     public Guid Id { get; set; }
     public DayOfWeek Gun { get; set; }
     public bool IsCalismaGunu { get; set; } = false;
-    public TimeSpan? CalismaBaslangic { get; set; }
-    public TimeSpan? CalismaBitis { get; set; }
-    public TimeSpan? MolaBaslangic { get; set; }
-    public TimeSpan? MolaBitis { get; set; }
+    public TimeOnly? CalismaBaslangic { get; set; }
+    public TimeOnly? CalismaBitis { get; set; }
+    public TimeOnly? MolaBaslangic { get; set; }
+    public TimeOnly? MolaBitis { get; set; }
     public Guid CalismaTakvimId { get; set; }
     public CalismaTakvimi CalismaTakvimi { get; set; } = default!;
+    public Guid TenantId { get; set; }
 }

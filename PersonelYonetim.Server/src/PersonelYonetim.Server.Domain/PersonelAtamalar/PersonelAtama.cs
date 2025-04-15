@@ -4,6 +4,7 @@ using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
@@ -20,7 +21,7 @@ public sealed class PersonelAtama : Entity
     public Guid? DepartmanId { get; set; }
     public Departman? Departman { get; set; }
     public Guid? PozisyonId { get; set; }
-    public Pozisyon? Pozisyon { get; set; }
+    //public Pozisyon? Pozisyon { get; set; }
     public Guid? SubeId { get; set; }
     public Sube? Sube { get; set; }
     public Guid SirketId { get; set; }
@@ -38,6 +39,7 @@ public sealed class PersonelAtama : Entity
     public CalismaTakvimi? CalismaTakvimi { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal BrutUcret { get; set; }
+    public Guid TenantId { get; set; }
 }
 
 public sealed class SozlesmeTuruEnum : SmartEnum<SozlesmeTuruEnum>
@@ -51,11 +53,3 @@ public sealed class SozlesmeTuruEnum : SmartEnum<SozlesmeTuruEnum>
     }
 }
 
-public sealed class CalismaSekliEnum: SmartEnum<CalismaSekliEnum>
-{
-    public static readonly CalismaSekliEnum TamZamanli = new("Tam Zamanlı", 0);
-    public static readonly CalismaSekliEnum YariZamanli = new("Yari zamanli", 1);
-    private CalismaSekliEnum(string name, int value) : base(name, value)
-    {
-    }
-}

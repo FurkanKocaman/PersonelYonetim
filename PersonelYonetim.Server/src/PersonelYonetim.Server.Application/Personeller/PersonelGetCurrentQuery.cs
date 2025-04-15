@@ -1,16 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
-using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
-using PersonelYonetim.Server.Domain.Roller;
-using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Users;
-using System.Runtime;
 using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.Personeller;
@@ -21,34 +16,18 @@ public sealed class PersonelGetCurrentQueryResponse : EntityDto
 {
     public string Ad { get; set; } = default!;
     public string Soyad { get; set; } = default!;
-    public string FullName { get; set; } = default!;
     public DateTimeOffset DogumTarihi { get; set; }
-    public DateTimeOffset PozisyonBaslangicTarih { get; set; }
-    public string? ProfilResimUrl { get; set; }
+    public string? AvatarUrl { get; set; }
     public string? Cinsiyet { get; set; }
-    public string SirketAd { get; set; } = default!;
-    public Guid SirketId { get; set; } = default!;
-    public string? SubeAd { get; set; }
-    public Guid? SubeId { get; set; }
-    public string? DepartmanAd { get; set; }
-    public Guid? DepartmanId { get; set; }
-    public string? PozisyonAd { get; set; }
-    public Guid? PozisyonId { get; set; }
-    public Iletisim Iletisim { get; set; } = default!;
-    public Adres Adres { get; set; } = default!;
-    public string? Yonetici { get; set; }
+    public string KurumsalBirimAd { get; set; } = string.Empty;
+    public string PozisyonAd { get; set; } = string.Empty;
+    public string? YoneticiAd { get; set; }
     public string? YoneticiPozisyon { get; set; }
-    public int Role { get; set; } = default!;
-    public Guid UserId { get; set; } = default!;
-    public Guid? CalismaTakvimiId { get; set; }
-    public Guid? IzinKuralId { get; set; }
-    public int SozlesmeTuruValue { get; set; }
-    public DateTimeOffset? SozlesmeBitisTarihi { get; set; }
-
+    public string Role { get; set; } = default!;
 }
 public sealed class PersonelGetCurrentQueryHandler(
     IPersonelRepository personelRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     UserManager<AppUser> userManager,
     IHttpContextAccessor httpContextAccessor)
     : IRequestHandler<PersonelGetCurrentQuery, IQueryable<PersonelGetCurrentQueryResponse>>
@@ -69,50 +48,35 @@ public sealed class PersonelGetCurrentQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var response = personelAtamaRepository.GetAll()
-                .Where(p => p.PersonelId == personel.Id && p.IsDeleted == false)
-                .Join(userManager.Users,
-                personelAtama => personelAtama.Personel!.CreateUserId,
-                createUser => createUser.Id,
-                (personelAtama, createUser) => new { personelAtama, createUser })
-                .Select(pu => new PersonelGetCurrentQueryResponse
-                {
-                    Id = personel.Id,
-                    Ad = personel.Ad,
-                    Soyad = personel.Soyad,
-                    FullName = personel.FullName,
-                    DogumTarihi = personel.DogumTarihi,
-                    PozisyonBaslangicTarih = pu.personelAtama.PozisyonBaslamaTarihi,
-                    ProfilResimUrl = personel.AvatarUrl,
-                    Cinsiyet = personel.Cinsiyet == null ? null : pu.personelAtama.Personel!.Cinsiyet == true ? "Erkek" : "Kadın",
-                    SirketId = pu.personelAtama.SirketId,
-                    SirketAd = pu.personelAtama.Sirket!.Ad,
-                    SubeId = pu.personelAtama.SubeId,
-                    SubeAd = pu.personelAtama.Sube != null ? pu.personelAtama.Sube.Ad : null,
-                    DepartmanId = pu.personelAtama.DepartmanId,
-                    DepartmanAd = pu.personelAtama.Departman != null ? pu.personelAtama.Departman.Ad : null,
-                    PozisyonId = pu.personelAtama.PozisyonId,
-                    PozisyonAd = pu.personelAtama.Pozisyon != null ? pu.personelAtama.Pozisyon.Ad : null,
-                    Iletisim = pu.personelAtama.Personel!.Iletisim,
-                    Adres = pu.personelAtama.Personel.Adres,
-                    Yonetici = pu.personelAtama.Yonetici != null ? $"{pu.personelAtama.Yonetici.FullName}" : null,
-                    YoneticiPozisyon = "",
-                    Role = pu.personelAtama.RolTipi.Value,
-                    UserId = pu.personelAtama.Personel.UserId,
-                    CalismaTakvimiId = pu.personelAtama.CalismaTakvimId,
-                    //IzinKuralId = pu.personelAtama.IzinKuralId!,
-                    SozlesmeTuruValue = pu.personelAtama.SozlesmeTuru.Value,
-                    SozlesmeBitisTarihi = pu.personelAtama.SozlesmeBitisTarihi,
-                    IsActive = pu.personelAtama.Personel.IsActive,
-                    CreatedAt = pu.personelAtama.Personel.CreatedAt,
-                    CreateUserId = pu.createUser.Id,
-                    CreateUserName = pu.createUser.FirstName + " " + pu.createUser.LastName + " (" + pu.createUser.Email + ")",
-                    UpdateAt = pu.personelAtama.Personel.UpdateAt,
-                    UpdateUserId = null,
-                    UpdateUserName = null,
-                    IsDeleted = pu.personelAtama.Personel.IsDeleted,
-                    DeleteAt = pu.personelAtama.Personel.DeleteAt
-                });
+        var response = personelGorevlendirmeRepository.Where(p => p.PersonelId == personel.Id && p.IsActive && !p.IsDeleted)
+                    .GroupJoin(userManager.Users,
+                    personelGorevlendirme => personel.CreateUserId,
+                    createUser => createUser.Id,
+                    (personelGorevlendirme, createUsers) => new { personelGorevlendirme, createUsers })
+                    .SelectMany(
+                    pu => pu.createUsers.DefaultIfEmpty(),
+                    (pu, createUser) => new PersonelGetCurrentQueryResponse
+                    {
+                        Id = personel.Id,
+                        Ad = personel.Ad,
+                        Soyad = personel.Soyad,
+                        DogumTarihi = personel.DogumTarihi,
+                        AvatarUrl = personel.AvatarUrl,
+                        Cinsiyet = personel.Cinsiyet != null ? personel.Cinsiyet.Value ? "Erkek" : "Kadın" : "Bilinmiyor",
+                        KurumsalBirimAd = pu.personelGorevlendirme.KurumsalBirim != null ? pu.personelGorevlendirme.KurumsalBirim.Ad : "Bilinmiyor",
+                        PozisyonAd = pu.personelGorevlendirme.Pozisyon != null ? pu.personelGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
+                        YoneticiAd = pu.personelGorevlendirme.RaporlananGorevlendirme != null ? pu.personelGorevlendirme.RaporlananGorevlendirme.Personel.FullName : "Bilinmiyor",
+                        YoneticiPozisyon = pu.personelGorevlendirme.RaporlananGorevlendirme != null ? pu.personelGorevlendirme.RaporlananGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
+                        IsActive = personel.IsActive,
+                        CreatedAt = personel.CreatedAt,
+                        CreateUserId = createUser != null ? createUser.Id : Guid.Empty,
+                        CreateUserName = createUser != null ? createUser.FirstName + " " + createUser.LastName + " (" + createUser.Email + ")" : "Bilinmiyor",
+                        UpdateAt = personel.UpdateAt,
+                        UpdateUserId = null,
+                        UpdateUserName = null,
+                        IsDeleted = personel.IsDeleted,
+                        DeleteAt = personel.DeleteAt
+                    });
 
         return Task.FromResult(response);
     }

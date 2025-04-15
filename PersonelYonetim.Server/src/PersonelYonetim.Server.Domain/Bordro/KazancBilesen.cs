@@ -11,4 +11,5 @@ public class KazancBilesen : Entity
     public bool SGKMatrahinaDahil { get; set; }
     public bool GelirVergisiMatrahinaDahil { get; set; }
     public bool DamgaVergisiMatrahinaDahil { get; set; }
+    public Guid TenantId { get; set; }
 }

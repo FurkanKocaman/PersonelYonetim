@@ -47,7 +47,7 @@ internal sealed class CalismaTakvimiGetQueryHandler(
         var takvimler = calismaTakvimRepository.GetAll().Where(p => !p.IsDeleted);
         var response = calismaTakvimRepository.GetAll()
             .Where(t => personelAtamaRepository.GetAll()
-                .Any(p => p.SirketId == t.SirketId && p.PersonelId == personel.Id))
+                .Any(p =>p.PersonelId == personel.Id))
             .Include(t => t.CalismaGunler) 
             .Select(takvim => new CalismaTakvimiGetQueryResponse
             {

@@ -12,4 +12,5 @@ public sealed class Pozisyon : Entity
     public Sirket Sirket { get; set; } = default!;
     public Guid? DepartmanId { get; set; }
     public Departman? Departman { get; set; }
+    public Guid TenantId { get; set; }
 }

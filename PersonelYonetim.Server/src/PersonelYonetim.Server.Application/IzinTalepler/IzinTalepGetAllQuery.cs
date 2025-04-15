@@ -67,22 +67,23 @@ internal sealed class IzinTalepGetAllQueryHandler(
         var izinler = izinTalepRepository
          .GetAll()
          .Include(i => i.Personel)
-         .Where(p => p.Personel.PersonelAtamalar.Any(pa=>pa.IsDeleted == false && pa.IsActive == true && pa.SirketId == personelAtama.SirketId))
+         .Where(p => p.Personel.PersonelAtamalar.Any(pa => pa.IsDeleted == false && pa.IsActive == true && pa.SirketId == personelAtama.SirketId))
          .Include(i => i.IzinTur)
          .Include(i => i.DegerlendirmeAdimlari)
-             .ThenInclude(td => td.OnaySureciAdimi)
-         .Where(i => i.DegerlendirmeAdimlari
-                 .Where(td => td.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Beklemede)
-                 .OrderBy(td => td.OnaySureciAdimi!.Sira)
-                 .Take(1)
-                 .Any(td =>
-                     (td.OnaySureciAdimi!.PersonelId.HasValue && td.OnaySureciAdimi.PersonelId == personel.Id) ||
-                     (td.OnaySureciAdimi!.Rol != null && td.OnaySureciAdimi.Rol == personelAtama.RolTipi && 
-                     ((td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYonetici || td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYardimci) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.DepartmanId == personelAtama.DepartmanId)
-                     : (td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SubeId == personelAtama.SubeId)
-                     : (td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SirketId == personelAtama.SirketId) : false)
-                 ))
-         );
+             .ThenInclude(td => td.OnaySureciAdimi);
+         //.Where(i => i.DegerlendirmeAdimlari
+         //        .Where(td => td.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Beklemede)
+         //        .OrderBy(td => td.OnaySureciAdimi!.Sira)
+         //        .Take(1)
+         //        //.Any(td =>
+         //        //    (td.OnaySureciAdimi!.PersonelId.HasValue && td.OnaySureciAdimi.PersonelId == personel.Id) ||
+         //        //    (td.OnaySureciAdimi!.Rol != null && td.OnaySureciAdimi.Rol == personelAtama.RolTipi && 
+         //        //    ((td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYonetici || td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYardimci) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.DepartmanId == personelAtama.DepartmanId)
+         //        //    : (td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SubeId == personelAtama.SubeId)
+         //        //    : (td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SirketId == personelAtama.SirketId) : false)
+         //        //))
+                 
+         //);
 
 
         var x = izinler.ToList();
@@ -99,7 +100,7 @@ internal sealed class IzinTalepGetAllQueryHandler(
                 ToplamSure = entity.ToplamSure,
                 IzinTuru = entity.IzinTur.Ad,
                 Aciklama = entity.Aciklama!,
-                DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
+                //DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
                 DegerlendirenId = null,
                 DegerlendirenAd = null,
                 IsActive = entity.IsActive,
@@ -120,19 +121,6 @@ internal sealed class IzinTalepGetAllQueryHandler(
             });
 
         return Task.FromResult(response);
-    }
-
-    bool sirketlerAyniMi(PersonelAtama personelAtama1, PersonelAtama personelAtama2)
-    {
-        return personelAtama1.SirketId == personelAtama2.SirketId;
-    }
-    bool subelerAyniMi(PersonelAtama personelAtama1, PersonelAtama personelAtama2)
-    {
-        return personelAtama1.SubeId == personelAtama2.SubeId;
-    }
-    bool departmanlarAyniMi(PersonelAtama personelAtama1, PersonelAtama personelAtama2)
-    {
-        return personelAtama1.DepartmanId == personelAtama2.DepartmanId;
     }
 }
 

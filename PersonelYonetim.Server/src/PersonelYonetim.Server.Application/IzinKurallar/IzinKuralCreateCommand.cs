@@ -32,9 +32,9 @@ internal sealed class IzinKuralCreateCommandHandler(
         {
             try
             {
-                var isKuralExist = await izinKuralRepository.AnyAsync(p => p.Ad == request.Ad && p.SirketId == request.SirketId);
-                if (isKuralExist)
-                    return Result<string>.Failure("Bu isimde bir kural bu şirkette zaten var");
+                //var isKuralExist = await izinKuralRepository.AnyAsync(p => p.Ad == request.Ad && p.SirketId == request.SirketId);
+                //if (isKuralExist)
+                //    return Result<string>.Failure("Bu isimde bir kural bu şirkette zaten var");
                 IzinKural izinKural = request.Adapt<IzinKural>();
                 izinKuralRepository.Add(izinKural);
                 var affectedRows = await unitOfWork.SaveChangesAsync(cancellationToken);

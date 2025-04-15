@@ -28,10 +28,9 @@ public sealed class IzinTur : Entity
     public bool HesapSekli { get; set; } = true; // tamgün/yarımgün true  /  saatlik false
     public bool AciklamaZorunlu { get; set; } = false;
     public bool YerineBakacakZorunlu { get; set; } = false;
-    public Guid SirketId { get; set; }
-    public Sirket Sirket { get; set; } = default!;
     public Guid IzinKuralId { get; set; }
     public IzinKural? IzinKural { get; set; }
+    public Guid TenantId { get; set; }
 }
 
 public sealed class LimitTipiEnum : SmartEnum<LimitTipiEnum>

@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Bildirimler;
+using PersonelYonetim.Server.Application.CalismaCizelgeleri;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.Duyurular;
 using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
+using PersonelYonetim.Server.Application.KurumsalBirimler;
+using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
@@ -38,27 +41,29 @@ public class AppODataController(
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
         builder.EntitySet<SubelerGetQueryResponse>("subeler");
-        builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
+        //builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
+        //builder.EntitySet<IzinTalepGetOnayBekleyenQueryResponse>("izin-talepler-onay-bekleyenler");
         builder.EntitySet<IzinTalepGetQueryResponse>("personel-izin-talepler");
         //builder.EntitySet<IzinlerGetKalanQueryResponse>("getkalanizinler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
-        builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
+        //builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
         builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
         builder.EntitySet<DuyuruGetAllQueryResponse>("duyurular");
+        //builder.EntitySet<CalismaCizelgeleriGetAllQueryResponse>("calisma-cizelgeler");
+        builder.EntitySet<KurumsalBirimGetAllQueryResponse>("kurumsal-birimler");
+        builder.EntitySet< KurumsalBirimTipiGetAllQueryResponse>("kurumsal-birim-tipleri");
         return builder.GetEdmModel();
     }
 
     [HttpGet("personeller")]
-    [Authorize(Permissions.ViewPersonel)]
-    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(Guid SirketId,
-    Guid? SubeId,
-    Guid? DepartmanId,
-    Guid? PozisyonId, CancellationToken cancellationToken)
+    [Authorize()]
+    public async Task<IQueryable<PersonelGetAllQueryResponse>> GetAllPersoneller(
+    Guid? KurumsalBirimId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new PersonelGetAllQuery(SirketId,SubeId,DepartmanId,PozisyonId), cancellationToken);
+        var response = await sender.Send(new PersonelGetAllQuery(KurumsalBirimId), cancellationToken);
 
         return response;
     }
@@ -109,13 +114,13 @@ public class AppODataController(
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
         return response;
     }
-    [HttpGet("izin-kurallar")]
-    [Authorize]
-    public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
-        return response;
-    }
+    //[HttpGet("izin-kurallar")]
+    //[Authorize]
+    //public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
+    //{
+    //    var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
+    //    return response;
+    //}
     [HttpGet("izin-turler")]
     [Authorize]
     public async Task<IQueryable<IzinTurGetAllQueryResponse>> GetAllIzinTurler(CancellationToken cancellationToken)
@@ -131,6 +136,13 @@ public class AppODataController(
         var response = await sender.Send(new IzinTalepGetAllQuery(), cancellationToken);
         return response;
     }
+    //[HttpGet("izin-talepler-onay-bekleyenler")]
+    //[Authorize(Permissions.ViewIzinler)]
+    //public async Task<IQueryable<IzinTalepGetOnayBekleyenQueryResponse>> GetAllOnayBekleyenIzinTalepler(CancellationToken cancellationToken)
+    //{
+    //    var response = await sender.Send(new IzinTalepGetOnayBekleyenQuery(), cancellationToken);
+    //    return response;
+    //}
 
     [HttpGet("personel-izin-talepler")]
     [Authorize]
@@ -155,13 +167,13 @@ public class AppODataController(
         return response;
     }
 
-    [HttpGet("personel-atamalar")]
-    [Authorize]
-    public async Task<IQueryable<PersonelAtamaGetQueryResponse>> GetPersonelAtamalar(CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new PersonelAtamaGetQuery(), cancellationToken);
-        return response;
-    }
+    //[HttpGet("personel-atamalar")]
+    //[Authorize]
+    //public async Task<IQueryable<PersonelAtamaGetQueryResponse>> GetPersonelAtamalar(CancellationToken cancellationToken)
+    //{
+    //    var response = await sender.Send(new PersonelAtamaGetQuery(), cancellationToken);
+    //    return response;
+    //}
     [HttpGet("bildirimler")]
     [Authorize]
     public async Task<IQueryable<BildirimlerGetQueryResponse>> GetBildirimler(CancellationToken cancellationToken)
@@ -182,6 +194,29 @@ public class AppODataController(
     public async Task<IQueryable<DuyuruGetAllQueryResponse>> GetDuyurular(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new DuyuruGetAllQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("calisma-cizelgeler")]
+    [Authorize]
+    public async Task<List<CalismaCizelgeleriGetAllQueryResponse>> GetCalismaCizelgeler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new CalismaCizelgeleriGetAllQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("kurumsal-birim-tipleri")]
+    [Authorize]
+    public async Task<IQueryable<KurumsalBirimTipiGetAllQueryResponse>> GetKurumsalBirimTipleri(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new KurumsalBirimTipiGetAllQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("kurumsal-birimler")]
+    [Authorize]
+    public async Task<IQueryable<KurumsalBirimGetAllQueryResponse>> GetKurumsalBirimler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new KurumsalBirimGetAllQuery(), cancellationToken);
         return response;
     }
 

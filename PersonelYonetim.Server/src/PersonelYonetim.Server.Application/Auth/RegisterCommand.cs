@@ -1,11 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.KurumsalBirimler;
 using PersonelYonetim.Server.Application.Personeller;
-using PersonelYonetim.Server.Application.Sirketler;
+using PersonelYonetim.Server.Application.Services;
+using PersonelYonetim.Server.Domain.CalismaTakvimleri;
+using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.KurumsalBirimler;
+using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Rols;
-using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
@@ -13,79 +16,128 @@ using TS.Result;
 namespace PersonelYonetim.Server.Application.Auth;
 
 public sealed record RegisterCommand(
-   PersonelCreateCommand PersonelCreateCommand,
-   SirketCreateCommand SirketCreateCommand
+   KurumsalBirimCreateCommand KurumsalBirimCreateCommand,
+   PersonelCreateCommand PersonelCreateCommand
    ) : IRequest<Result<LoginCommandResponse>>;
-//{
-//    public RegisterCommand WithUpdatedPersonelCreateCommand(PersonelCreateCommand updatedPersonelCreateCommand)
-//    {
-//        return this with { PersonelCreateCommand = updatedPersonelCreateCommand };
-//    }
-//}
 
 internal sealed class RegisterCommandHandler(
-   ISirketRepository sirketRepository,
+   IKurumsalBirimRepository kurumsalBirimRepository,
    IPersonelRepository personelRepository,
    UserManager<AppUser> userManager,
+   IIzinKuralRepository izinKuralRepository,
+   IIzinTurRepository izinTurRepository,
+   IOnaySurecRepository onaySurecRepository,
+   IOnaySurecAdimRepository onaySurecAdimRepository,
+   ICalismaTakvimRepository calismaTakvimRepository,
+   ICalismaGunRepository calismaGunRepository,
+   IKurumsalBirimTipiRepository kurumsalBirimTipiRepository,
    IUnitOfWork unitOfWork,
+   IDataSeeder dataSeeder,
    ISender sender) : IRequestHandler<RegisterCommand, Result<LoginCommandResponse>>
 {
     public async Task<Result<LoginCommandResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        //using (var transaction = unitOfWork.BeginTransaction())
-        //{
-            try
+        try
+        {
+            Guid tenantId = Guid.CreateVersion7();
+
+            var (role,pozisyon) = await dataSeeder.SeedAsync(tenantId);
+            List<KurumsalBirimTipi> birimTipleri = KurumsalYapiSeedData.OlusturDefaultYapi(tenantId);
+            kurumsalBirimTipiRepository.AddRange(birimTipleri);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            KurumsalBirimTipi sirket = birimTipleri.FirstOrDefault(p => p.HiyerarsiSeviyesi == 1)!;
+
+           var updatedKurumsalBirimCreateCommand = request.KurumsalBirimCreateCommand with
             {
-                var result = await sender.Send(request.SirketCreateCommand);
-                if (result.IsSuccessful)
+               BirimTipiId = sirket.Id,
+               TenantId = tenantId,
+            };
+            var result = await sender.Send(updatedKurumsalBirimCreateCommand);
+            if (result.IsSuccessful)
+            {
+
+                IzinKural defaultIzinKural = new()
                 {
-                    var updatedPersonelCreateCommand = request.PersonelCreateCommand with
+                    Ad = "Default İzin Kural",
+                    Aciklama = "Şirket oluşturulduğunda otomatik oluşan default izin kuralı",
+                    TenantId = tenantId,
+                };
+
+                izinKuralRepository.Add(defaultIzinKural);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                var defaultIzinTurler = DefaultIzinTurler.GetDefaultIzinTurler(tenantId, defaultIzinKural.Id);
+                izinTurRepository.AddRange(defaultIzinTurler);
+
+                var defaultOnaySurecler = DefaultOnaySurec.GetDefaultOnaySurecleri(tenantId);
+
+                onaySurecRepository.AddRange(defaultOnaySurecler);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                List<OnaySureciAdimi> defaultOnayAdimlari = new();
+
+                foreach (var onaySurec in defaultOnaySurecler)
+                {
+                    defaultOnayAdimlari.Add(DefaultOnaySurec.GetDefaultOnayAdim(tenantId, onaySurec.Id, role.Id));
+                }
+                onaySurecAdimRepository.AddRange(defaultOnayAdimlari);
+
+                CalismaTakvimi tamCalismaTakvim = DefaultCalismaTakvim.GetDefaultTamCalismaTakvim(tenantId);
+                CalismaTakvimi yariCalismaTakvim = DefaultCalismaTakvim.GetDefaultYarimCalismaTakvim(tenantId);
+
+                List<CalismaGun> tamCalismaGunler = DefaultCalismaTakvim.GetDefaultTamCalismaGunler(tamCalismaTakvim.Id, tenantId);
+                List<CalismaGun> yariCalismaGunler = DefaultCalismaTakvim.GetDefaultYariCalismaGunler(yariCalismaTakvim.Id, tenantId);
+
+                calismaTakvimRepository.AddRange([tamCalismaTakvim, yariCalismaTakvim]);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                calismaGunRepository.AddRange(tamCalismaGunler);
+                calismaGunRepository.AddRange(yariCalismaGunler);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                var updatedPersonelCreateCommand = request.PersonelCreateCommand with
+                {
+                    TenantId = tenantId,
+                    KurumsalBirimId = result.Data,
+                    RoleId = role.Id,
+                    PozisyonId = pozisyon.Id,
+                };
+
+                var response = await sender.Send(updatedPersonelCreateCommand);
+                if (response.IsSuccessful)
+                {
+                    var kurumsalBirim = await kurumsalBirimRepository.FirstOrDefaultAsync(p => p.Id == result.Data);
+                    kurumsalBirim.CreateUserId = Guid.Parse(response.Data!);
+                    await unitOfWork.SaveChangesAsync();
+
+                    var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
+                    if (personel == null)
                     {
-                        SirketId = Guid.Parse(result.Data!),
-                        RolValue = RolTipiEnum.SirketYonetici.Value,
-                    };
+                        return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
+                    }
 
-                    //request = request.WithUpdatedPersonelCreateCommand(updatedPersonelCreateCommand);
+                    var user = await userManager.FindByIdAsync(response.Data!);
+                    user!.CreateUserId = user.Id;
+                    await unitOfWork.SaveChangesAsync();
 
-                    var response = await sender.Send(updatedPersonelCreateCommand);
-                    if (response.IsSuccessful)
+                    LoginCommand login = new(request.PersonelCreateCommand.Iletisim.Eposta, request.PersonelCreateCommand.Ad);
+                    var loginRes = await sender.Send(login);
+                    if (loginRes.IsSuccessful)
                     {
-                        var sirket = await sirketRepository.FirstOrDefaultAsync(p => p.Id == Guid.Parse(result.Data!));
-                        sirket.CreateUserId = Guid.Parse(response.Data!);
-                        await unitOfWork.SaveChangesAsync();
-
-                        var personel = personelRepository.GetAll().AsNoTracking().FirstOrDefault(p => p.UserId == Guid.Parse(response.Data!));
-                        if (personel == null)
-                        {
-                            return Result<LoginCommandResponse>.Failure("Kullanıcı bulunamadı");
-                        }
-
-                        var user = await userManager.FindByIdAsync(response.Data!);
-                        user!.CreateUserId = user.Id;
-                        await unitOfWork.SaveChangesAsync();
-                        //await unitOfWork.CommitTransactionAsync(transaction);
-
-                        LoginCommand login = new(request.PersonelCreateCommand.Iletisim.Eposta, request.PersonelCreateCommand.Ad);
-                        var loginRes = await sender.Send(login);
-                        if (loginRes.IsSuccessful)
-                        {
-                            return loginRes;
-                        }
+                        return loginRes;
                     }
                 }
-                else
-                {
-                    //await unitOfWork.RollbackTransactionAsync(transaction);
-                    return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
-                }
-                //await unitOfWork.RollbackTransactionAsync(transaction);
+            }
+            else
+            {
                 return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
             }
-            catch (Exception ex)
-            {
-                //await unitOfWork.RollbackTransactionAsync(transaction);
-                return Result<LoginCommandResponse>.Failure("Hata oluştu: " + ex.Message);
-            }
-        //}
+            return Result<LoginCommandResponse>.Failure("Kayıt oluşturulamadı");
+        }
+        catch (Exception ex)
+        {
+            return Result<LoginCommandResponse>.Failure("Hata oluştu: " + ex.Message);
+        }
     }
 }

@@ -35,36 +35,55 @@ internal sealed class SirketlerGetQueryHandler(
         {
             throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
         }
-        var personel = personelRepository.FirstOrDefault(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted);
-        if (personel == null) { 
-        }
 
-        var result = (from personelAtama in personelAtamaRepository.GetAll()
-                      where personel!.Id == personelAtama.PersonelId && personelAtama.IsDeleted == false && personelAtama.IsActive
-                      join sirket in sirketRepository.GetAll() on personelAtama.SirketId equals sirket.Id
-                      join create_user in userManager.Users.AsQueryable() on sirket.CreateUserId equals create_user.Id
-                      join update_user in userManager.Users.AsQueryable() on sirket.UpdateUserId equals update_user.Id
-                      into update_user
-                      from update_users in update_user.DefaultIfEmpty()
-                          //where personelAtama.YoneticiTipi >= 0
-                      select new SirketlerGetQueryResponse
-                      {
-                          Id = sirket.Id,
-                          Ad=sirket.Ad,
-                          Aciklama=sirket.Aciklama,
-                          LogoUrl=sirket.LogoUrl,
-                          Adres = sirket.Adres,
-                          Iletisim = sirket.Iletisim,
-                          IsActive = sirket.IsActive,
-                          CreatedAt = sirket.CreatedAt,
-                          CreateUserId = create_user.Id,
-                          CreateUserName = create_user.FirstName + " " + create_user.LastName + " (" + create_user.Email + ")",
-                          UpdateAt = sirket.UpdateAt,
-                          UpdateUserId = update_users.Id,
-                          UpdateUserName = sirket.UpdateUserId == null ? null : update_users.FirstName + " " + update_users.LastName + " (" + update_users.Email + ")",
-                          IsDeleted = sirket.IsDeleted,
-                          DeleteAt = sirket.DeleteAt,
-                      });
-        return Task.FromResult(result);
+        var personel = personelRepository.GetAll()
+            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
+            .Select(p => new { p.Id, p.PersonelAtamalar })
+            .FirstOrDefault();
+
+        if (personel == null)
+            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+
+        var sirketler = sirketRepository.GetAll().Where(p => p.IsDeleted == false);
+
+        var response = sirketler
+            .Join(personelAtamaRepository.GetAll(),
+                  sirket => sirket.Id,
+                  personelAtama => personelAtama.SirketId,
+                  (sirket, personelAtama) => new { sirket, personelAtama })
+            .Where(sp => sp.personelAtama.IsDeleted == false && sp.personelAtama.PersonelId == personel.Id)
+            .GroupJoin(userManager.Users,
+                  sp => sp.sirket.CreateUserId,
+                  createUser => createUser.Id,
+                  (sp, createUsers) => new { sp.sirket, sp.personelAtama, createUsers })
+            .SelectMany(
+                   spu => spu.createUsers.DefaultIfEmpty(),
+                   (spu, createUser)=> new { spu.sirket, spu.personelAtama, createUser = createUser })
+            .GroupJoin(userManager.Users,
+                  sp => sp.sirket.UpdateUserId,
+                  updateUser => updateUser.Id,
+                  (sp, updateUsers) => new { sp.sirket, sp.createUser, updateUsers })
+            .SelectMany(
+                  spu => spu.updateUsers.DefaultIfEmpty(),
+                  (spu, updateUser) => new SirketlerGetQueryResponse
+                  {
+                      Id = spu.sirket.Id,
+                      Ad = spu.sirket.Ad,
+                      Aciklama = spu.sirket.Aciklama,
+                      LogoUrl = spu.sirket.LogoUrl,
+                      Adres = spu.sirket.Adres,
+                      Iletisim = spu.sirket.Iletisim,
+                      IsActive = spu.sirket.IsActive,
+                      CreatedAt = spu.sirket.CreatedAt,
+                      CreateUserId = spu.sirket.CreateUserId != Guid.Empty ? spu.sirket.CreateUserId : null,
+                      CreateUserName = spu.createUser != null ? spu.createUser.FirstName + " " + spu.createUser.LastName + " (" + spu.createUser.Email + ")" : null,
+                      UpdateAt = spu.sirket.UpdateAt,
+                      UpdateUserId = updateUser != null ? updateUser.Id : null,
+                      UpdateUserName = updateUser == null ? null : updateUser.FirstName + " " + updateUser.LastName + " (" + updateUser.Email + ")",
+                      IsDeleted = spu.sirket.IsDeleted,
+                      DeleteAt = spu.sirket.DeleteAt
+                  });
+
+        return Task.FromResult(response);
     }
 }

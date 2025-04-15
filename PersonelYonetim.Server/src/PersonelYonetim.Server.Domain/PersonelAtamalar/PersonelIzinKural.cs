@@ -15,5 +15,5 @@ public class PersonelIzinKural : Entity
     public OnaySurec? OnaySurec { get; set; }
     public Guid SirketId { get; set; }
     public Sirket? Sirket { get; set; }
-
+    public Guid TenantId { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Users;
 
 namespace PersonelYonetim.Server.Domain.Personeller;
@@ -18,5 +19,7 @@ public sealed class Personel : Entity
     public Guid UserId { get; set; } = default!;
     public AppUser User { get; set; } = default!;
     public ICollection<PersonelAtama> PersonelAtamalar { get; set; } = default!;
+    public ICollection<PersonelGorevlendirme> PersonelGorevlendirmeler { get;set; } = new List<PersonelGorevlendirme>();
     public ICollection<PersonelBildirim> PersonelBildirimler { get; set; } = new List<PersonelBildirim>();
+    public Guid TenantId { get; set; }
 }

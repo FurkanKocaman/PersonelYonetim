@@ -12,4 +12,5 @@ public sealed class TakvimEtkinlik : Entity
     public Sirket Sirket { get; set; } = default!;
     public bool IsPublic { get; set; } = true;
     public IEnumerable<Guid>? PersonelIdler { get; set; } = null;
+    public Guid TenantId { get; set; }
 }

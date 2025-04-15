@@ -12,4 +12,5 @@ public sealed class Duyuru : Entity
     public AliciTipiEnum AliciTipi { get; set; } = AliciTipiEnum.Herkes;
     public Guid? AliciId { get; set; } // AliciTipi.Personel ise
     public List<Guid>? AliciIdler { get; set; } //AliciTipi.Personeller ise
+    public Guid TenantId { get; set; }
 }

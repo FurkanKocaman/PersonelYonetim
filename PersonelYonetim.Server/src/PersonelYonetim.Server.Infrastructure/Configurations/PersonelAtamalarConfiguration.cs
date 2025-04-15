@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Rols;
 using System.Reflection.Emit;
 
@@ -25,11 +26,11 @@ internal sealed class PersonelAtamalarConfiguration : IEntityTypeConfiguration<P
            .WithMany()
            .HasForeignKey(pa => pa.DepartmanId)
            .OnDelete(DeleteBehavior.NoAction);
-        builder
-             .HasOne(pa => pa.Pozisyon)
-            .WithMany()
-            .HasForeignKey(pa => pa.PozisyonId)
-            .OnDelete(DeleteBehavior.NoAction);
+        //builder
+        //     .HasOne(pa => pa.Pozisyon)
+        //    .WithMany()
+        //    .HasForeignKey(pa => pa.PozisyonId)
+        //    .OnDelete(DeleteBehavior.NoAction);
         builder
             .HasOne(pa => pa.Sube)
             .WithMany()

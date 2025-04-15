@@ -12,6 +12,7 @@ public sealed class AppUser : IdentityUser<Guid>
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string FullName => $"{FirstName} {LastName}";
+    public Guid TenantId { get; set; }
 
     #region Audit Log
     public DateTimeOffset CreatedAt { get; set; }

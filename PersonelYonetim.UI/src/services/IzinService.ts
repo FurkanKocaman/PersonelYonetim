@@ -113,14 +113,14 @@ export class IzinService {
 
     try {
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/izin-talepler?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/odata/izin-talepler-onay-bekleyenler?${queryParams}`,
         {
           params: {
             $count: true,
           },
         }
       );
-
+      console.log(response.data);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
@@ -140,6 +140,7 @@ export class IzinService {
       useToastStore().addToast(response.data.data, "", "success", 5000, true);
       return response.data;
     } catch (error) {
+      useToastStore().addToast(error.response.data.errorMessages[0], "", "error", 5000, true);
       console.error(error);
     }
   }

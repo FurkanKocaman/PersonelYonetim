@@ -11,6 +11,6 @@ public sealed class Sirket : Entity
     public string? LogoUrl { get; set; }
     public Adres Adres { get; set; } = default!;
     public Iletisim Iletisim { get; set; } = default!;
-
+    public Guid TenantId { get; set; }
     public ICollection<Sube>? Subeler { get; set; }
 }

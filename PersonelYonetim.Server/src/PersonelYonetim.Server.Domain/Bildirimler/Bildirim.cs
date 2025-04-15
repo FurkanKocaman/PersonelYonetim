@@ -12,6 +12,7 @@ public sealed class Bildirim : Entity
     public List<Guid>? AliciIdler { get; set; }
     public string? Url { get; set; }
     public ICollection<PersonelBildirim> PersonelBildirimler { get; set; } = new List<PersonelBildirim>();
+    public Guid TenantId { get; set; }
 }
 
 public sealed class BildirimTipiEnum : SmartEnum<BildirimTipiEnum>

@@ -18,5 +18,8 @@ public static class RouteRegistrar
         app.RegisterFileRoutes();
         app.RegisterBildirimRoutes();
         app.RegisterDuyuruRoutes();
+        app.RegisterCalismaCizelgeRoutes();
+        app.RegisterMesaiRoutes();
+        app.RegisterKurumsalBirimRoutes();
     }
 }

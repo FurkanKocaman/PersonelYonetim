@@ -50,5 +50,6 @@ public class MaasPusula  :Entity
     public  ICollection<KesintiBilesen> KesintiBilesenleri { get; set; } = new List<KesintiBilesen>();
     public Guid SirketId { get; set; }
     public Sirket? Sirket { get; set; }
+    public Guid TenantId { get; set; }
 
 }

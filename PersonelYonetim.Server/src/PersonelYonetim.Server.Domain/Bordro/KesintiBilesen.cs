@@ -8,4 +8,5 @@ public class KesintiBilesen : Entity
     public string KesintiTuru { get; set; } = default!;
     public string? Aciklama { get; set; }
     public decimal Tutar { get; set; }
+    public Guid TenantId { get; set; }
 }

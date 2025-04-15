@@ -5,7 +5,9 @@ namespace PersonelYonetim.Server.Domain.Rols;
 
 public sealed class AppRole : IdentityRole<Guid>
 {
-
+    public string? Aciklama { get; set; }
+    public bool YapisalRolMu { get; set; } = false;
+    public Guid TenantId { get; set; }
     #region Audit Log
     public DateTimeOffset CreatedAt { get; set; }
     public Guid CreateUserId { get; set; } = default!;

@@ -16,5 +16,6 @@ public sealed class Departman : Entity
     public Sube Sube { get; set; } = default!;
 
     public ICollection<Pozisyon>? Pozisyonlar { get; set; }
+    public Guid TenantId { get; set; }
 
 }

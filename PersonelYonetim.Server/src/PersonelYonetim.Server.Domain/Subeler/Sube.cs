@@ -16,4 +16,6 @@ public sealed class Sube : Entity
     public Sirket Sirket { get; set; } = default!;
 
     public ICollection<Departman>? Departmanlar { get; set; }
+
+    public Guid TenantId { get; set; }
 }

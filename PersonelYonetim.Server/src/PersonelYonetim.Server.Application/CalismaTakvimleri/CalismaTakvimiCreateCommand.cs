@@ -46,12 +46,12 @@ internal sealed class CalismaTakvimiCreateCommandHandler(
                     .Where(p => p.PersonelId == personel!.Id)
                     .Select(p => new { p.SirketId, }) .FirstOrDefault();
 
-                var calismaTakvimDb = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.Ad == request.Ad && p.SirketId == personelAtama!.SirketId);
+                var calismaTakvimDb = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.Ad == request.Ad );
                     
                 if (calismaTakvimDb == null)
                 {
                     CalismaTakvimi calismaTakvim = request.Adapt<CalismaTakvimi>();
-                    calismaTakvim.SirketId = personelAtama!.SirketId;
+                    //calismaTakvim.SirketId = personelAtama!.SirketId;
                     calismaTakvimRepository.Add(calismaTakvim);
                     calismaTakvimDb = calismaTakvim;
                     await unitOfWork.SaveChangesAsync(cancellationToken);

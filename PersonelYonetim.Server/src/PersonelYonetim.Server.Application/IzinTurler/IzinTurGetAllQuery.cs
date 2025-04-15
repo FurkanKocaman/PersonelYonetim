@@ -48,7 +48,7 @@ internal sealed class IzinTurGetAllQueryHandler(
         var response = izinTurRepository.GetAll()
                 .Where(p => !p.IsDeleted)
                 .Join(personelAtamaRepository.GetAll(),
-                    izinTur => izinTur.SirketId,
+                    izinTur => izinTur.TenantId,
                     personelAtama => personelAtama.SirketId,
                     (izinTur, personelAtama) => new { izinTur, personelAtama })
                 .Where(ip => ip.personelAtama.PersonelId == personel.Id && !ip.personelAtama.IsDeleted)
@@ -59,8 +59,8 @@ internal sealed class IzinTurGetAllQueryHandler(
                     Aciklama = ip.izinTur.Aciklama,
                     UcretliMi = ip.izinTur.UcretliMi,
                     LimitTipi = ip.izinTur.LimitTipi == LimitTipiEnum.Limitsiz ? ip.izinTur.LimitTipi.Name : ip.izinTur.LimitTipi.Name + " " + ip.izinTur.LimitGunSayisi +" gün",
-                    SirketId = ip.izinTur.SirketId,
-                    SirketAd = ip.izinTur.Sirket.Ad,
+                    SirketId = ip.izinTur.TenantId,
+                    //SirketAd = ip.izinTur.t.Ad,
                     IsActive = ip.izinTur.IsActive,
                     CreatedAt = ip.izinTur.CreatedAt,
                     IsDeleted = ip.izinTur.IsDeleted,
