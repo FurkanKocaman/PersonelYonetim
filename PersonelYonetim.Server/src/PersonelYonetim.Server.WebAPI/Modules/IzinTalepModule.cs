@@ -13,13 +13,13 @@ public static class IzinTalepModule
     {
         RouteGroupBuilder group = app.MapGroup("/izin-talep").WithTags("IzinTalep").RequireAuthorization();
 
-        //group.MapPost("/create",
-        //    async (ISender sender, IzinTalepCreateCommand request, CancellationToken cancellationToken) =>
-        //    {
-        //        var response = await sender.Send(request, cancellationToken);
-        //        return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        //    })
-        //    .RequireAuthorization(Permissions.CreateIzinler).Produces<Result<string>>().WithName("IzinTalepCreate");
+        group.MapPost("/create",
+            async (ISender sender, IzinTalepCreateCommand request, CancellationToken cancellationToken) =>
+            {
+                var response = await sender.Send(request, cancellationToken);
+                return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+            })
+            .RequireAuthorization().Produces<Result<string>>().WithName("IzinTalepCreate");
 
         //group.MapPut("/update",
         //    async (ISender sender, [FromBody] IzinTalepUpdateCommand request, CancellationToken cancellationToken) =>

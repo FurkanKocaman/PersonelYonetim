@@ -188,12 +188,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        //modelBuilder.Entity<OnaySurec>()
-        //    .HasOne(p => p.Sirket)
-        //    .WithMany()
-        //    .HasForeignKey(p => p.SirketId)
-        //    .OnDelete(DeleteBehavior.NoAction);
-
         modelBuilder.Entity<PersonelBildirim>()
             .HasOne(p => p.Bildirim)
             .WithMany(p => p.PersonelBildirimler)
@@ -215,22 +209,10 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Entity<AppUserRole>()
             .HasKey(p => new {p.UserId, p.RoleId, p.SirketId});
 
-        //modelBuilder.Entity<TalepDegerlendirme>()
-        //    .HasOne(p => p.IzinTalep)
-        //    .WithMany(p => p.DegerlendirmeAdimlari)
-        //    .HasForeignKey(p => p.TalepId)
-        //    .OnDelete(DeleteBehavior.NoAction);
-
         modelBuilder.Entity<TalepDegerlendirme>()
             .HasOne(p => p.Degerlendiren)
             .WithMany()
             .HasForeignKey(p => p.DegerlendirenId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<IzinTalep>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<IzinTalep>()
@@ -298,6 +280,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasOne(p => p.MaasPusula)
             .WithMany(p => p.KesintiBilesenleri)
             .HasForeignKey(p => p.MaasPusulaId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinKural>()
+            .HasOne(p => p.VarsayilanOnaySurec)
+            .WithMany()
+            .HasForeignKey(p => p.VarsayilanOnaySurecId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 

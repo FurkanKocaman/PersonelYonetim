@@ -9,11 +9,9 @@ internal sealed class TalepDegerlendirmeConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<TalepDegerlendirme> builder)
     {
-        //builder.Property(p => p.TalepTuru)
-        //    .HasConversion(tip => tip!.Value, value => OnaySurecTuruEnum.FromValue(value));
+        builder.Property(p => p.TalepTipi)
+            .HasConversion(tip => tip!.Value, value => OnaySurecTuruEnum.FromValue(value));
         builder.Property(p => p.DegerlendirmeDurumu).HasConversion(durum => durum.Value, value => DegerlendirmeDurumEnum.FromValue(value));
-        builder.Property(p => p.AtananOnayciRol)
-            .HasConversion(rol => rol!.Value, value => RolTipiEnum.FromValue(value));
 
         builder.HasOne(p => p.OnaySureciAdimi)
             .WithMany()

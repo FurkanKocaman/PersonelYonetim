@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.Rols;
+
 
 namespace PersonelYonetim.Server.Infrastructure.Configurations;
 internal class OnaySurecConfiguration : IEntityTypeConfiguration<OnaySurec>
@@ -15,6 +15,16 @@ internal class OnaySurecAdimConfiguration : IEntityTypeConfiguration<OnaySureciA
 {
     public void Configure(EntityTypeBuilder<OnaySureciAdimi> builder)
     {
-        //builder.Property(p => p.Rol).HasConversion(tip => tip!.Value, value => RolTipiEnum.FromValue(value));
+        builder.Property(p => p.OnaylayiciTanimTipi).HasConversion(tip => tip.Value, value => OnaylayiciTanimTipiEnum.FromValue(value));
+
+        builder.HasOne(p => p.Role)
+            .WithMany()
+            .HasForeignKey(p => p.RolId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne(p => p.HedefKurumsalBirim)
+            .WithMany()
+            .HasForeignKey(p => p.HedefKurumsalBirimId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -37,7 +37,7 @@ public sealed class PersonelGorevlendirme : Entity
     public Guid MesaiOnaySurecId { get; set; }
     public OnaySurec? MesaiOnaySurec { get; set; }
 
-    public Guid? CalismaTakvimId { get; set; }
+    public Guid CalismaTakvimId { get; set; }
     public CalismaTakvimi? CalismaTakvimi { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]

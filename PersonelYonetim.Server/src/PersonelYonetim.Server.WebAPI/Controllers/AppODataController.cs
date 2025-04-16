@@ -10,12 +10,10 @@ using PersonelYonetim.Server.Application.CalismaCizelgeleri;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.Duyurular;
-using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
 using PersonelYonetim.Server.Application.KurumsalBirimler;
 using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Sirketler;
@@ -44,7 +42,7 @@ public class AppODataController(
         //builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
-        //builder.EntitySet<IzinTalepGetOnayBekleyenQueryResponse>("izin-talepler-onay-bekleyenler");
+        builder.EntitySet<IzinTalepGetOnayBekleyenQueryResponse>("izin-talepler-onay-bekleyenler");
         builder.EntitySet<IzinTalepGetQueryResponse>("personel-izin-talepler");
         //builder.EntitySet<IzinlerGetKalanQueryResponse>("getkalanizinler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
@@ -136,13 +134,13 @@ public class AppODataController(
         var response = await sender.Send(new IzinTalepGetAllQuery(), cancellationToken);
         return response;
     }
-    //[HttpGet("izin-talepler-onay-bekleyenler")]
-    //[Authorize(Permissions.ViewIzinler)]
-    //public async Task<IQueryable<IzinTalepGetOnayBekleyenQueryResponse>> GetAllOnayBekleyenIzinTalepler(CancellationToken cancellationToken)
-    //{
-    //    var response = await sender.Send(new IzinTalepGetOnayBekleyenQuery(), cancellationToken);
-    //    return response;
-    //}
+    [HttpGet("izin-talepler-onay-bekleyenler")]
+    [Authorize()]
+    public async Task<IQueryable<IzinTalepGetOnayBekleyenQueryResponse>> GetAllOnayBekleyenIzinTalepler(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinTalepGetOnayBekleyenQuery(), cancellationToken);
+        return response;
+    }
 
     [HttpGet("personel-izin-talepler")]
     [Authorize]

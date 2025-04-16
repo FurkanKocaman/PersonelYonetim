@@ -1,6 +1,5 @@
 ﻿using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Rols;
 
 namespace PersonelYonetim.Server.Domain.OnaySurecleri;
 public sealed class TalepDegerlendirme
@@ -8,12 +7,13 @@ public sealed class TalepDegerlendirme
     public Guid Id { get; private set; } = Guid.CreateVersion7();
     public Guid TalepId { get; private set; }
     public int AdimSirasi { get; private set; }
+    public OnaySurecTuruEnum TalepTipi { get; set; } = default!;
     public Guid OnaySureciAdimiId { get; private set; }
     public OnaySureciAdimi? OnaySureciAdimi { get; private set; }
 
     public Guid? AtananOnayciPersonelId { get; private set; }
     public Personel? AtananOnayciPersonel { get; private set; }
-    public RolTipiEnum? AtananOnayciRol { get; private set; }
+    public Guid? AtananOnayciRolId { get; private set; }
 
 
     public Guid? DegerlendirenId { get; private set; }
@@ -25,19 +25,21 @@ public sealed class TalepDegerlendirme
     public Guid TenantId { get; set; }
     private TalepDegerlendirme() { }
 
-    public TalepDegerlendirme(Guid talepId, int adimSirasi, Guid onaySureciAdimiId)
+    public TalepDegerlendirme(Guid talepId, int adimSirasi, Guid onaySureciAdimiId, OnaySurecTuruEnum talepTipi, Guid tenantId)
     {
         Id = Guid.CreateVersion7();
         TalepId = talepId;
         AdimSirasi = adimSirasi;
         OnaySureciAdimiId = onaySureciAdimiId;
+        TalepTipi = talepTipi;
         DegerlendirmeDurumu = DegerlendirmeDurumEnum.Beklemede;
+        TenantId = tenantId;
     }
 
-    public void OnayciAta(Guid? personelId, RolTipiEnum? rol)
+    public void OnayciAta(Guid? personelId, Guid? rolId)
     {
         AtananOnayciPersonelId = personelId;
-        AtananOnayciRol = rol;
+        AtananOnayciRolId = rolId;
     }
 
     public void DurumuGuncelle(DegerlendirmeDurumEnum yeniDurum, Guid? degerlendirenId, string? yorum, DateTimeOffset degerlendirmeTarihi)
@@ -52,5 +54,4 @@ public sealed class TalepDegerlendirme
         Yorum = yorum;
         DegerlendirilmeTarihi = degerlendirmeTarihi;
     }
-
 }

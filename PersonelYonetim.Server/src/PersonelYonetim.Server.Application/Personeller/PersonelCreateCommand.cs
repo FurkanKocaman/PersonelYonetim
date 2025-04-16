@@ -67,7 +67,7 @@ internal sealed class PersonelCreateCommandHandler(
 
         Personel personel = request.Adapt<Personel>();
 
-        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta);
+        UserCreateCommand userCreateCommand = new(personel.Ad, personel.Soyad, personel.Iletisim.Eposta,request.TenantId);
         var userResult = await sender.Send(userCreateCommand, cancellationToken);
         if (!userResult.IsSuccessful)
         {
@@ -93,6 +93,7 @@ internal sealed class PersonelCreateCommandHandler(
             PersonelId = personel.Id,
             Yil = currentDate.Year,
             Ay = currentDate.Month,
+            TenantId = request.TenantId,
         };
 
         calismaCizelgeRepository.Add(cizelge);
@@ -108,6 +109,7 @@ internal sealed class PersonelCreateCommandHandler(
                 CalismaCizelgesiId = cizelge.Id,
                 Tarih = tarih,
                 PersonelId = personel.Id,
+                TenantId = request.TenantId,
             };
 
             GunlukCalismalar.Add(gunlukCalisma);

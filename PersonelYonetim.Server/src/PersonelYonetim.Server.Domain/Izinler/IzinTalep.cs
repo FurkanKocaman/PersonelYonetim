@@ -20,8 +20,6 @@ public sealed class IzinTalep : Entity
     public string? Aciklama { get; private set; }
     public Guid OnaySurecId { get; private set; } // Aktif hale getirildi
     public OnaySurec? OnaySurec { get; private set; } // İlişki
-    public Guid SirketId { get; private set; }
-    public Sirket? Sirket { get; private set; }
 
     private readonly List<TalepDegerlendirme> _degerlendirmeAdimlari = new();
     public IReadOnlyCollection<TalepDegerlendirme> DegerlendirmeAdimlari => _degerlendirmeAdimlari.AsReadOnly();
@@ -37,8 +35,8 @@ public sealed class IzinTalep : Entity
      decimal toplamSure,
      Guid izinTurId,
      Guid onaySurecId,
-     Guid sirketId,
-     string? aciklama)
+     string? aciklama,
+     Guid tenantId)
     {
         PersonelId = personelId;
         BaslangicTarihi = baslangicTarihi;
@@ -48,7 +46,7 @@ public sealed class IzinTalep : Entity
         IzinTurId = izinTurId;
         Aciklama = aciklama;
         OnaySurecId = onaySurecId;
-        SirketId = sirketId;
+        TenantId = tenantId;
     }
 
     public void DegerlendirmeAdimiEkle(TalepDegerlendirme adim)
