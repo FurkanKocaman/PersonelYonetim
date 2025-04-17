@@ -1,7 +1,4 @@
-﻿using PersonelYonetim.Server.Domain.Sirketler;
-using PersonelYonetim.Server.Domain.Tenants;
-
-namespace PersonelYonetim.Server.Domain.CalismaTakvimleri;
+﻿namespace PersonelYonetim.Server.Domain.CalismaTakvimleri;
 public static class DefaultCalismaTakvim
 {
     public static CalismaTakvimi GetDefaultTamCalismaTakvim(Guid tenantId)

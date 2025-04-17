@@ -61,25 +61,10 @@ public static class InfrastructureRegistrar
         }).AddJwtBearer();
         services.AddAuthorization(opt =>
         {
-            opt.AddPolicy(Permissions.ViewSirket, policy => policy.RequireClaim("permission", Permissions.ViewSirket));
-            opt.AddPolicy(Permissions.CreateSirket, policy => policy.RequireClaim("permission", Permissions.CreateSirket));
-            opt.AddPolicy(Permissions.EditSirket, policy => policy.RequireClaim("permission", Permissions.EditSirket));
-            opt.AddPolicy(Permissions.DeleteSirket, policy => policy.RequireClaim("permission", Permissions.DeleteSirket));
-
-            opt.AddPolicy(Permissions.ViewSube, policy => policy.RequireClaim("permission", Permissions.ViewSube));
-            opt.AddPolicy(Permissions.CreateSube, policy => policy.RequireClaim("permission", Permissions.CreateSube));
-            opt.AddPolicy(Permissions.EditSube, policy => policy.RequireClaim("permission", Permissions.EditSube));
-            opt.AddPolicy(Permissions.DeleteSube, policy => policy.RequireClaim("permission", Permissions.DeleteSube));
-
-            opt.AddPolicy(Permissions.ViewDepartman, policy => policy.RequireClaim("permission", Permissions.ViewDepartman));
-            opt.AddPolicy(Permissions.CreateDepartman, policy => policy.RequireClaim("permission", Permissions.CreateDepartman));
-            opt.AddPolicy(Permissions.EditDepartman, policy => policy.RequireClaim("permission", Permissions.EditDepartman));
-            opt.AddPolicy(Permissions.DeleteDepartman, policy => policy.RequireClaim("permission", Permissions.DeleteDepartman));
-
-            opt.AddPolicy(Permissions.ViewPozisyon, policy => policy.RequireClaim("permission", Permissions.ViewPozisyon));
-            opt.AddPolicy(Permissions.CreatePozisyon, policy => policy.RequireClaim("permission", Permissions.CreatePozisyon));
-            opt.AddPolicy(Permissions.EditPozisyon, policy => policy.RequireClaim("permission", Permissions.EditPozisyon));
-            opt.AddPolicy(Permissions.DeletePozisyon, policy => policy.RequireClaim("permission", Permissions.DeletePozisyon));
+            opt.AddPolicy(Permissions.ViewKurumsalYapi, policy => policy.RequireClaim("permission", Permissions.ViewKurumsalYapi));
+            opt.AddPolicy(Permissions.CreateKurumsalYapi, policy => policy.RequireClaim("permission", Permissions.CreateKurumsalYapi));
+            opt.AddPolicy(Permissions.EditKurumsalYapi, policy => policy.RequireClaim("permission", Permissions.EditKurumsalYapi));
+            opt.AddPolicy(Permissions.DeleteKurumsalYapi, policy => policy.RequireClaim("permission", Permissions.DeleteKurumsalYapi));
 
             opt.AddPolicy(Permissions.ViewPersonel, policy => policy.RequireClaim("permission", Permissions.ViewPersonel));
             opt.AddPolicy(Permissions.CreatePersonel, policy => policy.RequireClaim("permission", Permissions.CreatePersonel));

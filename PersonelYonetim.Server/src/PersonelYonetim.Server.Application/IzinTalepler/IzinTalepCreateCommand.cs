@@ -1,18 +1,12 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Bildirimler;
-using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
-using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.UnitOfWork;
-using System.Security.Claims;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;

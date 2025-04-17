@@ -1,9 +1,7 @@
 ﻿using Ardalis.SmartEnum;
 using PersonelYonetim.Server.Domain.Abstractions;
-using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Sirketler;
 
 namespace PersonelYonetim.Server.Domain.Mesailer;
 public class MesaiTalep : Entity
@@ -18,8 +16,6 @@ public class MesaiTalep : Entity
     public decimal? Ucret { get; set; }// mesai ücrete çevrilirse
     public decimal? IzinGun { get; set; } // mesai izine çevrilirse
     public ICollection<TalepDegerlendirme> DegerlendirmeAdimlari { get; set; } = new List<TalepDegerlendirme>();
-    public Guid SirketId { get; set; }
-    public Sirket? Sirket { get; set; }
     public Guid TenantId { get; set; }
 }
 

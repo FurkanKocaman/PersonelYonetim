@@ -1,6 +1,5 @@
 ﻿using Ardalis.SmartEnum;
 using PersonelYonetim.Server.Domain.Abstractions;
-using PersonelYonetim.Server.Domain.Sirketler;
 
 namespace PersonelYonetim.Server.Domain.Izinler;
 

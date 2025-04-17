@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.CalismaCizelgeleri;
 public sealed record CalismaCizelgeleriGetAllQuery(
-    Guid? SirketId = null) : IRequest<List<CalismaCizelgeleriGetAllQueryResponse>>;
+    Guid? tenantId = null) : IRequest<List<CalismaCizelgeleriGetAllQueryResponse>>;
 
 public sealed class CalismaCizelgeleriGetAllQueryResponse : EntityDto
 {
@@ -47,20 +47,20 @@ internal sealed class CalismaCizelgeleriGetAllQueryResponseHandler(
 
         var personel = personelRepository.GetAll()
             .Where(p => p.UserId == Guid.Parse(userIdString))
-            .Include(p => p.PersonelAtamalar)
-            .Select(p => new { p.Id, p.FullName, p.PersonelAtamalar })
+            .Include(p => p.PersonelGorevlendirmeler)
+            .Select(p => new { p.Id, p.FullName, p.PersonelGorevlendirmeler })
             .FirstOrDefault();
 
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-        var personelAtama = personel.PersonelAtamalar.Where(p => request.SirketId != null ? p.SirketId == request.SirketId : true && p.IsActive == true && p.IsDeleted == false).FirstOrDefault();
+        var personelAtama = personel.PersonelGorevlendirmeler.Where(p => request.tenantId != null ? p.TenantId == request.tenantId : true && p.IsActive == true && p.IsDeleted == false).FirstOrDefault();
        
         if (personelAtama is null)
             throw new UnauthorizedAccessException("Personelatama bilgisi bulunamadı.");
 
         var calismaCizelgeleri = calismaCizelgeRepository
-          .Where(p => p.SirketId == personelAtama.SirketId && p.IsDeleted == false)
+          .Where(p => p.TenantId == personelAtama.TenantId && p.IsDeleted == false)
           .Include(p => p.Personel)
           .OrderBy(p => p.PersonelId)
           .ToList();

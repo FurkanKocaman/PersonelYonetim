@@ -1,6 +1,5 @@
-import type { IzinTurModel } from "@/models/entity-models/izin/IzinTurModel";
 import api from "./Axios";
-import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
+import type { IzinKuralModel, IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
 import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCreateCommand";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
@@ -47,7 +46,7 @@ export class IzinService {
   async getIzinTurler(
     paginationParams: PaginationParams
   ): Promise<
-    { items: IzinTurModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+    { items: IzinTurResponse[]; count: number; pageSize: number; pageNumber: number } | undefined
   > {
     try {
       const { pageNumber, pageSize, orderBy, filter } = paginationParams;

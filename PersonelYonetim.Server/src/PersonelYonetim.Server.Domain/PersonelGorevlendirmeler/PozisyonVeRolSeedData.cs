@@ -1,4 +1,5 @@
-﻿using PersonelYonetim.Server.Domain.Rols;
+﻿using PersonelYonetim.Server.Domain.Pozisyonlar;
+using PersonelYonetim.Server.Domain.Rols;
 
 namespace PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 public static class PozisyonVeRolSeedData

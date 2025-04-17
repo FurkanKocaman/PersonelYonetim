@@ -10,10 +10,9 @@ const personel: PersonelItem = reactive({
   id: "",
   ad: "",
   soyad: "",
-  fullName: "",
   dogumTarihi: new Date(),
   cinsiyet: undefined,
-  profilResimUrl: undefined,
+  avatarUrl: undefined,
   iletisim: {
     eposta: "",
     telefon: "",
@@ -24,22 +23,15 @@ const personel: PersonelItem = reactive({
     ilce: "",
     tamAdres: "",
   },
-  yonetici: undefined,
+  yoneticiAd: undefined,
   yoneticiPozisyon: undefined,
-  sirketId: "",
-  sirketAd: "",
-  subeId: undefined,
-  subeAd: undefined,
-  departmanId: undefined,
-  departmanAd: undefined,
-  pozisyonId: undefined,
-  pozisyonAd: undefined,
-  calismaTakvimiId: undefined,
-  sozlesmeTuruValue: 0,
-  pozisyonBaslangicTarih: new Date(),
-  sozlesmeBitisTarihi: undefined,
-  izinKuralId: undefined,
-  role: 0,
+  kurumsalBirimAd: "",
+  pozisyonAd: "",
+  sozlesmeTuruValue: 0, //Backendde yok
+  baslangicTarih: new Date(),
+  sozlesmeBitisTarihi: undefined, //Backendde yok
+  izinKuralId: undefined, //Backendde yok
+  roleClaims: [],
   isActive: true,
   createdAt: new Date(),
   createUserId: "",
@@ -66,15 +58,15 @@ onMounted(async () => {
         <div class="overflow-x-auto flex md:flex-row flex-col justify-between">
           <div class="flex flex-row justify-between md:justify-start flex-1">
             <div class="flex flex-col mr-5">
-              <span class="text-xl font-semibold">{{ personel.fullName }}</span>
+              <span class="text-xl font-semibold">{{ personel.ad + " " + personel.soyad }}</span>
               <span class="text-md dark:text-neutral-500">{{ personel.pozisyonAd }}</span>
-              <span class="text-sm dark:text-neutral-300">{{ personel.departmanAd }}</span>
+              <span class="text-sm dark:text-neutral-300">{{ personel.kurumsalBirimAd }}</span>
             </div>
             <div>
               <img
-                v-if="personel.profilResimUrl"
+                v-if="personel.avatarUrl"
                 class="object-cover mx-2 size-20 rounded-xl"
-                :src="apiUrl + personel.profilResimUrl"
+                :src="apiUrl + personel.avatarUrl"
                 alt="Avatar"
                 width="100"
                 height="100"
@@ -83,7 +75,7 @@ onMounted(async () => {
                 v-else
                 class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mx-2 rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
               >
-                {{ personel.fullName[0] }}
+                {{ personel.ad[0] }}
               </div>
             </div>
           </div>
@@ -93,7 +85,7 @@ onMounted(async () => {
             >
               <span class="text-sm text-neutral-500 dark:text-neutral-400">Yoneticim</span>
               <span class="mr-10 text-sm text-neutral-700 dark:text-neutral-200">{{
-                personel.yonetici
+                personel.yoneticiAd
               }}</span>
             </div>
             <div

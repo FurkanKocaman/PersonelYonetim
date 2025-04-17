@@ -30,12 +30,12 @@ const handleIzinTalepCreate = async () => {
   emit("closeModal", false);
 };
 onMounted(() => {
-  getIzinKural();
+  getIzinTurler();
 });
 
-const getIzinKural = async () => {
-  const response = await IzinService.getIzinKural(paginationParams.value);
-  izinTurler.value = response?.items[0].izinTurler;
+const getIzinTurler = async () => {
+  const response = await IzinService.getIzinTurler(paginationParams.value);
+  console.log(response), (izinTurler.value = response?.items);
 };
 
 const mesaiBaslangicHesapla = () => {

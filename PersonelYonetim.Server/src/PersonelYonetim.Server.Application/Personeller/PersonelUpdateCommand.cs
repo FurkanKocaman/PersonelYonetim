@@ -2,10 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Application.PersonelAtamalar;
 using PersonelYonetim.Server.Application.Users;
-using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.UnitOfWork;
@@ -24,9 +21,6 @@ public sealed record PersonelUpdateCommand(
     Iletisim Iletisim,
     Adres Adres,
     Guid? YoneticiId,
-    Guid SirketId,
-    Guid? SubeId,
-    Guid? DepartmanId,
     Guid? PozisyonId,
     Guid? CalismaTakvimiId,
     int SozlesmeTuruValue,
@@ -43,17 +37,13 @@ public sealed class PersonelUpdateCommandValidator : AbstractValidator<PersonelU
         RuleFor(x => x.Ad).NotEmpty().WithMessage("Ad boş olamaz");
         RuleFor(x => x.Soyad).NotEmpty().WithMessage("Soyad boş olamaz");
         RuleFor(x => x.Iletisim.Eposta).NotEmpty().EmailAddress().WithMessage("Geçerli bir e-posta giriniz");
-        RuleFor(x => x.SirketId).NotEmpty().WithMessage("Şirket ID boş olamaz");
     }
 }
 
 internal sealed class PersonelUpdateCommandHandler(
     IPersonelRepository personelRepository,
-    IDepartmanRepository departmanRepository,
     IPozisyonRepository pozisyonRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
     UserManager<AppUser> userManager,
-    IUnitOfWork unitOfWork,
     IWebHostEnvironment env,
     ISender sender) : IRequestHandler<PersonelUpdateCommand, Result<string>>
 {
@@ -93,14 +83,6 @@ internal sealed class PersonelUpdateCommandHandler(
         personel.Iletisim = request.Iletisim;
         personel.Adres = request.Adres;
 
-
-        if (request.DepartmanId.HasValue)
-        {
-            var departman = await departmanRepository.FirstOrDefaultAsync(d => d.Id == request.DepartmanId);
-            if (departman is null)
-                return Result<string>.Failure("Departman bulunamadı");
-        }
-
         if (request.PozisyonId.HasValue)
         {
             var pozisyon = await pozisyonRepository.FirstOrDefaultAsync(p => p.Id == request.PozisyonId);
@@ -108,26 +90,26 @@ internal sealed class PersonelUpdateCommandHandler(
                 return Result<string>.Failure("Pozisyon bulunamadı");
         }
 
-        var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id && pd.SirketId == request.SirketId && pd.IsDeleted == false);
-        if (request.SirketId != personelAtama.SirketId || request.SubeId != personelAtama.SubeId || request.DepartmanId != personelAtama.DepartmanId || request.PozisyonId != personelAtama.PozisyonId || request.RolValue != personelAtama.RolTipi.Value || request.YoneticiId != personelAtama.YoneticiId)
-        {
-            personelAtama.IsDeleted = true;
+        //var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id && pd.SirketId == request.SirketId && pd.IsDeleted == false);
+        //if (request.SirketId != personelAtama.SirketId || request.SubeId != personelAtama.SubeId || request.DepartmanId != personelAtama.DepartmanId || request.PozisyonId != personelAtama.PozisyonId || request.RolValue != personelAtama.RolTipi.Value || request.YoneticiId != personelAtama.YoneticiId)
+        //{
+        //    personelAtama.IsDeleted = true;
 
-            //PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
-            //var result = await sender.Send(personelAtamaCreateCommand);
-        }
-        else
-        {
-            if (request.IzinKuralId is not null)
-                //personelAtama.IzinKuralId = request.IzinKuralId;
-            if (request.CalismaTakvimiId is not null)
-                personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
-        }
+        //    //PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
+        //    //var result = await sender.Send(personelAtamaCreateCommand);
+        //}
+        //else
+        //{
+        //    if (request.IzinKuralId is not null)
+        //        //personelAtama.IzinKuralId = request.IzinKuralId;
+        //    if (request.CalismaTakvimiId is not null)
+        //        personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
+        //}
 
 
-        personelRepository.Update(personel);
-        personelAtamaRepository.Update(personelAtama);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        //personelRepository.Update(personel);
+        //personelAtamaRepository.Update(personelAtama);
+        //await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<string>.Succeed("Personel başarıyla güncellendi");
     }

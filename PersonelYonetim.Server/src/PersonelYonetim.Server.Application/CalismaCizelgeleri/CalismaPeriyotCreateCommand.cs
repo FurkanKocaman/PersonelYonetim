@@ -1,8 +1,7 @@
-﻿using Mapster;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
@@ -22,7 +21,7 @@ internal sealed class CalismaPeriyotCreateCommandHandler(
     IPersonelRepository personelRepository,
     ICalismaPeriyotRepository calismaPeriyotRepository,
     ICalismaCizelgeRepository calismaCizelgeRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IUnitOfWork unitOfWork
     ) : IRequestHandler<CalismaPeriyotCreateCommand, Result<string>>
 {
@@ -69,7 +68,7 @@ internal sealed class CalismaPeriyotCreateCommandHandler(
         if (cizelge is null)
             return Result<string>.Failure("Çalışma çizelgesi bulunamadı");
 
-        var personelAtama = personelAtamaRepository.Where(pa => pa.PersonelId == personelId && pa.IsDeleted == false && pa.IsActive == true).Include(pa => pa.CalismaTakvimi).ThenInclude(c => c!.CalismaGunler).FirstOrDefault();
+        var personelAtama = personelGorevlendirmeRepository.Where(pa => pa.PersonelId == personelId && pa.IsDeleted == false && pa.IsActive == true).Include(pa => pa.CalismaTakvimi).ThenInclude(c => c!.CalismaGunler).FirstOrDefault();
 
         var calismaTakvim = personelAtama!.CalismaTakvimi;
 

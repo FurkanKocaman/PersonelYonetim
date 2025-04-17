@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.Personeller;

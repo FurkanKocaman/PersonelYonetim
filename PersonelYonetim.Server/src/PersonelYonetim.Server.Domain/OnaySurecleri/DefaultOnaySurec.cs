@@ -47,6 +47,7 @@ public static class DefaultOnaySurec
             RolId = roleId,
             OnaySurecId = onaySurecId,
             TenantId = tenantId,
+            OnaylayiciTanimTipi = OnaylayiciTanimTipiEnum.YapisalRol_TalepEdenBirimi
         };
         return onaySureciAdimi;
     }

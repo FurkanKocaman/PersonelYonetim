@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Roles from "@/models/Roles";
 import { authGuard } from "./authGuard";
+import RoleClaims from "@/models/RoleClaims";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,11 +37,7 @@ const router = createRouter({
           component: () => import("@/views/sirket/SirketView.vue"),
           meta: {
             title: "Sirket Yönetimi",
-            requiredRole: [
-              Roles.SirketYonetici.value,
-              Roles.SirketYardimci.value,
-              Roles.Admin.value,
-            ],
+            roleClaims: [RoleClaims.viewKurumsalYapi],
           },
         },
         {
@@ -50,14 +46,7 @@ const router = createRouter({
           component: () => import("@/views/personel/PersonelView.vue"),
           meta: {
             title: "Personel Yönetimi",
-            requiredRole: [
-              Roles.SirketYonetici.value,
-              Roles.SirketYardimci.value,
-              Roles.Admin.value,
-              Roles.Calisan.value,
-              Roles.DepartmanYonetici.value,
-              Roles.DepartmanYardimci.value,
-            ],
+            roleClaims: [RoleClaims.viewPersonel],
           },
         },
         // İzin Yönetimi Ana Sayfası

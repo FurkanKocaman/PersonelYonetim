@@ -13,13 +13,14 @@ export async function authGuard(
   await userStore.getUser();
 
   const user: PersonelItem = userStore.user;
-  const requiredRoles: number[] = Array.isArray(to.meta.requiredRole) ? to.meta.requiredRole : [];
+  const roleClaims: string[] = Array.isArray(to.meta.roleClaims) ? to.meta.roleClaims : [];
 
   if (!user?.id || user.id === "") {
     document.title = "Giriş Yap | Personel Yönetim Sistemi";
     return next({ name: "login" });
   }
-  if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
+  const set = new Set(user.roleClaims);
+  if (roleClaims.length > 0 && !roleClaims.some((item) => set.has(item))) {
     document.title = `${to.meta.title || "Personel Yönetim"} | Personel Yönetim Sistemi`;
     return next({ name: "Unauthorized" });
   }

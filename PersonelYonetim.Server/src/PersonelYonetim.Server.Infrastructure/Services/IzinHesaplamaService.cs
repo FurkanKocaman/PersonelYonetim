@@ -29,16 +29,26 @@ internal sealed class IzinHesaplamaService(
             return Result<IzinHesaplamaResult>.Failure("Personel için çalışma takvimi günleri bulunamadı.");
 
         decimal toplamGun = 0;
-        DateTimeOffset currentDay = baslangic;
 
-        while(currentDay.Date <= bitis.Date)
+        baslangic = baslangic.ToLocalTime();
+        bitis = bitis.ToLocalTime();
+
+        DateTimeOffset currentDay = baslangic.Date;
+
+        while(currentDay <= bitis.Date)
         {
            var calismaGun = calismaGunler.FirstOrDefault(g => g.Gun == currentDay.DayOfWeek);
 
             if(calismaGun is not null && calismaGun.IsCalismaGunu)
             {
+                if(currentDay == baslangic.Date && new TimeOnly(baslangic.Hour,baslangic.Minute) >= calismaGun.CalismaBitis)
+                {
+                    currentDay = currentDay.AddDays(1);
+                    continue;
+                }
+
                 //Mola süresi sonradan çıkarılabilir
-                var toplamMesai = (decimal)(new TimeOnly(calismaGun.CalismaBaslangic!.Value.Hour, calismaGun.CalismaBaslangic.Value.Minute).ToTimeSpan()).Hours;
+                var toplamMesai = (decimal)(new TimeOnly(calismaGun.CalismaBaslangic!.Value.Hour, calismaGun.CalismaBaslangic.Value.Minute).ToTimeSpan()).TotalHours;
 
                 if (baslangic.Date == bitis.Date)
                 {

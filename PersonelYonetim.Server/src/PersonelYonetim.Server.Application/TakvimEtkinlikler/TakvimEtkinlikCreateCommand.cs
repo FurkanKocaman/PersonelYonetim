@@ -1,12 +1,9 @@
 ﻿using FluentValidation;
 using Mapster;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
-using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
-using System.Security.Claims;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.TakvimEtkinlikler;
@@ -16,7 +13,7 @@ public sealed record TakvimEtkinlikCreateCommand(
     DateTimeOffset BaslangicTarihi,
     DateTimeOffset? BitisTarihi,
     bool IsPublic,
-    Guid? SirketId,
+    Guid? tenantId,
     IEnumerable<Guid>? PersonelIdler) : IRequest<Result<string>>;
 
 public sealed class TakvimEtkinlikCreateCommandValidator : AbstractValidator<TakvimEtkinlikCreateCommand>
@@ -29,37 +26,22 @@ public sealed class TakvimEtkinlikCreateCommandValidator : AbstractValidator<Tak
 }
 
 internal sealed class TakvimEtkinlikCreateCommandHandler(
-    IPersonelRepository personelRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
     ITakvimEtkinlikRepository takvimEtkinlikRepository,
     IUnitOfWork unitOfWork,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<TakvimEtkinlikCreateCommand, Result<string>>
+    ICurrentUserService currentUserService
+    ) : IRequestHandler<TakvimEtkinlikCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(TakvimEtkinlikCreateCommand request, CancellationToken cancellationToken)
     {
         TakvimEtkinlik takvimEtkinlik = request.Adapt<TakvimEtkinlik>();
-        if(request.SirketId == null)
+        if(request.tenantId == null)
         {
-            var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdString))
-            {
-                throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
-            }
+            Guid? tenantId = currentUserService.TenantId;
 
-            var personel = personelRepository.GetAll()
-                .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
-                .Select(p => new { p.Id })
-                .FirstOrDefault();
+            if(!tenantId.HasValue)
+                return Result<string>.Failure("TenantId bulunamadı");
 
-            if (personel == null)
-            {
-                throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
-            }
-            var sirket = personelAtamaRepository
-                .Where(p => p.PersonelId == personel.Id && !p.IsDeleted)
-                .Select(p => new { p.SirketId })
-                .FirstOrDefault();
-            takvimEtkinlik.SirketId = sirket!.SirketId;
+            takvimEtkinlik.TenantId = tenantId.Value;
         }
        
         takvimEtkinlikRepository.Add(takvimEtkinlik);

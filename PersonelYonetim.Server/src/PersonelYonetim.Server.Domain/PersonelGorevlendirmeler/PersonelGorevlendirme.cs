@@ -4,8 +4,8 @@ using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,18 +15,18 @@ public sealed class PersonelGorevlendirme : Entity
     public Guid PersonelId { get; set; }
     public Personel Personel { get; set; } = default!;
 
-    public Guid KurumsalBirimId { get; set; }
-    public KurumsalBirim KurumsalBirim { get; set; } = default!;
+    public Guid? KurumsalBirimId { get; set; }
+    public KurumsalBirim? KurumsalBirim { get; set; }
 
-    public Guid PozisyonId { get; set; }
-    public Pozisyon Pozisyon { get; set; } = default!;
+    public Guid? PozisyonId { get; set; }
+    public Pozisyon? Pozisyon { get; set; }
 
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset? BitisTarihi { get; set; }
 
     public bool BirincilGorevMi { get; set; } = true;
-    public GorevlendirmeTipiEnum GorevlendirmeTipi { get; set; } = GorevlendirmeTipiEnum.Suresiz;
-    public CalismaSekliEnum CalismaSekli { get; set; } = CalismaSekliEnum.TamZamanli;
+    public GorevlendirmeTipiEnum? GorevlendirmeTipi { get; set; }
+    public CalismaSekliEnum? CalismaSekli { get; set; }
 
     public ICollection<GorevlendirmeRolu> GorevlendirmeRolleri { get; set; } = new List<GorevlendirmeRolu>();
     public GorevlendirmeIzinKurali? GorevlendirmeIzinKurali { get; set; }

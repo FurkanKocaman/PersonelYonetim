@@ -8,7 +8,6 @@ using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Bildirimler;
 using PersonelYonetim.Server.Application.CalismaCizelgeleri;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
-using PersonelYonetim.Server.Application.Departmanlar;
 using PersonelYonetim.Server.Application.Duyurular;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
@@ -16,8 +15,7 @@ using PersonelYonetim.Server.Application.KurumsalBirimler;
 using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
-using PersonelYonetim.Server.Application.Sirketler;
-using PersonelYonetim.Server.Application.Subeler;
+using PersonelYonetim.Server.Application.Roller;
 using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.RoleClaim;
 
@@ -35,10 +33,8 @@ public class AppODataController(
         ODataConventionModelBuilder builder = new();
         builder.EnableLowerCamelCase();
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
-        builder.EntitySet<DepartmanGetAllQueryResponse>("departmanlar");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
-        builder.EntitySet<SirketlerGetQueryResponse>("sirketler");
-        builder.EntitySet<SubelerGetQueryResponse>("subeler");
+        builder.EntitySet<RoleGetAllQueryResponse>("roller");
         //builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
@@ -47,7 +43,6 @@ public class AppODataController(
         //builder.EntitySet<IzinlerGetKalanQueryResponse>("getkalanizinler");
         builder.EntitySet<CalismaTakvimiGetQueryResponse>("calisma-takvim");
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
-        //builder.EntitySet<PersonelAtamaGetQueryResponse>("personel-atamalar");
         builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
         builder.EntitySet<DuyuruGetAllQueryResponse>("duyurular");
         //builder.EntitySet<CalismaCizelgeleriGetAllQueryResponse>("calisma-cizelgeler");
@@ -80,36 +75,23 @@ public class AppODataController(
     {
         var response = await sender.Send(new PersonelGetCurrentQuery(), cancellationToken);
         return response;
-    }
-    [HttpGet("sirketler")]
-    [Authorize(Permissions.ViewSirket)]
-    public async Task<IQueryable<SirketlerGetQueryResponse>> GetAllSirketler(CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new SirketlerGetQuery(), cancellationToken);
-        return response;
-    }
 
-    [HttpGet("subeler")]
-    //[Authorize(Permissions.ViewSube)]
-    public async Task<IQueryable<SubelerGetQueryResponse>> GetAllSubeler(Guid? SirketId, CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new SubelerGetQuery(SirketId), cancellationToken);
-        return response;
-    }
 
-    [HttpGet("departmanlar")]
-    [Authorize(Permissions.ViewDepartman)]
-    public async Task<IQueryable<DepartmanGetAllQueryResponse>> GetAllDepartmanlar(Guid? SubeId, CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new DepartmanGetAllQuery(SubeId), cancellationToken);
-        return response;
     }
 
     [HttpGet("pozisyonlar")]
-    [Authorize(Permissions.ViewPozisyon)]
+    [Authorize()]
     public async Task<IQueryable<PozisyonGetAllQueryResponse>> GetAllPozisyonlar(Guid? SirketId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PozisyonGetAllQuery(SirketId), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("roller")]
+    [Authorize()]
+    public async Task<IQueryable<RoleGetAllQueryResponse>> GetAllRoller(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new RoleGetAllQuery(null), cancellationToken);
         return response;
     }
     //[HttpGet("izin-kurallar")]

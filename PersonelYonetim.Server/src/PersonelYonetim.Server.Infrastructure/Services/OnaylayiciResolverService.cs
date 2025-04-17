@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;

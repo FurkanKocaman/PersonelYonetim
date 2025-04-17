@@ -6,7 +6,7 @@ import type { PaginationParams } from "@/models/request-models/PaginationParams"
 
 class PozisyonService {
   async pozisyonlarGet(
-    sirketId: string,
+    tenantId: string | undefined,
     paginationParams?: PaginationParams
   ): Promise<
     { items: PozisyonModel[]; count: number; pageSize: number; pageNumber: number } | undefined
@@ -28,7 +28,7 @@ class PozisyonService {
         {
           params: {
             $count: true,
-            sirketId: sirketId,
+            tenantId: tenantId,
           },
         }
       );

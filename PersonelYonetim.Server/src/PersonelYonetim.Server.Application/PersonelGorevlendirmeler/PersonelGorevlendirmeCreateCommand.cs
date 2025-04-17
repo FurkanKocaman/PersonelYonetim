@@ -1,14 +1,13 @@
-﻿
-using Mapster;
+﻿using Mapster;
 using MediatR;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
+using System.Xml;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
@@ -22,7 +21,7 @@ public sealed record PersonelGorevlendirmeCreateCommand(
     bool BirincilGorevMi,
     int GorevlendirmeTipiValue,
     int CalismaSekliValue,
-    Guid? RaporlananGorevlendirmeId,
+    Guid? RaporlananPersonelId,
     Guid? IzinKuralId,
     Guid? CalismaTakvimId,
     decimal BrutUcret,
@@ -86,6 +85,16 @@ internal sealed class PersonelGorevlendirmeCreateCommandHandler(
             personelGorevlendirme.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
             personelGorevlendirme.MesaiOnaySurecId = MesaiOnaySurecId;
             personelGorevlendirme.CalismaTakvimId = CalismaTakvimId;
+
+            if(request.RaporlananPersonelId is not null)
+            {
+                var raporlananGorevlendirme = personelGorevlendirmeRepository.Where(p => p.PersonelId == request.RaporlananPersonelId && p.TenantId == request.TenantId && p.IsDeleted == false).FirstOrDefault();
+                if (raporlananGorevlendirme is null)
+                    return Result<string>.Failure("Raporlanacak gorevlendirme bulunamadı");
+
+                personelGorevlendirme.RaporlananGorevlendirmeId = raporlananGorevlendirme.Id;
+            }
+            
 
             personelGorevlendirmeRepository.Add(personelGorevlendirme);
 

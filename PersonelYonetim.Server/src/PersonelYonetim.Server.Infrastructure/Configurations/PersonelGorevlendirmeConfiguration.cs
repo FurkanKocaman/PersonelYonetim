@@ -13,7 +13,7 @@ internal sealed class PersonelGorevlendirmeConfiguration : IEntityTypeConfigurat
         builder.Property(p => p.CalismaSekli).HasConversion<string>();
         builder.Property(p => p.BrutUcret).HasColumnType("decimal(18,2)");
 
-        builder.Property(p => p.GorevlendirmeTipi).HasConversion(tip => tip.Value, value => GorevlendirmeTipiEnum.FromValue(value));
-        builder.Property(p => p.CalismaSekli).HasConversion(tip => tip.Value, value => CalismaSekliEnum.FromValue(value));
+        builder.Property(p => p.GorevlendirmeTipi).HasConversion(tip => tip!.Value, value => GorevlendirmeTipiEnum.FromValue(value));
+        builder.Property(p => p.CalismaSekli).HasConversion(tip => tip!.Value, value => CalismaSekliEnum.FromValue(value));
     }
 }

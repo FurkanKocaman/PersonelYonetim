@@ -1,15 +1,12 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
-using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;
 public sealed record IzinTalepGetOnayBekleyenQuery() : IRequest<IQueryable<IzinTalepGetOnayBekleyenQueryResponse>>;
@@ -109,8 +106,8 @@ IPersonelRepository personelRepository
                          {
                              PersonelAd = t.AtananOnayciPersonel!= null ? t.AtananOnayciPersonel.Ad : "Bilinmiyor",
                              AvatarUrl = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.AvatarUrl : null,
-                             KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim.Ad : "Bilinmiyor",
-                             PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon.Ad : "Bilinmiyor",
+                             KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim!.Ad : "Bilinmiyor",
+                             PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon!.Ad : "Bilinmiyor",
                              Sira = t.AdimSirasi,
                              OnayDurum = t.DegerlendirmeDurumu.Name
                          }).ToList(),

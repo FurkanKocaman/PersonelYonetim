@@ -1,10 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Abstractions;
-using PersonelYonetim.Server.Domain.Departmanlar;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Users;
 
 namespace PersonelYonetim.Server.Application.Personeller;
@@ -32,18 +29,12 @@ public sealed class PersonelGetQueryResponse : EntityDto
 
 internal sealed class PersonelGetQueryHandler(
     IPersonelRepository personelRepository,
-    IDepartmanRepository departmanRepository,
-    IPozisyonRepository pozisyonRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
     UserManager<AppUser> userManager) : IRequestHandler<PersonelGetQuery, IQueryable<PersonelGetQueryResponse>>
 {
     public Task<IQueryable<PersonelGetQueryResponse>> Handle(PersonelGetQuery request, CancellationToken cancellationToken)
     {
         var response = (from entity in personelRepository.GetAll()
                         where entity.Id == request.Id && !entity.IsDeleted
-                        join personel_departman in personelAtamaRepository.GetAll() on entity.Id equals personel_departman.PersonelId
-                        join departman in departmanRepository.GetAll() on personel_departman.DepartmanId equals departman.Id
-                        join pozisyon in pozisyonRepository.GetAll() on personel_departman.PozisyonId equals pozisyon.Id
                         join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
                         join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
                         into update_user
@@ -62,8 +53,6 @@ internal sealed class PersonelGetQueryHandler(
                             Sehir = entity.Adres.Sehir,
                             Ilce = entity.Adres.Ilce,
                             TamAdres = entity.Adres.TamAdres,
-                            DepartmanAd = departman.Ad,
-                            PozisyonAd = pozisyon.Ad,
                             //Yonetici = entity.Yonetici != null ? entity.Yonetici!.FullName : "",
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,

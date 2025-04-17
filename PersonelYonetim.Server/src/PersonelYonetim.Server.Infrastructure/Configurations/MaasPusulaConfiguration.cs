@@ -17,11 +17,7 @@ internal class MaasPusulaConfiguration : IEntityTypeConfiguration<MaasPusula>
             .WithMany()
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
-        builder
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
+    
     
     }
 }

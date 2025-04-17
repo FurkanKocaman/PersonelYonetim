@@ -57,6 +57,7 @@ internal sealed class PersonelGetAllQueryHandler(
                     personel => personel.Id,
                     personelGorevlendirme => personelGorevlendirme.PersonelId,
                     (personel, personelGorevlendirme) => new { personel, personelGorevlendirme })
+            .Where(pg => request.KurumsalBirimId != null ? pg.personelGorevlendirme.KurumsalBirimId == request.KurumsalBirimId : true)
             .GroupJoin(userManager.Users,
                     pp => pp.personel.CreateUserId,
                     createUser => createUser.Id,
@@ -83,7 +84,7 @@ internal sealed class PersonelGetAllQueryHandler(
                         KurumsalBirimAd = ppuu.personelGorevlendirme.KurumsalBirim != null ? ppuu.personelGorevlendirme.KurumsalBirim.Ad : "Bilinmiyor",
                         PozisyonAd = ppuu.personelGorevlendirme.Pozisyon != null ? ppuu.personelGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
                         YoneticiAd = ppuu.personelGorevlendirme.RaporlananGorevlendirme != null ? ppuu.personelGorevlendirme.RaporlananGorevlendirme.Personel.FullName : "Bilinmiyor",
-                        YoneticiPozisyon = ppuu.personelGorevlendirme.RaporlananGorevlendirme != null ? ppuu.personelGorevlendirme.RaporlananGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
+                        YoneticiPozisyon = ppuu.personelGorevlendirme.RaporlananGorevlendirme != null ? ppuu.personelGorevlendirme.RaporlananGorevlendirme.Pozisyon!.Ad : "Bilinmiyor",
                         Roller = ppuu.personelGorevlendirme.GorevlendirmeRolleri.Select(r => r.Rol.Name).ToArray(),
                         IsActive = ppuu.personel.IsActive,
                         CreatedAt = ppuu.personel.CreatedAt,

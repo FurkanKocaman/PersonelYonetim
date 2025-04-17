@@ -4,16 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.Duyurular;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PersonelYonetim.Server.Application.Duyurular;
 public sealed record DuyuruGetAllQuery(
@@ -23,13 +17,12 @@ public sealed class DuyuruGetAllQueryResponse:EntityDto
 {
     public string Baslik { get; set; } = default!;
     public string? Aciklama { get; set; }
-    public string? SirketAd { get; set; }
     public string AliciTipi { get; set; } = default!;
 }
 
 internal sealed class DuyuruGetAllQueryResponseHandler(
     IPersonelRepository personelRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IDuyuruRepository duyuruRepository,
     IHttpContextAccessor httpContextAccessor,
     UserManager<AppUser> userManager
@@ -59,9 +52,9 @@ internal sealed class DuyuruGetAllQueryResponseHandler(
             (p.AliciIdler != null && p.AliciIdler.Contains(personel.Id))
         );
         var response = duyurular
-                    .Join(personelAtamaRepository.GetAll(),
-                    duyuru => duyuru.SirketId,
-                    personelAtama => personelAtama.SirketId,
+                    .Join(personelGorevlendirmeRepository.GetAll(),
+                    duyuru => duyuru.TenantId,
+                    personelAtama => personelAtama.TenantId,
                     (duyuru, personelAtama) => new { duyuru, personelAtama })
                     .Where(dp => dp.personelAtama.PersonelId == personel.Id && dp.personelAtama.IsActive && dp.personelAtama.IsDeleted == false)
                      .Join(userManager.Users,
@@ -73,7 +66,6 @@ internal sealed class DuyuruGetAllQueryResponseHandler(
                          Id = dp.duyuru.Id,
                          Baslik = dp.duyuru.Baslik,
                          Aciklama = dp.duyuru.Aciklama,
-                         SirketAd = dp.duyuru.Sirket.Ad,
                          AliciTipi = dp.duyuru.AliciTipi.Name,
                          IsActive = dp.duyuru.IsActive,
                          CreatedAt = dp.duyuru.CreatedAt,

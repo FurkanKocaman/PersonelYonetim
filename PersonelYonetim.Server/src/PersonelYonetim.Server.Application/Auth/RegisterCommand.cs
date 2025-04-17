@@ -9,6 +9,7 @@ using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.Tenants;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
@@ -31,6 +32,7 @@ internal sealed class RegisterCommandHandler(
    ICalismaTakvimRepository calismaTakvimRepository,
    ICalismaGunRepository calismaGunRepository,
    IKurumsalBirimTipiRepository kurumsalBirimTipiRepository,
+   ITenantRepository tenantRepository,
    IUnitOfWork unitOfWork,
    IDataSeeder dataSeeder,
    ISender sender) : IRequestHandler<RegisterCommand, Result<LoginCommandResponse>>
@@ -39,7 +41,10 @@ internal sealed class RegisterCommandHandler(
     {
         try
         {
-            Guid tenantId = Guid.CreateVersion7();
+
+            Tenant tenant = new(request.KurumsalBirimCreateCommand.Ad, null, null);
+
+            Guid tenantId = tenant.Id;
 
             var (role,pozisyon) = await dataSeeder.SeedAsync(tenantId);
             List<KurumsalBirimTipi> birimTipleri = KurumsalYapiSeedData.OlusturDefaultYapi(tenantId);
@@ -119,6 +124,8 @@ internal sealed class RegisterCommandHandler(
 
                     var user = await userManager.FindByIdAsync(response.Data!);
                     user!.CreateUserId = user.Id;
+                    tenant.CreateUserId = user.Id;
+                    await tenantRepository.AddAsync(tenant,cancellationToken);
                     await unitOfWork.SaveChangesAsync();
 
                     LoginCommand login = new(request.PersonelCreateCommand.Iletisim.Eposta, request.PersonelCreateCommand.Ad);

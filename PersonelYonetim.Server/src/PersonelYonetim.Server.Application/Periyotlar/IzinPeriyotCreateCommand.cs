@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
 using TS.Result;
@@ -14,7 +14,7 @@ public sealed record IzinPeriyotCreateCommand(
     ) : IRequest<Result<string>>;
 
 internal sealed class IzinPeriyotCreateCommandHandler(
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IIzinPeriyotRepository izinPeriyotRepository,
     IGunlukCalismaRepository gunlukCalismaRepository,
     IUnitOfWork unitOfWork
@@ -22,7 +22,7 @@ internal sealed class IzinPeriyotCreateCommandHandler(
 {
     public async Task<Result<string>> Handle(IzinPeriyotCreateCommand request, CancellationToken cancellationToken)
     {
-        var personelAtama = personelAtamaRepository.Where(p => p.PersonelId == request.PersonelId && p.IsActive & !p.IsDeleted).Include(p => p.CalismaTakvimi).ThenInclude(p => p!.CalismaGunler).FirstOrDefault();
+        var personelAtama = personelGorevlendirmeRepository.Where(p => p.PersonelId == request.PersonelId && p.IsActive & !p.IsDeleted).Include(p => p.CalismaTakvimi).ThenInclude(p => p!.CalismaGunler).FirstOrDefault();
 
         if (personelAtama is null)
             return Result<string>.Failure("Personel ataması bulunamadı.");

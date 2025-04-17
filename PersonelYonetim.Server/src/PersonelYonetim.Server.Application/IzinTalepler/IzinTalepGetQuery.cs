@@ -80,8 +80,8 @@ internal sealed class IzinTalepGetQueryHandler(
                          {
                              PersonelAd = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.Ad : "Bilinmiyor",
                              AvatarUrl = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.AvatarUrl : null,
-                             KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim.Ad : "Bilinmiyor",
-                             PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon.Ad : "Bilinmiyor",
+                             KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim!.Ad : "Bilinmiyor",
+                             PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon!.Ad : "Bilinmiyor",
                              Sira = t.AdimSirasi,
                              OnayDurum = t.DegerlendirmeDurumu.Name
                          }).ToList(),

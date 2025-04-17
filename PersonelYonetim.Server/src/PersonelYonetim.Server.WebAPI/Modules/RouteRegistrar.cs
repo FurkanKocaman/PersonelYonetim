@@ -6,12 +6,9 @@ public static class RouteRegistrar
     {
         app.RegisterPersonelRoutes();
         app.RegisterAuthRoutes();
-        app.RegisterUserRoutes();
-        app.RegisterDepartmanRoutes();
+        app.RegisterUserRoutes();        
         app.RegisterPozisyonRoutes();
         app.RegisterIzinTalepRoutes();
-        app.RegisterSirketRoutes();
-        app.RegisterSubeRoutes();
         app.RegisterIzinRoutes();
         app.RegisterCalismaTakvimRoutes();
         app.RegisterTakvimEtkinlikRoutes();

@@ -1,6 +1,5 @@
 ﻿using Ardalis.SmartEnum;
 using PersonelYonetim.Server.Domain.Abstractions;
-using PersonelYonetim.Server.Domain.Sirketler;
 
 namespace PersonelYonetim.Server.Domain.Bordro;
 public class BordroDonem : Entity
@@ -11,8 +10,6 @@ public class BordroDonem : Entity
     public DateTimeOffset DonemBitis { get; set; }
     public BordroDonemDurumEnum BordroDonemDurum { get; set; } = BordroDonemDurumEnum.Planlandi;
     public ICollection<MaasPusula> MaasPusulalar { get; set; } = new List<MaasPusula>();
-    public Guid SirketId { get; set; }
-    public Sirket? Sirket { get; set; }
     public Guid TenantId { get; set; }
 }
 

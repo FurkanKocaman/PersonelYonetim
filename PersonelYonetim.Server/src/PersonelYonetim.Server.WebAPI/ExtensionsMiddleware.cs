@@ -1,11 +1,8 @@
 ﻿using GenericRepository;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
-using PersonelYonetim.Server.Domain.RoleClaim;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Users;
-using System.Security.Claims;
 
 namespace PersonelYonetim.Server.WebAPI;
 

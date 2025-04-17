@@ -7,19 +7,15 @@ using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.Bordro;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
-using PersonelYonetim.Server.Domain.Departmanlar;
 using PersonelYonetim.Server.Domain.Duyurular;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
-using PersonelYonetim.Server.Domain.Sirketler;
-using PersonelYonetim.Server.Domain.Subeler;
 using PersonelYonetim.Server.Domain.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.Tenants;
 using PersonelYonetim.Server.Domain.Tokenler;
@@ -37,15 +33,11 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         _httpContextAccessor = httpContextAccessor;
     }
     public DbSet<Personel> Personeller { get; set; }
-    public DbSet<PersonelAtama> PersonelAtamalar { get; set; }
-    public DbSet<Sirket> Sirketler { get; set; }
-    public DbSet<Sube> Subeler { get; set; }
-    public DbSet<Departman> Departmanlar { get; set; }
-    public DbSet<Domain.Pozisyonlar.Pozisyon> Pozisyonlar { get; set; }
+
     public DbSet<IzinTalep> IzinTalepleri { get; set; }
     public DbSet<IzinTur> IzinTurleri { get; set; }
     public DbSet<IzinKural> IzinKuralları { get; set; }
-    public DbSet<PersonelIzinKural> PersonelIzinKurallari { get; set; }
+
     public DbSet<IdentityRoleClaim<Guid>> IdentityRoleClaims { get; set; }
     public DbSet<CalismaTakvimi> CalismaTakvimleri { get; set; }
     public DbSet<CalismaGun> CalismaGunleri { get; set; }
@@ -66,11 +58,11 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
 
     public DbSet<KurumsalBirimTipi> KurumsalBirimTipleri { get; set; }
     public DbSet<KurumsalBirim> KurumsalBirimler { get; set; }
-    public DbSet<Domain.PersonelGorevlendirmeler.Pozisyon> GorevlendirmePozisyonlar { get; set; }
 
     public DbSet<PersonelGorevlendirme> PersonelGorevlendirmeler { get; set; }
     public DbSet<GorevlendirmeIzinKurali> GorevlendirmeIzinKurallari { get; set; }
     public DbSet<GorevlendirmeRolu> GorevlendirmeRolleri { get; set; }
+    public DbSet<Pozisyon> Pozisyonlar { get; set; }
 
     public DbSet<Tenant> Tenants { get; set; }
 
@@ -135,11 +127,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<CalismaCizelge>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<GunlukCalisma>()
            .HasOne(p => p.Personel)
@@ -200,12 +187,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .HasForeignKey(p => p.PersonelId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<TakvimEtkinlik>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
         modelBuilder.Entity<AppUserRole>()
             .HasKey(p => new {p.UserId, p.RoleId, p.SirketId});
 
@@ -234,41 +215,6 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
 
         modelBuilder.Entity<IdentityRoleClaim<Guid>>()
             .ToTable("RoleClaims");
-
-        modelBuilder.Entity<Sube>()
-            .HasOne(p => p.Sirket)
-            .WithMany(s => s.Subeler)
-            .HasForeignKey(s => s.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<Departman>()
-            .HasOne(p => p.Sube)
-            .WithMany(s => s.Departmanlar)
-            .HasForeignKey(s => s.SubeId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<Domain.Pozisyonlar.Pozisyon>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p =>p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-        modelBuilder.Entity<Domain.Pozisyonlar.Pozisyon>()
-            .HasOne(p => p.Departman)
-            .WithMany(p => p.Pozisyonlar)
-            .HasForeignKey(p => p.DepartmanId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<Departman>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        modelBuilder.Entity<BordroDonem>()
-            .HasOne(p => p.Sirket)
-            .WithMany()
-            .HasForeignKey(p => p.SirketId)
-            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<KazancBilesen>()
             .HasOne(p => p.MaasPusula)

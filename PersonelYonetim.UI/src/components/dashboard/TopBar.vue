@@ -5,7 +5,6 @@ import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import type { BildirimModel } from "@/models/entity-models/BildirimModel";
 import BildirimService from "@/services/BildirimService";
-import Roles from "@/models/Roles";
 
 const route = useRoute();
 const activeTab = computed(() => {
@@ -237,8 +236,8 @@ const logout = () => {
             class="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-full p-1 focus:outline-none"
           >
             <img
-              v-if="userStore.user?.profilResimUrl"
-              :src="apiUrl + userStore.user?.profilResimUrl"
+              v-if="userStore.user?.avatarUrl"
+              :src="apiUrl + userStore.user?.avatarUrl"
               alt="Kullanıcı"
               class="w-8 h-8 rounded-full border border-gray-200 dark:border-neutral-600"
             />
@@ -246,7 +245,7 @@ const logout = () => {
               v-else
               class="text-3xl font-semibold text-sky-600 transition-all duration-300 ease-in-out rounded-full border-1 border-sky-500 w-10 h-10 flex items-center justify-center"
             >
-              {{ userStore.user.fullName[0] }}
+              {{ userStore.user.ad[0] }}
             </div>
           </button>
 
@@ -258,8 +257,8 @@ const logout = () => {
             <div class="p-4 border-b border-gray-200 dark:border-neutral-700 text-center">
               <div class="relative mx-auto w-16 h-16 mb-3">
                 <img
-                  v-if="userStore.user?.profilResimUrl"
-                  :src="apiUrl + userStore.user?.profilResimUrl"
+                  v-if="userStore.user?.avatarUrl"
+                  :src="apiUrl + userStore.user?.avatarUrl"
                   alt="Kullanıcı"
                   class="w-16 h-16 rounded-full border-2 border-white dark:border-neutral-600 shadow-md object-cover"
                 />
@@ -267,7 +266,7 @@ const logout = () => {
                   v-else
                   class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
                 >
-                  {{ userStore.user.fullName[0] }}
+                  {{ userStore.user.ad[0] }}
                 </div>
 
                 <div
@@ -275,7 +274,7 @@ const logout = () => {
                 ></div>
               </div>
               <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {{ userStore.user?.fullName || "Kullanıcı" }}
+                {{ userStore.user?.ad + " " + userStore.user?.soyad || "Kullanıcı" }}
               </h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {{ userStore.user?.iletisim.eposta || "kullanici@ornek.com" }}
@@ -283,11 +282,7 @@ const logout = () => {
               <div
                 class="mt-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 py-1 px-2 rounded-full inline-block"
               >
-                {{
-                  userStore.user.pozisyonAd != undefined
-                    ? userStore.user.pozisyonAd
-                    : Roles.getRoleByValue(userStore.user.role).name
-                }}
+                {{ userStore.user.pozisyonAd }}
               </div>
             </div>
             <div class="py-1">

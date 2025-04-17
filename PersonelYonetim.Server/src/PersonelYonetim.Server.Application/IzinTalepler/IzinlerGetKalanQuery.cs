@@ -1,12 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using PersonelYonetim.Server.Application.IzinKurallar;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Izinler;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
-using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;
 public sealed record IzinlerGetKalanQuery(
@@ -20,72 +17,59 @@ public sealed class IzinlerGetKalanQueryResponse
     public string GuncelHakEdisDonem { get; set; } = string.Empty;
 }
 internal sealed class IzinlerGetKalanQueryHandler(
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
+    IGorevlendirmeIzinKuraliRepository gorevlendirmeIzinKuraliRepository,
     IPersonelRepository personelRepository,
-    IIzinKuralRepository izinKuralRepository,
     IIzinTalepRepository izinTalepRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
-    IHttpContextAccessor httpContextAccessor
+    ICurrentUserService currentUserService
 ) : IRequestHandler<IzinlerGetKalanQuery, IzinlerGetKalanQueryResponse>
 {
     public Task<IzinlerGetKalanQueryResponse> Handle(IzinlerGetKalanQuery request, CancellationToken cancellationToken)
     {
-        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdString))
+        Guid? userId = currentUserService.UserId;
+        Guid? tenantId = currentUserService.TenantId;
+
+        if (!userId.HasValue || !tenantId.HasValue)
+        {
+            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+        }
+
+        var personelId = personelRepository.FirstOrDefault(p => p.UserId == userId).Id;
+
+        if(personelId == Guid.Empty)
             throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
 
-        var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
-            .Select(p => new { p.Id })
-            .FirstOrDefault();
+        var personelGorevlendirme = personelGorevlendirmeRepository.FirstOrDefault(p => p.PersonelId == personelId && p.IsDeleted == false && p.IsActive && p.TenantId == tenantId);
+        if (personelGorevlendirme is null)
+            throw new UnauthorizedAccessException("Kullanıcı görevlendirme bulunamadı.");
 
-        if (personel is null)
-            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+        var gorevlendirmeIzinKurali = gorevlendirmeIzinKuraliRepository.Where(p => p.PersonelGorevlendirmeId == personelGorevlendirme.Id && p.IsActive && !p.IsDeleted)
+                                        .Include(p => p.IzinKural).ThenInclude(p => p.IzinTurler).FirstOrDefault();
 
-        var izinKuralKayitlari = izinKuralRepository.GetAll()
-            .Where(kural => !kural.IsDeleted)
-            .Include(kural => kural.IzinTurler)
-            .ToList();
+        if (gorevlendirmeIzinKurali is null || gorevlendirmeIzinKurali.IzinKural is null || !gorevlendirmeIzinKurali.IzinKural.IzinTurler.Any())
+            throw new UnauthorizedAccessException("Kullanıcı görevlendirme izin kuralı bulunamadı.");
 
-        var atamaKaydi = personelAtamaRepository.GetAll()
-            .FirstOrDefault(pa => pa.PersonelId == personel.Id);
+        var izinTur = gorevlendirmeIzinKurali.IzinKural.IzinTurler.FirstOrDefault(p => p.Ad == "Yillik Izin");
+        if (izinTur is null)
+            throw new UnauthorizedAccessException("İzin türü bulunamadı.");
 
-        if (atamaKaydi is null)
-            throw new Exception("Personelin atama kaydı bulunamadı.");
+        decimal izinTaleplerToplamGun = izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id).Sum(p => p.ToplamSure);
 
-        // Geçerli yıl ve sadece "Yıllık İzin" için kullanılan talepler
-        var izinTalepler = izinTalepRepository
-            .Where(talep =>
-                talep.PersonelId == personel.Id &&
-                talep.BitisTarihi.Year == DateTime.Now.Year &&
-                talep.IzinTur.Ad == "Yillik Izin" &&
-                //talep.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi &&
-                !talep.IsDeleted)
-            .ToList();
+        var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.BaslangicTarihi.Year);
 
-        var kullanilanSure = izinTalepler.Sum(t => t.ToplamSure);
+        var toplamHak = kidemYil == 1 || kidemYil == 0 ? izinTur.LimitGunSayisi : izinTur.LimitGunSayisi + (4 * kidemYil);
 
-        var kuralKaydi = izinKuralKayitlari
-            .FirstOrDefault(kural =>
-                                      kural.IzinTurler.Any(t => t.Ad == "Yillik Izin"));
-
-        if (kuralKaydi is null)
-            throw new Exception("İlgili yıllık izin kuralı bulunamadı.");
-
-        var izinTur = kuralKaydi.IzinTurler.First(t => t.Ad == "Yillik Izin");
-
-        var kacYildirCalisiyor = Math.Max(1, DateTimeOffset.Now.Year - atamaKaydi.PozisyonBaslamaTarihi.Year);
-        var toplamHak = kacYildirCalisiyor * izinTur.LimitGunSayisi;
-
-        var donemBaslangic = new DateTimeOffset(DateTimeOffset.Now.Year, atamaKaydi.PozisyonBaslamaTarihi.Month, atamaKaydi.PozisyonBaslamaTarihi.Day, 0, 0, 0, DateTimeOffset.Now.Offset);
+        var donemBaslangic = new DateTimeOffset(DateTimeOffset.Now.Year, personelGorevlendirme.BaslangicTarihi.Month, personelGorevlendirme.BaslangicTarihi.Day, 0, 0, 0, DateTimeOffset.Now.Offset);
         if (DateTimeOffset.Now < donemBaslangic)
             donemBaslangic = donemBaslangic.AddYears(-1);
+
         var donemBitis = donemBaslangic.AddYears(1);
 
         var response = new IzinlerGetKalanQueryResponse
         {
             IzinTurAd = izinTur.Ad,
-            Kullanilan = kullanilanSure,
-            Kalan = toplamHak - kullanilanSure,
+            Kullanilan = izinTaleplerToplamGun,
+            Kalan = toplamHak - izinTaleplerToplamGun,
             GuncelHakEdisDonem = $"{donemBaslangic:dd-MM-yyyy} - {donemBitis:dd-MM-yyyy}"
         };
 

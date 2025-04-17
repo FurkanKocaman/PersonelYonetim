@@ -1,16 +1,15 @@
-using PersonelYonetim.Server.Application;
-using PersonelYonetim.Server.Infrastructure;
-using PersonelYonetim.Server.WebAPI.Controllers;
-using PersonelYonetim.Server.WebAPI.Modules;
-using PersonelYonetim.Server.WebAPI;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.RateLimiting;
-using Scalar.AspNetCore;
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.Authentication;
-using Grpc.Net.Compression;
 using Microsoft.AspNetCore.ResponseCompression;
+using PersonelYonetim.Server.Application;
+using PersonelYonetim.Server.Infrastructure;
+using PersonelYonetim.Server.WebAPI;
+using PersonelYonetim.Server.WebAPI.Controllers;
+using PersonelYonetim.Server.WebAPI.Modules;
+using Scalar.AspNetCore;
 using System.IO.Compression;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 

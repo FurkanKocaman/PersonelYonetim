@@ -1,4 +1,4 @@
-﻿using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
+﻿using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Rols;
 
 namespace PersonelYonetim.Server.Application.Services;

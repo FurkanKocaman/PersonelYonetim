@@ -2,9 +2,8 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
-using PersonelYonetim.Server.Domain.Rols;
 
-namespace PersonelYonetim.Server.Infrastructure.Configurations;
+namespace PersonelYonetim.Server.Infrastructure.Configuration;
 internal sealed class TalepDegerlendirmeConfiguration : IEntityTypeConfiguration<TalepDegerlendirme>
 {
     public void Configure(EntityTypeBuilder<TalepDegerlendirme> builder)

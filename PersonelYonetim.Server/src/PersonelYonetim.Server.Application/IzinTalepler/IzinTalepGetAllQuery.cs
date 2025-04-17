@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Izinler;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
-using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
 
@@ -32,7 +31,7 @@ internal sealed class IzinTalepGetAllQueryHandler(
     IIzinTalepRepository izinTalepRepository,
     UserManager<AppUser> userManager,
     IPersonelRepository personelRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IHttpContextAccessor httpContextAccessor)
     : IRequestHandler<IzinTalepGetAllQuery, IQueryable<IzinTalepGetAllQueryResponse>>
 {
@@ -54,7 +53,7 @@ internal sealed class IzinTalepGetAllQueryHandler(
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
         }
 
-        var personelAtama = personelAtamaRepository.GetAll()
+        var personelAtama = personelGorevlendirmeRepository.GetAll()
             .Where(p => p.PersonelId == personel.Id && p.IsActive && !p.IsDeleted)
             .Select(p=>p)
             .FirstOrDefault();
@@ -67,7 +66,7 @@ internal sealed class IzinTalepGetAllQueryHandler(
         var izinler = izinTalepRepository
          .GetAll()
          .Include(i => i.Personel)
-         .Where(p => p.Personel.PersonelAtamalar.Any(pa => pa.IsDeleted == false && pa.IsActive == true && pa.SirketId == personelAtama.SirketId))
+         .Where(p => p.Personel.PersonelGorevlendirmeler.Any(pa => pa.IsDeleted == false && pa.IsActive == true && pa.TenantId == personelAtama.TenantId))
          .Include(i => i.IzinTur)
          .Include(i => i.DegerlendirmeAdimlari)
              .ThenInclude(td => td.OnaySureciAdimi);

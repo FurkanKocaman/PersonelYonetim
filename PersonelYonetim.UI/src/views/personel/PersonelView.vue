@@ -1,30 +1,19 @@
 <script setup lang="ts">
-import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
 import type { PersonelItem } from "@/models/PersonelModels";
-import type { SirketModel } from "@/models/entity-models/SirketModel";
-import type { SubeModel } from "@/models/entity-models/SubeModel";
-import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
-import SirketService from "@/services/SirketService";
-import SubeService from "@/services/SubeService";
-import { computed, onMounted, ref, watch, type Ref } from "vue";
+import { computed, onMounted, ref, type Ref } from "vue";
 import PersonelModal from "@/components/modals/PersonelModal.vue";
 import TableLayout from "@/components/TableLayout.vue";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import KurumsalBirimService from "@/services/KurumsalBirimService";
+import type { KurumsalBirimGetModel } from "@/models/response-models/KurumsalBirimGetModel";
 
 const selectedPersonel = ref<PersonelItem | undefined>(undefined);
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
 const filteredPersonellerList: Ref<PersonelItem[] | undefined> = ref([]);
 
-const sirketler: Ref<SirketModel[] | undefined> = ref([]);
-const selectedSirket = ref("");
-
-const subeler: Ref<SubeModel[] | undefined> = ref([]);
-const selectedSube: Ref<string | undefined> = ref(undefined);
-
-const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
-const selectedDepartman: Ref<string | undefined> = ref(undefined);
-
+const kurumsalBirimler: Ref<KurumsalBirimGetModel[] | undefined> = ref([]);
+const selectedKurumsalBirimId = ref(undefined);
 const showPersonelModal = ref(false);
 
 const paginationParams: Ref<PaginationParams> = ref({
@@ -36,11 +25,8 @@ const paginationParams: Ref<PaginationParams> = ref({
 });
 
 onMounted(async () => {
-  const res = await SirketService.sirketlerGet();
-  sirketler.value = res?.items;
-  if (sirketler.value) {
-    selectedSirket.value = sirketler.value[0].id;
-  }
+  const res = await KurumsalBirimService.kurumsalBirimlerGet();
+  kurumsalBirimler.value = res?.items;
   getPersoneller();
 });
 
@@ -53,9 +39,7 @@ const setPageNumber = (pageNumber: number) => {
 
 const getPersoneller = async () => {
   const response = await PersonelService.getPersonelList(
-    selectedSirket.value,
-    selectedSube.value,
-    selectedDepartman.value,
+    selectedKurumsalBirimId.value,
     paginationParams.value
   );
   if (response) {
@@ -67,48 +51,32 @@ const getPersoneller = async () => {
 
 const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
   return (filteredPersonellerList.value || []).map(
-    ({ id, fullName, iletisim, subeAd, departmanAd, pozisyonAd, role, isActive }) => ({
+    ({ id, ad, soyad, iletisim, kurumsalBirimAd, pozisyonAd, yoneticiAd, isActive }) => ({
       id,
-      fullName,
+      ad,
+      soyad,
       iletisim: iletisim.eposta,
-      subeAd,
-      departmanAd,
+      kurumsalBirimAd,
       pozisyonAd,
-      role,
+      yoneticiAd,
       isActive: isActive ? "Aktif" : "Pasif",
     })
   );
 });
 
-const getSubeler = async () => {
-  const res = await SubeService.subelerGet(selectedSirket.value);
-  subeler.value = res?.items;
-};
-
-const getDepartmanlar = async () => {
-  if (selectedSube.value == undefined) {
-    selectedDepartman.value = undefined;
-  } else {
-    const res = await DepartmanService.departmanlarGet(selectedSube.value!);
-    departmanlar.value = res?.items;
-  }
-};
-
-watch(selectedSirket, getSubeler);
-watch(selectedSube, getDepartmanlar);
-watch(selectedSube, () => {
-  paginationParams.value.pageNumber = 1;
-  getPersoneller();
-});
-watch(selectedDepartman, () => {
-  paginationParams.value.pageNumber = 1;
-  getPersoneller();
-});
+// watch(selectedSube, () => {
+//   paginationParams.value.pageNumber = 1;
+//   getPersoneller();
+// });
+// watch(selectedDepartman, () => {
+//   paginationParams.value.pageNumber = 1;
+//   getPersoneller();
+// });
 
 const openEditModal = (personel: PersonelItem) => {
   console.log(personeller.value);
   selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
-  selectedPersonel.value!.role = personel.role;
+  // selectedPersonel.value!.role = personel.role;
   showPersonelModal.value = true;
 };
 
@@ -131,44 +99,20 @@ const orderBy = (order: string) => {
       <div class="flex w-full justify-between mb-5">
         <div class="flex flex-1">
           <div class="flex flex-col w-1/4 mr-3">
-            <label for="sirket">Şirket</label>
+            <label for="sirket">Birim</label>
             <select
               id="sirket"
-              v-model="selectedSirket"
-              v-on:change="getSubeler()"
+              v-model="selectedKurumsalBirimId"
+              v-on:change="getPersoneller()"
               class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded-sm text-sm"
             >
-              <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
-                {{ sirket.ad }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col w-1/4 mr-3">
-            <label for="sube">Şube</label>
-            <select
-              id="sube"
-              v-model="selectedSube"
-              v-on:change="getDepartmanlar()"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-              :disabled="selectedSirket == ''"
-            >
-              <option :value="undefined" selected>Şube seçiniz</option>
-              <option v-for="sube in subeler" :key="sube.id" :value="sube.id">
-                {{ sube.ad }}
-              </option>
-            </select>
-          </div>
-          <div class="flex flex-col w-1/4">
-            <label for="departman">Departman</label>
-            <select
-              id="departman"
-              v-model="selectedDepartman"
-              class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-800 bg-neutral-400/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
-              :disabled="selectedSube == undefined"
-            >
-              <option :value="undefined" selected>Departman seçiniz</option>
-              <option v-for="departman in departmanlar" :key="departman.id" :value="departman.id">
-                {{ departman.ad }}
+              <option :value="undefined" selected>Birim seçiniz</option>
+              <option
+                v-for="kurumsalBirim in kurumsalBirimler"
+                :key="kurumsalBirim.id"
+                :value="kurumsalBirim.id"
+              >
+                {{ kurumsalBirim.ad }}
               </option>
             </select>
           </div>
@@ -203,13 +147,13 @@ const orderBy = (order: string) => {
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <TableLayout
           :table-headers="[
-            { key: 'fullName', value: 'Ad', width: 'w-1/7' },
-            { key: 'iletisim', value: 'Eposta', width: 'w-1/6' },
-            { key: 'subeAd', value: 'Şube', width: 'w-1/12' },
-            { key: 'departmanAd', value: 'Departman', width: 'w-1/10' },
+            { key: 'ad', value: 'Ad', width: 'w-1' },
+            { key: 'soyad', value: 'Soyad' },
+            { key: 'iletisim', value: 'Eposta' },
+            { key: 'kurumsalBirimAd', value: 'Birim' },
             { key: 'pozisyonAd', value: 'Pozisyon' },
-            { key: 'role', value: 'Rol' },
-            { key: 'isActive', value: 'Durum', width: 'w-1/12' },
+            { key: 'yoneticiAd', value: 'Yonetici' },
+            { key: 'isActive', value: 'Durum' },
           ]"
           :table-content="filteredPersoneller"
           :islemler="['edit', 'detaylar']"
