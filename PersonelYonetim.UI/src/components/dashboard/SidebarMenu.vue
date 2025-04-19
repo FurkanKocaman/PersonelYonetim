@@ -42,9 +42,9 @@ const closeIzinTalep = (state: boolean) => {
 
 const filteredMenuItems = computed(() => {
   return props.menuItems.filter((item) => {
-    if (!item.rolaClaims) return true;
+    if (!item.roleClaims) return true;
 
-    return item.rolaClaims.some((item) => props.user.roleClaims.includes(item));
+    return item.roleClaims.some((item) => props.user.roleClaims.includes(item));
   });
 });
 

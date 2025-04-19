@@ -1,4 +1,5 @@
-﻿using PersonelYonetim.Server.Domain.Abstractions;
+﻿using Ardalis.SmartEnum;
+using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Personeller;
 
 namespace PersonelYonetim.Server.Domain.Bordro;
@@ -8,6 +9,11 @@ public class MaasPusula  :Entity
     public Personel? Personel { get; set; } 
     public Guid BordroDonemId { get; set; }
     public BordroDonem? BordroDonem { get; set; }
+    public MaasPusulaDurumEnum Durum { get; set; } = MaasPusulaDurumEnum.Beklemede;
+
+    public string? TabiKanunKodu { get; set; } // Örn: "5510"
+    public string? TesvikKodu { get; set; }    // Örn: "6111", null olabilir
+    public string? SGKDurumu { get; set; }     // Örn: "Normal", "Emekli", "Engelli", "Yabancı"
 
     // Kazanç Özetleri
     public decimal BrutUcret { get; set; } // Dönemlik ana maaş
@@ -39,9 +45,7 @@ public class MaasPusula  :Entity
     public decimal IssizlikPrimiIsveren { get; set; } // Hesaplama Z adımı Sosyal güvenlik matrahı * 0.02 
     public decimal ToplamIsverenMaliyeti { get; set; } // ToplamBrutKazanc + Y + Z
     public int SGKGunSayisi { get; set; } // MUHSGK için gerekli
-    public int EksikGunSayisi { get; set; } // MUHSGK için gerekli
-    public string? EksikGunNedeniKodu { get; set; } // MUHSGK için gerekli (SGK kodları)
-    public string? MeslekKodu { get; set; } // MUHSGK için gerekli (ISCO 08 kodları)
+    public List<EksikGun> EksikGunler { get; set; } = new List<EksikGun>(); // MUHSGK için gerekli
     public bool BesKesintisiVarMi { get; set; }
     public decimal BesKesintiTutari { get; set; }
 
@@ -49,5 +53,15 @@ public class MaasPusula  :Entity
     public  ICollection<KesintiBilesen> KesintiBilesenleri { get; set; } = new List<KesintiBilesen>();
 
     public Guid TenantId { get; set; }
+}
 
+public sealed class MaasPusulaDurumEnum : SmartEnum<MaasPusulaDurumEnum>
+{
+    public static readonly MaasPusulaDurumEnum Beklemede = new("Beklemede", 0);
+    public static readonly MaasPusulaDurumEnum Onaylandi = new("Onaylandi", 1);
+    public static readonly MaasPusulaDurumEnum Reddedildi = new("Reddedildi", 2);
+    public static readonly MaasPusulaDurumEnum Iptal = new("Iptal", 3);
+    private MaasPusulaDurumEnum(string name, int value) : base(name, value)
+    {
+    }
 }

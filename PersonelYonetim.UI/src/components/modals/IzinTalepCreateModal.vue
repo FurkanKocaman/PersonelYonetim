@@ -35,7 +35,8 @@ onMounted(() => {
 
 const getIzinTurler = async () => {
   const response = await IzinService.getIzinTurler(paginationParams.value);
-  console.log(response), (izinTurler.value = response?.items);
+  console.log(response);
+  izinTurler.value = response?.items;
 };
 
 const mesaiBaslangicHesapla = () => {

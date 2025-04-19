@@ -48,13 +48,13 @@ internal sealed class CalismaCizelgeleriGetAllQueryResponseHandler(
         var personel = personelRepository.GetAll()
             .Where(p => p.UserId == Guid.Parse(userIdString))
             .Include(p => p.PersonelGorevlendirmeler)
-            .Select(p => new { p.Id, p.FullName, p.PersonelGorevlendirmeler })
+            .Select(p => new { p.Id, p.FullName, p.PersonelGorevlendirmeler, p.TenantId })
             .FirstOrDefault();
 
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-        var personelAtama = personel.PersonelGorevlendirmeler.Where(p => request.tenantId != null ? p.TenantId == request.tenantId : true && p.IsActive == true && p.IsDeleted == false).FirstOrDefault();
+        var personelAtama = personel.PersonelGorevlendirmeler.Where(p => p.TenantId == personel.TenantId && p.IsActive == true && p.IsDeleted == false).FirstOrDefault();
        
         if (personelAtama is null)
             throw new UnauthorizedAccessException("Personelatama bilgisi bulunamadı.");

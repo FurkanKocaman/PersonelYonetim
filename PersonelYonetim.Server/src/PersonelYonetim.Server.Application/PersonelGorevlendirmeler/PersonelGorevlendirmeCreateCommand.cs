@@ -7,7 +7,6 @@ using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
-using System.Xml;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
@@ -25,6 +24,10 @@ public sealed record PersonelGorevlendirmeCreateCommand(
     Guid? IzinKuralId,
     Guid? CalismaTakvimId,
     decimal BrutUcret,
+    string? TabiOlduguKanun,
+    string? SGKIsYeri,
+    string? VergiDairesiAdi,
+    string? MeslekKodu,
     Guid TenantId
     ) : IRequest<Result<string>>;
 

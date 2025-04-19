@@ -44,10 +44,10 @@ const menuItems = ref<MenuItem[]>([
     roleClaims: [RoleClaims.approveIzinler],
   },
   {
-    name: "Maaş Yönetimi",
+    name: "Bordro",
     icon: "money-bill-wave",
     active: false,
-    path: "/dashboard/maas",
+    path: "/dashboard/bordro/calisanlar",
   },
   {
     name: "Takvim",

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +26,13 @@ public static class InfrastructureRegistrar
             opt.UseSqlServer(connectionString);
             opt.EnableSensitiveDataLogging();
         });
+
+        services.AddHangfire(config =>
+        {
+            config.UseSqlServerStorage(configuration.GetConnectionString("SqlServer")!);
+        });
+
+        services.AddHangfireServer();
 
         services.AddScoped<Domain.UnitOfWork.IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBildirimService, BildirimService>();

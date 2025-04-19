@@ -7,6 +7,8 @@ internal class MaasPusulaConfiguration : IEntityTypeConfiguration<MaasPusula>
 {
     public void Configure(EntityTypeBuilder<MaasPusula> builder)
     {
+        builder.Property(p => p.Durum).HasConversion(tip => tip.Value, value => MaasPusulaDurumEnum.FromValue(value));
+
         builder
             .HasOne(p => p.BordroDonem)
             .WithMany(p => p.MaasPusulalar)

@@ -79,10 +79,26 @@ const router = createRouter({
         },
 
         {
-          path: "maas",
-          name: "Maas",
-          component: () => import("@/views/maas/MaasView.vue"),
-          meta: { title: "Maaş Yönetimi" },
+          path: "bordro",
+          name: "Bordro",
+          component: () => import("@/layouts/BordroLayout.vue"),
+          meta: { title: "Bordro" },
+          redirect: "/dashboard/bordro/calisanlar",
+          children: [
+            {
+              path: "",
+              name: "",
+              component: () => import("@/views/bordro/BordroView.vue"),
+              meta: { title: "Bordro" },
+            },
+
+            {
+              path: "calisanlar",
+              name: "Calisanlar",
+              component: () => import("@/views/bordro/CalisanlarView.vue"),
+              meta: { title: "Calisanlar" },
+            },
+          ],
         },
         {
           path: "takvim",

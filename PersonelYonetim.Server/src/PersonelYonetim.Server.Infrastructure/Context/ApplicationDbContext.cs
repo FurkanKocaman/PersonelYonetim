@@ -11,6 +11,7 @@ using PersonelYonetim.Server.Domain.Duyurular;
 using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
 using PersonelYonetim.Server.Domain.OnaySurecleri;
+using PersonelYonetim.Server.Domain.PersonelDetaylar;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
@@ -33,6 +34,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         _httpContextAccessor = httpContextAccessor;
     }
     public DbSet<Personel> Personeller { get; set; }
+    public DbSet<PersonelDetay> PersonelDetaylar { get; set; }
 
     public DbSet<IzinTalep> IzinTalepleri { get; set; }
     public DbSet<IzinTur> IzinTurleri { get; set; }
@@ -54,7 +56,9 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
     public DbSet<IzinPeriyodu> IzinPeriyotları { get; set; }
     public DbSet<FazlaMesaiPeriyodu> FazlaMesaiPeriyotları { get; set; }
     public DbSet<Token> Tokenler { get; set; }
+
     public DbSet<BordroDonem> BordroDonemleri { get; set; }
+    public DbSet<MaasPusula> MaasPusulalar { get; set; }
 
     public DbSet<KurumsalBirimTipi> KurumsalBirimTipleri { get; set; }
     public DbSet<KurumsalBirim> KurumsalBirimler { get; set; }
@@ -72,6 +76,12 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+
+        modelBuilder.Entity<PersonelDetay>()
+            .HasOne(p => p.Personel)
+            .WithOne(p => p.PersonelDetay)
+            .HasForeignKey<PersonelDetay>(p => p.PersonelId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<PersonelGorevlendirme>()
             .HasOne(p => p.Personel)

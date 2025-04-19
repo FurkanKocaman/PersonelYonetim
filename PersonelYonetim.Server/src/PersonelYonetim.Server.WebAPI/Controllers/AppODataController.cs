@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 using PersonelYonetim.Server.Application.Bildirimler;
+using PersonelYonetim.Server.Application.Bordro;
 using PersonelYonetim.Server.Application.CalismaCizelgeleri;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Duyurular;
@@ -45,9 +46,12 @@ public class AppODataController(
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
         builder.EntitySet<DuyuruGetAllQueryResponse>("duyurular");
-        //builder.EntitySet<CalismaCizelgeleriGetAllQueryResponse>("calisma-cizelgeler");
+        builder.EntitySet<CalismaCizelgeleriGetAllQueryResponse>("calisma-cizelgeler");
         builder.EntitySet<KurumsalBirimGetAllQueryResponse>("kurumsal-birimler");
         builder.EntitySet< KurumsalBirimTipiGetAllQueryResponse>("kurumsal-birim-tipleri");
+        builder.EntitySet<CalismaCizelgeGetAllQueryResponse>("calisma-cizelgeler-new");
+        builder.EntitySet<BordroGetAllQueryResponse>("bordro");
+        builder.EntitySet<BordroGetCalisanlarQueryResponse>("bordro-calisanlar");
         return builder.GetEdmModel();
     }
 
@@ -184,6 +188,13 @@ public class AppODataController(
         var response = await sender.Send(new CalismaCizelgeleriGetAllQuery(), cancellationToken);
         return response;
     }
+    [HttpGet("calisma-cizelgeler-new")]
+    [Authorize]
+    public async Task<IQueryable<CalismaCizelgeGetAllQueryResponse>> GetCalismaCizelgelernew(int yil, int ay,CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new CalismaCizelgelerGetAllQuery(yil,ay), cancellationToken);
+        return response;
+    }
     [HttpGet("kurumsal-birim-tipleri")]
     [Authorize]
     public async Task<IQueryable<KurumsalBirimTipiGetAllQueryResponse>> GetKurumsalBirimTipleri(CancellationToken cancellationToken)
@@ -197,6 +208,21 @@ public class AppODataController(
     public async Task<IQueryable<KurumsalBirimGetAllQueryResponse>> GetKurumsalBirimler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new KurumsalBirimGetAllQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("bordro")]
+    [Authorize()]
+    public async Task<IQueryable<BordroGetAllQueryResponse>> GetBordro(int yil, int ay, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new BordroGetAllQuery(yil, ay), cancellationToken);
+        return response;
+    }
+    [HttpGet("bordro-calisanlar")]
+    [Authorize()]
+    public async Task<IQueryable<BordroGetCalisanlarQueryResponse>> GetBordroCalisanlar(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new BordroGetCalisanlarQuery(), cancellationToken);
         return response;
     }
 

@@ -11,7 +11,7 @@ const activeTab = computed(() => {
   if (route.path.includes("/sirket")) return "Sirket Yönetimi";
   if (route.path.includes("/personel")) return "Personel Yönetimi";
   if (route.path.includes("/izin")) return "İzin Yönetimi";
-  if (route.path.includes("/maas")) return "Maaş Yönetimi";
+  if (route.path.includes("/bordro")) return "Bordro";
   if (route.path.includes("/takvim")) return "Takvim";
   if (route.path.includes("/ayarlar")) return "Ayarlar";
   if (route.path.includes("/profile")) return "Profil";

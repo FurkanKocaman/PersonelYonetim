@@ -42,6 +42,10 @@ public sealed class PersonelGorevlendirme : Entity
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal BrutUcret { get; set; }
+    public string? TabiOlduguKanun { get; set; }
+    public string? SGKIsyeri { get; set; }
+    public string? VergiDairesiAdi { get; set; }
+    public string? MeslekKodu { get; set; }
 
     public Guid TenantId { get; set; }
 }

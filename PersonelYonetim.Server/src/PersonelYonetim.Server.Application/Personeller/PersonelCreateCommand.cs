@@ -98,7 +98,7 @@ internal sealed class PersonelCreateCommandHandler(
                 personelRepository.Add(personel);
                 await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.BaslangicTarihi, request.BitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimId, request.BrutUcret, tenantId.Value);
+                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.BaslangicTarihi, request.BitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimId, request.BrutUcret, null, null, null, null, tenantId.Value);
 
                 var gorevlendirmeCreateRes = await sender.Send(personelGorevlendirmeCreateCommand);
                 if (!gorevlendirmeCreateRes.IsSuccessful)

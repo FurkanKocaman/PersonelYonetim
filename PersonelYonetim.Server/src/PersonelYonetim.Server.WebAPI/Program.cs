@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.RateLimiting;
@@ -81,6 +82,9 @@ app.RegisterRoutes();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard();
+//RecurringJob.AddOrUpdate<BildirimJob>(x => x.SendBildirimler(), Cron.Hourly);
 
 app.UseStaticFiles();
 

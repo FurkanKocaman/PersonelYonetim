@@ -30,13 +30,11 @@ const showDetailModal = ref(false);
 const selectedIzin = ref<IzinItem | null>(null);
 const izinList = ref<IzinItem[]>([]);
 
-// Filter options
 const filterOptions = ref<FilterOptions>({
   durum: "",
   izinTipi: "",
 });
 
-// Static data
 const izinDurumlari: IzinDurumu[] = ["Beklemede", "Onaylandı", "Reddedildi"];
 const izinTurleri = ["Yıllık İzin", "Hastalık İzni", "Mazeret İzni"];
 const statusColors: Record<IzinDurumu, string> = {
@@ -45,7 +43,6 @@ const statusColors: Record<IzinDurumu, string> = {
   Reddedildi: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
 };
 
-// Route and active tab
 const route = useRoute();
 const router = useRouter();
 
@@ -55,7 +52,6 @@ const activeTab = computed(() => {
   return "";
 });
 
-// Computed properties
 const filteredIzinList = computed(() => {
   return izinList.value.filter((izin) => {
     const durumMatch = !filterOptions.value.durum || izin.durum === filterOptions.value.durum;
@@ -65,7 +61,6 @@ const filteredIzinList = computed(() => {
   });
 });
 
-// Kurallar sayfasına ait mi kontrolü
 const isKurallarRoute = computed(() => {
   return (
     route.name === "IzinKurallar" ||
@@ -75,14 +70,12 @@ const isKurallarRoute = computed(() => {
   );
 });
 
-// Methods
 const viewIzinDetails = (izin: IzinItem) => {
   selectedIzin.value = izin;
   showDetailModal.value = true;
 };
 
 const editIzin = (izin: IzinItem) => {
-  // Implement edit functionality
   console.log("Edit izin:", izin);
 };
 
@@ -91,18 +84,15 @@ const closeDetailModal = () => {
   selectedIzin.value = null;
 };
 
-// Kurallar sayfasına yönlendir
 const goToRules = () => {
   router.push({ name: "IzinKurallari" });
 };
 
-// İzin talebi oluştur
 const createLeaveRequest = () => {
   router.push({ name: "IzinTalep" });
 };
 
 onMounted(() => {
-  // Implement API call to fetch izin list
   console.log(activeTab.value);
 });
 const closeIzinTalep = (res: boolean) => {
