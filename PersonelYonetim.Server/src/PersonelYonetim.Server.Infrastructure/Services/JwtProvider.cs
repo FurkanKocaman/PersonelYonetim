@@ -19,7 +19,8 @@ internal sealed class JwtProvider(
         var roles =  userManager.GetRolesAsync(user).Result;
         List<Claim> claims = new()
         {
-            new Claim(ClaimTypes.NameIdentifier,user.Id.ToString())
+            new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+            new Claim("tenant_id", user.TenantId.ToString()),
         };
         foreach(var role in roles)
         {

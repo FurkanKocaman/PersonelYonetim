@@ -6,6 +6,6 @@ export interface MenuItem {
   icon: string;
   active: boolean;
   path: string;
-  roles?: number[];
+  roleClaims?: string[];
   subItems?: MenuItem[];
 }

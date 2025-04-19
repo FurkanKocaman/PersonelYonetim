@@ -60,9 +60,7 @@ class AuthService {
   async getCurrentUser() {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-current`);
-
       const User: PersonelItem = response.data[0];
-      User.role = Number(User.role);
       return User;
     } catch (error) {
       return error;

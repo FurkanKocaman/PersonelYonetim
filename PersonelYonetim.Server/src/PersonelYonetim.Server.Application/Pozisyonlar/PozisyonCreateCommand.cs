@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using Mapster;
 using MediatR;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
-using PersonelYonetim.Server.Domain.Sirketler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
@@ -10,8 +10,9 @@ namespace PersonelYonetim.Server.Application.Pozisyonlar;
 
 public sealed record PozisyonCreateCommand(
     string Ad,
+    string? Kod,
     string? Aciklama,
-    Guid SirketId) : IRequest<Result<string>> ;
+    Guid? tenantId) : IRequest<Result<string>> ;
 
 public sealed class PozisyonCreateCommandValidator : AbstractValidator<PozisyonCreateCommand>
 {
@@ -24,24 +25,20 @@ public sealed class PozisyonCreateCommandValidator : AbstractValidator<PozisyonC
 
 internal sealed class PozisyonCreateCommandHandler(
     IPozisyonRepository pozisyonRepository,
-    ISirketRepository sirketRepository,
+    ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork) : IRequestHandler<PozisyonCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PozisyonCreateCommand request, CancellationToken cancellationToken)
     {
-        var pozisyonVarMi = await pozisyonRepository.AnyAsync(p => p.Ad == request.Ad && !p.IsDeleted);
+        Guid? tenantId = currentUserService.TenantId;
+        if(!tenantId.HasValue)
+            return Result<string>.Failure("Tenant bilgisi bulunamadı.");
+
+        var pozisyonVarMi = await pozisyonRepository.AnyAsync(p => p.Ad == request.Ad && !p.IsDeleted && p.TenantId == tenantId);
         if (pozisyonVarMi)
             return Result<string>.Failure("Pozisyon zaten mevcut");
 
-        var sirketVarMi = await sirketRepository.AnyAsync(p => p.Id == request.SirketId && !p.IsDeleted);
-        if(!sirketVarMi)
-        {
-            return Result<string>.Failure("Şirket bulunamadı");
-        }
-
         Pozisyon pozisyon = request.Adapt<Pozisyon>();
-        pozisyon.DepartmanId = null;
-        pozisyon.Departman = null;
         pozisyonRepository.Add(pozisyon);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

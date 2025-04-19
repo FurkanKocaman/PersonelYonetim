@@ -1,8 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PersonelYonetim.Server.Application.Subeler;
 using PersonelYonetim.Server.Application.TakvimEtkinlikler;
-using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;

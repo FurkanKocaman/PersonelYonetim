@@ -1,5 +1,4 @@
 ﻿using Ardalis.SmartEnum;
-using System.Security.Cryptography;
 
 namespace PersonelYonetim.Server.Domain.Tokenler;
 
@@ -14,6 +13,7 @@ public sealed class Token
     public string TokenString { get; set; } = default!;
     public DateTimeOffset Expires { get; set; } = default!;
     public TokenTypeEnum TokenType { get; set; } = default!;
+    public Guid TenantId { get; set; }
 }
 
 public sealed class TokenTypeEnum : SmartEnum<TokenTypeEnum>

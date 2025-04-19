@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using PersonelYonetim.Server.Application.IzinKurallar;
-using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;

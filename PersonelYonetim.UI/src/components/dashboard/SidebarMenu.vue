@@ -5,7 +5,6 @@ import { useRoute } from "vue-router";
 import TakvimEtkinlikCreateModal from "../modals/TakvimEtkinlikCreateModal.vue";
 import IzinTalepCreateModal from "../modals/IzinTalepCreateModal.vue";
 import type { PersonelItem } from "@/models/PersonelModels";
-import Roles from "@/models/Roles";
 import DuyuruCreateModal from "../modals/DuyuruCreateModal.vue";
 
 // Menü öğesi için tip tanımı
@@ -26,7 +25,7 @@ const props = defineProps({
   },
 });
 
-const profilImageUrl = import.meta.env.VITE_API_URL + props.user.profilResimUrl;
+const profilImageUrl = import.meta.env.VITE_API_URL + props.user.avatarUrl;
 
 const isAddMenuOpen = ref(false);
 const isduyuruCreateModalOpen = ref(false);
@@ -43,9 +42,9 @@ const closeIzinTalep = (state: boolean) => {
 
 const filteredMenuItems = computed(() => {
   return props.menuItems.filter((item) => {
-    if (!item.roles) return true;
+    if (!item.roleClaims) return true;
 
-    return item.roles.includes(props.user.role);
+    return item.roleClaims.some((item) => props.user.roleClaims.includes(item));
   });
 });
 
@@ -132,7 +131,7 @@ const isMenuItemActive = (itemPath: string): boolean => {
         <!-- Kullanıcı Profili -->
         <div class="flex flex-col items-center mt-4 -mx-2" :class="{ 'px-2': !sidebarOpen }">
           <img
-            v-if="user.profilResimUrl"
+            v-if="user.avatarUrl"
             class="object-cover mx-2 rounded-full border-1 border-sky-500"
             :class="{ 'w-16 h-16': sidebarOpen, 'w-10 h-10': !sidebarOpen }"
             :src="profilImageUrl"
@@ -144,11 +143,11 @@ const isMenuItemActive = (itemPath: string): boolean => {
             v-else
             class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mx-2 rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
           >
-            {{ user.fullName[0] }}
+            {{ user.ad[0] }}
           </div>
           <div :class="{ hidden: !sidebarOpen }">
             <h4 class="mx-2 mt-2 font-medium text-neutral-900 dark:text-gray-200">
-              {{ user.fullName }}
+              {{ user.ad + " " + user.soyad }}
             </h4>
             <!-- <p
               v-if="user.role == 'SirketSahibi'"
@@ -157,20 +156,10 @@ const isMenuItemActive = (itemPath: string): boolean => {
               Şirket Sahibi
             </p> -->
             <p class="mx-2 mt-1 text-sm font-semibold text-neutral-800 dark:text-gray-400">
-              {{
-                props.user.pozisyonAd != undefined
-                  ? props.user.pozisyonAd
-                  : props.user.departmanAd != undefined
-                  ? props.user.departmanAd
-                  : props.user.subeAd != undefined
-                  ? props.user.subeAd
-                  : props.user.sirketAd != undefined
-                  ? props.user.sirketAd
-                  : ""
-              }}
+              {{ props.user.pozisyonAd }}
             </p>
             <p class="mx-2 mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-              ({{ Roles.getRoleByValue(props.user.role).name }})
+              ({{ props.user.kurumsalBirimAd }})
             </p>
           </div>
         </div>

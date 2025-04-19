@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Dtos;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
@@ -26,7 +26,7 @@ internal sealed class CalismaTakvimiGetQueryHandler(
      IHttpContextAccessor httpContextAccessor,
      ICalismaTakvimRepository calismaTakvimRepository,
      IPersonelRepository personelRepository,
-     IPersonelAtamaRepository personelAtamaRepository) : IRequestHandler<CalismaTakvimiGetQuery, IQueryable<CalismaTakvimiGetQueryResponse>>
+     IPersonelGorevlendirmeRepository personelGorevlendirmeRepository) : IRequestHandler<CalismaTakvimiGetQuery, IQueryable<CalismaTakvimiGetQueryResponse>>
 {
     public Task<IQueryable<CalismaTakvimiGetQueryResponse>> Handle(CalismaTakvimiGetQuery request, CancellationToken cancellationToken)
     {
@@ -46,8 +46,8 @@ internal sealed class CalismaTakvimiGetQueryHandler(
 
         var takvimler = calismaTakvimRepository.GetAll().Where(p => !p.IsDeleted);
         var response = calismaTakvimRepository.GetAll()
-            .Where(t => personelAtamaRepository.GetAll()
-                .Any(p => p.SirketId == t.SirketId && p.PersonelId == personel.Id))
+            .Where(t => personelGorevlendirmeRepository.GetAll()
+                .Any(p =>p.PersonelId == personel.Id))
             .Include(t => t.CalismaGunler) 
             .Select(takvim => new CalismaTakvimiGetQueryResponse
             {

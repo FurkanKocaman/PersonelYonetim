@@ -5,8 +5,8 @@ import SidebarMenu from "@/components/dashboard/SidebarMenu.vue";
 import TopBar from "../components/dashboard/TopBar.vue";
 import type { MenuItem } from "@/types/menu";
 import { useUserStore } from "@/stores/user";
-import type { UserModel } from "@/models/entity-models/UserModel";
-import Roles from "@/models/Roles";
+import RoleClaims from "@/models/RoleClaims";
+import type { PersonelItem } from "@/models/PersonelModels";
 
 const router = useRouter();
 const route = useRoute();
@@ -27,56 +27,27 @@ const menuItems = ref<MenuItem[]>([
     icon: "building",
     active: false,
     path: "/dashboard/sirket",
-    roles: [
-      Roles.SirketYonetici.value,
-      Roles.SirketYardimci.value,
-      Roles.Admin.value,
-      Roles.DepartmanYonetici.value,
-      Roles.SubeYonetici.value,
-      Roles.SubeYardimci.value,
-    ],
+    roleClaims: [RoleClaims.viewKurumsalYapi],
   },
   {
     name: "Personel",
     icon: "users",
     active: false,
     path: "/dashboard/personel",
-    roles: [
-      Roles.SirketYonetici.value,
-      Roles.SirketYardimci.value,
-      Roles.Admin.value,
-      Roles.DepartmanYonetici.value,
-      Roles.SubeYonetici.value,
-      Roles.SubeYardimci.value,
-    ],
+    roleClaims: [RoleClaims.viewPersonel],
   },
   {
     name: "İzin Yönetimi",
     icon: "calendar-alt",
     active: false,
     path: "/dashboard/izin",
-    roles: [
-      Roles.SirketYonetici.value,
-      Roles.SirketYardimci.value,
-      Roles.Admin.value,
-      Roles.DepartmanYonetici.value,
-      Roles.SubeYonetici.value,
-      Roles.SubeYardimci.value,
-    ],
+    roleClaims: [RoleClaims.approveIzinler],
   },
   {
-    name: "Maaş Yönetimi",
+    name: "Bordro",
     icon: "money-bill-wave",
     active: false,
-    path: "/dashboard/maas",
-    roles: [
-      Roles.SirketYonetici.value,
-      Roles.SirketYardimci.value,
-      Roles.Admin.value,
-      Roles.DepartmanYonetici.value,
-      Roles.SubeYonetici.value,
-      Roles.SubeYardimci.value,
-    ],
+    path: "/dashboard/bordro/calisanlar",
   },
   {
     name: "Takvim",
@@ -99,7 +70,7 @@ const menuItems = ref<MenuItem[]>([
 ]);
 
 const userStore = useUserStore();
-const user = ref<UserModel | undefined>(undefined);
+const user = ref<PersonelItem | undefined>(undefined);
 
 const toggleSidebar = () => {
   sidebarOpen.value = !sidebarOpen.value;

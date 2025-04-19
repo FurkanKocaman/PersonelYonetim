@@ -6,17 +6,19 @@ public static class RouteRegistrar
     {
         app.RegisterPersonelRoutes();
         app.RegisterAuthRoutes();
-        app.RegisterUserRoutes();
-        app.RegisterDepartmanRoutes();
+        app.RegisterUserRoutes();        
         app.RegisterPozisyonRoutes();
         app.RegisterIzinTalepRoutes();
-        app.RegisterSirketRoutes();
-        app.RegisterSubeRoutes();
         app.RegisterIzinRoutes();
         app.RegisterCalismaTakvimRoutes();
         app.RegisterTakvimEtkinlikRoutes();
         app.RegisterFileRoutes();
         app.RegisterBildirimRoutes();
         app.RegisterDuyuruRoutes();
+        app.RegisterCalismaCizelgeRoutes();
+        app.RegisterMesaiRoutes();
+        app.RegisterKurumsalBirimRoutes();
+        app.RegisterBordroRoutes();
+        app.RegisterpersonelDetayRoutes();
     }
 }

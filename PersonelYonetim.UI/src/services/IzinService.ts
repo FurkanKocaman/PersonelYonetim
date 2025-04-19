@@ -1,6 +1,5 @@
-import type { IzinTurModel } from "@/models/entity-models/izin/IzinTurModel";
 import api from "./Axios";
-import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
+import type { IzinKuralModel, IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
 import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCreateCommand";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
@@ -47,7 +46,7 @@ export class IzinService {
   async getIzinTurler(
     paginationParams: PaginationParams
   ): Promise<
-    { items: IzinTurModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+    { items: IzinTurResponse[]; count: number; pageSize: number; pageNumber: number } | undefined
   > {
     try {
       const { pageNumber, pageSize, orderBy, filter } = paginationParams;
@@ -113,14 +112,14 @@ export class IzinService {
 
     try {
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/izin-talepler?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/odata/izin-talepler-onay-bekleyenler?${queryParams}`,
         {
           params: {
             $count: true,
           },
         }
       );
-
+      console.log(response.data);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
@@ -140,6 +139,7 @@ export class IzinService {
       useToastStore().addToast(response.data.data, "", "success", 5000, true);
       return response.data;
     } catch (error) {
+      useToastStore().addToast(error.response.data.errorMessages[0], "", "error", 5000, true);
       console.error(error);
     }
   }

@@ -8,6 +8,6 @@ internal sealed class IzinTalepConfiguration : IEntityTypeConfiguration<IzinTale
 {
     public void Configure(EntityTypeBuilder<IzinTalep> builder)
     {
-        builder.Property(p => p.DegerlendirmeDurumu).HasConversion(durum => durum.Value, value => DegerlendirmeDurumEnum.FromValue(value));
+       
     }
 }

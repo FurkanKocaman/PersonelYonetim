@@ -1,11 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.OnaySurecleri;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
+using TS.Result;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;
 
@@ -13,7 +17,6 @@ public sealed record IzinTalepGetQuery() : IRequest<IQueryable<IzinTalepGetQuery
 
 public sealed class IzinTalepGetQueryResponse : EntityDto
 {
-    public Guid PersonelId { get; set; }
     public string PersonelFullName { get; set; } = default!;
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
@@ -22,65 +25,76 @@ public sealed class IzinTalepGetQueryResponse : EntityDto
     public string IzinTuru { get; set; } = default!;
     public string? Aciklama { get; set; }
     public string DegerlendirmeDurumu { get; set; } = default!;
-    public Guid? DegerlendirenId { get; set; }
-    public string? DegerlendirenAd { get; set; }
-}
 
+    public List<OnaySureci> OnayAdimlari { get; set; } = new List<OnaySureci>();
+}
 internal sealed class IzinTalepGetQueryHandler(
     IIzinTalepRepository izinTalepRepository,
+    ITalepDegerlendirmeRepository talepDegerlendirmeRepository,
     UserManager<AppUser> userManager,
     IPersonelRepository personelRepository,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<IzinTalepGetQuery, IQueryable<IzinTalepGetQueryResponse>>
+    ICurrentUserService currentUserService
+) : IRequestHandler<IzinTalepGetQuery, IQueryable<IzinTalepGetQueryResponse>>
 {
     public Task<IQueryable<IzinTalepGetQueryResponse>> Handle(IzinTalepGetQuery request, CancellationToken cancellationToken)
     {
-        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdString))
+        Guid? userId = currentUserService.UserId;
+        Guid? tenantId = currentUserService.TenantId;
+
+        if (!userId.HasValue || !tenantId.HasValue)
         {
-            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
+            return Task.FromResult(Enumerable.Empty<IzinTalepGetQueryResponse>().AsQueryable());
         }
 
-        var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
-            .Select(p => new { p.Id })
-            .FirstOrDefault();
+        var personel = personelRepository.Where(p => p.UserId == userId && p.TenantId == tenantId).Select(p => new { p.Id }).FirstOrDefault();
+        if (personel == null)
+            return Task.FromResult(Enumerable.Empty<IzinTalepGetQueryResponse>().AsQueryable());
 
-        if (personel is null)
-            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+        var talepDegerlendirmeler = talepDegerlendirmeRepository.Where(p => p.TenantId == tenantId);
 
-
-        var response = (from entity in izinTalepRepository.Where(i => i.PersonelId == personel.Id && !i.IsDeleted)
-                        join onay_user in userManager.Users.AsQueryable() on entity.DegerlendirenId equals onay_user.Id
-                        into onay_user
-                        from onay_users in onay_user.DefaultIfEmpty()
-                        join create_user in userManager.Users.AsQueryable() on entity.CreateUserId equals create_user.Id
-                        join update_user in userManager.Users.AsQueryable() on entity.UpdateUserId equals update_user.Id
-                        into update_user
-                        from update_users in update_user.DefaultIfEmpty()
-                        select new IzinTalepGetQueryResponse
-                        {
-                            Id = entity.Id,
-                            PersonelId = entity.PersonelId,
-                            PersonelFullName = entity.Personel.FullName,
-                            BaslangicTarihi = entity.BaslangicTarihi,
-                            BitisTarihi = entity.BitisTarihi,
-                            MesaiBaslangicTarihi = entity.MesaiBaslangicTarihi,
-                            ToplamSure = entity.ToplamSure,
-                            IzinTuru = entity.IzinTur.Ad,
-                            Aciklama = entity.Aciklama!,
-                            DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
-                            DegerlendirenId = entity.DegerlendirenId,
-                            DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
-                            IsActive = entity.IsActive,
-                            CreatedAt = entity.CreatedAt,
-                            CreateUserId = create_user.Id,
-                            CreateUserName = create_user.FirstName + " " + create_user.LastName + " (" + create_user.Email + ")",
-                            UpdateAt = entity.UpdateAt,
-                            UpdateUserId = update_users.Id,
-                            UpdateUserName = entity.UpdateUserId == null ? null : update_users.FirstName + " " + update_users.LastName + " (" + update_users.Email + ")",
-                            IsDeleted = entity.IsDeleted,
-                            DeleteAt = entity.DeleteAt,
-                        });
+        var izinTalepler = izinTalepRepository.Where(p => p.TenantId == tenantId && p.PersonelId == personel.Id);
+        var response = izinTalepler
+                .Join(userManager.Users,
+                    izinTalep => izinTalep.CreateUserId,
+                    createUser => createUser.Id,
+                    (izinTalep, createUser) => new { izinTalep, createUser })
+                .GroupJoin(userManager.Users,
+                    itu => itu.izinTalep.UpdateUserId,
+                    updateUser => updateUser.Id,
+                    (itu, updateUsers) => new { itu.izinTalep, itu.createUser, updateUsers })
+                .SelectMany(
+                     itu => itu.updateUsers.DefaultIfEmpty(),
+                     (ituu, updateUser) =>
+                     new IzinTalepGetQueryResponse
+                     {
+                         Id = ituu.izinTalep.Id,
+                         PersonelFullName = ituu.izinTalep.Personel.FullName,
+                         BaslangicTarihi = ituu.izinTalep.BaslangicTarihi,
+                         BitisTarihi = ituu.izinTalep.BitisTarihi,
+                         MesaiBaslangicTarihi = ituu.izinTalep.MesaiBaslangicTarihi,
+                         ToplamSure = ituu.izinTalep.ToplamSure,
+                         IzinTuru = ituu.izinTalep.IzinTur.Ad,
+                         Aciklama = ituu.izinTalep.Aciklama,
+                         DegerlendirmeDurumu = ituu.izinTalep.GuncelDegerlendirmeDurumu().Name,
+                         OnayAdimlari = talepDegerlendirmeler.Where(t => t.TalepId == ituu.izinTalep.Id).OrderBy(t => t.AdimSirasi).Include(t => t.AtananOnayciPersonel).ThenInclude(p => p!.PersonelGorevlendirmeler).Select(t => new OnaySureci
+                         {
+                             PersonelAd = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.Ad : "Bilinmiyor",
+                             AvatarUrl = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.AvatarUrl : null,
+                             KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim!.Ad : "Bilinmiyor",
+                             PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon!.Ad : "Bilinmiyor",
+                             Sira = t.AdimSirasi,
+                             OnayDurum = t.DegerlendirmeDurumu.Name
+                         }).ToList(),
+                         IsActive = ituu.izinTalep.IsActive,
+                         CreatedAt = ituu.izinTalep.CreatedAt,
+                         CreateUserId = ituu.createUser != null ? ituu.createUser.Id : Guid.Empty,
+                         CreateUserName = ituu.createUser != null ? ituu.createUser.FirstName + " " + ituu.createUser.LastName + " (" + ituu.createUser.Email + ")" : "Bilinmiyor",
+                         UpdateAt = ituu.izinTalep.UpdateAt,
+                         UpdateUserId = updateUser != null ? updateUser.Id : Guid.Empty,
+                         UpdateUserName = updateUser != null ? updateUser.FirstName + " " + updateUser.LastName + " (" + updateUser.Email + ")" : "Bilinmiyor",
+                         IsDeleted = ituu.izinTalep.IsDeleted,
+                         DeleteAt = ituu.izinTalep.DeleteAt
+                     }).OrderBy(p => p.CreatedAt).AsQueryable();
 
         return Task.FromResult(response);
     }

@@ -5,4 +5,5 @@ namespace PersonelYonetim.Server.Domain.Roller;
 public sealed class AppUserRole : IdentityUserRole<Guid>
 {
     public Guid SirketId { get; set; }
+    public Guid TenantId { get; set; }
 }

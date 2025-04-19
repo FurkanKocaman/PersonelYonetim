@@ -1,16 +1,14 @@
 import { type PersonelItem } from "@/models/PersonelModels";
 import api from "./Axios";
-import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
 import { useToastStore } from "@/stores/ToastStore";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
+import type { PersonelCreateCommand } from "@/models/request-models/PersonelCreateCommand";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
   async getPersonelList(
-    sirketId: string,
-    subeId: string | undefined,
-    departmanId: string | undefined,
+    kurumsalBirimId: string | undefined,
     paginationParams?: PaginationParams
   ): Promise<
     { items: PersonelItem[]; count: number; pageSize: number; pageNumber: number } | undefined
@@ -31,9 +29,7 @@ class PersonelService {
         {
           params: {
             $count: true,
-            SirketId: sirketId,
-            SubeId: subeId,
-            DepartmanId: departmanId,
+            kurumsalBirimId: kurumsalBirimId,
           },
         }
       );
@@ -49,7 +45,7 @@ class PersonelService {
     }
   }
 
-  async createPersonel(request: PersonelCreateRequest): Promise<string> {
+  async createPersonel(request: PersonelCreateCommand): Promise<string> {
     try {
       const response = await api.post(
         `${import.meta.env.VITE_API_URL}/personeller/create`,
@@ -65,7 +61,7 @@ class PersonelService {
       throw error;
     }
   }
-  async updatePersonel(request: PersonelCreateRequest): Promise<string> {
+  async updatePersonel(request: PersonelCreateCommand): Promise<string> {
     try {
       const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
       if (response.status == 200) {

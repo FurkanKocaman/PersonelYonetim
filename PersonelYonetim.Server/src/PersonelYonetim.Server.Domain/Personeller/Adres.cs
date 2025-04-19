@@ -1,6 +1,4 @@
-﻿using PersonelYonetim.Server.Domain.Abstractions;
-
-namespace PersonelYonetim.Server.Domain.Personeller;
+﻿namespace PersonelYonetim.Server.Domain.Personeller;
 
 public sealed class Adres
 {

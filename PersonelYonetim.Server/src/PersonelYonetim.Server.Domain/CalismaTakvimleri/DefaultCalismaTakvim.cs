@@ -1,18 +1,29 @@
 ﻿namespace PersonelYonetim.Server.Domain.CalismaTakvimleri;
 public static class DefaultCalismaTakvim
 {
-    public static CalismaTakvimi GetDefaultCalismaTakvim(Guid sirketId)
+    public static CalismaTakvimi GetDefaultTamCalismaTakvim(Guid tenantId)
     {
-        CalismaTakvimi calismaTakvimi = new()
+        CalismaTakvimi calismaTakvim = new()
         {
-            Ad = "Default Çalışma takvimi",
-            Aciklama = "Şirketler için default çalışma takvimi",
-            SirketId = sirketId
+            Ad = "Tam zamanlı çalışma takvimi",
+            Aciklama = "Şirketler için default tam zamanlı çalışma takvimi",
+            TenantId = tenantId,
         };
 
-        return calismaTakvimi;
+        return calismaTakvim;
     }
-    public static List<CalismaGun> GetDefaultCalismaGunler(Guid CalismaTakvimId)
+    public static CalismaTakvimi GetDefaultYarimCalismaTakvim(Guid tenantId)
+    {
+        CalismaTakvimi calismaTakvim = new()
+        {
+            Ad = "Yari zamanlı çalışma takvimi",
+            Aciklama = "Şirketler için default yarı zamanlı çalışma takvimi",
+            TenantId = tenantId,
+        };
+
+        return calismaTakvim;
+    }
+    public static List<CalismaGun> GetDefaultTamCalismaGunler(Guid calismaTakvimId, Guid tenantId)
     {
         var defaultCalismaGunler = new List<CalismaGun>
         {
@@ -20,66 +31,141 @@ public static class DefaultCalismaTakvim
             {
                 Gun = DayOfWeek.Monday,
                 IsCalismaGunu = true,
-                CalismaBaslangic = TimeSpan.FromHours(9),
-                CalismaBitis = TimeSpan.FromHours(18),
-                MolaBaslangic = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30),
-                MolaBitis = TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
-                CalismaTakvimId = CalismaTakvimId,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(18, 0),
+                MolaBaslangic = new TimeOnly(12, 30),
+                MolaBitis = new TimeOnly(13, 30),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Tuesday,
                 IsCalismaGunu = true,
-                CalismaBaslangic = TimeSpan.FromHours(9),
-                CalismaBitis = TimeSpan.FromHours(18),
-                MolaBaslangic = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30),
-                MolaBitis = TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
-                CalismaTakvimId = CalismaTakvimId,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(18, 0),
+                MolaBaslangic = new TimeOnly(12, 30),
+                MolaBitis = new TimeOnly(13, 30),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Wednesday,
                 IsCalismaGunu = true,
-                CalismaBaslangic = TimeSpan.FromHours(9),
-                CalismaBitis = TimeSpan.FromHours(18),
-                MolaBaslangic = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30),
-                MolaBitis = TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
-                CalismaTakvimId = CalismaTakvimId,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(18, 0),
+                MolaBaslangic = new TimeOnly(12, 30),
+                MolaBitis = new TimeOnly(13, 30),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Thursday,
                 IsCalismaGunu = true,
-                CalismaBaslangic = TimeSpan.FromHours(9),
-                CalismaBitis = TimeSpan.FromHours(18),
-                MolaBaslangic = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30),
-                MolaBitis = TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
-                CalismaTakvimId = CalismaTakvimId,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(18, 0),
+                MolaBaslangic = new TimeOnly(12, 30),
+                MolaBitis = new TimeOnly(13, 30),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Friday,
                 IsCalismaGunu = true,
-                CalismaBaslangic = TimeSpan.FromHours(9),
-                CalismaBitis = TimeSpan.FromHours(18),
-                MolaBaslangic = TimeSpan.FromHours(12) + TimeSpan.FromMinutes(30),
-                MolaBitis = TimeSpan.FromHours(13) + TimeSpan.FromMinutes(30),
-                CalismaTakvimId = CalismaTakvimId
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(18, 0),
+                MolaBaslangic = new TimeOnly(12, 30),
+                MolaBitis = new TimeOnly(13, 30),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Saturday,
                 IsCalismaGunu = false,
-                CalismaTakvimId = CalismaTakvimId
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             },
             new CalismaGun
             {
                 Gun = DayOfWeek.Sunday,
                 IsCalismaGunu = false,
-                CalismaTakvimId = CalismaTakvimId
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
             }
         };
 
         return defaultCalismaGunler;
     }
+    public static List<CalismaGun> GetDefaultYariCalismaGunler(Guid calismaTakvimId, Guid tenantId)
+    {
+        var partTimeCalismaGunler = new List<CalismaGun>
+        {
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Monday,
+                IsCalismaGunu = true,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(13, 0),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Tuesday,
+                IsCalismaGunu = true,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(13, 0),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Wednesday,
+                IsCalismaGunu = true,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(13, 0),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Thursday,
+                IsCalismaGunu = true,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(13, 0),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Friday,
+                IsCalismaGunu = true,
+                CalismaBaslangic = new TimeOnly(9, 0),
+                CalismaBitis = new TimeOnly(13, 0),
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Saturday,
+                IsCalismaGunu = false,
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            },
+            new CalismaGun
+            {
+                Gun = DayOfWeek.Sunday,
+                IsCalismaGunu = false,
+                CalismaTakvimId = calismaTakvimId,
+                TenantId = tenantId,
+            }
+        };
+
+        return partTimeCalismaGunler;
+    }
+
 }

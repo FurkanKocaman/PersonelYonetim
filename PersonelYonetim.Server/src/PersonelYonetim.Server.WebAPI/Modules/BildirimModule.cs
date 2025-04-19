@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using PersonelYonetim.Server.Application.Bildirimler;
-using PersonelYonetim.Server.Application.Departmanlar;
-using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;

@@ -1,14 +1,12 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Bildirimler;
-using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Izinler;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
-using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.OnaySurecleri;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
-using System.Security.Claims;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.IzinTalepler;
@@ -17,166 +15,187 @@ public sealed record IzinTalepCreateCommand(
     DateTimeOffset BaslangicTarihi,
     DateTimeOffset BitisTarihi,
     Guid IzinTurId,
-    string? Aciklama) : IRequest<Result<string>>;
+    string? Aciklama) : IRequest<Result<Guid>>;
 
 public sealed class IzinTalepCreateCommandValidator : AbstractValidator<IzinTalepCreateCommand>
 {
     public IzinTalepCreateCommandValidator()
     {
         RuleFor(x => x.BaslangicTarihi).NotEmpty().WithMessage("Başlangıç tarihi boş olamaz");
-        RuleFor(x => x.BitisTarihi).NotEmpty().WithMessage("Bitiş tarihi boş olamaz");
+        RuleFor(x => x.BitisTarihi).NotEmpty().WithMessage("Bitiş tarihi boş olamaz")
+            .GreaterThan(x => x.BaslangicTarihi).WithMessage("Bitiş tarihi başlangıç tarihinden sonra olmalıdır.");
     }
 }
 
 internal sealed class IzinTalepCreateCommandHandler(
+    ICurrentUserService currentUserService,
+    IIzinHesaplamaService izinHesaplamaService,
+    IIzinHakSorgulamaService izinHakSorgulamaService,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
+    IGorevlendirmeIzinKuraliRepository gorevlendirmeIzinKuraliRepository,
+    IOnaySurecRepository onaySurecRepository,
+    IOnaylayiciResolverService onaylayiciResolverService,
     IIzinTalepRepository izinTalepRepository,
-    ICalismaGunRepository calismaGunRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
-    IPersonelRepository personelRepository,
     IIzinTurRepository izinTurRepository,
     IUnitOfWork unitOfWork,
-    IHttpContextAccessor httpContextAccessor,
+    ITalepDegerlendirmeRepository talepDegerlendirmeRepository,
     IBildirimService bildirimService
-    ) : IRequestHandler<IzinTalepCreateCommand, Result<string>>
+    ) : IRequestHandler<IzinTalepCreateCommand, Result<Guid>>
 {
-    public async Task<Result<string>> Handle(IzinTalepCreateCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(IzinTalepCreateCommand request, CancellationToken cancellationToken)
     {
-
-        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdString))
+        using (var transaction = unitOfWork.BeginTransaction())
         {
-            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
-        }
-
-        var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString))
-            .Select(p => new { p.Id })
-            .FirstOrDefault();
-
-        if (personel == null)
-        {
-            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
-        }
-
-        var personelAtama = personelAtamaRepository.Where(p => p.PersonelId == personel.Id && p.IsActive && p.IsDeleted == false).Include(p => p.Personel).FirstOrDefault();
-        if (personelAtama is null)
-            return Result<string>.Failure("Personel departmanı bulunamadı");
-
-        List<CalismaGun> calismaGunler = calismaGunRepository.Where(g => g.CalismaTakvimId == personelAtama.CalismaTakvimId).ToList();
-
-        IzinTur izinTur = await izinTurRepository.FirstOrDefaultAsync(p => p.Id == request.IzinTurId);
-        if (izinTur is null)
-            return Result<string>.Failure("Izin tur bulunamadı");
-
-        List<IzinTalep> izinTalepler = izinTalepRepository.Where(p => p.PersonelId == personel.Id && p.IzinTurId == izinTur.Id && p.BitisTarihi.Year == DateTime.Now.Year).ToList();
-        decimal toplamIzinGun = 0;
-
-        foreach(var izin in izinTalepler)
-        {
-            if(izin.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Reddedildi)
-                toplamIzinGun += izin.ToplamSure;
-        }
-        
-        decimal toplamGun = 0;
-
-        DateTimeOffset baslangic = request.BaslangicTarihi.ToLocalTime();
-        DateTimeOffset bitis = request.BitisTarihi.ToLocalTime();
-
-        DateTimeOffset baslangicGun = baslangic.Date;
-        DateTimeOffset bitisGun = bitis.Date;
-
-        while (baslangicGun <= bitisGun)
-        {
-            var calismaGun = calismaGunler.FirstOrDefault(p => p.Gun == baslangicGun.DayOfWeek);
-
-            if (calismaGun is not null && calismaGun.IsCalismaGunu)
+            try
             {
+                Guid? userId = currentUserService.UserId;
+                Guid? tenantId = currentUserService.TenantId;
 
-                if (baslangicGun == baslangic.Date && baslangic.TimeOfDay > (calismaGun.CalismaBaslangic ?? TimeSpan.Zero))
+                if (!userId.HasValue || !tenantId.HasValue)
                 {
-                    if(baslangic.TimeOfDay <= (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
-                    {
-                        toplamGun += (decimal)((calismaGun.CalismaBitis - baslangic.TimeOfDay)?.TotalHours ?? 0) / 9;
-                    }
+                    return Result<Guid>.Failure("Kullanıcı veya şirket kimliği bulunamadı.");
                 }
-                else if (baslangicGun == bitis.Date && bitis.TimeOfDay < (calismaGun.CalismaBitis ?? TimeSpan.FromHours(18)))
+
+                var personelGorevlendirme = await personelGorevlendirmeRepository.Where(pg => pg.Personel.UserId == userId && pg.TenantId == tenantId && pg.BirincilGorevMi && pg.IsActive && !pg.IsDeleted)
+                    .Include(pg => pg.Personel)
+                    .Include(pg => pg.KurumsalBirim)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+
+                if (personelGorevlendirme is null)
+                    return Result<Guid>.Failure("Personel görevlendirme bulunamadı");
+
+                var personel = personelGorevlendirme.Personel;
+
+                var izinTur = await izinTurRepository.FirstOrDefaultAsync(p => p.Id == request.IzinTurId && p.TenantId == tenantId, cancellationToken);
+                if(izinTur is null)
+                    return Result<Guid>.Failure("İzin tür bulunamadı");
+
+                var sureHesaplamaResult = await izinHesaplamaService.HesaplaIzinSuresiAsync(personelGorevlendirme.CalismaTakvimId,request.BaslangicTarihi, request.BitisTarihi, izinTur, cancellationToken);
+
+                if (!sureHesaplamaResult.IsSuccessful)
                 {
-                    toplamGun += (decimal)((bitis.TimeOfDay - calismaGun.CalismaBaslangic)?.TotalHours ?? 0) / 9;
+                    return Result<Guid>.Failure($"İzin süresi hesaplanamadı: {sureHesaplamaResult.Data}");
+                }
+
+                decimal hesaplananToplamGun = sureHesaplamaResult.Data!.ToplamGun;
+                DateTimeOffset mesaiBaslangicTarihi = sureHesaplamaResult.Data!.MesaiBaslangicTarihi;
+
+                if (hesaplananToplamGun <= 0)
+                {
+                    return Result<Guid>.Failure("Hesaplanan izin süresi geçersiz.");
+                }
+
+                var hakKontrolResult = await izinHakSorgulamaService.TalepHakkiKontrolEtAsync(
+                    personelGorevlendirme.Id,
+                    request.IzinTurId,
+                    hesaplananToplamGun,
+                    request.BaslangicTarihi,
+                    cancellationToken);
+
+                if(!hakKontrolResult.IsSuccessful)
+                    return Result<Guid>.Failure($"İzin hakkı kontrolü başarısız: {hakKontrolResult.ErrorMessages!.FirstOrDefault()}");
+
+                var gorevlendirmeKural = await gorevlendirmeIzinKuraliRepository.Where(p => p.PersonelGorevlendirmeId == personelGorevlendirme.Id).Include(p => p.IzinKural).FirstOrDefaultAsync();
+                if (gorevlendirmeKural is null)
+                    return Result<Guid>.Failure("Kural ataması bulunamadı");
+
+                OnaySurec? onaySurec = null;
+
+                if (gorevlendirmeKural.OzelOnaySurecId.HasValue)
+                {
+                    onaySurec = await onaySurecRepository.Where(p => p.Id == gorevlendirmeKural.OzelOnaySurecId).Include(p => p.OnayAdimlari).FirstOrDefaultAsync();
+                    if (onaySurec is null || !onaySurec.OnayAdimlari.Any())
+                        return Result<Guid>.Failure("Onay sureci bulunamadı");
+                }
+                else if (gorevlendirmeKural.IzinKural.VarsayilanOnaySurecId.HasValue)
+                {
+                    onaySurec = await onaySurecRepository.Where(p => p.Id == gorevlendirmeKural.IzinKural.VarsayilanOnaySurecId).Include(p => p.OnayAdimlari).FirstOrDefaultAsync();
+                    if (onaySurec is null || !onaySurec.OnayAdimlari.Any())
+                        return Result<Guid>.Failure("Onay sureci bulunamadı");
                 }
                 else
                 {
-                    toplamGun += 1;
+                    return Result<Guid>.Failure("Gecerli onay sureci bulunamadı");
                 }
-            }
-            baslangicGun = baslangicGun.AddDays(1);
-        }
 
-        if ((((DateTimeOffset.Now.Year - personelAtama.PozisyonBaslamaTarihi.Year) == 0 ? 1 : (DateTimeOffset.Now.Year - personelAtama.PozisyonBaslamaTarihi.Year)) * izinTur.LimitGunSayisi) < toplamGun + toplamIzinGun && izinTur.LimitTipi != LimitTipiEnum.Limitsiz && izinTur.EksiBakiyeHakkı != EksiBakiyeHakkıEnum.Limitsiz && !(izinTur.EksiBakiyeHakkı == EksiBakiyeHakkıEnum.Limitli && izinTur.EksiBakiyeHakkı > (toplamGun - toplamIzinGun)-izinTur.LimitGunSayisi) )
-            return Result<string>.Failure("İzin hakkı dolmuştur");
+                var izinTalep = new IzinTalep( 
+                   personelId: personel.Id,
+                   baslangicTarihi: request.BaslangicTarihi,
+                   bitisTarihi: request.BitisTarihi,  
+                   mesaiBaslangicTarihi: mesaiBaslangicTarihi,
+                   toplamSure: hesaplananToplamGun,
+                   izinTurId: request.IzinTurId,
+                   onaySurecId: onaySurec.Id,
+                   aciklama: request.Aciklama,
+                   tenantId: tenantId.Value
+               );
 
-        var izinBitisGun = calismaGunler.FirstOrDefault(g => g.Gun == bitis.DayOfWeek);
-        DateTimeOffset mesaibaslangic = bitis;
-        
-        if(izinBitisGun != null && izinBitisGun.IsCalismaGunu)
-        {
-            if(bitis.TimeOfDay < (izinBitisGun.CalismaBitis ?? TimeSpan.FromHours(18)))
-            {
-                mesaibaslangic = bitis;
-            }
-            else
-            {
-                CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
-                if (sonrakiCalismaGun != null)
+                await izinTalepRepository.AddAsync(izinTalep, cancellationToken);
+
+                Guid? ilkOnayciPersonelId = null;
+                List<TalepDegerlendirme> talepDegerlendirmeler = new();
+
+                if(onaySurec is not null)
                 {
-                    while (mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+                    foreach(var onayAdimi in onaySurec.OnayAdimlari)
                     {
-                        mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                        var talepDegerlendirme = new TalepDegerlendirme(
+                         talepId: izinTalep.Id,
+                         adimSirasi: onayAdimi.Sira,
+                         onaySureciAdimiId: onayAdimi.Id,
+                         talepTipi: OnaySurecTuruEnum.Izin,
+                         tenantId: tenantId.Value
+                         );
+
+                        if(onayAdimi.Sira == 1)
+                        {
+                            var resolverResult = await onaylayiciResolverService.OnaylayiciGetirAsync(
+                                onayAdimi, personelGorevlendirme, cancellationToken);
+
+                            if (!resolverResult.IsSuccessful || !resolverResult.Data.HasValue)
+                            {
+                                await unitOfWork.RollbackTransactionAsync(transaction);
+                                return Result<Guid>.Failure($"İlk onaycı belirlenemedi: {resolverResult.Data}");
+                            }
+                            ilkOnayciPersonelId = resolverResult.Data;
+                            talepDegerlendirme.OnayciAta(ilkOnayciPersonelId, onayAdimi.RolId);
+                        }
+                        talepDegerlendirmeler.Add(talepDegerlendirme);
                     }
-                    mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+                    await talepDegerlendirmeRepository.AddRangeAsync(talepDegerlendirmeler);
                 }
-            }
-        }
-        else
-        {
-            CalismaGun sonrakiCalismaGun = calismaGunler.Where(g => g.IsCalismaGunu).OrderBy(p => p.Gun).FirstOrDefault()!;
-            if (sonrakiCalismaGun != null)
-            {
-                while(mesaibaslangic.DayOfWeek != sonrakiCalismaGun.Gun)
+
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                if (ilkOnayciPersonelId.HasValue)
                 {
-                   mesaibaslangic = mesaibaslangic.Date.AddDays(1);
+                    Bildirim bildirim = new()
+                    {
+                        Baslik = "Yeni İzin Talebi",
+                        Aciklama = $"{personel.Ad} {personel.Soyad} tarafından yeni bir izin talebi oluşturuldu.",
+                        CreatedAt = DateTimeOffset.Now,
+                        BildirimTipi = BildirimTipiEnum.Onay,
+                        AliciTipi = AliciTipiEnum.Personel,
+                        AliciId = ilkOnayciPersonelId,
+                        TenantId = tenantId.Value,
+                    };
+
+                    await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, ilkOnayciPersonelId.Value);
                 }
-                mesaibaslangic = mesaibaslangic.DateTime.Add(sonrakiCalismaGun.CalismaBaslangic ?? TimeSpan.FromHours(9));
+             
+                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CommitTransactionAsync(transaction);
+                return Result<Guid>.Succeed(izinTalep.Id);
+
             }
+            catch (Exception ex)
+            {
+                await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<Guid>.Failure("İzin talebi oluşturulurken hata oluştu: " + ex.Message);
+            }
+
         }
-
-
-        IzinTalep izinTalep = new()
-        {
-            IzinTurId = request.IzinTurId,
-            BaslangicTarihi = baslangic,
-            BitisTarihi = bitis,
-            PersonelId = personel.Id,
-            ToplamSure = toplamGun,
-            MesaiBaslangicTarihi = mesaibaslangic,
-            DegerlendirmeDurumu = DegerlendirmeDurumEnum.Beklemede
-        };
-
-        Bildirim bildirim = new()
-        {
-            Baslik = "Yeni İzin Talebi",
-            Aciklama = $"{personelAtama.Personel.Ad} {personelAtama.Personel.Soyad} tarafından yeni bir izin talebi oluşturuldu.",
-            CreatedAt = DateTimeOffset.Now,
-            BildirimTipi = BildirimTipiEnum.Onay,
-            AliciTipi = AliciTipiEnum.Personel,
-            AliciId = personelAtama.YoneticiId ?? personel.Id,
-        };
-
-        await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, personelAtama.YoneticiId ?? personel.Id);
-
-        izinTalepRepository.Add(izinTalep);
-        await unitOfWork.SaveChangesAsync();
-
-        return Result<string>.Succeed("İzin talebi oluşturuldu. Toplam "+toplamGun+" gün");
     }
 }
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Roles from "@/models/Roles";
 import { computed, defineProps, onMounted } from "vue";
 
 const props = defineProps<{
@@ -77,7 +76,7 @@ const getColumnBgColor = (key: string, value: unknown) => {
 </script>
 
 <template>
-  <table class="divide-y divide-gray-200 dark:divide-neutral-700 w-full">
+  <table class="divide-y divide-gray-200 dark:divide-neutral-700 w-full table-auto">
     <thead class="bg-gray-200/60 dark:bg-neutral-800 w-full">
       <tr>
         <th
@@ -85,7 +84,7 @@ const getColumnBgColor = (key: string, value: unknown) => {
           :key="header.key"
           scope="col"
           class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-full"
-          :class="header.width != undefined ? header.width : 'w-fit'"
+          :class="[header.width ? header.width : 'w-[150px]']"
         >
           <div class="flex cursor-pointer select-none" @click="orderBy(header.key)">
             {{ header.value }}
@@ -126,11 +125,7 @@ const getColumnBgColor = (key: string, value: unknown) => {
           <span
             :style="{ backgroundColor: getColumnBgColor(key, row[key as string]) }"
             class="px-2 py-1 rounded-md"
-            >{{
-              key == "role"
-                ? Roles.getRoleByValue(row[key as string] as number).name
-                : formatValue(row[key as string])
-            }}</span
+            >{{ formatValue(row[key as string]) }}</span
           >
         </td>
 

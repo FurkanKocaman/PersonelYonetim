@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
 using System.Security.Claims;
@@ -30,7 +31,9 @@ internal sealed class IzinTalepGetAllQueryHandler(
     IIzinTalepRepository izinTalepRepository,
     UserManager<AppUser> userManager,
     IPersonelRepository personelRepository,
-    IHttpContextAccessor httpContextAccessor) : IRequestHandler<IzinTalepGetAllQuery, IQueryable<IzinTalepGetAllQueryResponse>>
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
+    IHttpContextAccessor httpContextAccessor)
+    : IRequestHandler<IzinTalepGetAllQuery, IQueryable<IzinTalepGetAllQueryResponse>>
 {
     public Task<IQueryable<IzinTalepGetAllQueryResponse>> Handle(IzinTalepGetAllQuery request, CancellationToken cancellationToken)
     {
@@ -40,53 +43,81 @@ internal sealed class IzinTalepGetAllQueryHandler(
             throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
         }
 
-        var personel = personelRepository.GetAll()
+        var personelQuery = personelRepository.GetAll()
             .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
-            .Select(p => new { p.Id })
+            .Select(p => new { p.Id });
+
+        var personel = personelQuery.FirstOrDefault();
+        if (personel is null)
+        {
+            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+        }
+
+        var personelAtama = personelGorevlendirmeRepository.GetAll()
+            .Where(p => p.PersonelId == personel.Id && p.IsActive && !p.IsDeleted)
+            .Select(p=>p)
             .FirstOrDefault();
 
-        if (personel is null)
-            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+        if (personelAtama is null)
+        {
+            throw new UnauthorizedAccessException("Personel atama bilgisi bulunamadı.");
+        }
 
         var izinler = izinTalepRepository
-            .Where(i => i.Personel.PersonelAtamalar.Any(p => p.YoneticiId == personel.Id) && !i.IsDeleted)
-            .Include(i => i.Personel)
-            .Include(i => i.IzinTur)
-            .Include(i => i.Degerlendiren)
-            .AsQueryable();
+         .GetAll()
+         .Include(i => i.Personel)
+         .Where(p => p.Personel.PersonelGorevlendirmeler.Any(pa => pa.IsDeleted == false && pa.IsActive == true && pa.TenantId == personelAtama.TenantId))
+         .Include(i => i.IzinTur)
+         .Include(i => i.DegerlendirmeAdimlari)
+             .ThenInclude(td => td.OnaySureciAdimi);
+         //.Where(i => i.DegerlendirmeAdimlari
+         //        .Where(td => td.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Beklemede)
+         //        .OrderBy(td => td.OnaySureciAdimi!.Sira)
+         //        .Take(1)
+         //        //.Any(td =>
+         //        //    (td.OnaySureciAdimi!.PersonelId.HasValue && td.OnaySureciAdimi.PersonelId == personel.Id) ||
+         //        //    (td.OnaySureciAdimi!.Rol != null && td.OnaySureciAdimi.Rol == personelAtama.RolTipi && 
+         //        //    ((td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYonetici || td.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYardimci) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.DepartmanId == personelAtama.DepartmanId)
+         //        //    : (td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SubeYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SubeId == personelAtama.SubeId)
+         //        //    : (td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYardimci || td.OnaySureciAdimi.Rol == RolTipiEnum.SirketYonetici) ? i.Personel.PersonelAtamalar.Any(p => p.IsDeleted == false && p.SirketId == personelAtama.SirketId) : false)
+         //        //))
+                 
+         //);
 
-        var users = userManager.Users.AsQueryable();
 
-        var response = from entity in izinler
-                       join onay_user in users on entity.DegerlendirenId equals onay_user.Id into onay_user_join
-                       from onay_users in onay_user_join.DefaultIfEmpty()
-                       join create_user in users on entity.CreateUserId equals create_user.Id
-                       join update_user in users on entity.UpdateUserId equals update_user.Id into update_user_join
-                       from update_users in update_user_join.DefaultIfEmpty()
-                       select new IzinTalepGetAllQueryResponse
-                       {
-                           Id = entity.Id,
-                           PersonelId = entity.Personel.Id,
-                           PersonelFullName = entity.Personel.FullName,
-                           BaslangicTarihi = entity.BaslangicTarihi,
-                           BitisTarihi = entity.BitisTarihi,
-                           MesaiBaslangicTarihi = entity.MesaiBaslangicTarihi,
-                           ToplamSure = entity.ToplamSure,
-                           IzinTuru = entity.IzinTur.Ad,
-                           Aciklama = entity.Aciklama!,
-                           DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
-                           DegerlendirenId = entity.DegerlendirenId,
-                           DegerlendirenAd = entity.Degerlendiren != null ? $"{entity.Degerlendiren!.Ad} {entity.Degerlendiren!.Soyad}" : null,
-                           IsActive = entity.IsActive,
-                           CreatedAt = entity.CreatedAt,
-                           CreateUserId = create_user.Id,
-                           CreateUserName = $"{create_user.FirstName} {create_user.LastName} ({create_user.Email})",
-                           UpdateAt = entity.UpdateAt,
-                           UpdateUserId = entity.UpdateUserId,
-                           UpdateUserName = entity.UpdateUserId == null ? null : $"{update_users.FirstName} {update_users.LastName} ({update_users.Email})",
-                           IsDeleted = entity.IsDeleted,
-                           DeleteAt = entity.DeleteAt,
-                       };
+        var x = izinler.ToList();
+        var response = izinler
+
+            .Select(entity => new IzinTalepGetAllQueryResponse
+            {
+                Id = entity.Id,
+                PersonelId = entity.Personel.Id,
+                PersonelFullName = entity.Personel.FullName,
+                BaslangicTarihi = entity.BaslangicTarihi,
+                BitisTarihi = entity.BitisTarihi,
+                MesaiBaslangicTarihi = entity.MesaiBaslangicTarihi,
+                ToplamSure = entity.ToplamSure,
+                IzinTuru = entity.IzinTur.Ad,
+                Aciklama = entity.Aciklama!,
+                //DegerlendirmeDurumu = entity.DegerlendirmeDurumu.Name!,
+                DegerlendirenId = null,
+                DegerlendirenAd = null,
+                IsActive = entity.IsActive,
+                CreatedAt = entity.CreatedAt,
+                CreateUserId = entity.CreateUserId,
+                CreateUserName = userManager.Users
+                    .Where(u => u.Id == entity.CreateUserId)
+                    .Select(u => $"{u.FirstName} {u.LastName} ({u.Email})")
+                    .FirstOrDefault(),
+                UpdateAt = entity.UpdateAt,
+                UpdateUserId = entity.UpdateUserId,
+                UpdateUserName = userManager.Users
+                    .Where(u => u.Id == entity.UpdateUserId)
+                    .Select(u => $"{u.FirstName} {u.LastName} ({u.Email})")
+                    .FirstOrDefault(),
+                IsDeleted = entity.IsDeleted,
+                DeleteAt = entity.DeleteAt
+            });
 
         return Task.FromResult(response);
     }

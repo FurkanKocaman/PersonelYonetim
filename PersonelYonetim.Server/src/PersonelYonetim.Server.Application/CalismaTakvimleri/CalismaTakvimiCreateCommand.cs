@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Dtos;
-using PersonelYonetim.Server.Domain.PersonelAtamalar;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using System.Security.Claims;
@@ -21,7 +21,7 @@ internal sealed class CalismaTakvimiCreateCommandHandler(
     ICalismaTakvimRepository calismaTakvimRepository,
     ICalismaGunRepository calismaGunRepository,
     IPersonelRepository personelRepository,
-    IPersonelAtamaRepository personelAtamaRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IUnitOfWork unitOfWork,
     IHttpContextAccessor httpContextAccessor) : IRequestHandler<CalismaTakvimiCreateCommand, Result<string>>
 {
@@ -42,16 +42,16 @@ internal sealed class CalismaTakvimiCreateCommandHandler(
                     .Select(p => new { p.Id, })
                     .FirstOrDefault();
 
-                var personelAtama = personelAtamaRepository.GetAll()
+                var personelAtama = personelGorevlendirmeRepository.GetAll()
                     .Where(p => p.PersonelId == personel!.Id)
-                    .Select(p => new { p.SirketId, }) .FirstOrDefault();
+                    .Select(p => new { p.TenantId, }) .FirstOrDefault();
 
-                var calismaTakvimDb = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.Ad == request.Ad && p.SirketId == personelAtama!.SirketId);
+                var calismaTakvimDb = await calismaTakvimRepository.FirstOrDefaultAsync(p => p.Ad == request.Ad );
                     
                 if (calismaTakvimDb == null)
                 {
                     CalismaTakvimi calismaTakvim = request.Adapt<CalismaTakvimi>();
-                    calismaTakvim.SirketId = personelAtama!.SirketId;
+                    //calismaTakvim.SirketId = personelAtama!.SirketId;
                     calismaTakvimRepository.Add(calismaTakvim);
                     calismaTakvimDb = calismaTakvim;
                     await unitOfWork.SaveChangesAsync(cancellationToken);

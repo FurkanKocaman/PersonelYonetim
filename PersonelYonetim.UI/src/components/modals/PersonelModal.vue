@@ -1,31 +1,29 @@
 <script setup lang="ts">
 import type { CalismaTakvimModel } from "@/models/entity-models/calisma-takvim/CalismaTakvimModel";
-import type { DepartmanModel } from "@/models/entity-models/DepartmanModel";
-import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
-import type { SirketModel } from "@/models/entity-models/SirketModel";
-import type { SubeModel } from "@/models/entity-models/SubeModel";
 import type { PersonelItem } from "@/models/PersonelModels";
-import type { PersonelCreateRequest } from "@/models/request-models/PersonelCreateRequest";
-import Roles from "@/models/Roles";
 import { SozlesmeTuru } from "@/models/entity-models/UserModel";
 import CalismaTakvimService from "@/services/CalismaTakvimService";
-import DepartmanService from "@/services/DepartmanService";
 import PersonelService from "@/services/PersonelService";
-import PozisyonService from "@/services/PozisyonService";
-import SirketService from "@/services/SirketService";
-import SubeService from "@/services/SubeService";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { onMounted, reactive, ref, type Ref } from "vue";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import FileServie from "@/services/FileServie";
+import type { PersonelCreateCommand } from "@/models/request-models/PersonelCreateCommand";
+import KurumsalBirimService from "@/services/KurumsalBirimService";
+import type { KurumsalBirimGetModel } from "@/models/response-models/KurumsalBirimGetModel";
+import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
+import PozisyonService from "@/services/PozisyonService";
+import RoleService from "@/services/RoleService";
+import type { RoleModel } from "@/models/response-models/RoleModel";
 
 const currentStep = ref(0);
-const sirketler: Ref<SirketModel[] | undefined> = ref([]);
-const subeler: Ref<SubeModel[] | undefined> = ref([]);
-const departmanlar: Ref<DepartmanModel[] | undefined> = ref([]);
-const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
+
 const personeller: Ref<PersonelItem[] | undefined> = ref([]);
+const pozisyonlar: Ref<PozisyonModel[] | undefined> = ref([]);
+const roller: Ref<RoleModel[] | undefined> = ref([]);
+
+const kurumsalBirimler: Ref<KurumsalBirimGetModel[] | undefined> = ref([]);
 const calismaTakvimler: Ref<CalismaTakvimModel[] | undefined> = ref([]);
 
 const fileInput: Ref<HTMLInputElement | undefined> = ref(undefined);
@@ -43,7 +41,7 @@ const paginationParams: Ref<PaginationParams> = ref({
   filter: undefined,
 });
 
-const request: PersonelCreateRequest = reactive(
+const request: PersonelCreateCommand = reactive(
   props.personel
     ? JSON.parse(JSON.stringify(props.personel))
     : {
@@ -51,7 +49,7 @@ const request: PersonelCreateRequest = reactive(
         soyad: "",
         dogumTarihi: new Date(),
         cinsiyet: undefined,
-        profilResimUrl: undefined,
+        avatarUrl: undefined,
         iletisim: {
           eposta: "",
           telefon: "",
@@ -62,35 +60,38 @@ const request: PersonelCreateRequest = reactive(
           ilce: "",
           tamAdres: "",
         },
-        iseGirisTarihi: new Date(),
-        yoneticiId: undefined,
-        sirketId: "",
-        subeId: undefined,
-        departmanId: undefined,
+        kurumsalBirimId: undefined,
         pozisyonId: undefined,
-        calismaTakvimiValue: -1,
-        sozlesmeTuruValue: -1,
-        sozlesmeBitisTarihi: undefined,
-        rolValue: -1,
-        calismaTakvimiId: undefined,
-        pozisyonBaslangicTarih: new Date(),
+        roleId: undefined,
+        baslangicTarihi: new Date(),
+        bitisTarihi: undefined,
+        birincilGorevMi: true,
+        gorevlendirmeTipiValue: undefined,
+        raporlananGorevlendirmeId: undefined,
         izinKuralId: undefined,
+        calismaTakvimId: undefined,
+        brutUcret: undefined,
+        tenantId: undefined,
       }
 );
 onMounted(() => {
-  getSirketler();
+  getKurumsalBirimler();
+  getPersoneller();
   getCalismaTakvimler();
-  if (props.personel) {
-    request.rolValue = props.personel.role;
-  }
+  getPozisyonlar();
+  getRoller();
 });
+
 const emit = defineEmits(["closeModal", "refresh"]);
+
 const handlePersonel = async () => {
   const imageResponse =
-    selectedFile.value != undefined ? await FileServie.uploadProfileImage(selectedFile.value) : "";
-  request.profilResimUrl = imageResponse;
+    selectedFile.value != undefined
+      ? await FileServie.uploadProfileImage(selectedFile.value)
+      : undefined;
+  request.avatarUrl = imageResponse;
   if (props.personel) {
-    request.pozisyonBaslangicTarih = new Date();
+    request.baslangicTarihi = new Date();
     const response = await PersonelService.updatePersonel(request);
     console.log(response);
 
@@ -104,59 +105,35 @@ const handlePersonel = async () => {
     emit("refresh");
   }
 };
-const getSirketler = async () => {
-  try {
-    const res = await SirketService.sirketlerGet();
-    sirketler.value = res?.items;
-    request.sirketId = sirketler.value![0].id;
-    getSubeler(request.sirketId);
-    getPozisyonlar(request.sirketId);
-    if (request.subeId) {
-      getDepartmanlar(request.subeId);
-    }
-    getPersoneller();
-  } catch (error) {
-    console.error("Veri çekme hatası:", error);
-  }
-};
-const getSubeler = async (id: string) => {
-  try {
-    const res = await SubeService.subelerGet(id);
 
-    subeler.value = res?.items;
+const getKurumsalBirimler = async () => {
+  try {
+    const res = await KurumsalBirimService.kurumsalBirimlerGet();
+    kurumsalBirimler.value = res?.items;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
 };
 
-const getDepartmanlar = async (id: string) => {
-  try {
-    const res = await DepartmanService.departmanlarGet(id);
-    departmanlar.value = res?.items;
-    console.log(res);
-  } catch (error) {
-    console.error("Veri çekme hatası:", error);
-  }
-};
-const getPozisyonlar = async (id: string) => {
-  try {
-    const res = await PozisyonService.pozisyonlarGet(id);
-    pozisyonlar.value = res?.items;
-  } catch (error) {
-    console.error("Veri çekme hatası:", error);
-  }
-};
 const getPersoneller = async () => {
   try {
-    if (request.sirketId != "") {
-      const res = await PersonelService.getPersonelList(request.sirketId, "", "");
-      personeller.value = res!.items;
-      paginationParams.value.count = res!.count;
-    }
+    const res = await PersonelService.getPersonelList(undefined);
+    personeller.value = res!.items;
+    paginationParams.value.count = res!.count;
   } catch (error) {
     console.error("Veri çekme hatası:", error);
   }
 };
+
+const getPozisyonlar = async () => {
+  const res = await PozisyonService.pozisyonlarGet(undefined);
+  pozisyonlar.value = res?.items;
+};
+const getRoller = async () => {
+  const res = await RoleService.rollerGet(undefined);
+  roller.value = res?.items;
+};
+
 const handleFileChange = () => {
   if (fileInput.value?.files?.length) {
     selectedFile.value = fileInput.value.files[0];
@@ -364,12 +341,12 @@ const getCalismaTakvimler = async () => {
                 </div>
                 <div class="mb-2 flex flex-col">
                   <label
-                    for="sirket"
+                    for="cinsiyet"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >Cinsiyet</label
                   >
                   <select
-                    id="sirket"
+                    id="cinsiyet"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
                     v-model="request.cinsiyet"
                   >
@@ -408,7 +385,7 @@ const getCalismaTakvimler = async () => {
                     type="text"
                     name="sehir"
                     id="sehir"
-                    v-model="request.adres.sehir"
+                    v-model="request.adres!.sehir"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="Trabzon"
                     required
@@ -424,7 +401,7 @@ const getCalismaTakvimler = async () => {
                     type="text"
                     name="ilce"
                     id="ilce"
-                    v-model="request.adres.ilce"
+                    v-model="request.adres!.ilce"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     placeholder="Ortahisar"
                     required
@@ -440,7 +417,7 @@ const getCalismaTakvimler = async () => {
                     type="text"
                     name="tam-adres"
                     id="tam-adres"
-                    v-model="request.adres.tamAdres"
+                    v-model="request.adres!.tamAdres"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                     required
                   />
@@ -451,7 +428,7 @@ const getCalismaTakvimler = async () => {
                   >
                   <Datepicker
                     id="isebaslamatarih"
-                    v-model="request.pozisyonBaslangicTarih"
+                    v-model="request.baslangicTarihi"
                     locale="TR"
                     :enable-time-picker="true"
                     :format="'dd-MM-yyyy'"
@@ -497,104 +474,32 @@ const getCalismaTakvimler = async () => {
                   <label
                     for="sirket"
                     class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Şirket</label
+                    >Birim</label
                   >
                   <select
                     id="sirket"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.sirketId"
+                    v-model="request.kurumsalBirimId"
                     @change="getPersoneller()"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" value="" selected>
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
                       Personelin çalışdacağı şirketi seçin
                     </option>
                     <option
-                      v-for="sirket in sirketler"
-                      :key="sirket.id"
-                      :value="sirket.id"
+                      v-for="birim in kurumsalBirimler"
+                      :key="birim.id"
+                      :value="birim.id"
                       class="text-neutral-800 dark:text-neutral-200"
                     >
-                      {{ sirket.ad }}
+                      {{ birim.ad }}
                     </option>
                   </select>
                 </div>
-                <div class="mb-2 flex flex-col">
-                  <label
-                    for="sube"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Şube</label
-                  >
-                  <select
-                    id="sube"
-                    class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    :class="request.sirketId == '' ? 'opacity-50' : ''"
-                    v-model="request.subeId"
-                    @change="
-                      () => {
-                        if(request.subeId != undefined){
-                          getDepartmanlar(request.subeId!);
-                        }
-                        else{
-                          request.departmanId = undefined
-                          request.pozisyonId = undefined
-                          departmanlar = []
-                        }
-                      }
-                    "
-                    :disabled="request.sirketId == ''"
-                  >
-                    <option
-                      class="text-neutral-800 dark:text-neutral-200"
-                      :value="undefined"
-                      selected
-                    >
-                      Personelin çalışdacağı şubeyi seçin
-                    </option>
-                    <option
-                      v-for="sube in subeler"
-                      :key="sube.id"
-                      :value="sube.id"
-                      class="text-neutral-800 dark:text-neutral-200"
-                    >
-                      {{ sube.ad }}
-                    </option>
-                  </select>
-                </div>
-                <div class="mb-2">
-                  <label
-                    for="departman"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >Departman</label
-                  >
-                  <select
-                    id="departman"
-                    class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    :class="request.subeId == undefined ? 'opacity-50' : ''"
-                    v-model="request.departmanId"
-                    :disabled="request.subeId == undefined"
-                  >
-                    <option
-                      class="text-neutral-800 dark:text-neutral-200"
-                      :value="undefined"
-                      selected
-                    >
-                      Personelin çalışdacağı departmanı seçin
-                    </option>
-                    <option
-                      v-for="departman in departmanlar"
-                      :key="departman.id"
-                      :value="departman.id"
-                      @change="
-                        () => {
-                          if (request.departmanId == undefined) request.pozisyonId = undefined;
-                        }
-                      "
-                      class="text-neutral-800 dark:text-neutral-200"
-                    >
-                      {{ departman.ad }}
-                    </option>
-                  </select>
-                </div>
+
                 <div class="mb-2">
                   <label
                     for="pozisyon"
@@ -604,9 +509,9 @@ const getCalismaTakvimler = async () => {
                   <select
                     id="pozisyon"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    :class="request.departmanId == undefined ? 'opacity-50' : ''"
+                    :class="request.kurumsalBirimId == undefined ? 'opacity-50' : ''"
                     v-model="request.pozisyonId"
-                    :disabled="request.departmanId == undefined"
+                    :disabled="request.kurumsalBirimId == undefined"
                   >
                     <option
                       class="text-neutral-800 dark:text-neutral-200"
@@ -637,18 +542,22 @@ const getCalismaTakvimler = async () => {
                   <select
                     id="pozisyon"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.rolValue"
+                    v-model="request.roleId"
                   >
-                    <option class="text-neutral-800 dark:text-neutral-200" :value="-1" selected>
-                      Personelin unvanını seçin
+                    <option
+                      class="text-neutral-800 dark:text-neutral-200"
+                      :value="undefined"
+                      selected
+                    >
+                      Personelin erişim şeklini seçin
                     </option>
                     <option
-                      v-for="rol in [0, 1, 2, 3, 4, 5, 6]"
-                      :key="rol"
-                      :value="rol"
+                      v-for="rol in roller"
+                      :key="rol.id"
+                      :value="rol.id"
                       class="text-neutral-800 dark:text-neutral-200"
                     >
-                      {{ Roles.getRoleByValue(rol).name }}
+                      {{ rol.ad }}
                     </option>
                   </select>
                 </div>
@@ -661,7 +570,7 @@ const getCalismaTakvimler = async () => {
                   <select
                     id="sozlesme"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.sozlesmeTuruValue"
+                    v-model="request.gorevlendirmeTipiValue"
                   >
                     <option class="text-neutral-800 dark:text-neutral-200" :value="-1" selected>
                       Sozlesme türünü seçin
@@ -675,13 +584,13 @@ const getCalismaTakvimler = async () => {
                       {{ SozlesmeTuru.getSozlesmeByValue(sozlesme).name }}
                     </option>
                   </select>
-                  <div v-if="request.sozlesmeTuruValue == 0" class="w-full mr-1">
+                  <div v-if="request.gorevlendirmeTipiValue == 0" class="w-full mr-1">
                     <label for="tarih" class="block text-sm/5 font-semibold my-2"
                       >Sozlesme Bitis Tarihi</label
                     >
                     <Datepicker
                       id="tarih"
-                      v-model="request.sozlesmeBitisTarihi"
+                      v-model="request.bitisTarihi"
                       locale="tr"
                       :enable-time-picker="false"
                       :format="'dd-MM-yyyy'"
@@ -697,7 +606,7 @@ const getCalismaTakvimler = async () => {
                   <select
                     id="calisma"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.calismaTakvimiId"
+                    v-model="request.calismaTakvimId"
                   >
                     <option
                       class="text-neutral-800 dark:text-neutral-200"
@@ -725,7 +634,7 @@ const getCalismaTakvimler = async () => {
                   <select
                     id="pozisyon"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.yoneticiId"
+                    v-model="request.raporlananGorevlendirmeId"
                   >
                     <option
                       class="text-neutral-800 dark:text-neutral-200"
@@ -740,7 +649,7 @@ const getCalismaTakvimler = async () => {
                       :value="personel.id"
                       class="text-neutral-800 dark:text-neutral-200"
                     >
-                      {{ personel.fullName }}
+                      {{ personel.ad + " " + personel.soyad }}
                     </option>
                   </select>
                 </div>

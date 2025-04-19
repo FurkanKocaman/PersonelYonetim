@@ -11,7 +11,7 @@ public sealed record UserCreateCommand(
     string FirstName,
     string LastName,
     string Email,
-    Guid SirketId
+    Guid TenantId
     ) : IRequest<Result<Guid>>;
 
 public sealed class UserCreateCommandValidator : AbstractValidator<UserCreateCommand>
