@@ -39,6 +39,7 @@ public sealed class OnaySureci
     public string KurumsalBirimAd { get; set; } = default!;
     public string PozisyonAd { get; set; } = default!;
     public int Sira { get; set; }
+    public DateTimeOffset? DegerlendirilmeTarihi { get; set; }
     public string OnayDurum { get; set; } = string.Empty;
 }
 internal sealed class IzinTalepGetOnayBekleyenQueryHandler(
@@ -94,7 +95,7 @@ IPersonelRepository personelRepository
                          ToplamSure = ituu.izinTalep.ToplamSure,
                          IzinTuru = ituu.izinTalep.IzinTur.Ad,
                          Aciklama = ituu.izinTalep.Aciklama,
-                         DegerlendirmeDurumu = ituu.izinTalep.GuncelDegerlendirmeDurumu().Name,
+                         DegerlendirmeDurumu = talepDegerlendirmeler.Where(t => t.TalepId == ituu.izinTalep.Id).OrderByDescending(t => t.AdimSirasi).FirstOrDefault()!.DegerlendirmeDurumu.Name,
                          CakisanIzinTalepler = izinTalepler.Where(i =>i.Id != ituu.izinTalep.Id && (ituu.izinTalep.BaslangicTarihi <= i.BitisTarihi && ituu.izinTalep.BitisTarihi >= i.BaslangicTarihi)).Include(i => i.Personel).Select(i => new CakisanIzinTalep
                          {
                              PersonelId = i.PersonelId,
@@ -104,11 +105,12 @@ IPersonelRepository personelRepository
                          }).ToList(),
                          OnayAdimlari = talepDegerlendirmeler.Where(t => t.TalepId == ituu.izinTalep.Id).OrderBy(t => t.AdimSirasi).Include(t => t.AtananOnayciPersonel).ThenInclude(p => p!.PersonelGorevlendirmeler).Select(t => new OnaySureci
                          {
-                             PersonelAd = t.AtananOnayciPersonel!= null ? t.AtananOnayciPersonel.Ad : "Bilinmiyor",
+                             PersonelAd = t.AtananOnayciPersonel!= null ? t.AtananOnayciPersonel.Ad + " " + t.AtananOnayciPersonel.Soyad : "Bilinmiyor",
                              AvatarUrl = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.AvatarUrl : null,
                              KurumsalBirimAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.KurumsalBirim!.Ad : "Bilinmiyor",
                              PozisyonAd = t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId) != null ? t.AtananOnayciPersonel!.PersonelGorevlendirmeler.FirstOrDefault(p => p.IsDeleted == false && p.TenantId == tenantId)!.Pozisyon!.Ad : "Bilinmiyor",
                              Sira = t.AdimSirasi,
+                             DegerlendirilmeTarihi = t.DegerlendirilmeTarihi,
                              OnayDurum = t.DegerlendirmeDurumu.Name
                          }).ToList(),
                          IsActive = ituu.izinTalep.IsActive,

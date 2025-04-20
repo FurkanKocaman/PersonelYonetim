@@ -22,7 +22,7 @@ public class CustomClaimsTransformation(RoleManager<AppRole> roleManager) : ICla
         }
         foreach (var roleClaim in roleClaims)
         {
-            var role = await roleManager.FindByNameAsync(roleClaim);
+            var role = await roleManager.FindByIdAsync(roleClaim);
             if(role is not null)
             {
                 var permissions = await roleManager.GetClaimsAsync(role);

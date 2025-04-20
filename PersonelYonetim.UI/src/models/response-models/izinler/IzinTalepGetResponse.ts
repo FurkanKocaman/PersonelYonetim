@@ -27,7 +27,9 @@ export interface OnaySureci {
   personelId?: string;
   personelAd?: string;
   avatarUrl?: string;
-  rol?: string;
+  kurumsalBirimAd: string;
+  pozisyonAd: string;
   sira: number;
-  durum: string;
+  onayDurum: string;
+  degerlendirilmeTarihi: Date | undefined;
 }

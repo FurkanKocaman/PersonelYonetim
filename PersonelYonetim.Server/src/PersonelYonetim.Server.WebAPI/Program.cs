@@ -1,3 +1,5 @@
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OData;
@@ -61,6 +63,7 @@ x.AddFixedWindowLimiter("fixed",cfg =>
 
 builder.Services.AddExceptionHandler<ExceptionHandler>().AddProblemDetails();
 builder.Services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>();
+
 
 var app = builder.Build();
 

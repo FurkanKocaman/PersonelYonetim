@@ -53,7 +53,7 @@ internal sealed class IzinlerGetKalanQueryHandler(
         if (izinTur is null)
             throw new UnauthorizedAccessException("İzin türü bulunamadı.");
 
-        decimal izinTaleplerToplamGun = izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id).Sum(p => p.ToplamSure);
+        decimal izinTaleplerToplamGun = izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id && p.PersonelId == personelId).Sum(p => p.ToplamSure);
 
         var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.BaslangicTarihi.Year);
 

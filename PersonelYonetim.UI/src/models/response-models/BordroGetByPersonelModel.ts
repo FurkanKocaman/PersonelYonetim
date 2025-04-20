@@ -1,8 +1,9 @@
-export interface BordroGetAllModel {
+export interface BordroGetByPersonelModel {
   id: string;
   fullName: string;
   durum: string;
-  avatarUrl: string | undefined;
+  yil: number;
+  ay: number;
 
   // Girdiler
   brutUcret: number;

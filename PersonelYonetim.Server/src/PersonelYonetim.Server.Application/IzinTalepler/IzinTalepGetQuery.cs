@@ -52,7 +52,8 @@ internal sealed class IzinTalepGetQueryHandler(
 
         var talepDegerlendirmeler = talepDegerlendirmeRepository.Where(p => p.TenantId == tenantId);
 
-        var izinTalepler = izinTalepRepository.Where(p => p.TenantId == tenantId && p.PersonelId == personel.Id);
+        var izinTalepler = izinTalepRepository.Where(p => p.TenantId == tenantId && p.PersonelId == personel.Id).Include(p => p.DegerlendirmeAdimlari).Include(p => p.Personel).Include(p => p.IzinTur);
+        var x = izinTalepler.ToList();
         var response = izinTalepler
                 .Join(userManager.Users,
                     izinTalep => izinTalep.CreateUserId,
@@ -75,7 +76,7 @@ internal sealed class IzinTalepGetQueryHandler(
                          ToplamSure = ituu.izinTalep.ToplamSure,
                          IzinTuru = ituu.izinTalep.IzinTur.Ad,
                          Aciklama = ituu.izinTalep.Aciklama,
-                         DegerlendirmeDurumu = ituu.izinTalep.GuncelDegerlendirmeDurumu().Name,
+                         DegerlendirmeDurumu = talepDegerlendirmeler.Where(t => t.TalepId == ituu.izinTalep.Id).OrderByDescending(t => t.AdimSirasi).FirstOrDefault()!.DegerlendirmeDurumu.Name,
                          OnayAdimlari = talepDegerlendirmeler.Where(t => t.TalepId == ituu.izinTalep.Id).OrderBy(t => t.AdimSirasi).Include(t => t.AtananOnayciPersonel).ThenInclude(p => p!.PersonelGorevlendirmeler).Select(t => new OnaySureci
                          {
                              PersonelAd = t.AtananOnayciPersonel != null ? t.AtananOnayciPersonel.Ad : "Bilinmiyor",

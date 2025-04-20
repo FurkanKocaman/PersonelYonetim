@@ -1,9 +1,12 @@
-﻿using Hangfire;
+﻿using DinkToPdf.Contracts;
+using DinkToPdf;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Bildirimler;
 using PersonelYonetim.Server.Domain.RoleClaim;
 using PersonelYonetim.Server.Domain.Rols;
@@ -34,8 +37,11 @@ public static class InfrastructureRegistrar
 
         services.AddHangfireServer();
 
+        services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
         services.AddScoped<Domain.UnitOfWork.IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBildirimService, BildirimService>();
+        services.AddScoped<IPDFService, PDFService>();
 
         services
             .AddIdentity<AppUser, AppRole>(opt =>

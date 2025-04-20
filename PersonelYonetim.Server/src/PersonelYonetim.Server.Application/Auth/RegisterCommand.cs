@@ -41,8 +41,10 @@ internal sealed class RegisterCommandHandler(
     {
         try
         {
-
-            Tenant tenant = new(request.KurumsalBirimCreateCommand.Ad, null, null);
+            Tenant tenant = new() 
+            { 
+                Name=request.KurumsalBirimCreateCommand.Ad,
+            };
 
             Guid tenantId = tenant.Id;
 

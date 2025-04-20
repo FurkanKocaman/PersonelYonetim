@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PersonelYonetim.Server.Application.IzinTalepler;
-using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
@@ -37,12 +36,12 @@ public static class IzinTalepModule
            })
            .RequireAuthorization(Permissions.CreateIzinler).Produces<Result<string>>().WithName("IzinTalepDelete");
 
-        //group.MapPost("/degerlendir",
-        //     async (ISender sender, [FromBody]IzinTalepOnayCommand request, CancellationToken cancellationToken) =>
-        //     {
-        //         var response = await sender.Send(request, cancellationToken);
-        //         return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        //     })
-        //    .RequireAuthorization(Permissions.ApproveIzinler).Produces<Result<string>>().WithName("IzinTalepDegerlendir");
+        group.MapPost("/degerlendir",
+             async (ISender sender, [FromBody] IzinTalepDegerlendirmeCommand request, CancellationToken cancellationToken) =>
+             {
+                 var response = await sender.Send(request, cancellationToken);
+                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+             })
+            .RequireAuthorization(Permissions.ApproveIzinler).Produces<Result<string>>().WithName("IzinTalepDegerlendir");
     }
 }

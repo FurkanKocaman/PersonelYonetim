@@ -101,6 +101,12 @@ const router = createRouter({
           ],
         },
         {
+          path: "bordrolarim",
+          name: "Bordrolarim",
+          component: () => import("@/views/bordro/BordrolarimView.vue"),
+          meta: { title: "Bordrolarım" },
+        },
+        {
           path: "takvim",
           name: "Takvim",
           component: () => import("@/views/takvim/TakvimView.vue"),

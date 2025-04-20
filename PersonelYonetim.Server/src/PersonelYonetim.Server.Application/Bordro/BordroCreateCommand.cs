@@ -99,6 +99,9 @@ internal sealed class BordroCreateCommandHandler(
                         {
                             PersonelId = personelGorevlendirme.PersonelId,
                             BordroDonemId = bordroDonem.Id,
+                            SGKDurumu = "Normal",
+
+                            TabiKanunKodu = "5510",
 
                             // Kazanç Özetleri
                             BrutUcret = BrutUcret,
@@ -131,6 +134,9 @@ internal sealed class BordroCreateCommandHandler(
                             SGKGunSayisi = SGKGunSayisi,
                             BesKesintisiVarMi = BesKesintisiVarMi,
                             BesKesintiTutari = BesKesintiTutari,
+
+                            Yil = bordroDonem.Yil,
+                            Ay = bordroDonem.Ay,
 
                             TenantId = tenantId!.Value,
                         };

@@ -99,8 +99,8 @@ const getIzinTalepler = async () => {
   paginationParams.value.count = response!.count;
 };
 
-const izinDegerlendir = async (id: string, degerlendirme: number) => {
-  const response = await IzinService.izinTalepDegerlendir(id, degerlendirme);
+const izinDegerlendir = async (id: string, degerlendirme: number, yorum: string | undefined) => {
+  const response = await IzinService.izinTalepDegerlendir(id, degerlendirme, yorum);
   showDetailModal.value = false;
   console.log(response);
   getIzinTalepler();
@@ -531,30 +531,52 @@ function getLeaveSegmentStyle(personelAd: string | undefined, gun: string): CSSP
                   >{{ adim.sira }}</span
                 >
                 <img
+                  v-if="adim.avatarUrl"
+                  class="size-10 rounded-md object-cover mx-2 mt-2"
+                  width="100"
+                  height="100"
                   :src="apiUrl + adim.avatarUrl"
-                  class="size-10 rounded-md mx-2 mt-2"
-                  alt="Profile Image"
+                  alt=""
                 />
-                <div>
-                  <h3>{{ adim.personelAd }}</h3>
+                <div
+                  v-else
+                  class="text-xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mr-2 rounded-md border-1 border-sky-500 mx-2 mt-2 size-10 flex items-center justify-center"
+                >
+                  {{ adim.personelAd![0] }}
+                </div>
+
+                <div class="flex flex-col">
+                  <div class="flex">
+                    <h3>{{ adim.personelAd }}</h3>
+                    <p class="dark:text-neutral-400 text-neutral-500 ml-2">
+                      ({{ adim.pozisyonAd }})
+                    </p>
+                  </div>
                   <p class="dark:text-neutral-400 text-neutral-500">
-                    {{ adim.rol }}
+                    {{
+                      adim.degerlendirilmeTarihi
+                        ? dayjs(adim.degerlendirilmeTarihi).format("D MMMM YYYY HH:mm, dddd") +
+                          " tarihinde " +
+                          adim.onayDurum.toLocaleLowerCase() +
+                          "."
+                        : "-"
+                    }}
                   </p>
                 </div>
               </div>
               <div
                 class="text-xs p-1 rounded-md h-fit"
                 :class="
-                  adim.durum == 'Beklemede'
+                  adim.onayDurum == 'Beklemede'
                     ? 'bg-yellow-500'
-                    : adim.durum == 'Onaylandı'
+                    : adim.onayDurum == 'Onaylandı'
                     ? 'bg-green-500'
-                    : adim.durum == 'Reddedildi'
+                    : adim.onayDurum == 'Reddedildi'
                     ? 'bg-red-500'
                     : 'bg-blue-500'
                 "
               >
-                {{ adim.durum }}
+                {{ adim.onayDurum }}
               </div>
             </div>
           </div>
@@ -577,14 +599,14 @@ function getLeaveSegmentStyle(personelAd: string | undefined, gun: string): CSSP
         <button
           type="button"
           class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-          @click="izinDegerlendir(selectedIzin?.id!, 1)"
+          @click="izinDegerlendir(selectedIzin?.id!, 2, undefined)"
         >
           Reddet
         </button>
         <button
           type="button"
           class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800"
-          @click="izinDegerlendir(selectedIzin?.id!, 0)"
+          @click="izinDegerlendir(selectedIzin?.id!, 1, undefined)"
         >
           Onayla
         </button>

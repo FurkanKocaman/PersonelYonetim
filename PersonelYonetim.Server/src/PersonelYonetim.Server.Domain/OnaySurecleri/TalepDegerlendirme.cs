@@ -1,5 +1,6 @@
 ﻿using PersonelYonetim.Server.Domain.Izinler;
 using PersonelYonetim.Server.Domain.Personeller;
+using TS.Result;
 
 namespace PersonelYonetim.Server.Domain.OnaySurecleri;
 public sealed class TalepDegerlendirme
@@ -42,16 +43,17 @@ public sealed class TalepDegerlendirme
         AtananOnayciRolId = rolId;
     }
 
-    public void DurumuGuncelle(DegerlendirmeDurumEnum yeniDurum, Guid? degerlendirenId, string? yorum, DateTimeOffset degerlendirmeTarihi)
+    public Result<string> DurumuGuncelle(DegerlendirmeDurumEnum yeniDurum, Guid? degerlendirenId, string? yorum, DateTimeOffset degerlendirmeTarihi)
     {
         if (DegerlendirmeDurumu != DegerlendirmeDurumEnum.Beklemede && yeniDurum != DegerlendirmeDurumEnum.IptalEdildi)
         {
-            throw new InvalidOperationException("Sadece 'Beklemede' durumundaki bir adım değerlendirilebilir.");
+            return Result<string>.Failure("Sadece 'Beklemede' durumundaki bir adım değerlendirilebilir.");
         }
 
         DegerlendirmeDurumu = yeniDurum;
         DegerlendirenId = degerlendirenId;
         Yorum = yorum;
         DegerlendirilmeTarihi = degerlendirmeTarihi;
+        return Result<string>.Succeed("Başarıyla izin durumu güncellendi");
     }
 }

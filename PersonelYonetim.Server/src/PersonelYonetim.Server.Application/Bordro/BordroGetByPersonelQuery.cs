@@ -4,17 +4,17 @@ using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Bordro;
 
 namespace PersonelYonetim.Server.Application.Bordro;
-public sealed record BordroGetAllQuery(
-    int Yil,
-    int Ay
-    ) : IRequest<IQueryable<BordroGetAllQueryResponse>>;
+public sealed record BordroGetByPersonelQuery(
+    int? yil 
+    ) : IRequest<IQueryable<BordroGetByPersonelQueryResponse>>;
 
-public sealed class BordroGetAllQueryResponse
+public class BordroGetByPersonelQueryResponse
 {
     public Guid Id { get; set; }
     public string FullName { get; set; } = default!;
+    public int Yil { get; set; }
+    public int Ay { get; set; }
     public string Durum { get; set; } = default!;
-    public string? AvatarUrl { get; set; }
 
     //Girdiler
     public decimal BrutUcret { get; set; }
@@ -24,11 +24,11 @@ public sealed class BordroGetAllQueryResponse
 
     //Kazançlar
     public decimal GunlukUcret { get; set; }
-    public int OdemeyeEsasGunSayisi {get;set;}
+    public int OdemeyeEsasGunSayisi { get; set; }
     public decimal FazlaCalismaUcretToplam { get; set; }
 
     //SGK
-    public int FiiliCalisma { get;set; }
+    public int FiiliCalisma { get; set; }
     public decimal UcretliIzin { get; set; }
     public decimal Raporlu { get; set; }
     public decimal UcretsizIzin { get; set; }
@@ -53,40 +53,43 @@ public sealed class BordroGetAllQueryResponse
     //Maliyet
     public decimal EleGecenUcret { get; set; }
     public decimal Tesvikler { get; set; }
-    public decimal TesvikliMaliyet {get; set; }
+    public decimal TesvikliMaliyet { get; set; }
 }
 
-internal sealed class BordroGetAllQueryHandler(
+internal sealed class BordroGetByPersonelQueryHandler(
     IBordroDonemRepository bordroDonemRepository,
     ICurrentUserService currentUserService
-    ) : IRequestHandler<BordroGetAllQuery, IQueryable<BordroGetAllQueryResponse>>
+    ) : IRequestHandler<BordroGetByPersonelQuery, IQueryable<BordroGetByPersonelQueryResponse>>
 {
-    public Task<IQueryable<BordroGetAllQueryResponse>> Handle(BordroGetAllQuery request, CancellationToken cancellationToken)
+    public Task<IQueryable<BordroGetByPersonelQueryResponse>> Handle(BordroGetByPersonelQuery request, CancellationToken cancellationToken)
     {
+
         Guid? userId = currentUserService.UserId;
         Guid? tenantId = currentUserService.TenantId;
 
         if (!userId.HasValue || !tenantId.HasValue)
             throw new Exception("Personel bulunamamdı");
 
-        var bordroDonem = bordroDonemRepository.Where(p => p.TenantId == tenantId && p.Yil == request.Yil && p.Ay == request.Ay).Include(p => p.MaasPusulalar).ThenInclude(p => p.Personel).FirstOrDefault();
+        var bordroDonem = bordroDonemRepository.Where(p => p.TenantId == tenantId && request.yil != null ? p.Yil == request.yil : true).Include(p => p.MaasPusulalar).ThenInclude(p => p.Personel).FirstOrDefault();
         if (bordroDonem is null)
-            return Task.FromResult(Enumerable.Empty<BordroGetAllQueryResponse>().AsQueryable());
+            return Task.FromResult(Enumerable.Empty<BordroGetByPersonelQueryResponse>().AsQueryable());
 
         var response = bordroDonem.MaasPusulalar
-                .Select(p => new BordroGetAllQueryResponse
+            .Where(p => p.Personel!.UserId == userId)
+                .Select(p => new BordroGetByPersonelQueryResponse
                 {
                     Id = p.Id,
                     FullName = p.Personel!.Ad + " " + p.Personel.Soyad,
                     Durum = p.Durum.Name,
-                    AvatarUrl = p.Personel.AvatarUrl,
+                    Yil = p.BordroDonem?.Yil ?? 0,
+                    Ay = p.BordroDonem?.Ay ?? 0,
 
                     BrutUcret = p.BrutUcret,
                     SGKGun = 30,
                     EkOdemelerToplam = 0,
                     KesintilerToplam = 0,
 
-                    GunlukUcret = p.BrutUcret/30,
+                    GunlukUcret = p.BrutUcret / 30,
                     OdemeyeEsasGunSayisi = 30,
                     FazlaCalismaUcretToplam = 0,
 
@@ -100,7 +103,7 @@ internal sealed class BordroGetAllQueryHandler(
                     EkOdemeIstisnaToplam = p.GelirVergisiIstisnasiUygulanan,
                     GVAylikMatrah = p.GelirVergisiMatrahi,
                     GVOdemesi = p.OdenecekGelirVergisi,
-                    
+
                     EkOdemeIstisna = p.DamgaVergisiIstisnasiUygulanan,
                     DVAylikMatrah = p.BrutUcret - 22003,//Toplam ucret - asgari ücret
                     DVOdemesi = p.OdenecekDamgaVergisi,
@@ -108,12 +111,12 @@ internal sealed class BordroGetAllQueryHandler(
                     YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci,
                     OzelKesintiler = 0,
                     TumKesintiler = p.ToplamKesinti,
-                    
+
                     EleGecenUcret = p.NetMaas,
                     Tesvikler = 0,
                     TesvikliMaliyet = p.ToplamIsverenMaliyeti,
                 }).AsQueryable();
 
-        return Task.FromResult(response);
+        return Task.FromResult(response.AsQueryable());
     }
 }

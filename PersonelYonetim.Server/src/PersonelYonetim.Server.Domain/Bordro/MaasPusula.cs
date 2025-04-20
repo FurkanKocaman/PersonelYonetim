@@ -10,6 +10,8 @@ public class MaasPusula  :Entity
     public Guid BordroDonemId { get; set; }
     public BordroDonem? BordroDonem { get; set; }
     public MaasPusulaDurumEnum Durum { get; set; } = MaasPusulaDurumEnum.Beklemede;
+    public int Yil { get; set; }
+    public int Ay { get; set; }
 
     public string? TabiKanunKodu { get; set; } // Örn: "5510"
     public string? TesvikKodu { get; set; }    // Örn: "6111", null olabilir

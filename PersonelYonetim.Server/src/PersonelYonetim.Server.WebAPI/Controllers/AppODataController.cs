@@ -10,6 +10,7 @@ using PersonelYonetim.Server.Application.Bordro;
 using PersonelYonetim.Server.Application.CalismaCizelgeleri;
 using PersonelYonetim.Server.Application.CalismaTakvimleri;
 using PersonelYonetim.Server.Application.Duyurular;
+using PersonelYonetim.Server.Application.IzinKurallar;
 using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
 using PersonelYonetim.Server.Application.KurumsalBirimler;
@@ -36,7 +37,7 @@ public class AppODataController(
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<RoleGetAllQueryResponse>("roller");
-        //builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
+        builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
         builder.EntitySet<IzinTurGetAllQueryResponse>("izin-turler");
         builder.EntitySet<IzinTalepGetAllQueryResponse>("izin-talepler");
         builder.EntitySet<IzinTalepGetOnayBekleyenQueryResponse>("izin-talepler-onay-bekleyenler");
@@ -52,6 +53,12 @@ public class AppODataController(
         builder.EntitySet<CalismaCizelgeGetAllQueryResponse>("calisma-cizelgeler-new");
         builder.EntitySet<BordroGetAllQueryResponse>("bordro");
         builder.EntitySet<BordroGetCalisanlarQueryResponse>("bordro-calisanlar");
+        builder.EntitySet<BordroGetByPersonelQueryResponse>("personel-bordrolar");
+
+        builder.EntityType<IzinKuralGetAllResponse>()
+            .CollectionProperty(p => p.IzinTurler)
+            .Expand();
+
         return builder.GetEdmModel();
     }
 
@@ -98,13 +105,13 @@ public class AppODataController(
         var response = await sender.Send(new RoleGetAllQuery(null), cancellationToken);
         return response;
     }
-    //[HttpGet("izin-kurallar")]
-    //[Authorize]
-    //public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
-    //{
-    //    var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
-    //    return response;
-    //}
+    [HttpGet("izin-kurallar")]
+    [Authorize]
+    public async Task<IQueryable<IzinKuralGetAllResponse>> GetAllIzinKurallar(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new IzinKuralGetAllQuery(), cancellationToken);
+        return response;
+    }
     [HttpGet("izin-turler")]
     [Authorize]
     public async Task<IQueryable<IzinTurGetAllQueryResponse>> GetAllIzinTurler(CancellationToken cancellationToken)
@@ -223,6 +230,13 @@ public class AppODataController(
     public async Task<IQueryable<BordroGetCalisanlarQueryResponse>> GetBordroCalisanlar(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new BordroGetCalisanlarQuery(), cancellationToken);
+        return response;
+    }
+    [HttpGet("personel-bordrolar")]
+    [Authorize()]
+    public async Task<IQueryable<BordroGetByPersonelQueryResponse>> GetPersonelBordrolar(int? yil, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new BordroGetByPersonelQuery(yil), cancellationToken);
         return response;
     }
 

@@ -22,6 +22,7 @@ public sealed record LoginCommandResponse
 internal sealed class LoginCommandHandler(
     UserManager<AppUser> userManager, 
     SignInManager<AppUser> signInManager,
+    //IEmailService emailService,
     IJwtProvider jwtProvider,
     ISender sender) : IRequestHandler<LoginCommand, Result<LoginCommandResponse>>
 {

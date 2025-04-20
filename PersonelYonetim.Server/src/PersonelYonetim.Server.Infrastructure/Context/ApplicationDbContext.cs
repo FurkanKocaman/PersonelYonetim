@@ -198,7 +198,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AppUserRole>()
-            .HasKey(p => new {p.UserId, p.RoleId, p.SirketId});
+            .HasKey(p => new {p.UserId, p.RoleId});
 
         modelBuilder.Entity<TalepDegerlendirme>()
             .HasOne(p => p.Degerlendiren)
@@ -217,6 +217,10 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .WithMany()
             .HasForeignKey(p => p.IzinTurId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTalep>()
+            .Navigation(e => e.DegerlendirmeAdimlari)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         modelBuilder.Entity<Personel>()
             .HasOne(p => p.User)
