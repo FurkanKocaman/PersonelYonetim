@@ -120,7 +120,6 @@ export class IzinService {
           },
         }
       );
-      console.log(response.data);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],

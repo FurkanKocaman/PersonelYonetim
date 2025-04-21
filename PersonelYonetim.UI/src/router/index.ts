@@ -15,6 +15,10 @@ const router = createRouter({
       redirect: "/dashboard",
     },
     {
+      path: "/test",
+      component: () => import("@/views/TestView.vue"),
+    },
+    {
       path: "/dashboard",
       component: () => import("@/layouts/DashBoardLayout.vue"),
       beforeEnter: authGuard,

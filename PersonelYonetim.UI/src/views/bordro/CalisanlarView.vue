@@ -9,8 +9,10 @@ import { onMounted, ref, watch, type Ref } from "vue";
 const bordroCalisanlar: Ref<BordroGetCalisanlarModel[] | undefined> = ref([]);
 
 const isBirimlerMenuOpen = ref(false);
+const isIslemlerMenuOpen = ref(false);
 const selectedBirim = ref<string | undefined>(undefined);
 const birimler: Ref<KurumsalBirimGetModel[] | undefined> = ref([]);
+const personelId = ref([]);
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -41,100 +43,146 @@ const getAllBirimler = async () => {
   birimler.value = birimlerRes?.items;
 };
 
+const bordroHesapla = async () => {
+  const today = new Date();
+  const res = await BordroService.bordroCreate(
+    today.getFullYear(),
+    new Date().getMonth() + 1,
+    personelId.value,
+    true
+  );
+  console.log(res);
+};
+
 watch(selectedBirim, () => getAllCalisanlar());
+
+defineExpose({
+  bordroHesapla,
+});
 </script>
 
 <template>
   <div class="flex flex-col w-full h-full px-5">
     <div class="flex">
-      <!-- Search box -->
-      <div class="mr-10 relative">
-        <input
-          type="text"
-          id="voice-search"
-          class="bg-neutral-50 border border-neutral-300 outline-none text-gray-900 text-sm rounded-md block w-full pr-8 p-2.5 dark:bg-neutral-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-          placeholder="Ara"
-          required
-        />
-        <button type="button" class="absolute inset-y-0 end-0 flex items-center pe-3">
-          <svg
-            class="size-5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white fill-none"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z"
-              class="stroke-2 stroke-neutral-600 dark:stroke-neutral-300"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+      <div class="flex flex-1">
+        <!-- Search box -->
+        <div class="mr-10 relative">
+          <input
+            type="text"
+            id="voice-search"
+            class="bg-neutral-50 border border-neutral-300 outline-none text-gray-900 text-sm rounded-md block w-full pr-8 p-2.5 dark:bg-neutral-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+            placeholder="Ara"
+            required
+          />
+          <button type="button" class="absolute inset-y-0 end-0 flex items-center pe-3">
+            <svg
+              class="size-5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white fill-none"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z"
+                class="stroke-2 stroke-neutral-600 dark:stroke-neutral-300"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
 
+        <div class="relative">
+          <button
+            id="dropdownBgHoverButton"
+            class="text-neutral-700 border border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
+            type="button"
+            @click="() => (isBirimlerMenuOpen = !isBirimlerMenuOpen)"
+          >
+            Birimler
+            <svg
+              class="w-2.5 h-2.5 ms-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 4 4 4-4"
+              />
+            </svg>
+          </button>
+
+          <div
+            v-if="isBirimlerMenuOpen"
+            class="absolute z-50 bg-neutral-200 dark:bg-neutral-700 rounded-md"
+          >
+            <ul
+              class="p-1 w-[10rem] text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
+            >
+              <li
+                class="cursor-pointer"
+                @click="
+                  () => {
+                    selectedBirim = undefined;
+                  }
+                "
+              >
+                <div
+                  class="flex items-center px-2 py-2 rounded-sm hover:bg-gray-50 dark:hover:bg-neutral-600"
+                >
+                  Hepsi
+                </div>
+              </li>
+              <li
+                v-for="birim in birimler"
+                :key="birim.id"
+                class="cursor-pointer"
+                @click="
+                  () => {
+                    selectedBirim = birim.ad;
+                  }
+                "
+              >
+                <div
+                  class="flex items-center px-2 py-2 rounded-sm hover:bg-gray-50 dark:hover:bg-neutral-600"
+                >
+                  {{ birim.ad }}
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
       <div class="relative">
         <button
-          id="dropdownBgHoverButton"
-          class="text-neutral-700 border border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
-          type="button"
-          @click="() => (isBirimlerMenuOpen = !isBirimlerMenuOpen)"
+          class="flex justify-center items-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-1 text-center me-2 mb-2 group dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+          @click="
+            () => {
+              isIslemlerMenuOpen = !isIslemlerMenuOpen;
+            }
+          "
         >
-          Birimler
-          <svg
-            class="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
+          İşlemler
+          <svg class="size-7 fill-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path
-              stroke="currentColor"
+              d="M7 10L12 15L17 10"
+              class="stroke-blue-700 group-hover:stroke-white"
+              stroke-width="1.5"
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 4 4 4-4"
             />
           </svg>
         </button>
-
-        <div
-          v-if="isBirimlerMenuOpen"
-          class="absolute z-50 bg-neutral-200 dark:bg-neutral-700 rounded-md"
-        >
-          <ul
-            class="p-1 w-[10rem] text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
+        <div v-if="isIslemlerMenuOpen" class="absolute bg-neutral-400 z-20 rounded-md">
+          <button
+            class="text-sm hover:bg-neutral-300 px-3 py-1 rounded-md"
+            @click="bordroHesapla()"
           >
-            <li
-              class="cursor-pointer"
-              @click="
-                () => {
-                  selectedBirim = undefined;
-                }
-              "
-            >
-              <div
-                class="flex items-center px-2 py-2 rounded-sm hover:bg-gray-50 dark:hover:bg-neutral-600"
-              >
-                Hepsi
-              </div>
-            </li>
-            <li
-              v-for="birim in birimler"
-              :key="birim.id"
-              class="cursor-pointer"
-              @click="
-                () => {
-                  selectedBirim = birim.ad;
-                }
-              "
-            >
-              <div
-                class="flex items-center px-2 py-2 rounded-sm hover:bg-gray-50 dark:hover:bg-neutral-600"
-              >
-                {{ birim.ad }}
-              </div>
-            </li>
-          </ul>
+            Bordro Hesapla
+          </button>
         </div>
       </div>
     </div>
@@ -158,7 +206,7 @@ watch(selectedBirim, () => getAllCalisanlar());
               </th>
 
               <th
-                class="sticky bg-neutral-100 dark:bg-neutral-800 left-[12.5rem] px-4 py-2 w-24 z-20 text-left border-r border-neutral-300 dark:border-neutral-700"
+                class="sticky bg-neutral-100 dark:bg-neutral-800 left-[13rem] px-4 py-2 w-24 z-20 text-left border-r border-neutral-300 dark:border-neutral-700"
               >
                 <div class="flex">
                   Dahil
@@ -238,7 +286,12 @@ watch(selectedBirim, () => getAllCalisanlar());
                 class="sticky left-[14rem] bg-neutral-100 dark:bg-neutral-800 px-4 py-2 z-10 border-r border-neutral-300 dark:border-neutral-700"
               >
                 <label class="inline-flex items-center cursor-pointer">
-                  <input type="checkbox" value="" class="sr-only peer" />
+                  <input
+                    type="checkbox"
+                    :value="calisan.id"
+                    v-model="personelId"
+                    class="sr-only peer"
+                  />
                   <div
                     class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"
                   ></div>

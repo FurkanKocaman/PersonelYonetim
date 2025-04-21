@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import type { BordroGetByPersonelModel } from "@/models/response-models/BordroGetByPersonelModel";
 import BordroService from "@/services/BordroService";
+import MaasPusulaService from "@/services/MaasPusulaService";
 import { onMounted, ref, watch, type Ref } from "vue";
 
 const isYilMenuOpen = ref(false);
 
+const isPusulaDegerlendirmeOpen = ref(false);
+
 const bordro: Ref<BordroGetByPersonelModel[] | undefined> = ref([]);
 const bordroCount = ref(0);
+
+const selectedPusula = ref("");
 
 const selectedTableGroup = ref<{
   header: string;
@@ -110,10 +115,67 @@ const getAllBordro = async () => {
   bordroCount.value = res!.count;
 };
 
+const maasPusulaDegerlendir = async (value: number) => {
+  const res = await MaasPusulaService.maasPusulaDegerlendir(selectedPusula.value, value);
+  if (res) isPusulaDegerlendirmeOpen.value = false;
+};
+
 watch(selectedYil, () => getAllBordro());
 </script>
 
 <template>
+  <div
+    class="fixed top-0 right-0 z-50 w-full h-full flex justify-center items-center backdrop-blur-sm"
+    v-if="isPusulaDegerlendirmeOpen"
+  >
+    <div class="flex flex-col bg-neutral-300 dark:bg-neutral-800 rounded-md">
+      <div class="flex justify-between">
+        <h1 class="text-base font-semibold px-3 py-5">Maas Pusula Degerlendirme</h1>
+        <svg
+          class="size-7 group"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          @click="isPusulaDegerlendirmeOpen = false"
+        >
+          <circle
+            opacity="0.5"
+            cx="12"
+            cy="12"
+            r="10"
+            class="stroke-neutral-500 group-hover:stroke-red-500"
+            stroke-width="1.5"
+          />
+          <path
+            d="M14.5 9.50002L9.5 14.5M9.49998 9.5L14.5 14.5"
+            class="stroke-neutral-500 group-hover:stroke-red-500"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+      <p class="text-sm mb-4 max-w-[40rem] px-3 text-neutral-500 dark:text-neutral-400">
+        Pusulanızdaki tüm detayları incelendikten sonra degerlendirebilirsiniz.Eğer 5 gün içinde
+        değerlendirmezseniz otomatik olarak onaylanacaktır.
+      </p>
+      <div class="flex justify-end">
+        <button
+          type="button"
+          class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+          @click="maasPusulaDegerlendir(1)"
+        >
+          Reddet
+        </button>
+        <button
+          type="button"
+          class="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800"
+          @click="maasPusulaDegerlendir(1)"
+        >
+          Onayla
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="flex flex-col w-full h-full pt-10 px-5">
     <div class="flex">
       <div class="relative">
@@ -266,6 +328,26 @@ watch(selectedYil, () => getAllBordro());
                 :class="statusColors[maaPusula.durum]"
                 >{{ maaPusula.durum }}</span
               >
+              <svg
+                class="size-7 rounded-md mr-2 p-1 group cursor-pointer"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                @click="
+                  () => {
+                    isPusulaDegerlendirmeOpen = !isPusulaDegerlendirmeOpen;
+                    selectedPusula = maaPusula.id;
+                  }
+                "
+              >
+                <path
+                  d="M11 4H7.2C6.0799 4 5.51984 4 5.09202 4.21799C4.71569 4.40974 4.40973 4.7157 4.21799 5.09202C4 5.51985 4 6.0799 4 7.2V16.8C4 17.9201 4 18.4802 4.21799 18.908C4.40973 19.2843 4.71569 19.5903 5.09202 19.782C5.51984 20 6.0799 20 7.2 20H16.8C17.9201 20 18.4802 20 18.908 19.782C19.2843 19.5903 19.5903 19.2843 19.782 18.908C20 18.4802 20 17.9201 20 16.8V12.5M15.5 5.5L18.3284 8.32843M10.7627 10.2373L17.411 3.58902C18.192 2.80797 19.4584 2.80797 20.2394 3.58902C21.0205 4.37007 21.0205 5.6364 20.2394 6.41745L13.3774 13.2794C12.6158 14.0411 12.235 14.4219 11.8012 14.7247C11.4162 14.9936 11.0009 15.2162 10.564 15.3882C10.0717 15.582 9.54378 15.6885 8.48793 15.9016L8 16L8.04745 15.6678C8.21536 14.4925 8.29932 13.9048 8.49029 13.3561C8.65975 12.8692 8.89125 12.4063 9.17906 11.9786C9.50341 11.4966 9.92319 11.0768 10.7627 10.2373Z"
+                  class="stroke-yellow-600 group-hover:stroke-yellow-400"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </div>
           </div>
           <!-- Girdiler start -->

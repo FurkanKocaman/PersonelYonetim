@@ -5,6 +5,27 @@ import type { BordroGetCalisanlarModel } from "@/models/response-models/BordroCa
 import type { BordroGetByPersonelModel } from "@/models/response-models/BordroGetByPersonelModel";
 
 class BordroService {
+  async bordroCreate(
+    yil: number,
+    ay: number,
+    personelId: string[] | undefined,
+    tekrarHesapla: boolean
+  ): Promise<string> {
+    try {
+      const res = await api.post(`${import.meta.env.VITE_API_URL}/bordro/create`, {
+        yil: yil,
+        ay: ay,
+        personelId: personelId,
+        tekrarHesapla: tekrarHesapla,
+      });
+
+      return res.data.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   async bordroGetAll(
     yil: number,
     ay: number,

@@ -97,6 +97,7 @@ const getIzinTalepler = async () => {
   izinList.value = response!.items;
   loading.value = false;
   paginationParams.value.count = response!.count;
+  console.log(response);
 };
 
 const izinDegerlendir = async (id: string, degerlendirme: number, yorum: string | undefined) => {
@@ -323,10 +324,19 @@ function getLeaveSegmentStyle(personelAd: string | undefined, gun: string): CSSP
         <div class="flex flex-col justify-center items-center gap-4 mx-2">
           <div class="w-fit flex items-center justify-center mb-4">
             <img
-              src="https://picsum.photos/200/300"
-              class="size-12 rounded-md"
-              alt="Profile Image"
+              v-if="selectedIzin?.avatarUrl"
+              class="size-12 rounded-md object-cover mx-2 mt-2"
+              width="100"
+              height="100"
+              :src="apiUrl + selectedIzin.avatarUrl"
+              alt=""
             />
+            <div
+              v-else
+              class="text-xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mr-2 rounded-md border-1 border-sky-500 mx-2 mt-2 size-12 flex items-center justify-center"
+            >
+              {{ selectedIzin?.personelFullName![0] }}
+            </div>
             <div class="bg-neutral-300 dark:bg-neutral-700 rounded-md mx-5 p-2 text-sm">
               <p>
                 <span class="text-neutral-900 dark:text-neutral-50 font-semibold">{{
@@ -501,10 +511,19 @@ function getLeaveSegmentStyle(personelAd: string | undefined, gun: string): CSSP
             <div class="flex items-center justify-between">
               <div class="flex text-sm">
                 <img
-                  src="https://picsum.photos/200/300"
-                  class="size-10 rounded-md mx-2 mt-2"
-                  alt="Profile Image"
+                  v-if="selectedIzin?.avatarUrl"
+                  class="size-10 rounded-md object-cover mx-2 mt-2"
+                  width="100"
+                  height="100"
+                  :src="apiUrl + selectedIzin.avatarUrl"
+                  alt=""
                 />
+                <div
+                  v-else
+                  class="text-xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mr-2 rounded-md border-1 border-sky-500 mx-2 mt-2 size-10 flex items-center justify-center"
+                >
+                  {{ selectedIzin?.personelFullName![0] }}
+                </div>
                 <div>
                   <h3>{{ selectedIzin?.personelFullName }}</h3>
                   <p class="dark:text-neutral-400 text-neutral-500">

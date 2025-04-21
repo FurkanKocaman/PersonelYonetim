@@ -5,5 +5,5 @@ using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 namespace PersonelYonetim.Server.Application.Services;
 public interface IPDFService
 {
-    public byte[] CreateBordroPdf(PersonelGorevlendirme personelGorevlendirme, PersonelDetay personelDetay, Tenant tenant, MaasPusula maasPusula);
+    public  Task<byte[]> CreateBordroPdf(PersonelGorevlendirme personelGorevlendirme, PersonelDetay personelDetay, Tenant tenant, MaasPusula maasPusula);
 }

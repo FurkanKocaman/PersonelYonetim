@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Azure.Core;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -20,6 +21,7 @@ using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Roller;
 using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Domain.RoleClaim;
+using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Controllers;
 
@@ -35,6 +37,7 @@ public class AppODataController(
         ODataConventionModelBuilder builder = new();
         builder.EnableLowerCamelCase();
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
+        builder.EntitySet<PersonelDetaylarGetQueryResponse>("personel-detaylar");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<RoleGetAllQueryResponse>("roller");
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
@@ -69,6 +72,14 @@ public class AppODataController(
     {
         var response = await sender.Send(new PersonelGetAllQuery(KurumsalBirimId), cancellationToken);
 
+        return response;
+    }
+
+    [HttpGet("personel-detaylar")]
+    [Authorize()]
+    public async Task<IQueryable<PersonelDetaylarGetQueryResponse>> GetPersonelDetaylar(Guid? personelId, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new PersonelDetaylarGetQuery(personelId), cancellationToken);
         return response;
     }
 
@@ -215,6 +226,14 @@ public class AppODataController(
     public async Task<IQueryable<KurumsalBirimGetAllQueryResponse>> GetKurumsalBirimler(CancellationToken cancellationToken)
     {
         var response = await sender.Send(new KurumsalBirimGetAllQuery(), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("ust-birimler")]
+    [Authorize()]
+    public async Task<Result<List<UstBirimDto>>> GetUstBirimler(Guid BirimTipiId, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new KurumsalBirimGetUstBirimler(BirimTipiId), cancellationToken);
         return response;
     }
 

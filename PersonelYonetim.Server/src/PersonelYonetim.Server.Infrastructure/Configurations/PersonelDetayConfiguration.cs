@@ -13,22 +13,15 @@ internal class PersonelDetayConfiguration : IEntityTypeConfiguration<PersonelDet
     public void Configure(EntityTypeBuilder<PersonelDetay> builder)
     {
         builder.Property(p => p.TCKN).HasColumnType("varchar(11)");
-        builder.Property(p => p.NufusIl).HasColumnType("varchar(50)");
-        builder.Property(p => p.NufusIlce).HasColumnType("varchar(50)");
         builder.Property(p => p.AnaAdi).HasColumnType("varchar(50)");
         builder.Property(p => p.BabaAdi).HasColumnType("varchar(50)");
         builder.Property(p => p.DogumYeri).HasColumnType("varchar(50)");
         builder.Property(p => p.MedeniHali).HasColumnType("varchar(20)");
-        builder.Property(p => p.Cinsiyet).HasColumnType("varchar(10)");
         builder.Property(p => p.Uyruk).HasColumnType("varchar(30)");
 
-        builder.Property(p => p.CepTelefonu).HasColumnType("varchar(20)");
         builder.Property(p => p.IsTelefonu).HasColumnType("varchar(20)");
-        builder.Property(p => p.Eposta).HasColumnType("varchar(100)");
         builder.Property(p => p.EpostaIs).HasColumnType("varchar(100)");
-        builder.Property(p => p.Adres).HasColumnType("varchar(250)");
-        builder.Property(p => p.IkametIl).HasColumnType("varchar(50)");
-        builder.Property(p => p.IkametIlce).HasColumnType("varchar(50)");
+       
         builder.Property(p => p.PostaKodu).HasColumnType("varchar(10)");
 
         builder.Property(p => p.EgitimDurumu).HasColumnType("varchar(50)");

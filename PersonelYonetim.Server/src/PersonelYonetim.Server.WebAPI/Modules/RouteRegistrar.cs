@@ -21,5 +21,6 @@ public static class RouteRegistrar
         app.RegisterBordroRoutes();
         app.RegisterpersonelDetayRoutes();
         app.RegisterMaasPusulaRoutes();
+        app.RegisterKurumsalBirimTipiRoutes();
     }
 }

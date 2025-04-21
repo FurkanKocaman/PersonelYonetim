@@ -54,21 +54,6 @@ onMounted(() => {
         > -->
         <!-- <i class="fas fa-plus mr-2"></i> İzin Talebi Oluştur
         </button> -->
-        <button
-          v-if="route.name == 'Calisanlar'"
-          class="flex justify-center items-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-1 text-center me-2 mb-2 group dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
-        >
-          İşlemler
-          <svg class="size-7 fill-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M7 10L12 15L17 10"
-              class="stroke-blue-700 group-hover:stroke-white"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
       </div>
     </div>
 

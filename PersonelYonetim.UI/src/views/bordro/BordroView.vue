@@ -107,6 +107,9 @@ const aylar = [
 ];
 onMounted(() => {
   getAllBordro();
+  const today = new Date();
+  selectedYil.value = today.getFullYear();
+  selectedAy.value = today.getMonth() + 1;
 });
 
 const getAllBordro = async () => {

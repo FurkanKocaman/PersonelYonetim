@@ -15,6 +15,7 @@ public sealed class IzinTalepGetOnayBekleyenQueryResponse : EntityDto
 {
     public Guid PersonelId { get; set; }
     public string PersonelFullName { get; set; } = default!;
+    public string? AvatarUrl { get; set; }
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
     public DateTimeOffset MesaiBaslangicTarihi { get; set; }
@@ -89,6 +90,7 @@ IPersonelRepository personelRepository
                          Id = ituu.izinTalep.Id,
                          PersonelId = ituu.izinTalep.PersonelId,
                          PersonelFullName = ituu.izinTalep.Personel.FullName,
+                         AvatarUrl = ituu.izinTalep.Personel.AvatarUrl,
                          BaslangicTarihi = ituu.izinTalep.BaslangicTarihi,
                          BitisTarihi = ituu.izinTalep.BitisTarihi,
                          MesaiBaslangicTarihi = ituu.izinTalep.MesaiBaslangicTarihi,

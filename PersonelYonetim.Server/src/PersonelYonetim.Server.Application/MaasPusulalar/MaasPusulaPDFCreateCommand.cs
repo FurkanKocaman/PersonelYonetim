@@ -59,7 +59,7 @@ internal sealed class MaasPusulaPDFCreateCommandHandler(
         if (maasPusula is null)
             return Result<string>.Failure("Pusula bulunamamdı");
 
-        var pdfBytes = PDFService.CreateBordroPdf(personelGorevlendirme,personelDetay,tenant,maasPusula);
+        var pdfBytes = await PDFService.CreateBordroPdf(personelGorevlendirme,personelDetay,tenant,maasPusula);
 
         var fileName = $"{personelGorevlendirme.Personel.FullName}_Bordro_{DateTime.Now.Ticks}.pdf";
 

@@ -34,7 +34,7 @@ internal sealed class BordroCreateCommandHandler(
                 if (!userId.HasValue | !tenantId.HasValue)
                     return Result<string>.Failure("Şirket bulunamadı");
 
-                var personelGorevlendirmeler = await personelGorevlendirmeRepository.Where(p => p.TenantId == tenantId && !p.IsDeleted && p.BaslangicTarihi.Year <= request.Yil && p.BaslangicTarihi.Month <= request.Ay).ToListAsync();
+                var personelGorevlendirmeler = await personelGorevlendirmeRepository.Where(p => p.TenantId == tenantId && !p.IsDeleted && request.PersonelId != null ? request.PersonelId.Contains(p.Id) : true && p.BaslangicTarihi.Year <= request.Yil && p.BaslangicTarihi.Month <= request.Ay).ToListAsync();
 
                 var bordroDonem = await bordroDonemRepository.FirstOrDefaultAsync(b => b.TenantId == tenantId && b.Yil == request.Yil && b.Ay == request.Ay);
 
@@ -50,6 +50,13 @@ internal sealed class BordroCreateCommandHandler(
                     };
                     bordroDonemRepository.Add(bordroDonem);
                     await unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+
+                var oncekiBordroDonem = await bordroDonemRepository.Where(b => b.TenantId == tenantId && b.Yil == bordroDonem.Yil && b.Ay == bordroDonem.Ay - 1).Include(p => p.MaasPusulalar).FirstOrDefaultAsync();
+
+                if (request.Ay == 1)
+                {
+                    oncekiBordroDonem = null;
                 }
 
                 foreach (var personelGorevlendirme in personelGorevlendirmeler)
@@ -75,7 +82,7 @@ internal sealed class BordroCreateCommandHandler(
 
                         decimal SGKMatrahi = ToplamBrutKazanc;
                         decimal GelirVergisiMatrahi = ToplamBrutKazanc - SGKPrimiIsci - IssizlikPrimiIsci;
-                        decimal KumulatifGelirVergisiMatrahiOnceki = 0;
+                        decimal KumulatifGelirVergisiMatrahiOnceki = oncekiBordroDonem != null ? oncekiBordroDonem.MaasPusulalar.FirstOrDefault(p => p.PersonelId == personelGorevlendirme.PersonelId && p.TenantId == tenantId)!.KumulatifGelirVergisiMatrahiDonemSonu : 0;
                         decimal KumulatifGelirVergisiMatrahiDonemSonu = KumulatifGelirVergisiMatrahiOnceki + GelirVergisiMatrahi;
                         decimal HesaplananGelirVergisi = GelirVergisiMatrahi * 20 / 100; // gelir vergisi %20 olarak düşünüldü
                         decimal GelirVergisiIstisnasiUygulanan = 130;

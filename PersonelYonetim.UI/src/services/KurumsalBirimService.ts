@@ -66,10 +66,11 @@ class KurumsalBirimService {
         {
           params: {
             $count: true,
+            $expand: "KurumsalBirimler",
           },
         }
       );
-
+      console.log(response);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],

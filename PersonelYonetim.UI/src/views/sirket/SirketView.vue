@@ -3,14 +3,19 @@ import { onMounted, ref, type Ref } from "vue";
 import TableLayout from "@/components/TableLayout.vue";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { KurumsalBirimTipiGetModel } from "@/models/response-models/KurumsalBirimTipleriGetModel";
-import KurumsalBirimService from "@/services/KurumsalBirimService";
 import type { KurumsalBirimGetModel } from "@/models/response-models/KurumsalBirimGetModel";
 import KurumsalBirimCreateModal from "@/components/modals/KurumsalBirimCreateModal.vue";
+import KurumsalBirimTipiService from "@/services/KurumsalBirimTipiService";
+import KurumsalBirimTipiCreateModal from "@/components/modals/KurumsalBirimTipiCreateModal.vue";
 
 const expand = ref<Record<string, boolean>>({});
 const loading = ref<Record<string, boolean>>({});
 const count = ref<Record<string, number>>({});
 const showModal = ref<Record<string, boolean>>({});
+const showBirimTipiOption = ref<Record<string, boolean>>({});
+
+const yeniBirimTipHiyerarsiSeviyesi = ref(0);
+const showYeniBirimTipiCreateModal = ref(false);
 
 const kurumsalBirimTipleri: Ref<KurumsalBirimTipiGetModel[] | undefined> = ref([]);
 const selectedKurumsalBirimTipi: Ref<KurumsalBirimTipiGetModel | undefined> = ref(undefined);
@@ -28,27 +33,25 @@ onMounted(async () => {
 });
 
 const getKurumsalBirimTipleri = async () => {
-  const res = await KurumsalBirimService.kurumsalBirimTipleriGet();
+  const res = await KurumsalBirimTipiService.kurumsalBirimTipleriGet();
   kurumsalBirimTipleri.value = res?.items;
-  console.log(res);
   for (const item of res!.items) {
     const key = item.id;
-    console.log(expand.value);
     expand.value[key] = false;
     loading.value[key] = false;
     count.value[key] = 0;
     showModal.value[key] = false;
+    showBirimTipiOption.value[key] = false;
   }
 };
 
 function filteredkurumsalBirimler<T extends KurumsalBirimGetModel>(items: T[]) {
-  return items.map(({ id, ad, kod, personelCount, createdAt, createUserName, isActive }) => ({
+  return items.map(({ id, ad, kod, personelCount, createdAt, isActive }) => ({
     id,
     ad,
     kod,
     personelCount,
     createdAt: new Date(createdAt),
-    createUserName,
     isActive: isActive ? "Aktif" : "Pasif",
   }));
 }
@@ -62,10 +65,30 @@ function filteredkurumsalBirimler<T extends KurumsalBirimGetModel>(items: T[]) {
 //     paginationParamsSirket.value.pageNumber = pageNumber;
 //   }
 // };
+
+const deleteKurumsalBirimTipi = async (id: string) => {
+  const res = await KurumsalBirimTipiService.kurumsalBirimlerDelete(id);
+  console.log(res);
+  getKurumsalBirimTipleri();
+};
+
+const closeAllBirimTipiOptions = () => {
+  for (const item of kurumsalBirimTipleri.value!) {
+    const key = item.id;
+    showBirimTipiOption.value[key] = false;
+  }
+};
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div
+    class="flex flex-col h-full"
+    @click="
+      () => {
+        closeAllBirimTipiOptions();
+      }
+    "
+  >
     <div class="w-full mt-2 ml-5">
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
         Şirketteki birimleri buradan düzenleyebilirsiniz.
@@ -84,28 +107,57 @@ function filteredkurumsalBirimler<T extends KurumsalBirimGetModel>(items: T[]) {
                   kurumsalBirimTipi.ad
                 }}</span>
               </div>
-              <div class="flex items-center"></div>
-              <svg
-                class="size-4 group hover:cursor-pointer"
-                viewBox="0 0 16 16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M8 12C9.10457 12 10 12.8954 10 14C10 15.1046 9.10457 16 8 16C6.89543 16 6 15.1046 6 14C6 12.8954 6.89543 12 8 12Z"
-                  class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
-                />
-                <path
-                  d="M8 6C9.10457 6 10 6.89543 10 8C10 9.10457 9.10457 10 8 10C6.89543 10 6 9.10457 6 8C6 6.89543 6.89543 6 8 6Z"
-                  class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
-                />
-                <path
-                  d="M10 2C10 0.89543 9.10457 -4.82823e-08 8 0C6.89543 4.82823e-08 6 0.895431 6 2C6 3.10457 6.89543 4 8 4C9.10457 4 10 3.10457 10 2Z"
-                  class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
-                />
-              </svg>
+              <div class="relative flex items-center">
+                <svg
+                  class="size-4 group hover:cursor-pointer"
+                  viewBox="0 0 16 16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  @click.stop="
+                    showBirimTipiOption[kurumsalBirimTipi.id] =
+                      !showBirimTipiOption[kurumsalBirimTipi.id]
+                  "
+                >
+                  <path
+                    d="M8 12C9.10457 12 10 12.8954 10 14C10 15.1046 9.10457 16 8 16C6.89543 16 6 15.1046 6 14C6 12.8954 6.89543 12 8 12Z"
+                    class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
+                  />
+                  <path
+                    d="M8 6C9.10457 6 10 6.89543 10 8C10 9.10457 9.10457 10 8 10C6.89543 10 6 9.10457 6 8C6 6.89543 6.89543 6 8 6Z"
+                    class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
+                  />
+                  <path
+                    d="M10 2C10 0.89543 9.10457 -4.82823e-08 8 0C6.89543 4.82823e-08 6 0.895431 6 2C6 3.10457 6.89543 4 8 4C9.10457 4 10 3.10457 10 2Z"
+                    class="dark:fill-neutral-500 fill-neutral-800 dark:group-hover:fill-neutral-200 group-hover:fill-neutral-500"
+                  />
+                </svg>
+                <div
+                  v-if="showBirimTipiOption[kurumsalBirimTipi.id]"
+                  class="absolute mt-30 flex flex-col items-start bg-neutral-200 dark:bg-neutral-700 rounded-md p-2 z-20"
+                >
+                  <button
+                    class="hover:bg-neutral-400 dark:hover:bg-neutral-600 px-2 py-1 cursor-pointer rounded-md"
+                  >
+                    Düzenle
+                  </button>
+                  <button
+                    class="hover:bg-red-600 hover:text-white w-full text-start px-2 py-1 cursor-pointer rounded-md"
+                    @click="deleteKurumsalBirimTipi(kurumsalBirimTipi.id)"
+                  >
+                    Sil
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flex items-center gap-2 group hover:cursor-pointer mx-20">
+          <div
+            class="flex items-center gap-2 group hover:cursor-pointer mx-20"
+            @click="
+              () => {
+                yeniBirimTipHiyerarsiSeviyesi = kurumsalBirimTipi.hiyerarsiSeviyesi + 1;
+                showYeniBirimTipiCreateModal = true;
+              }
+            "
+          >
             <hr class="flex-grow border-t border-gray-400 group-hover:border-blue-600" />
             <span class="text-gray-600 group-hover:text-blue-600">+</span>
             <hr class="flex-grow border-t border-gray-400 group-hover:border-blue-600" />
@@ -198,12 +250,25 @@ function filteredkurumsalBirimler<T extends KurumsalBirimGetModel>(items: T[]) {
             v-if="showModal[kurumsalBirimTipi.id]"
             @refresh="getKurumsalBirimTipleri()"
           />
+          <KurumsalBirimTipiCreateModal
+            v-if="showYeniBirimTipiCreateModal"
+            @close-modal="
+              (p) => {
+                showYeniBirimTipiCreateModal = false;
+              }
+            "
+            :hiyerarsi-seviyesi="yeniBirimTipHiyerarsiSeviyesi"
+            :edit-mode="false"
+            :birim-tipi="undefined"
+            @refresh="getKurumsalBirimTipleri()"
+          />
           <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
             <TableLayout
               v-if="expand[kurumsalBirimTipi.ad] && !loading[kurumsalBirimTipi.ad]"
               :tableHeaders="[
                 { key: 'ad', value: 'Ad' },
                 { key: 'personelCount', value: 'Personel' },
+                { key: 'createdAt', value: 'Oluşturulma Tarihi' },
                 { key: 'isActive', value: 'Durum' },
               ]"
               :tableContent="filteredkurumsalBirimler(kurumsalBirimTipi.kurumsalBirimler)"

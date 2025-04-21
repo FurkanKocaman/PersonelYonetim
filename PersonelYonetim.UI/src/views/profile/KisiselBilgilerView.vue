@@ -1,133 +1,177 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
-// profilim kısmı
-const personel = {
-  adSoyad: "Erkan Demir",
-  unvan: "Yazılım Personeli",
-  departman: "Yazılım Üretim",
-  iseBaslamaTarihi: "2 Ağustos 2019",
-  sozlesmeTuru: "Süresiz",
-  calismaSuresi: "5 yıl 7 ay 21 gün",
-  sozlesmeBitisTarihi: null,
-  pozisyonBaslamaTarihi: "8 Ağustos 2024",
-  calismaSekli: "Tam zamanlı",
-  sirket: "ELASOFT YAZILIM VE BİLİŞİM TEKNOLOJİLERİ SAN.TİC.LTD.ŞTİ",
-  yonetici: {
-    adSoyad: "Adil Mert Şahin",
-    unvan: "Yazılım Müdürü",
-    resim:
-      "https://www.indir.com/haber/wp-content/uploads/2021/11/anonimsinde-hesaba-profil-fotografi-nasil-eklenir-.jpg",
-  },
-  iletisim: {
-    isEposta: "erkan.demir@elasoft.com.tr",
-    isTelefon: null,
-    kisiselEposta: "",
-    kisiselTelefon: "+90 551 159 19 57",
-  },
-  vatandaslik: {
-    dogumTarihi: "1 Mayıs 1989",
-    cinsiyet: "Erkek",
-    engelDerecesi: null,
-    uyrugu: "Türkiye",
-    kimlikNumarasi: "41557015086",
-    askerlikDurumu: "Tamamlandı",
-  },
-  egitim: {
-    egitimDurumu: "Mezun",
-    enYuksekEgitim: "Yüksek Lisans",
-    sonEgitimKurumu: null,
-  },
-  acilDurum: {
-    adSoyad: null,
-    telefon: null,
-    yakinlikDerece: null,
-  },
-  aile: {
-    medeniHal: "Evli",
-    esCalismaDurumu: null,
-    cocukSayisi: null,
-  },
-  adres: {
-    adres: "Aydınlıkevler mah. Hasan Paşa cad. kardeşler apt. sitesi no:74 iç kapı no:3 ortahisar",
-    adresDevam: null,
-    sehir: "Trabzon",
-    ulke: "Türkiye",
-    telefon: null,
-    postaKodu: "61000",
-  },
-  bankaHesabi: {
-    bankaAdi: null,
-    hesapTipi: null,
-    hesapNumarasi: null,
-    iban: "TR780001001225565740685001",
-  },
-};
-
-const iletisimForm = ref(false);
-const personelEmail = ref("");
-const personelTelefon = ref(personel.iletisim.kisiselTelefon);
-
-const iletisimFormKaydet = () => {
-  personel.iletisim.kisiselTelefon = personelTelefon.value;
-  personel.iletisim.kisiselEposta = personelEmail.value;
-  iletisimForm.value = false;
-};
-
-const acilDurumForm = ref(false);
-const acilDurumAdSoyad = ref(personel.acilDurum.adSoyad);
-const acilDurumTelefon = ref(personel.acilDurum.telefon);
-const acilDurumYakinlikDerecesi = ref(personel.acilDurum.yakinlikDerece);
-
-const acilDurumFormKaydet = () => {
-  personel.acilDurum.adSoyad = acilDurumAdSoyad.value;
-  personel.acilDurum.telefon = acilDurumTelefon.value;
-  personel.acilDurum.yakinlikDerece = acilDurumYakinlikDerecesi.value;
-  acilDurumForm.value = false;
-};
-
-const aileForm = ref(false);
-const aileMedeniHal = ref(personel.aile.medeniHal);
-const aileEsCalismaDurumu = ref(personel.aile.esCalismaDurumu);
-const aileCocoukSayisi = ref(personel.aile.cocukSayisi);
-
-const aileFormKaydet = () => {
-  personel.aile.medeniHal = aileMedeniHal.value;
-  personel.aile.esCalismaDurumu = aileEsCalismaDurumu.value;
-  personel.aile.cocukSayisi = aileCocoukSayisi.value;
-  aileForm.value = false;
-};
-
-const bankaForm = ref(false);
-const bankaAdi = ref(personel.bankaHesabi.bankaAdi);
-const bankaHesapTipi = ref(personel.bankaHesabi.hesapTipi);
-const bankaHesapNumarasi = ref(personel.bankaHesabi.hesapNumarasi);
-const bankaIBAN = ref(personel.bankaHesabi.iban);
-
-const bankaFormKaydet = () => {
-  personel.bankaHesabi.bankaAdi = bankaAdi.value;
-  personel.bankaHesabi.hesapTipi = bankaHesapTipi.value;
-  personel.bankaHesabi.hesapNumarasi = bankaHesapNumarasi.value;
-  personel.bankaHesabi.iban = bankaIBAN.value;
-  bankaForm.value = false;
-};
+import type { PersonelDetayUpdateModel } from "@/models/request-models/PersonelDetayUpdateModel";
+import type { PersonelDetaylarGetModel } from "@/models/response-models/PersonelDetaylarGetModel";
+import PersonelService from "@/services/PersonelService";
+import { onMounted, reactive, ref } from "vue";
 
 const vatandaslikForm = ref(false);
-const vatandaslikDogumTarihi = ref(personel.vatandaslik.dogumTarihi);
-const vatandaslikCinsiyet = ref(personel.vatandaslik.cinsiyet);
-const vatandaslikEngelDerecisi = ref(personel.vatandaslik.engelDerecesi);
-const vatandaslikUyruk = ref(personel.vatandaslik.uyrugu);
-const vatandaslikKimlikNumarasi = ref(personel.vatandaslik.kimlikNumarasi);
-const vatandaslikAskerlikDurumu = ref(personel.vatandaslik.askerlikDurumu);
+const aileForm = ref(false);
+const bankaForm = ref(false);
+const iletisimForm = ref(false);
+const acilDurumForm = ref(false);
 
-const vatandaslikFormKaydet = () => {
-  personel.vatandaslik.dogumTarihi = vatandaslikDogumTarihi.value;
-  personel.vatandaslik.cinsiyet = vatandaslikCinsiyet.value;
-  personel.vatandaslik.engelDerecesi = vatandaslikEngelDerecisi.value;
-  personel.vatandaslik.uyrugu = vatandaslikUyruk.value;
-  personel.vatandaslik.kimlikNumarasi = vatandaslikKimlikNumarasi.value;
-  personel.vatandaslik.askerlikDurumu = vatandaslikAskerlikDurumu.value;
-  vatandaslikForm.value = false;
+const personel: PersonelDetaylarGetModel = reactive({
+  id: "",
+  personelId: "",
+  fullName: "",
+  avatarUrl: undefined,
+  iletisim: {
+    eposta: "",
+    telefon: "",
+  },
+  adres: {
+    ulke: "",
+    sehir: "",
+    ilce: "",
+    tamAdres: "",
+  },
+  kurumsalBirimAd: "",
+  pozisyonAd: "",
+  gorevlendirmeTipi: "",
+  calismaSekli: "",
+  yoneticiAd: undefined,
+  yoneticiPozisyon: undefined,
+  baslangicTarih: undefined,
+  bitisTarih: undefined,
+
+  // Kimlik Bilgileri
+  tckn: undefined,
+  nufusIl: undefined,
+  nufusIlce: undefined,
+  anaAdi: undefined,
+  babaAdi: undefined,
+  dogumYeri: undefined,
+  dogumTarihi: new Date().toISOString(),
+  medeniHali: undefined,
+  cinsiyet: undefined,
+  uyruk: undefined,
+
+  // İletişim Bilgileri
+  isTelefonu: undefined,
+  epostaIs: undefined,
+  postaKodu: undefined,
+
+  // Eğitim Bilgileri
+  egitimDurumu: undefined,
+  mezuniyetOkulu: undefined,
+  mezuniyetBolumu: undefined,
+  mezuniyetTarihi: undefined,
+
+  // Askerlik Bilgileri
+  askerlikDurumu: undefined,
+  askerlikTarihi: undefined,
+
+  // Ehliyet Bilgileri
+  ehliyetSinifi: undefined,
+  ehliyetVerilisTarihi: undefined,
+
+  // Sağlık Bilgileri
+  engelliMi: false,
+  engelOrani: undefined,
+  saglikDurumu: undefined,
+  kanGrubu: undefined,
+
+  // Acil Durum Bilgileri
+  acilDurumKisiAdi: undefined,
+  acilDurumKisiTelefon: undefined,
+  acilDurumKisiYakinlik: undefined,
+
+  // Aile Bilgileri
+  cocukSayisi: undefined,
+  esCalisiyorMu: undefined,
+
+  // Banka Bilgileri
+  bankaAdi: undefined,
+  iban: undefined,
+
+  // Diğer
+  notlar: undefined,
+  tenantId: undefined,
+
+  isActive: true,
+  createdAt: new Date(),
+  createUserId: undefined,
+  createUserName: undefined,
+  updateAt: undefined,
+  updateUserId: undefined,
+  isDeleted: false,
+  deleteAt: undefined,
+});
+const personelUpdateRequest: PersonelDetayUpdateModel = reactive({
+  id: "",
+  personelId: "",
+
+  // Kimlik Bilgileri
+  tckn: "",
+  nufusIl: "",
+  nufusIlce: "",
+  anaAdi: "",
+  babaAdi: "",
+  dogumYeri: "",
+  dogumTarihi: undefined,
+  medeniHali: "",
+  cinsiyet: "",
+  uyruk: "",
+
+  // İletişim Bilgileri
+  cepTelefonu: "",
+  isTelefonu: "",
+  eposta: "",
+  epostaIs: "",
+  adres: "",
+  ikametIl: "",
+  ikametIlce: "",
+  postaKodu: "",
+
+  // Eğitim Bilgileri
+  egitimDurumu: "",
+  mezuniyetOkulu: "",
+  mezuniyetBolumu: "",
+  mezuniyetTarihi: undefined,
+
+  // Askerlik Bilgileri
+  askerlikDurumu: "",
+  askerlikTarihi: undefined,
+
+  // Ehliyet Bilgileri
+  ehliyetSinifi: "",
+  ehliyetVerilisTarihi: undefined,
+
+  // Sağlık Bilgileri
+  engelliMi: false,
+  engelOrani: 0,
+  saglikDurumu: "",
+  kanGrubu: "",
+
+  // Acil Durum Bilgileri
+  acilDurumKisiAdi: "",
+  acilDurumKisiTelefon: "",
+  acilDurumKisiYakinlik: "",
+
+  // Aile Bilgileri
+  cocukSayisi: 0,
+  esCalisiyorMu: false,
+
+  // Banka Bilgileri
+  bankaAdi: "",
+  iban: "",
+
+  // Diğer
+  notlar: "",
+});
+
+// const apiUrl = ref(import.meta.env.VITE_API_URL);
+
+onMounted(async () => {
+  const res = await PersonelService.getPersonelDetaylar();
+  Object.assign(personel, res);
+  Object.assign(personelUpdateRequest, res);
+  console.log(personelUpdateRequest);
+});
+
+const personelDetayUpdate = async () => {
+  Object.assign(personelUpdateRequest, personel);
+  await PersonelService.updatePersonelDetaylar(personelUpdateRequest);
 };
 </script>
 
@@ -138,7 +182,7 @@ const vatandaslikFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Vatandaşlık</h2>
-          <button @click="vatandaslikForm = true">
+          <button @click="vatandaslikForm = !vatandaslikForm">
             <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1"></i>
           </button>
         </div>
@@ -151,14 +195,14 @@ const vatandaslikFormKaydet = () => {
             </div>
             <div class="flex-1">
               <p class="text-sm">Cinsiyet</p>
-              <p class="text-sm">{{ personel.vatandaslik.cinsiyet }}</p>
+              <p class="text-sm">{{ personel.cinsiyet }}</p>
             </div>
           </div>
 
           <!-- Engel Derecesi -->
           <div>
             <p class="text-sm">Engel Derecesi</p>
-            <p class="">{{ personel.vatandaslik.engelDerecesi || "—" }}</p>
+            <p class="">{{ personel.engelOrani || "—" }}</p>
           </div>
 
           <hr class="my-4 border-gray-300 dark:border-gray-600" />
@@ -167,12 +211,12 @@ const vatandaslikFormKaydet = () => {
           <div class="flex justify-between w-full">
             <div class="flex-1">
               <p class="text-sm">Uyruğu</p>
-              <p class="text-sm">{{ personel.vatandaslik.uyrugu }}</p>
+              <p class="text-sm">{{ personel.uyruk ?? "-" }}</p>
             </div>
             <div class="flex-1">
               <div>
                 <p class="text-sm">Kimlik Numarası</p>
-                <p class="text-sm">11111111111</p>
+                <p class="text-sm">{{ personel.tckn ?? "-" }}</p>
               </div>
               <br />
             </div>
@@ -181,7 +225,7 @@ const vatandaslikFormKaydet = () => {
           <!-- Askerlik Durumu -->
           <div>
             <p class="text-sm">Askerlik Durumu</p>
-            <p class="text-sm">{{ personel.vatandaslik.askerlikDurumu }}</p>
+            <p class="text-sm">{{ personel.askerlikDurumu ?? "-" }}</p>
           </div>
         </div>
       </div>
@@ -195,18 +239,18 @@ const vatandaslikFormKaydet = () => {
           <div class="flex justify-between">
             <div class="flex-1">
               <p class="text-base">Eğitim Durumu</p>
-              <p class="text-sm">{{ personel.egitim.egitimDurumu }}</p>
+              <p class="text-sm">{{ personel.egitimDurumu ?? "-" }}</p>
             </div>
             <div class="flex-1">
-              <p class="text-base">Tamamlanan En Yüksek Eğitim Seviyesi</p>
-              <p class="text-sm">{{ personel.egitim.enYuksekEgitim }}</p>
+              <p class="text-base">Mezun Olunan Bölüm</p>
+              <p class="text-sm">{{ personel.mezuniyetBolumu ?? "-" }}</p>
             </div>
           </div>
           <br />
 
           <div>
             <p class="text-sm">Son Tamamlanan Eğitim Kurumu</p>
-            <p class="">{{ personel.egitim.sonEgitimKurumu || "—" }}</p>
+            <p class="">{{ personel.mezuniyetOkulu || "—" }}</p>
           </div>
         </div>
       </div>
@@ -215,7 +259,7 @@ const vatandaslikFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mb-5 mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Aile</h2>
-          <button @click="aileForm = true">
+          <button @click="aileForm = !aileForm">
             <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1"></i>
           </button>
         </div>
@@ -226,18 +270,18 @@ const vatandaslikFormKaydet = () => {
           <div class="flex justify-between">
             <div class="flex-1">
               <p class="text-base">Medeni Hal</p>
-              <p class="text-sm">{{ "—" }}</p>
+              <p class="text-sm">{{ personel.medeniHali ?? "—" }}</p>
             </div>
             <div class="flex-1">
               <p class="text-base">Eş Çalışma Durumu</p>
-              <p class="text-sm">{{ personel.aile.esCalismaDurumu || "—" }}</p>
+              <p class="text-sm">{{ personel.esCalisiyorMu || "—" }}</p>
             </div>
           </div>
 
           <br />
           <div>
             <p class="text-base">Çocuk Sayısı</p>
-            <p class="text-sm">{{ personel.aile.cocukSayisi || "—" }}</p>
+            <p class="text-sm">{{ personel.cocukSayisi || "—" }}</p>
           </div>
         </div>
       </div>
@@ -257,7 +301,7 @@ const vatandaslikFormKaydet = () => {
 
           <div>
             <p class="text-base">Adres (devam)</p>
-            <p class="text-base">{{ personel.adres.adresDevam || "—" }}</p>
+            <p class="text-base">{{ personel.adres.tamAdres || "—" }}</p>
           </div>
           <div class="flex">
             <div class="flex flex-col justify-start">
@@ -267,7 +311,7 @@ const vatandaslikFormKaydet = () => {
               </div>
               <div class="mt-3">
                 <p class="text-base">Posta Kodu</p>
-                <p class="text-sm">{{ personel.adres.postaKodu || "—" }}</p>
+                <p class="text-sm">{{ personel.postaKodu || "—" }}</p>
               </div>
             </div>
             <div class="flex flex-col justify-start ml-[10rem]">
@@ -277,7 +321,7 @@ const vatandaslikFormKaydet = () => {
               </div>
               <div class="mt-3">
                 <p class="text-base">Telefon</p>
-                <p class="text-sm">{{ personel.adres.telefon || "—" }}</p>
+                <p class="text-sm">{{ personel.iletisim.telefon || "—" }}</p>
               </div>
             </div>
           </div>
@@ -288,7 +332,7 @@ const vatandaslikFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Banka Hesabı</h2>
-          <button @click="bankaForm = true">
+          <button @click="bankaForm = !bankaForm">
             <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1"></i>
           </button>
         </div>
@@ -298,22 +342,22 @@ const vatandaslikFormKaydet = () => {
           <div class="flex justify-between flex-col">
             <div>
               <p class="text-sm">Banka Adı</p>
-              <p class="text-sm">{{ personel.bankaHesabi.bankaAdi || "—" }}</p>
+              <p class="text-sm">{{ personel.bankaAdi || "—" }}</p>
             </div>
-            <div class="mt-5">
+            <!-- <div class="mt-5">
               <p class="text-sm">Hesap Tipi</p>
               <p class="text-sm">{{ personel.bankaHesabi.hesapTipi || "—" }}</p>
-            </div>
+            </div> -->
           </div>
 
           <div class="flex justify-between flex-col">
-            <div>
+            <!-- <div>
               <p class="text-sm">Hesap Numarası</p>
-              <p class="text-sm">{{ personel.bankaHesabi.hesapNumarasi || "—" }}</p>
-            </div>
+              <p class="text-sm">{{ personel.iban || "—" }}</p>
+            </div> -->
             <div class="">
               <p class="text-sm">IBAN</p>
-              <p class="text-sm">{{ "—" }}</p>
+              <p class="text-sm">{{ personel.iban ?? "—" }}</p>
             </div>
           </div>
         </div>
@@ -324,7 +368,7 @@ const vatandaslikFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 p-4 md:my-5 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">İletişim</h2>
-          <button @click="iletisimForm = true">
+          <button @click="iletisimForm = !iletisimForm">
             <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1"></i>
           </button>
         </div>
@@ -337,7 +381,7 @@ const vatandaslikFormKaydet = () => {
             ></i>
             <div class="flex-1">
               <p class="text-sm">E-Posta (Kişisel)</p>
-              <p class="text-blue-600 font-medium">{{ personel.iletisim.kisiselEposta || "—" }}</p>
+              <p class="text-blue-600 font-medium">{{ personel.iletisim.eposta || "—" }}</p>
             </div>
           </div>
           <hr class="my-4 border-gray-300 dark:border-gray-600" />
@@ -350,7 +394,7 @@ const vatandaslikFormKaydet = () => {
             ></i>
             <div class="flex-1">
               <p class="text-sm">Telefon (Kişisel)</p>
-              <p class="text-blue-600 font-medium">{{ personel.iletisim.kisiselTelefon || "—" }}</p>
+              <p class="text-blue-600 font-medium">{{ personel.iletisim.telefon || "—" }}</p>
             </div>
           </div>
         </div>
@@ -361,7 +405,7 @@ const vatandaslikFormKaydet = () => {
       <div class="bg-neutral-100 dark:bg-neutral-800 p-4 mt-4 rounded-lg shadow-md mx-2">
         <div class="flex justify-between items-center mb-2">
           <h2 class="text-lg font-semibold">Acil Durum</h2>
-          <button @click="acilDurumForm = true">
+          <button @click="acilDurumForm = !acilDurumForm">
             <i class="fa-solid fa-pen cursor-pointer" style="color: #3562b1"></i>
           </button>
         </div>
@@ -374,16 +418,16 @@ const vatandaslikFormKaydet = () => {
 
           <div>
             <p class="text-sm">Adı Soyadı</p>
-            <p class="">{{ personel.acilDurum.adSoyad || "—" }}</p>
+            <p class="">{{ personel.acilDurumKisiAdi || "—" }}</p>
           </div>
 
           <div>
             <p class="text-sm">Telefon</p>
-            <p class="">{{ personel.acilDurum.telefon || "—" }}</p>
+            <p class="">{{ personel.acilDurumKisiTelefon || "—" }}</p>
           </div>
           <div>
             <p class="text-sm">Yakınlık Derecesi</p>
-            <p class="">{{ personel.acilDurum.yakinlikDerece || "—" }}</p>
+            <p class="">{{ personel.acilDurumKisiYakinlik || "—" }}</p>
           </div>
         </div>
       </div>
@@ -404,8 +448,8 @@ const vatandaslikFormKaydet = () => {
             <label class="block text-sm font-semibold mb-1">Doğum Tarihi</label>
             <input
               disabled
-              v-model="vatandaslikDogumTarihi"
               type="text"
+              v-model="personel.dogumTarihi"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             />
           </div>
@@ -414,8 +458,8 @@ const vatandaslikFormKaydet = () => {
 
             <select
               disabled
-              v-model="vatandaslikCinsiyet"
               id="vatandaslikCinsiyet"
+              v-model="personel.cinsiyet"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             >
               <option value="">—</option>
@@ -429,15 +473,15 @@ const vatandaslikFormKaydet = () => {
           <label class="block text-sm font-semibold mb-1">Engel Derecesi</label>
 
           <select
-            v-model="vatandaslikEngelDerecisi"
             id="engelDerece"
+            v-model="personel.engelOrani"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
           >
-            <option value="">—</option>
-            <option value="yok">yok</option>
-            <option value="1.derece">1.derece</option>
-            <option value="2.derece">2.derece</option>
-            <option value="3.derece">3.derece</option>
+            <option :value="null">yok</option>
+            <option value="%20">%20</option>
+            <option value="%40">%40</option>
+            <option value="%60">%60</option>
+            <option value="%80">%80</option>
           </select>
         </div>
         <hr class="my-4 border-gray-300 dark:border-gray-600" />
@@ -447,8 +491,8 @@ const vatandaslikFormKaydet = () => {
             <label class="block text-sm font-semibold mb-1">Uyruğu</label>
             <input
               disabled
-              v-model="vatandaslikUyruk"
               type="text"
+              v-model="personel.uyruk"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             />
           </div>
@@ -457,8 +501,8 @@ const vatandaslikFormKaydet = () => {
               <label class="block text-sm font-semibold mb-1">Kimlik Numarası</label>
               <input
                 disabled
-                v-model="vatandaslikKimlikNumarasi"
                 type="text"
+                v-model="personel.tckn"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
               />
             </div>
@@ -468,16 +512,11 @@ const vatandaslikFormKaydet = () => {
         <div>
           <label class="block text-sm font-semibold mb-1">Askerlik Durumu</label>
 
-          <select
-            disabled
-            v-model="vatandaslikAskerlikDurumu"
-            id="askerlik"
+          <input
+            type="text"
+            v-model="personel.askerlikDurumu"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
-          >
-            <option value="">—</option>
-            <option value="Tamamlandı">Tamamlandı</option>
-            <option value="Tamamlanmadı">Tamamlanmadı</option>
-          </select>
+          />
         </div>
 
         <br />
@@ -490,7 +529,12 @@ const vatandaslikFormKaydet = () => {
             İptal
           </button>
           <button
-            @click="vatandaslikFormKaydet"
+            @click="
+              () => {
+                personelDetayUpdate();
+                vatandaslikForm = false;
+              }
+            "
             class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
           >
             Kaydet
@@ -518,8 +562,8 @@ const vatandaslikFormKaydet = () => {
               class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100" -->
 
             <select
-              v-model="aileMedeniHal"
               id="seçenekler"
+              v-model="personel.medeniHali"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             >
               <option value="Evli">Evli</option>
@@ -532,13 +576,13 @@ const vatandaslikFormKaydet = () => {
             <label class="block text-sm font-semibold mb-1">Eş Çalışma Durumu</label>
 
             <select
-              v-model="aileEsCalismaDurumu"
               id="seçenekler"
+              v-model="personel.esCalisiyorMu"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             >
-              <option value="">—</option>
-              <option value="Çalışıyor">Çalışıyor</option>
-              <option value="Çalışmıyor">Çalışmıyor</option>
+              tion>
+              <option value="true">Çalışıyor</option>
+              <option value="false">Çalışmıyor</option>
             </select>
           </div>
         </div>
@@ -549,8 +593,8 @@ const vatandaslikFormKaydet = () => {
           >
           <input
             id="aileCocoukSayisi"
-            v-model="aileCocoukSayisi"
             type="text"
+            v-model="personel.cocukSayisi"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
           />
         </div>
@@ -564,7 +608,12 @@ const vatandaslikFormKaydet = () => {
             İptal
           </button>
           <button
-            @click="aileFormKaydet"
+            @click="
+              () => {
+                personelDetayUpdate();
+                aileForm = false;
+              }
+            "
             class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
           >
             Kaydet
@@ -586,43 +635,19 @@ const vatandaslikFormKaydet = () => {
           <div>
             <label class="block text-sm font-semibold mb-1">Banka Adı</label>
             <input
-              v-model="bankaAdi"
               type="text"
+              v-model="personel.bankaAdi"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold mb-1">Hesap Tipi</label>
-
-            <select
-              v-model="bankaHesapTipi"
-              id="seçenekler"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
-              style="height: 43px"
-            >
-              <option value="">—</option>
-              <option value="Vadesiz">Vadesiz</option>
-              <option value="Vadeli">Vadeli</option>
-              <option value="Çek">Çek</option>
-              <option value="Diğer">Diğer</option>
-            </select>
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label class="block text-sm font-semibold mb-1">Hesap Numarası</label>
-            <input
-              v-model="bankaHesapNumarasi"
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
-            />
-          </div>
-          <div>
             <label class="block text-sm font-semibold mb-1">IBAN</label>
             <input
-              v-model="bankaIBAN"
               type="text"
+              v-model="personel.iban"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             />
           </div>
@@ -638,7 +663,12 @@ const vatandaslikFormKaydet = () => {
             İptal
           </button>
           <button
-            @click="bankaFormKaydet"
+            @click="
+              () => {
+                personelDetayUpdate();
+                bankaForm = false;
+              }
+            "
             class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
           >
             Kaydet
@@ -663,7 +693,7 @@ const vatandaslikFormKaydet = () => {
               <label class="block text-sm font-semibold mb-1">E-Posta (İş)</label>
               <input
                 type="text"
-                value="erkan.demir@elasoft.com.tr"
+                v-model="personel.epostaIs"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                 disabled
               />
@@ -674,7 +704,7 @@ const vatandaslikFormKaydet = () => {
                 <span class="mx-2">🇹🇷</span>
                 <input
                   type="text"
-                  value=""
+                  v-model="personel.isTelefonu"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                   disabled
                 />
@@ -688,8 +718,8 @@ const vatandaslikFormKaydet = () => {
             <div>
               <label class="block text-sm font-semibold mb-1">E-Posta (Kişisel)</label>
               <input
-                v-model="personelEmail"
                 type="email"
+                v-model="personel.iletisim.eposta"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                 placeholder="E-posta (Kişisel)"
               />
@@ -698,8 +728,8 @@ const vatandaslikFormKaydet = () => {
               <label class="block text-sm font-semibold mb-1">Telefon (Kişisel)</label>
 
               <input
-                v-model="personelTelefon"
                 type="text"
+                v-model="personel.iletisim.telefon"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
                 placeholder="Telefon (Kişisel)"
               />
@@ -714,7 +744,12 @@ const vatandaslikFormKaydet = () => {
               İptal
             </button>
             <button
-              @click="iletisimFormKaydet"
+              @click="
+                () => {
+                  personelDetayUpdate();
+                  iletisimForm = false;
+                }
+              "
               class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
             >
               Kaydet
@@ -738,8 +773,8 @@ const vatandaslikFormKaydet = () => {
             <div>
               <label class="block text-sm font-semibold mb-1">Adı Soyadı</label>
               <input
-                v-model="acilDurumAdSoyad"
                 type="text"
+                v-model="personel.acilDurumKisiAdi"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
               />
             </div>
@@ -747,8 +782,8 @@ const vatandaslikFormKaydet = () => {
               <label class="block text-sm font-semibold mb-1">Telefon</label>
 
               <input
-                v-model="acilDurumTelefon"
                 type="text"
+                v-model="personel.acilDurumKisiTelefon"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
               />
             </div>
@@ -757,8 +792,8 @@ const vatandaslikFormKaydet = () => {
           <div>
             <label class="block text-sm font-semibold mb-1">Yakınlık Derecesi</label>
             <input
-              v-model="acilDurumYakinlikDerecesi"
               type="text"
+              v-model="personel.acilDurumKisiYakinlik"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
             />
           </div>
@@ -772,7 +807,12 @@ const vatandaslikFormKaydet = () => {
               İptal
             </button>
             <button
-              @click="acilDurumFormKaydet"
+              @click="
+                () => {
+                  personelDetayUpdate();
+                  acilDurumForm = false;
+                }
+              "
               class="text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
             >
               Kaydet

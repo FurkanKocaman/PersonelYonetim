@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { CalismaSekli, SozlesmeTuru } from "@/models/entity-models/UserModel";
-import type { PersonelItem } from "@/models/PersonelModels";
-import Roles from "@/models/Roles";
+import { CalismaSekli } from "@/models/entity-models/UserModel";
+import type { PersonelDetaylarGetModel } from "@/models/response-models/PersonelDetaylarGetModel";
 import PersonelService from "@/services/PersonelService";
+import dayjs from "dayjs";
+import "dayjs/locale/tr";
+dayjs.locale("tr");
 import { onMounted, reactive, ref } from "vue";
 
-const personel: PersonelItem = reactive({
+const personel: PersonelDetaylarGetModel = reactive({
   id: "",
-  ad: "",
-  soyad: "",
+  personelId: "",
   fullName: "",
-  dogumTarihi: new Date(),
-  cinsiyet: undefined,
-  profilResimUrl: undefined,
+  avatarUrl: undefined,
   iletisim: {
     eposta: "",
     telefon: "",
@@ -23,29 +22,75 @@ const personel: PersonelItem = reactive({
     ilce: "",
     tamAdres: "",
   },
-  yonetici: undefined,
+  kurumsalBirimAd: "",
+  pozisyonAd: "",
+  gorevlendirmeTipi: "",
+  calismaSekli: "",
+  yoneticiAd: undefined,
   yoneticiPozisyon: undefined,
-  sirketId: "",
-  sirketAd: "",
-  subeId: undefined,
-  subeAd: undefined,
-  departmanId: undefined,
-  departmanAd: undefined,
-  pozisyonId: undefined,
-  pozisyonAd: undefined,
-  calismaTakvimiId: undefined,
-  sozlesmeTuruValue: 0,
-  pozisyonBaslangicTarih: new Date(),
-  sozlesmeBitisTarihi: undefined,
-  izinKuralId: undefined,
-  role: 0,
+  baslangicTarih: undefined,
+  bitisTarih: undefined,
+
+  // Kimlik Bilgileri
+  tckn: undefined,
+  nufusIl: undefined,
+  nufusIlce: undefined,
+  anaAdi: undefined,
+  babaAdi: undefined,
+  dogumYeri: undefined,
+  dogumTarihi: new Date().toISOString(),
+  medeniHali: undefined,
+  cinsiyet: undefined,
+  uyruk: undefined,
+
+  // İletişim Bilgileri
+  isTelefonu: undefined,
+  epostaIs: undefined,
+  postaKodu: undefined,
+
+  // Eğitim Bilgileri
+  egitimDurumu: undefined,
+  mezuniyetOkulu: undefined,
+  mezuniyetBolumu: undefined,
+  mezuniyetTarihi: undefined,
+
+  // Askerlik Bilgileri
+  askerlikDurumu: undefined,
+  askerlikTarihi: undefined,
+
+  // Ehliyet Bilgileri
+  ehliyetSinifi: undefined,
+  ehliyetVerilisTarihi: undefined,
+
+  // Sağlık Bilgileri
+  engelliMi: false,
+  engelOrani: undefined,
+  saglikDurumu: undefined,
+  kanGrubu: undefined,
+
+  // Acil Durum Bilgileri
+  acilDurumKisiAdi: undefined,
+  acilDurumKisiTelefon: undefined,
+  acilDurumKisiYakinlik: undefined,
+
+  // Aile Bilgileri
+  cocukSayisi: undefined,
+  esCalisiyorMu: undefined,
+
+  // Banka Bilgileri
+  bankaAdi: undefined,
+  iban: undefined,
+
+  // Diğer
+  notlar: undefined,
+  tenantId: undefined,
+
   isActive: true,
   createdAt: new Date(),
-  createUserId: "",
+  createUserId: undefined,
   createUserName: undefined,
   updateAt: undefined,
   updateUserId: undefined,
-  updateUserName: undefined,
   isDeleted: false,
   deleteAt: undefined,
 });
@@ -53,7 +98,8 @@ const personel: PersonelItem = reactive({
 const apiUrl = ref(import.meta.env.VITE_API_URL);
 
 onMounted(async () => {
-  const res = await PersonelService.getCurrentPersonel();
+  const res = await PersonelService.getPersonelDetaylar();
+  console.log("RES", res);
   Object.assign(personel, res);
 });
 
@@ -88,14 +134,14 @@ const getCalismaSuresi = (startDateStr: string): string => {
             <h2 class="text-xl font-semibold">{{ personel.fullName }}</h2>
             <br />
             <p class="text-gray-600 dark:text-gray-300">
-              {{ personel.pozisyonAd || Roles.getRoleByValue(personel.role).name }}
+              {{ personel.pozisyonAd }}
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ personel.departmanAd }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ personel.kurumsalBirimAd }}</p>
           </div>
           <img
-            v-if="personel.profilResimUrl"
+            v-if="personel.avatarUrl"
             class="object-cover mx-2 size-20 rounded-full border-1 border-sky-500"
-            :src="apiUrl + personel.profilResimUrl"
+            :src="apiUrl + personel.avatarUrl"
             alt="Avatar"
             width="100"
             height="100"
@@ -104,7 +150,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
             v-else
             class="text-4xl font-semibold text-sky-600 transition-all duration-300 ease-in-out mx-2 rounded-full border-1 border-sky-500 w-16 h-16 flex items-center justify-center"
           >
-            {{ personel.fullName[0] }}
+            {{ personel.fullName![0] }}
           </div>
         </div>
 
@@ -114,33 +160,24 @@ const getCalismaSuresi = (startDateStr: string): string => {
           <div>
             <p class="text-gray-500 dark:text-gray-400">İşe Başlama Tarihi</p>
             <p class="font-medium">
-              {{
-                new Date(personel.pozisyonBaslangicTarih).toLocaleString("tr-TR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })
-              }}
+              {{ dayjs(personel.baslangicTarih).format("D MMMM YYYY ") }}
             </p>
           </div>
           <div>
             <p class="text-gray-500 dark:text-gray-400">Sözleşme Türü</p>
             <p class="font-medium">
-              {{ SozlesmeTuru.getSozlesmeByValue(personel.sozlesmeTuruValue).name }}
+              {{ personel.gorevlendirmeTipi }}
             </p>
           </div>
           <div>
             <p class="text-gray-500 dark:text-gray-400">Çalışma Süresi</p>
             <p class="font-medium">
-              {{ getCalismaSuresi(personel.pozisyonBaslangicTarih.toString()) }}
+              {{ getCalismaSuresi(personel.baslangicTarih!) }}
             </p>
           </div>
           <div>
             <p class="text-gray-500 dark:text-gray-400">Sözleşme Bitiş Tarihi</p>
-            <p class="font-medium">{{ personel.sozlesmeBitisTarihi || "—" }}</p>
+            <p class="font-medium">{{ personel.bitisTarih || "—" }}</p>
           </div>
         </div>
 
@@ -150,16 +187,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
           <div>
             <p class="text-gray-500 dark:text-gray-400">Pozisyon Başlama Tarihi</p>
             <p class="font-medium">
-              {{
-                new Date(personel.createdAt).toLocaleString("tr-TR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })
-              }}
+              {{ dayjs(personel.baslangicTarih).format("D MMMM YYYY ") }}
             </p>
           </div>
           <div>
@@ -168,16 +196,13 @@ const getCalismaSuresi = (startDateStr: string): string => {
           </div>
           <div class="col-span-2">
             <p class="text-gray-500 dark:text-gray-400">Şirket</p>
-            <p class="font-medium">{{ personel.sirketAd }}</p>
+            <p class="font-medium">{{ personel.kurumsalBirimAd }}</p>
           </div>
-          <div>
-            <p class="text-gray-500 dark:text-gray-400">Departman</p>
-            <p class="font-medium">{{ personel.departmanAd || "—" }}</p>
-          </div>
+
           <div>
             <p class="text-gray-500 dark:text-gray-400">Unvan</p>
             <p class="font-medium">
-              {{ personel.pozisyonAd || Roles.getRoleByValue(personel.role).name }}
+              {{ personel.pozisyonAd }}
             </p>
           </div>
         </div>
@@ -204,8 +229,10 @@ const getCalismaSuresi = (startDateStr: string): string => {
               class="w-10 h-10 rounded-full"
             />
             <div>
-              <p class="text-base font-medium">{{ personel.yonetici }}</p>
-              <p class="text-sm text-neutral-400 dark:text-neutral-400">Unvan</p>
+              <p class="text-base font-medium">{{ personel.yoneticiAd ?? "Bulunamamdı" }}</p>
+              <p class="text-sm text-neutral-400 dark:text-neutral-400">
+                {{ personel.yoneticiPozisyon ?? "Bulunamamdı" }}
+              </p>
             </div>
           </div>
         </div>
@@ -224,7 +251,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
               <i class="fa-solid fa-envelope" style="color: #3562b1"></i>
               <div class="flex-1">
                 <p class="text-sm">E-Posta (İş)</p>
-                <p class="text-blue-600 font-medium">{{ personel.iletisim.eposta }}</p>
+                <p class="text-blue-600 font-medium">{{ personel.epostaIs ?? "-" }}</p>
               </div>
             </div>
             <hr class="my-4 border-gray-300 dark:border-gray-600" />
@@ -233,7 +260,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
               <i class="fa-solid fa-phone" style="color: #3562b1"></i>
               <div class="flex-1">
                 <p class="text-sm">Telefon (İş)</p>
-                <p class="text-blue-600 font-medium">{{ "—" }}</p>
+                <p class="text-blue-600 font-medium">{{ personel.isTelefonu ?? "-" }}</p>
               </div>
             </div>
             <hr class="my-4 border-gray-300 dark:border-gray-600" />
@@ -247,7 +274,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
               <div class="flex-1">
                 <p class="text-sm">E-Posta (Kişisel)</p>
                 <p class="text-blue-600 font-medium">
-                  {{ "—" }}
+                  {{ personel.iletisim.eposta ?? "-" }}
                 </p>
               </div>
             </div>

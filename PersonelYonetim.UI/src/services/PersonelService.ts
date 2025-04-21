@@ -4,6 +4,8 @@ import { useToastStore } from "@/stores/ToastStore";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
 import type { PersonelCreateCommand } from "@/models/request-models/PersonelCreateCommand";
+import type { PersonelDetaylarGetModel } from "@/models/response-models/PersonelDetaylarGetModel";
+import type { PersonelDetayUpdateModel } from "@/models/request-models/PersonelDetayUpdateModel";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
@@ -77,9 +79,29 @@ class PersonelService {
   getCurrentPersonel = async (): Promise<PersonelItem | undefined> => {
     try {
       const response = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-current`);
+
       return response.data[0];
     } catch (error) {
       console.error(error);
+    }
+  };
+  getPersonelDetaylar = async (): Promise<PersonelDetaylarGetModel | undefined> => {
+    try {
+      const res = await api.get(`${import.meta.env.VITE_API_URL}/odata/personel-detaylar`);
+      return res.data.value[0];
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+  updatePersonelDetaylar = async (request: PersonelDetayUpdateModel): Promise<string> => {
+    try {
+      const res = await api.put(`${import.meta.env.VITE_API_URL}/personel-detay/update`, request);
+      useToastStore().addToast(res.data.data, "", "success", 5000, true);
+      return res.data.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
