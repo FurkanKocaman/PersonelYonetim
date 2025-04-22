@@ -229,11 +229,11 @@ public class AppODataController(
         return response;
     }
 
-    [HttpGet("ust-birimler")]
+    [HttpGet("ust-birimler/{birimTipiId}")]
     [Authorize()]
-    public async Task<Result<List<UstBirimDto>>> GetUstBirimler(Guid BirimTipiId, CancellationToken cancellationToken)
+    public async Task<Result<List<UstBirimDto>>> GetUstBirimler(Guid birimTipiId, CancellationToken cancellationToken)
     {
-        var response = await sender.Send(new KurumsalBirimGetUstBirimler(BirimTipiId), cancellationToken);
+        var response = await sender.Send(new KurumsalBirimGetUstBirimler(birimTipiId), cancellationToken);
         return response;
     }
 

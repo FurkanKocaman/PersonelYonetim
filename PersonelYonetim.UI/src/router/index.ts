@@ -86,7 +86,7 @@ const router = createRouter({
           path: "bordro",
           name: "Bordro",
           component: () => import("@/layouts/BordroLayout.vue"),
-          meta: { title: "Bordro" },
+          meta: { title: "Bordro", roleClaims: [RoleClaims.viewKurumsalYapi] },
           redirect: "/dashboard/bordro/calisanlar",
           children: [
             {

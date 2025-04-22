@@ -13,12 +13,14 @@ const loading = ref<Record<string, boolean>>({});
 const count = ref<Record<string, number>>({});
 const showModal = ref<Record<string, boolean>>({});
 const showBirimTipiOption = ref<Record<string, boolean>>({});
+const editMode = ref(false);
 
 const yeniBirimTipHiyerarsiSeviyesi = ref(0);
 const showYeniBirimTipiCreateModal = ref(false);
 
 const kurumsalBirimTipleri: Ref<KurumsalBirimTipiGetModel[] | undefined> = ref([]);
 const selectedKurumsalBirimTipi: Ref<KurumsalBirimTipiGetModel | undefined> = ref(undefined);
+const selectedKurumsalBirim: Ref<KurumsalBirimGetModel | undefined> = ref(undefined);
 
 const paginationParamsSirket: Ref<PaginationParams> = ref({
   count: 0,
@@ -56,10 +58,15 @@ function filteredkurumsalBirimler<T extends KurumsalBirimGetModel>(items: T[]) {
   }));
 }
 
-// const openBirimModal = (birim: KurumsalBirimModel) => {
-//   selectedKurumsalBirim.value = birim;
-//   showModal.value[birim.birimTipiId] = showModal.value[birim.birimTipiId];
-// };
+const openBirimModal = (birim: KurumsalBirimGetModel) => {
+  editMode.value = true;
+  selectedKurumsalBirim.value = kurumsalBirimTipleri.value
+    ?.find((p) => p.kurumsalBirimler.find((x) => x.id == birim.id))
+    ?.kurumsalBirimler.find((p) => p.id == birim.id);
+  if (selectedKurumsalBirim.value) {
+    showModal.value[selectedKurumsalBirim.value.birimTipiId] = true;
+  }
+};
 // const setPageNumber = (pageNumber: number) => {
 //   if (pageNumber != paginationParamsSirket.value.pageNumber) {
 //     paginationParamsSirket.value.pageNumber = pageNumber;
@@ -210,6 +217,8 @@ const closeAllBirimTipiOptions = () => {
                 class="cursor-pointer text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center me-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
                 @click.stop="
                   () => {
+                    selectedKurumsalBirim = undefined;
+                    editMode = false;
                     showModal[kurumsalBirimTipi.id] = !showModal[kurumsalBirimTipi.id];
                   }
                 "
@@ -246,6 +255,8 @@ const closeAllBirimTipiOptions = () => {
                 selectedKurumsalBirimTipi = undefined;
               }
             "
+            :birim="selectedKurumsalBirim"
+            :edit-mode="editMode"
             :selected-kurumsal-birim-tip="kurumsalBirimTipi.id"
             v-if="showModal[kurumsalBirimTipi.id]"
             @refresh="getKurumsalBirimTipleri()"
@@ -285,6 +296,7 @@ const closeAllBirimTipiOptions = () => {
                   : paginationParamsSirket.pageSize
               "
               :current-page="paginationParamsSirket.pageNumber"
+              @edit-click="openBirimModal"
             />
           </div>
         </div>

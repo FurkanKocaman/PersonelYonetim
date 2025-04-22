@@ -48,6 +48,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "money-bill-wave",
     active: false,
     path: "/dashboard/bordro/calisanlar",
+    roleClaims: [RoleClaims.viewKurumsalYapi],
   },
   {
     name: "Bordrolarım",

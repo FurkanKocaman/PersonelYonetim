@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PersonelYonetim.Server.Application.KurumsalBirimler;
 using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 using TS.Result;
 

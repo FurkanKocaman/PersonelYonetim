@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import SirketService from "@/services/SirketService";
-import { reactive, onMounted } from "vue";
+import { reactive, onMounted, type Ref, ref } from "vue";
 import type { KurumsalBirimModel } from "@/models/entity-models/KurumsalBirimModel";
 import type { KurumsalBirimCreateCommand } from "@/models/request-models/KurumsalBirimCreateCommand";
 import KurumsalBirimService from "@/services/KurumsalBirimService";
+import type { UstBirimDto } from "@/models/entity-models/UstBirimDto";
 
 const props = defineProps<{
   editMode?: boolean;
-  birim?: KurumsalBirimModel;
+  birim: KurumsalBirimModel | undefined;
   selectedKurumsalBirimTip: string;
 }>();
 
@@ -25,8 +25,11 @@ const request: KurumsalBirimCreateCommand = reactive(
       }
 );
 
+const ustBirimler: Ref<UstBirimDto[]> = ref([]);
+
 onMounted(() => {
   if (props.editMode && props.birim) {
+    console.log(props.birim);
     request.id = props.birim.id;
     request.ad = props.birim.ad;
     request.logoUrl = props.birim.logoUrl || undefined;
@@ -34,12 +37,25 @@ onMounted(() => {
     request.birimTipiId = props.birim.birimTipiId;
     request.ustBirimId = props.birim.ustBirimId;
   }
+
+  getUstBirimler();
 });
+
+const getUstBirimler = async () => {
+  const res = await KurumsalBirimService.getUstBirimler(props.selectedKurumsalBirimTip);
+  ustBirimler.value = res;
+  if (ustBirimler.value && !props.editMode) request.ustBirimId = ustBirimler.value[0].birimId;
+};
 
 const handleBirimCreate = async () => {
   try {
     if (props.editMode && props.birim) {
-      // await KurumsalBirimService.sirketlerUpdate(props.birim.id, request);
+      await KurumsalBirimService.birimUpdate(
+        props.birim.id,
+        request.ad,
+        request.kod,
+        request.ustBirimId
+      );
     } else {
       await KurumsalBirimService.birimCreate(request);
     }
@@ -52,7 +68,7 @@ const handleBirimCreate = async () => {
 
 const handleBirimDelete = async () => {
   if (props.birim) {
-    await SirketService.sirketlerDelete(props.birim.id);
+    await KurumsalBirimService.birimDelete(props.birim.id);
     emit("refresh");
     emit("closeModal", false);
   }
@@ -170,14 +186,18 @@ const handleBirimDelete = async () => {
                     class="block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
                     >Bağlı Olduğu üst birim (Opsiyonel)</label
                   >
-                  <input
-                    type="text"
-                    name="ustBirimId"
-                    id="ustBirimId"
+                  <select
                     v-model="request.ustBirimId"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
-                    placeholder=""
-                  />
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
+                  >
+                    <option
+                      v-for="birim in ustBirimler"
+                      :key="birim.birimId"
+                      :value="birim.birimId"
+                    >
+                      {{ birim.birimAd }}
+                    </option>
+                  </select>
                 </div>
                 <!-- <div class="mb-2 flex flex-col">
                   <label
@@ -268,7 +288,7 @@ const handleBirimDelete = async () => {
                 class="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
                 @click.stop="handleBirimDelete()"
               >
-                Şirketi sil
+                Birimi sil
               </button>
 
               <button

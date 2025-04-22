@@ -44,7 +44,7 @@ internal sealed class KurumsalBirimGetAllQueryhandler(
         }
 
 
-        var response = kurumsalBirimRepository.Where(p => p.TenantId == personel.TenantId).OrderBy(p => p.BirimTipi.HiyerarsiSeviyesi)
+        var response = kurumsalBirimRepository.Where(p => p.TenantId == personel.TenantId && !p.IsDeleted).OrderBy(p => p.BirimTipi.HiyerarsiSeviyesi)
                 .GroupJoin(userManager.Users,
                     birim => birim.CreateUserId,
                     createUser => createUser.Id,

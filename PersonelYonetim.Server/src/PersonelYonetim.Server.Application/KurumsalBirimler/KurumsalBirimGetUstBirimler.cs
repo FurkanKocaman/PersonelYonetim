@@ -34,7 +34,7 @@ internal sealed class KurumsalBirimGetUstBirimlerHandler(
         if (birimTipi is null)
             return Task.FromResult(Result<List<UstBirimDto>>.Failure("Birim tipi bulunamamdı"));
 
-        var kurumsalBirimler = kurumsalBirimRepository.Where(p => p.BirimTipi.HiyerarsiSeviyesi <= birimTipi.HiyerarsiSeviyesi && p.TenantId == tenantId)
+        var kurumsalBirimler = kurumsalBirimRepository.Where(p => p.BirimTipi.HiyerarsiSeviyesi <= birimTipi.HiyerarsiSeviyesi && p.TenantId == tenantId && !p.IsDeleted)
             .Include(p => p.BirimTipi)
             .Select(p => new UstBirimDto
             {

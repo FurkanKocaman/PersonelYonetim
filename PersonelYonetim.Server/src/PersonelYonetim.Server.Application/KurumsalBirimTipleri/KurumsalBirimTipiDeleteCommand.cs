@@ -6,7 +6,7 @@ using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
-namespace PersonelYonetim.Server.Application.KurumsalBirimler;
+namespace PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 public sealed record KurumsalBirimTipiDeleteCommand(
     Guid Id
     ) : IRequest<Result<string>>;
@@ -29,6 +29,13 @@ internal sealed class KurumsalBirimTipiDeleteCommandHandler(
         var birimTipi = await kurumsalBirimTipiRepository.WhereWithTracking(p => p.Id == request.Id && p.TenantId == tenantId).FirstOrDefaultAsync();
         if (birimTipi is null)
             return Result<string>.Failure("Birim tipi bulunamamdı");
+
+        var eskiTipler = await kurumsalBirimTipiRepository.WhereWithTracking(p => p.HiyerarsiSeviyesi >= birimTipi.HiyerarsiSeviyesi && p.TenantId == tenantId).ToListAsync();
+
+        foreach (var tip in eskiTipler)
+        {
+            tip.HiyerarsiSeviyesi -= 1;
+        }
 
         var birimler = await kurumsalBirimRepository.WhereWithTracking(p => p.BirimTipiId == birimTipi.Id && p.TenantId == tenantId).ToListAsync();
         var birimIdListesi = birimler.Select(b => b.Id).ToList();

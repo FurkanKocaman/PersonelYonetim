@@ -1,13 +1,10 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
-using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
-using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 public sealed record KurumsalBirimTipiGetAllQuery(
@@ -29,6 +26,7 @@ public sealed class KurumsalBirimDto
     public string? Kod { get; set; }
     public Guid BirimTipiId { get; set; }
     public string BirimTipiAd { get; set; } = default!;
+    public Guid? UstBirimId { get;set; }
     public int PersonelCount { get; set; }
     public bool IsActive { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
@@ -80,6 +78,7 @@ internal sealed class KurumsalBirimTipiGetAllQueryHandler(
                             Kod = p.Kod,
                             BirimTipiId = p.BirimTipiId,
                             BirimTipiAd = kuu.birimTipi.Ad,
+                            UstBirimId = p.UstBirimId,
                             PersonelCount = p.Gorevlendirmeler.Count(),
                             IsActive = p.IsActive,
                             CreatedAt = p.CreatedAt,
