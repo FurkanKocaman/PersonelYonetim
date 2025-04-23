@@ -28,8 +28,10 @@ const personel: PersonelDetaylarGetModel = reactive({
   calismaSekli: "",
   yoneticiAd: undefined,
   yoneticiPozisyon: undefined,
-  baslangicTarih: undefined,
-  bitisTarih: undefined,
+  iseGirisTarihi: undefined,
+  istenCikisTarihi: undefined,
+  pozisyonBaslangicTarih: undefined,
+  pozisyonBitisTarih: undefined,
 
   // Kimlik Bilgileri
   tckn: undefined,
@@ -160,7 +162,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
           <div>
             <p class="text-gray-500 dark:text-gray-400">İşe Başlama Tarihi</p>
             <p class="font-medium">
-              {{ dayjs(personel.baslangicTarih).format("D MMMM YYYY ") }}
+              {{ dayjs(personel.iseGirisTarihi).format("D MMMM YYYY ") }}
             </p>
           </div>
           <div>
@@ -172,12 +174,12 @@ const getCalismaSuresi = (startDateStr: string): string => {
           <div>
             <p class="text-gray-500 dark:text-gray-400">Çalışma Süresi</p>
             <p class="font-medium">
-              {{ getCalismaSuresi(personel.baslangicTarih!) }}
+              {{ getCalismaSuresi(personel.iseGirisTarihi!) }}
             </p>
           </div>
           <div>
             <p class="text-gray-500 dark:text-gray-400">Sözleşme Bitiş Tarihi</p>
-            <p class="font-medium">{{ personel.bitisTarih || "—" }}</p>
+            <p class="font-medium">{{ personel.istenCikisTarihi || "—" }}</p>
           </div>
         </div>
 
@@ -187,7 +189,7 @@ const getCalismaSuresi = (startDateStr: string): string => {
           <div>
             <p class="text-gray-500 dark:text-gray-400">Pozisyon Başlama Tarihi</p>
             <p class="font-medium">
-              {{ dayjs(personel.baslangicTarih).format("D MMMM YYYY ") }}
+              {{ dayjs(personel.pozisyonBaslangicTarih).format("D MMMM YYYY ") }}
             </p>
           </div>
           <div>

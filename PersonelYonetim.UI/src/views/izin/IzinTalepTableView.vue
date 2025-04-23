@@ -18,6 +18,7 @@ const onayAdimlari = ref<OnaySureci[] | undefined>([]);
 
 const selectedIzin = ref<IzinTalepGetResponse | undefined>(undefined);
 const selectedTab = ref<"cakisanIzinler" | "onaySureci">("cakisanIzinler");
+
 dayjs.locale("tr");
 const loading = ref(true);
 const error = ref(false);

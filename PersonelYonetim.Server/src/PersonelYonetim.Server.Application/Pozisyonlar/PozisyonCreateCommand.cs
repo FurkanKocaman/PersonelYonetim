@@ -39,6 +39,7 @@ internal sealed class PozisyonCreateCommandHandler(
             return Result<string>.Failure("Pozisyon zaten mevcut");
 
         Pozisyon pozisyon = request.Adapt<Pozisyon>();
+        pozisyon.TenantId = tenantId.Value;
         pozisyonRepository.Add(pozisyon);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

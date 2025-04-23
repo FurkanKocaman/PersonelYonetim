@@ -4,6 +4,7 @@ using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Bordro;
 using PersonelYonetim.Server.Domain.PersonelDetaylar;
 using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
+using PersonelYonetim.Server.Domain.Tenants;
 
 namespace PersonelYonetim.Server.Application.Bordro;
 public sealed record BordroGetCalisanlarQuery(
@@ -29,6 +30,7 @@ public sealed class BordroGetCalisanlarQueryResponse
 
 internal sealed class BordroGetCalisanlarQueryHandler(
     IPersonelDetayRepository personelDetayRepository,
+    ITenantRepository tenantRepository,
     ICurrentUserService currentUserService,
     IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     IMaasPusulaRepository maasPusulaRepository
@@ -47,6 +49,11 @@ internal sealed class BordroGetCalisanlarQueryHandler(
 
         var maasPusulalar = maasPusulaRepository.Where(p => p.TenantId == tenantId && p.BordroDonem!.Yil == DateTimeOffset.Now.Year).OrderBy(p => p.BordroDonem!.Ay).Include(p => p.BordroDonem);
 
+        var tenant = tenantRepository.FirstOrDefault(p => p.Id == tenantId);
+        if(tenant is null)
+            return Task.FromResult(Enumerable.Empty<BordroGetCalisanlarQueryResponse>().AsQueryable());
+
+
         var response = personelGorevlendirmeler
             .GroupJoin(personelDetayRepository.GetAll(),
                 personelGorevlendirme => personelGorevlendirme.PersonelId,
@@ -60,12 +67,12 @@ internal sealed class BordroGetCalisanlarQueryHandler(
                 FullName = pp.personelGorevlendirme.Personel.FullName,
                 AvatarUrl = pp.personelGorevlendirme.Personel.AvatarUrl,
                 TCKN = personelDetay != null ? personelDetay.TCKN : "",
-                IseBaslangicTarihi = pp.personelGorevlendirme.BaslangicTarihi,
-                IstenCikisTarihi = pp.personelGorevlendirme.BitisTarihi,
+                IseBaslangicTarihi = pp.personelGorevlendirme.IseGirisTarihi,
+                IstenCikisTarihi = pp.personelGorevlendirme.IstenCikisTarihi,
                 EngelDerecesi = personelDetay != null ? personelDetay.EngelliMi ? personelDetay.EngelOrani!.Value : 0 : 0,
-                TabiOlduguKanun = pp.personelGorevlendirme.TabiOlduguKanun,
-                SGKIsyeri = pp.personelGorevlendirme.SGKIsyeri,
-                VergiDairesiAdi = pp.personelGorevlendirme.VergiDairesiAdi,
+                TabiOlduguKanun = pp.personelGorevlendirme.TabiOlduguKanun ?? tenant.TabiOlduguKanun,
+                SGKIsyeri = pp.personelGorevlendirme.SGKIsyeri ?? tenant.SGKIsyeri,
+                VergiDairesiAdi = pp.personelGorevlendirme.VergiDairesiAdi ?? tenant.VergiDairesiAdi,
                 KumulatifVergiMatrahi = maasPusulalar.Where(p => p.PersonelId == pp.personelGorevlendirme.PersonelId).FirstOrDefault() != null ? maasPusulalar.Where(p => p.PersonelId == pp.personelGorevlendirme.PersonelId).FirstOrDefault()!.KumulatifGelirVergisiMatrahiDonemSonu : 0,
                 BirimAdi = pp.personelGorevlendirme.KurumsalBirim != null ? pp.personelGorevlendirme.KurumsalBirim.Ad : "",
                 PozisyonAd = pp.personelGorevlendirme.Pozisyon != null ? pp.personelGorevlendirme.Pozisyon.Ad : "",

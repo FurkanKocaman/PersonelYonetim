@@ -18,7 +18,6 @@ using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.TakvimEtkinlikler;
-using PersonelYonetim.Server.Domain.Tenants;
 using PersonelYonetim.Server.Domain.Tokenler;
 using PersonelYonetim.Server.Domain.Users;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
@@ -76,6 +75,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+        modelBuilder.Ignore<IdentityUserRole<Guid>>();
 
         modelBuilder.Entity<PersonelDetay>()
             .HasOne(p => p.Personel)

@@ -2,10 +2,11 @@ import { type PersonelItem } from "@/models/PersonelModels";
 import api from "./Axios";
 import { useToastStore } from "@/stores/ToastStore";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
-import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
 import type { PersonelCreateCommand } from "@/models/request-models/PersonelCreateCommand";
 import type { PersonelDetaylarGetModel } from "@/models/response-models/PersonelDetaylarGetModel";
 import type { PersonelDetayUpdateModel } from "@/models/request-models/PersonelDetayUpdateModel";
+import type { PersonelUpdateCommand } from "@/models/request-models/PersonelUpdateCommand";
+import type { PersonelGorevlendirmeModel } from "@/models/entity-models/PersonelGorevlendirmeModel";
 
 class PersonelService {
   // async getPersonelList(params?: PersonelPaginationParams): Promise<PersonelListResponse> {
@@ -63,7 +64,7 @@ class PersonelService {
       throw error;
     }
   }
-  async updatePersonel(request: PersonelCreateCommand): Promise<string> {
+  async updatePersonel(request: PersonelUpdateCommand): Promise<string> {
     try {
       const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
       if (response.status == 200) {
@@ -105,10 +106,12 @@ class PersonelService {
     }
   };
 
-  getPersonelAtamalar = async (
+  getPersonelGorevlendirmeler = async (
+    tenantId: string | undefined,
     paginationParams?: PaginationParams
   ): Promise<
-    { items: PersonelAtamaModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+    | { items: PersonelGorevlendirmeModel[]; count: number; pageSize: number; pageNumber: number }
+    | undefined
   > => {
     try {
       const queryParams = new URLSearchParams();
@@ -123,10 +126,11 @@ class PersonelService {
       }
 
       const response = await api.get(
-        `${import.meta.env.VITE_API_URL}/odata/personel-atamalar?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/odata/personel-gorevlendirmeler?${queryParams}`,
         {
           params: {
             $count: true,
+            tenantId: tenantId,
           },
         }
       );

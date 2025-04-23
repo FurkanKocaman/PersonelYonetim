@@ -75,7 +75,7 @@ internal sealed class BordroGetByPersonelQueryHandler(
             return Task.FromResult(Enumerable.Empty<BordroGetByPersonelQueryResponse>().AsQueryable());
 
         var response = bordroDonem.MaasPusulalar
-            .Where(p => p.Personel!.UserId == userId)
+            .Where(p => p.Personel!.UserId == userId && !p.IsDeleted)
                 .Select(p => new BordroGetByPersonelQueryResponse
                 {
                     Id = p.Id,

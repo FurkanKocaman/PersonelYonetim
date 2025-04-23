@@ -20,10 +20,10 @@ public sealed class PersonelGetQueryResponse : EntityDto
     public string PozisyonAd { get; set; } = default!;
     public string Eposta { get; set; } = default!;
     public string Telefon { get; set; } = default!;
-    public string Ulke { get; set; } = default!;
-    public string Sehir { get; set; } = default!;
-    public string Ilce { get; set; } = default!;
-    public string TamAdres { get; set; } = default!;
+    public string? Ulke { get; set; } 
+    public string? Sehir { get; set; }
+    public string? Ilce { get; set; }
+    public string? TamAdres { get; set; }
     public string? Yonetici { get; set; }
 }
 
@@ -49,10 +49,10 @@ internal sealed class PersonelGetQueryHandler(
                             DogumTarihi = entity.DogumTarihi,
                             IseGirisTarihi = DateTimeOffset.Now,
                             ProfilResimUrl = entity.AvatarUrl,
-                            Ulke = entity.Adres.Ulke,
-                            Sehir = entity.Adres.Sehir,
-                            Ilce = entity.Adres.Ilce,
-                            TamAdres = entity.Adres.TamAdres,
+                            Ulke = entity.Adres != null ? entity.Adres.Ulke : null,
+                            Sehir = entity.Adres != null ? entity.Adres.Sehir : null,
+                            Ilce = entity.Adres != null ? entity.Adres.Ilce : null,
+                            TamAdres = entity.Adres != null ? entity.Adres.TamAdres: null,
                             //Yonetici = entity.Yonetici != null ? entity.Yonetici!.FullName : "",
                             IsActive = entity.IsActive,
                             CreatedAt = entity.CreatedAt,

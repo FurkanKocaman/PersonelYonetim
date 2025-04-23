@@ -4,9 +4,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
-onMounted(() => {
-  console.log(route.name);
-});
+onMounted(() => {});
 </script>
 
 <template>

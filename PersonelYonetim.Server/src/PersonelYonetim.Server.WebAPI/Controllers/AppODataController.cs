@@ -16,10 +16,12 @@ using PersonelYonetim.Server.Application.IzinTalepler;
 using PersonelYonetim.Server.Application.IzinTurler;
 using PersonelYonetim.Server.Application.KurumsalBirimler;
 using PersonelYonetim.Server.Application.KurumsalBirimTipleri;
+using PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Application.Personeller;
 using PersonelYonetim.Server.Application.Pozisyonlar;
 using PersonelYonetim.Server.Application.Roller;
 using PersonelYonetim.Server.Application.TakvimEtkinlikler;
+using PersonelYonetim.Server.Application.Tenants;
 using PersonelYonetim.Server.Domain.RoleClaim;
 using TS.Result;
 
@@ -38,6 +40,7 @@ public class AppODataController(
         builder.EnableLowerCamelCase();
         builder.EntitySet<PersonelGetAllQueryResponse>("personeller");
         builder.EntitySet<PersonelDetaylarGetQueryResponse>("personel-detaylar");
+        builder.EntitySet<PersonelGorevlendirmeGetAllQueryResponse>("personel-gorevlendirmeler");
         builder.EntitySet<PozisyonGetAllQueryResponse>("pozisyonlar");
         builder.EntitySet<RoleGetAllQueryResponse>("roller");
         builder.EntitySet<IzinKuralGetAllResponse>("izin-kurallar");
@@ -50,13 +53,13 @@ public class AppODataController(
         builder.EntitySet<TakvimEtkinlikGetAllQueryResponse>("takvim-etkinlikler");
         builder.EntitySet<BildirimlerGetQueryResponse>("bildirimler");
         builder.EntitySet<DuyuruGetAllQueryResponse>("duyurular");
-        builder.EntitySet<CalismaCizelgeleriGetAllQueryResponse>("calisma-cizelgeler");
         builder.EntitySet<KurumsalBirimGetAllQueryResponse>("kurumsal-birimler");
         builder.EntitySet< KurumsalBirimTipiGetAllQueryResponse>("kurumsal-birim-tipleri");
         builder.EntitySet<CalismaCizelgeGetAllQueryResponse>("calisma-cizelgeler-new");
         builder.EntitySet<BordroGetAllQueryResponse>("bordro");
         builder.EntitySet<BordroGetCalisanlarQueryResponse>("bordro-calisanlar");
         builder.EntitySet<BordroGetByPersonelQueryResponse>("personel-bordrolar");
+        builder.EntitySet<TenantGetQueryResponse>("tenant");
 
         builder.EntityType<IzinKuralGetAllResponse>()
             .CollectionProperty(p => p.IzinTurler)
@@ -80,6 +83,13 @@ public class AppODataController(
     public async Task<IQueryable<PersonelDetaylarGetQueryResponse>> GetPersonelDetaylar(Guid? personelId, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new PersonelDetaylarGetQuery(personelId), cancellationToken);
+        return response;
+    }
+    [HttpGet("personel-gorevlendirmeler")]
+    [Authorize()]
+    public async Task<IQueryable<PersonelGorevlendirmeGetAllQueryResponse>> GetPersonelGorevlendirmeler([FromQuery]Guid? tenantId, CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new PersonelGorevlendirmeGetAllQuery(tenantId), cancellationToken);
         return response;
     }
 
@@ -199,14 +209,8 @@ public class AppODataController(
         return response;
     }
 
+
     [HttpGet("calisma-cizelgeler")]
-    [Authorize]
-    public async Task<List<CalismaCizelgeleriGetAllQueryResponse>> GetCalismaCizelgeler(CancellationToken cancellationToken)
-    {
-        var response = await sender.Send(new CalismaCizelgeleriGetAllQuery(), cancellationToken);
-        return response;
-    }
-    [HttpGet("calisma-cizelgeler-new")]
     [Authorize]
     public async Task<IQueryable<CalismaCizelgeGetAllQueryResponse>> GetCalismaCizelgelernew(int yil, int ay,CancellationToken cancellationToken)
     {
@@ -256,6 +260,14 @@ public class AppODataController(
     public async Task<IQueryable<BordroGetByPersonelQueryResponse>> GetPersonelBordrolar(int? yil, CancellationToken cancellationToken)
     {
         var response = await sender.Send(new BordroGetByPersonelQuery(yil), cancellationToken);
+        return response;
+    }
+
+    [HttpGet("tenant")]
+    [Authorize()]
+    public async Task<IQueryable<TenantGetQueryResponse>> GetTenant(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new TenantGetQuery(),cancellationToken);
         return response;
     }
 

@@ -2,10 +2,12 @@
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Application.Users;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Pozisyonlar;
-using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
@@ -16,18 +18,30 @@ public sealed record PersonelUpdateCommand(
     string Ad,
     string Soyad,
     DateTimeOffset DogumTarihi,
-    bool Cinsiyet,
-    string? ProfilResimUrl,
+    bool? Cinsiyet,
+    string? AvatarUrl,
     Iletisim Iletisim,
     Adres Adres,
-    Guid? YoneticiId,
+
+    Guid? KurumsalBirimId,
     Guid? PozisyonId,
-    Guid? CalismaTakvimiId,
-    int SozlesmeTuruValue,
-    DateTime PozisyonBaslangicTarih,
-    DateTime? SozlesmeBitisTarihi,
+    List<Guid>? RoleIdler,
+    DateTimeOffset IseGirisTarihi,
+    DateTimeOffset? IstenCikisTarihi,
+    DateTimeOffset PozisyonBaslangicTarihi,
+    DateTimeOffset? PozisyonBitisTarihi,
+    bool BirincilGorevMi,
+    int GorevlendirmeTipiValue,
+    int CalismaSekliValue,
+    Guid? RaporlananPersonelId,
     Guid? IzinKuralId,
-    int RolValue) : IRequest<Result<string>>;
+    Guid? CalismaTakvimId,
+    decimal BrutUcret,
+    string? TabiOlduguKanun,
+    string? SGKIsYeri,
+    string? VergiDairesiAdi,
+    string? MeslekKodu
+    ) : IRequest<Result<string>>;
 
 public sealed class PersonelUpdateCommandValidator : AbstractValidator<PersonelUpdateCommand>
 {
@@ -42,6 +56,8 @@ public sealed class PersonelUpdateCommandValidator : AbstractValidator<PersonelU
 
 internal sealed class PersonelUpdateCommandHandler(
     IPersonelRepository personelRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
+    IGorevlendirmeRoluRepository gorevlendirmeRoluRepository,
     IPozisyonRepository pozisyonRepository,
     UserManager<AppUser> userManager,
     IWebHostEnvironment env,
@@ -66,9 +82,9 @@ internal sealed class PersonelUpdateCommandHandler(
         personel.Soyad = request.Soyad;
         personel.DogumTarihi = request.DogumTarihi;
         personel.Cinsiyet = request.Cinsiyet;
-        if (request.ProfilResimUrl != null && request.ProfilResimUrl != "")
+        if (request.AvatarUrl != null && request.AvatarUrl != "")
         {
-            if (personel.AvatarUrl != null && request.ProfilResimUrl != null)
+            if (personel.AvatarUrl != null && request.AvatarUrl != null)
             {
                 var filePath = Path.Combine(env.WebRootPath, "profile_images", Path.GetFileName(personel.AvatarUrl));
                 if (File.Exists(filePath))
@@ -78,7 +94,7 @@ internal sealed class PersonelUpdateCommandHandler(
 
             }
 
-            personel.AvatarUrl = request.ProfilResimUrl;
+            personel.AvatarUrl = request.AvatarUrl;
         }
         personel.Iletisim = request.Iletisim;
         personel.Adres = request.Adres;
@@ -90,27 +106,74 @@ internal sealed class PersonelUpdateCommandHandler(
                 return Result<string>.Failure("Pozisyon bulunamadı");
         }
 
-        //var personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(pd => pd.PersonelId == personel.Id && pd.SirketId == request.SirketId && pd.IsDeleted == false);
-        //if (request.SirketId != personelAtama.SirketId || request.SubeId != personelAtama.SubeId || request.DepartmanId != personelAtama.DepartmanId || request.PozisyonId != personelAtama.PozisyonId || request.RolValue != personelAtama.RolTipi.Value || request.YoneticiId != personelAtama.YoneticiId)
-        //{
-        //    personelAtama.IsDeleted = true;
+        var personelGorevlendirme = await personelGorevlendirmeRepository.WhereWithTracking(p => p.PersonelId == personel.Id && !p.IsDeleted && p.TenantId == personel.TenantId).Include(p => p.GorevlendirmeIzinKurali).FirstOrDefaultAsync();
 
-        //    //PersonelAtamaCreateCommand personelAtamaCreateCommand = new(personel.Id, request.SirketId, request.SubeId, request.DepartmanId, request.PozisyonId, request.YoneticiId, request.RolValue, request.CalismaTakvimiId, request.SozlesmeTuruValue, request.SozlesmeBitisTarihi, request.PozisyonBaslangicTarih, request.IzinKuralId );
-        //    //var result = await sender.Send(personelAtamaCreateCommand);
-        //}
-        //else
-        //{
-        //    if (request.IzinKuralId is not null)
-        //        //personelAtama.IzinKuralId = request.IzinKuralId;
-        //    if (request.CalismaTakvimiId is not null)
-        //        personelAtama.CalismaTakvimId = request.CalismaTakvimiId;
-        //}
+        if (personelGorevlendirme is null)
+            return Result<string>.Failure("Mevcut gorevlendirme bulunamamdı");
 
+        if((request.KurumsalBirimId != null && request.KurumsalBirimId != personelGorevlendirme.KurumsalBirimId) || (request.PozisyonId != null && request.PozisyonId != personelGorevlendirme.PozisyonId))
+        {
+            personelGorevlendirme.IsActive = false;
+            personelGorevlendirme.IsDeleted = true;
+            personelGorevlendirme.PozisyonBitisTarihi = DateTimeOffset.Now;
 
-        //personelRepository.Update(personel);
-        //personelAtamaRepository.Update(personelAtama);
-        //await unitOfWork.SaveChangesAsync(cancellationToken);
+            PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id,request.KurumsalBirimId,request.PozisyonId,request.RoleIdler,request.IseGirisTarihi,request.IstenCikisTarihi,request.PozisyonBaslangicTarihi,request.PozisyonBitisTarihi,request.BirincilGorevMi,request.GorevlendirmeTipiValue,request.CalismaSekliValue,request.RaporlananPersonelId,request.IzinKuralId,request.CalismaTakvimId,request.BrutUcret,request.TabiOlduguKanun,request.SGKIsYeri,request.VergiDairesiAdi,request.MeslekKodu,personel.TenantId);
+            var result = await sender.Send(personelGorevlendirmeCreateCommand);
 
-        return Result<string>.Succeed("Personel başarıyla güncellendi");
+            if (!result.IsSuccessful)
+                return Result<string>.Failure(result.ErrorMessages![0]);
+        }
+        else
+        {
+            if(request.RoleIdler is not null)
+            {
+                var gorevlendirmeRoller = await gorevlendirmeRoluRepository
+               .Where(p => p.PersonelGorevlendirmeId == personelGorevlendirme.Id)
+               .ToListAsync(cancellationToken);
+
+                var mevcutRolIdler = gorevlendirmeRoller.Select(r => r.RolId).ToList();
+                var gelenRolIdler = request.RoleIdler;
+
+                var ortakRoller = mevcutRolIdler.Intersect(gelenRolIdler).ToList();
+                var eklenecekRoller = gelenRolIdler.Except(ortakRoller).ToList();
+                var silinecekRoller = mevcutRolIdler.Except(ortakRoller).ToList();
+
+                // 🔹 Ekleme işlemleri
+                foreach (var roleId in eklenecekRoller)
+                {
+                    var yeniRol = new GorevlendirmeRolu
+                    {
+                        Id = Guid.NewGuid(),
+                        PersonelGorevlendirmeId = personelGorevlendirme.Id,
+                        RolId = roleId,
+                    };
+
+                    await gorevlendirmeRoluRepository.AddAsync(yeniRol);
+                }
+
+                // 🔹 Silme işlemi: Eğer silinmek istenen roller varsa VE bazı roller hala kalıyorsa
+                if (silinecekRoller.Count < mevcutRolIdler.Count && silinecekRoller.Any())
+                {
+                    var silinecekEntities = gorevlendirmeRoller
+                        .Where(r => silinecekRoller.Contains(r.RolId))
+                        .ToList();
+
+                    gorevlendirmeRoluRepository.DeleteRange(silinecekEntities);
+                }
+            }
+
+            personelGorevlendirme.BirincilGorevMi = request.BirincilGorevMi;
+            personelGorevlendirme.GorevlendirmeTipi = GorevlendirmeTipiEnum.FromValue(request.GorevlendirmeTipiValue);
+            personelGorevlendirme.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
+            personelGorevlendirme.RaporlananGorevlendirmeId = request.RaporlananPersonelId;
+            personelGorevlendirme.GorevlendirmeIzinKurali!.IzinKuralId = request.IzinKuralId!.Value;
+            personelGorevlendirme.CalismaTakvimId = request.CalismaTakvimId!.Value;
+            personelGorevlendirme.BrutUcret = request.BrutUcret;
+            personelGorevlendirme.TabiOlduguKanun = request.TabiOlduguKanun;
+            personelGorevlendirme.SGKIsyeri = request.SGKIsYeri;
+            personelGorevlendirme.VergiDairesiAdi = request.VergiDairesiAdi;
+            personelGorevlendirme.MeslekKodu = request.MeslekKodu;
+        }
+            return Result<string>.Succeed("Personel başarıyla güncellendi");
     }
 }

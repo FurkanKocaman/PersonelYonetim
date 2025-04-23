@@ -7,9 +7,13 @@ import { onMounted, ref, watch, type Ref } from "vue";
 const isYilMenuOpen = ref(false);
 
 const isPusulaDegerlendirmeOpen = ref(false);
+const isIslemlerMenuOpen = ref(false);
 
-const bordro: Ref<BordroGetByPersonelModel[] | undefined> = ref([]);
+const bordro: Ref<BordroGetByPersonelModel[]> = ref([]);
 const bordroCount = ref(0);
+
+const pusulaIdler: Ref<string[]> = ref([]);
+const selectAllChecked = ref(false);
 
 const selectedPusula = ref("");
 
@@ -111,13 +115,31 @@ onMounted(() => {
 
 const getAllBordro = async () => {
   const res = await BordroService.bordroGetByPersonel(selectedYil.value);
-  bordro.value = res?.items;
+  bordro.value = res!.items;
   bordroCount.value = res!.count;
 };
 
 const maasPusulaDegerlendir = async (value: number) => {
   const res = await MaasPusulaService.maasPusulaDegerlendir(selectedPusula.value, value);
   if (res) isPusulaDegerlendirmeOpen.value = false;
+};
+
+const selectAll = () => {
+  if (selectAllChecked.value) {
+    pusulaIdler.value = bordro.value!.map((x) => x.id);
+  } else {
+    pusulaIdler.value = [];
+  }
+};
+
+const toggleSinglePusula = (pusulaId: string) => {
+  if (pusulaIdler.value.includes(pusulaId)) {
+    pusulaIdler.value = pusulaIdler.value.filter((id) => id !== pusulaId);
+  } else {
+    pusulaIdler.value.push(pusulaId);
+  }
+  // Hepsi seçiliyse üst checkbox'ı da işaretli yap
+  selectAllChecked.value = bordro.value?.every((x) => pusulaIdler.value.includes(x.id)) ?? false;
 };
 
 watch(selectedYil, () => getAllBordro());
@@ -177,7 +199,7 @@ watch(selectedYil, () => getAllBordro());
     </div>
   </div>
   <div class="flex flex-col w-full h-full pt-10 px-5">
-    <div class="flex">
+    <div class="flex justify-between">
       <div class="relative">
         <button
           id="dropdownBgHoverButton"
@@ -229,7 +251,39 @@ watch(selectedYil, () => getAllBordro());
           </ul>
         </div>
       </div>
+      <div class="relative">
+        <button
+          class="flex justify-center items-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-1.5 text-center me-2 mb-2 group dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+          @click="
+            () => {
+              isIslemlerMenuOpen = !isIslemlerMenuOpen;
+            }
+          "
+        >
+          İşlemler
+          <svg class="size-7 fill-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M7 10L12 15L17 10"
+              class="stroke-blue-700 group-hover:stroke-white"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <div
+          v-if="isIslemlerMenuOpen"
+          class="absolute bg-neutral-50 dark:bg-neutral-800 z-20 rounded-md border border-blue-600"
+        >
+          <button
+            class="font-semibold text-sm hover:bg-blue-600 hover:text-neutral-100 px-3 py-1 rounded-md"
+          >
+            PDF olarak indir
+          </button>
+        </div>
+      </div>
     </div>
+
     <div
       v-if="bordroCount == 0"
       class="w-full flex flex-col items-center justify-center mt-3 border py-5 rounded-md bg-neutral-300/50 dark:bg-neutral-800/50 shadow-xl"
@@ -292,7 +346,12 @@ watch(selectedYil, () => getAllBordro());
             class="flex justify-between w-4/12 px-4 py-5 rounded-tl-md bg-neutral-200 dark:bg-neutral-800 text-sm font-semibold"
           >
             <div class="flex-1 flex items-center justify-start h-full">
-              <input type="checkbox" class="w-4 h-4" />
+              <input
+                type="checkbox"
+                class="w-4 h-4"
+                v-model="selectAllChecked"
+                @change="selectAll"
+              />
             </div>
             <div class="flex-8 flex justify-start">Tarih</div>
             <div class="flex-1 flex justify-end">Durum</div>
@@ -317,7 +376,12 @@ watch(selectedYil, () => getAllBordro());
         >
           <div class="flex justify-between w-4/12 pl-4 py-2 rounded-tl-md text-base font-semibold">
             <div class="flex-1 flex items-center justify-center h-full">
-              <input type="checkbox" class="w-4 h-4" />
+              <input
+                type="checkbox"
+                class="w-4 h-4"
+                :checked="pusulaIdler.includes(maaPusula.id)"
+                @change="toggleSinglePusula(maaPusula.id)"
+              />
             </div>
             <div class="flex-10 flex items-center text-sm mx-2 truncate">
               <span>{{ maaPusula.yil + "\t" + aylar.find((x) => x.id == maaPusula.ay)!.ad }}</span>

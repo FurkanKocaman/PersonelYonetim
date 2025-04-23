@@ -101,7 +101,7 @@ class KurumsalBirimService {
       request
     );
     if (response.status == 200) {
-      useToastStore().addToast(response.data.data, "", "success", 5000, true);
+      useToastStore().addToast("Birim başarıyla oluşturuldu.", "", "success", 5000, true);
       return response.data.data;
     }
     return response.data;

@@ -37,7 +37,7 @@ public sealed class PersonelDetay : Entity
 
     // Sağlık Bilgileri
     public bool EngelliMi { get; set; } = false;
-    public int? EngelOrani { get; set; }
+    public int? EngelOrani { get; set; } = 0;
     public string? SaglikDurumu { get; set; }
     public string? KanGrubu { get; set; }
 

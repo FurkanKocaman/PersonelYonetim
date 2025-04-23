@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Application.Auth;
 using PersonelYonetim.Server.Application.Bordro;
 using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
@@ -19,7 +18,15 @@ public static class BordroModule
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
             })
-            .Produces<Result<LoginCommandResponse>>();
+            .Produces<Result<string>>();
+
+        group.MapPut("/update-calisanlar",
+           async (ISender sender, BordroCalisanlarUpdateCommand request, CancellationToken cancellationToken, UserManager<AppUser> userManager) =>
+           {
+               var response = await sender.Send(request, cancellationToken);
+               return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+           })
+           .Produces<Result<string>>();
 
     }
 }

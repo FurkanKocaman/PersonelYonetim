@@ -39,10 +39,37 @@ const router = createRouter({
           path: "sirket",
           name: "Sirket",
           component: () => import("@/views/sirket/SirketView.vue"),
+          redirect: "/dashboard/sirket/sirket-yapisi",
           meta: {
             title: "Sirket Yönetimi",
             roleClaims: [RoleClaims.viewKurumsalYapi],
           },
+          children: [
+            {
+              path: "sirket-yapisi",
+              name: "SirketYapisi",
+              component: () => import("@/views/sirket/SirketYapisiView.vue"),
+              meta: { title: "Sirket Yapısı" },
+            },
+            {
+              path: "sirket-ayarlari",
+              name: "SirketAyarlari",
+              component: () => import("@/views/sirket/SirketAyarlariView.vue"),
+              meta: { title: "Sirket Ayarları" },
+            },
+            {
+              path: "pozisyonlar",
+              name: "Pozisyonlar",
+              component: () => import("@/views/sirket/PozisyonlarView.vue"),
+              meta: { title: "Pozisyonlar" },
+            },
+            {
+              path: "rol-ayarlari",
+              name: "RolAyarlari",
+              component: () => import("@/views/sirket/RolAyarlariView.vue"),
+              meta: { title: "Rol Ayarları" },
+            },
+          ],
         },
         {
           path: "personel",

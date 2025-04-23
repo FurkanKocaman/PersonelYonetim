@@ -13,6 +13,7 @@ using PersonelYonetim.Server.WebAPI.Modules;
 using Scalar.AspNetCore;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
+using PersonelYonetim.Server.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,7 +64,6 @@ x.AddFixedWindowLimiter("fixed",cfg =>
 
 builder.Services.AddExceptionHandler<ExceptionHandler>().AddProblemDetails();
 builder.Services.AddTransient<IClaimsTransformation, CustomClaimsTransformation>();
-
 
 var app = builder.Build();
 

@@ -15,15 +15,17 @@ public sealed class PersonelDetaylarGetQueryResponse : EntityDto
     public string? FullName { get; set; }
     public string? AvatarUrl { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
-    public Adres Adres { get; set; } = default!;
+    public Adres? Adres { get; set; } 
     public string KurumsalBirimAd { get; set; } = string.Empty;
     public string PozisyonAd { get; set; } = string.Empty;
     public string GorevlendirmeTipi { get; set; } = string.Empty;
     public string CalismaSekli { get; set; } = string.Empty;
     public string? YoneticiAd { get; set; }
     public string? YoneticiPozisyon { get; set; }
-    public DateTimeOffset? BaslangicTarih { get; set; }
-    public DateTimeOffset? BitisTarih { get; set; }
+    public DateTimeOffset? IseGirisTarihi { get; set; }
+    public DateTimeOffset? IstenCikisTarihi { get; set; }
+    public DateTimeOffset? PozisyonBaslangicTarih { get; set; }
+    public DateTimeOffset? PozisyonBitisTarih { get; set; }
 
     // Kimlik Bilgileri
     public string? TCKN { get; set; }
@@ -108,7 +110,7 @@ internal sealed class PersonelDetaylarGetQueryHandler(
 
         var response = personel.Select(p => new PersonelDetaylarGetQueryResponse
         {
-            Id = p.PersonelDetay.Id,
+            Id = p.Id,
             PersonelId = p.Id,
             FullName = p.FullName,
             AvatarUrl = p.AvatarUrl,
@@ -118,21 +120,22 @@ internal sealed class PersonelDetaylarGetQueryHandler(
             PozisyonAd = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.Pozisyon?.Ad).FirstOrDefault() ?? "Bulunamamdı",
             GorevlendirmeTipi = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.GorevlendirmeTipi).FirstOrDefault()?.Name ?? "Bulunamamdı",
             CalismaSekli = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.CalismaSekli).FirstOrDefault()?.Name ?? "Bulunamamdı",
-            BaslangicTarih = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.BaslangicTarihi).FirstOrDefault(),
-            BitisTarih = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.BitisTarihi).FirstOrDefault(),
-
+            IseGirisTarihi = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.IseGirisTarihi).FirstOrDefault(),
+            IstenCikisTarihi = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.IstenCikisTarihi).FirstOrDefault(),
+            PozisyonBaslangicTarih = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.PozisyonBaslangicTarihi).FirstOrDefault(),
+            PozisyonBitisTarih = p.PersonelGorevlendirmeler.Where(p => !p.IsDeleted).Select(p => p.PozisyonBitisTarihi).FirstOrDefault(),
             // Kimlik Bilgileri
-            TCKN = p.PersonelDetay.TCKN,
-            AnaAdi = p.PersonelDetay.AnaAdi,
-            BabaAdi = p.PersonelDetay.BabaAdi,
-            DogumYeri = p.PersonelDetay.DogumYeri,
+            TCKN = p.PersonelDetay?.TCKN,
+            AnaAdi = p.PersonelDetay?.AnaAdi,
+            BabaAdi = p.PersonelDetay?.BabaAdi,
+            DogumYeri = p.PersonelDetay?.DogumYeri,
             DogumTarihi = p.DogumTarihi,
             MedeniHali = p.PersonelDetay?.MedeniHali,
             Cinsiyet = p.Cinsiyet != null ? p.Cinsiyet.Value ? "Erkek" : "Kadın" : "Bilinmiyor",
             Uyruk = p.PersonelDetay?.Uyruk,
 
             // İletişim Bilgileri
-            
+
             IsTelefonu = p.PersonelDetay?.IsTelefonu,
             EpostaIs = p.PersonelDetay?.EpostaIs,
             PostaKodu = p.PersonelDetay?.PostaKodu,
@@ -162,9 +165,9 @@ internal sealed class PersonelDetaylarGetQueryHandler(
 
             BankaAdi = p.PersonelDetay?.BankaAdi,
             IBAN = p.PersonelDetay?.IBAN,
-            
+
             Notlar = p.PersonelDetay?.Notlar,
-            
+
             IsActive = p.IsActive,
             CreatedAt = p.CreatedAt,
             CreateUserId = p.CreateUserId,

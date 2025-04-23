@@ -12,9 +12,13 @@ public sealed record BordroGetAllQuery(
 public sealed class BordroGetAllQueryResponse
 {
     public Guid Id { get; set; }
+    public Guid PersonelId { get; set; }
     public string FullName { get; set; } = default!;
     public string Durum { get; set; } = default!;
     public string? AvatarUrl { get; set; }
+
+    public int Yil { get; set; }
+    public int Ay { get; set; }
 
     //Girdiler
     public decimal BrutUcret { get; set; }
@@ -74,23 +78,28 @@ internal sealed class BordroGetAllQueryHandler(
             return Task.FromResult(Enumerable.Empty<BordroGetAllQueryResponse>().AsQueryable());
 
         var response = bordroDonem.MaasPusulalar
+                .Where(p => !p.IsDeleted)
                 .Select(p => new BordroGetAllQueryResponse
                 {
                     Id = p.Id,
+                    PersonelId = p.PersonelId,
                     FullName = p.Personel!.Ad + " " + p.Personel.Soyad,
                     Durum = p.Durum.Name,
                     AvatarUrl = p.Personel.AvatarUrl,
 
+                    Yil = p.Yil,
+                    Ay = p.Ay,
+
                     BrutUcret = p.BrutUcret,
-                    SGKGun = 30,
+                    SGKGun = p.SGKGunSayisi,
                     EkOdemelerToplam = 0,
                     KesintilerToplam = 0,
 
-                    GunlukUcret = p.BrutUcret/30,
-                    OdemeyeEsasGunSayisi = 30,
+                    GunlukUcret = p.BrutUcret/p.SGKGunSayisi,
+                    OdemeyeEsasGunSayisi = p.SGKGunSayisi,
                     FazlaCalismaUcretToplam = 0,
 
-                    FiiliCalisma = 22,
+                    FiiliCalisma = p.FiiliCalismaGunu,
                     UcretliIzin = 0,
                     Raporlu = 0,
                     UcretsizIzin = 0,
@@ -102,10 +111,10 @@ internal sealed class BordroGetAllQueryHandler(
                     GVOdemesi = p.OdenecekGelirVergisi,
                     
                     EkOdemeIstisna = p.DamgaVergisiIstisnasiUygulanan,
-                    DVAylikMatrah = p.BrutUcret - 22003,//Toplam ucret - asgari ücret
+                    DVAylikMatrah = p.ToplamBrutKazanc,//Toplam ucret - asgari ücret
                     DVOdemesi = p.OdenecekDamgaVergisi,
 
-                    YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci,
+                    YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci+ p.SGKPrimiIsci,
                     OzelKesintiler = 0,
                     TumKesintiler = p.ToplamKesinti,
                     

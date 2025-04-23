@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import type { BordroGetAllModel } from "@/models/response-models/BordroGetAllModel";
 import BordroService from "@/services/BordroService";
+import MaasPusulaService from "@/services/MaasPusulaService";
 import { onMounted, ref, watch, type Ref } from "vue";
 
 const isYilMenuOpen = ref(false);
 const isAyMenuOpen = ref(false);
 
+const isIslemlerMenuOpen = ref(false);
+
 const bordro: Ref<BordroGetAllModel[] | undefined> = ref([]);
 const bordroCount = ref(0);
 
 const apiUrl = import.meta.env.VITE_API_URL;
+
+const pusulaIdler: Ref<string[]> = ref([]);
+const selectAllChecked = ref(false);
 
 const selectedTableGroup = ref<{
   header: string;
@@ -106,7 +112,6 @@ const aylar = [
   { id: 12, ad: "Aralık" },
 ];
 onMounted(() => {
-  getAllBordro();
   const today = new Date();
   selectedYil.value = today.getFullYear();
   selectedAy.value = today.getMonth() + 1;
@@ -118,116 +123,178 @@ const getAllBordro = async () => {
   bordroCount.value = res!.count;
 };
 
+const getMaasPusulaPdf = async (personelId: string, yil: number, ay: number) => {
+  await MaasPusulaService.getMaasPusulaPdf(personelId, yil, ay);
+};
+
+const selectAll = () => {
+  if (selectAllChecked.value) {
+    pusulaIdler.value = bordro.value!.map((x) => x.personelId);
+  } else {
+    pusulaIdler.value = [];
+  }
+};
+
+const toggleSinglePusula = (pusulaId: string) => {
+  if (pusulaIdler.value.includes(pusulaId)) {
+    pusulaIdler.value = pusulaIdler.value.filter((personelId) => personelId !== pusulaId);
+  } else {
+    pusulaIdler.value.push(pusulaId);
+  }
+  selectAllChecked.value =
+    bordro.value?.every((x) => pusulaIdler.value.includes(x.personelId)) ?? false;
+};
+
+const getPusulaPdfler = async () => {
+  for (const personelId of pusulaIdler.value) {
+    await MaasPusulaService.getMaasPusulaPdf(personelId, selectedYil.value, selectedAy.value);
+  }
+};
+
 watch(selectedYil, () => getAllBordro());
 watch(selectedAy, () => getAllBordro());
 </script>
 
 <template>
   <div class="flex flex-col w-full h-full px-5">
-    <div class="flex">
-      <div class="relative">
-        <button
-          id="dropdownBgHoverButton"
-          class="w-[10rem] text-neutral-700 border flex justify-end border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-5 py-2.5 text-start items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
-          type="button"
-          @click="() => (isYilMenuOpen = !isYilMenuOpen)"
-        >
-          <span class="flex-1 pr-10">{{ yillar.find((x) => x.yil == selectedYil)!.yil }}</span>
-          <svg
-            class="w-2.5 h-2.5 ms-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
+    <div class="flex justify-between">
+      <div class="flex flex-1">
+        <div class="relative">
+          <button
+            id="dropdownBgHoverButton"
+            class="w-[10rem] text-neutral-700 border flex justify-end border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-5 py-2.5 text-start items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
+            type="button"
+            @click="() => (isYilMenuOpen = !isYilMenuOpen)"
           >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </button>
-
-        <div
-          v-if="isYilMenuOpen"
-          class="absolute w-[10rem] z-50 bg-neutral-300 dark:bg-neutral-700 rounded-md"
-        >
-          <ul
-            class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
-          >
-            <li
-              v-for="yil in yillar"
-              :key="yil.id"
-              @click="
-                () => {
-                  selectedYil = yil.yil;
-                  isYilMenuOpen = !isYilMenuOpen;
-                }
-              "
+            <span class="flex-1 pr-10">{{ yillar.find((x) => x.yil == selectedYil)!.yil }}</span>
+            <svg
+              class="w-2.5 h-2.5 ms-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
             >
-              <div
-                class="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 4 4 4-4"
+              />
+            </svg>
+          </button>
+
+          <div
+            v-if="isYilMenuOpen"
+            class="absolute w-[10rem] z-50 bg-neutral-300 dark:bg-neutral-700 rounded-md"
+          >
+            <ul
+              class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
+            >
+              <li
+                v-for="yil in yillar"
+                :key="yil.id"
+                @click="
+                  () => {
+                    selectedYil = yil.yil;
+                    isYilMenuOpen = !isYilMenuOpen;
+                  }
+                "
               >
-                {{ yil.yil }}
-              </div>
-            </li>
-          </ul>
+                <div
+                  class="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  {{ yil.yil }}
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="relative ml-5">
+          <button
+            id="dropdownBgHoverButton"
+            class="w-[10rem] text-neutral-700 border border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-8 py-2.5 flex items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
+            type="button"
+            @click="() => (isAyMenuOpen = !isAyMenuOpen)"
+          >
+            <span class="pr-5 flex-1 flex justify-start">{{
+              aylar.find((x) => x.id == selectedAy)!.ad
+            }}</span>
+            <svg
+              class="size-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 4 4 4-4"
+              />
+            </svg>
+          </button>
+
+          <div
+            v-if="isAyMenuOpen"
+            class="w-[10rem] absolute z-50 bg-neutral-300 dark:bg-neutral-700 rounded-md"
+          >
+            <ul
+              class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
+            >
+              <li
+                v-for="ay in aylar"
+                :key="ay.id"
+                @click="
+                  () => {
+                    selectedAy = ay.id;
+                    isAyMenuOpen = !isAyMenuOpen;
+                  }
+                "
+              >
+                <div
+                  class="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  {{ ay.ad }}
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-
-      <div class="relative ml-5">
+      <div class="relative">
         <button
-          id="dropdownBgHoverButton"
-          class="w-[10rem] text-neutral-700 border border-neutral-300 dark:border-gray-600 bg-neutral-50 cursor-pointer outline-none focus:outline-none font-medium rounded-md text-sm px-8 py-2.5 flex items-center dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-200"
-          type="button"
-          @click="() => (isAyMenuOpen = !isAyMenuOpen)"
+          class="flex justify-center items-center text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md text-sm px-4 py-1.5 text-center me-2 mb-2 group dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800"
+          @click="
+            () => {
+              isIslemlerMenuOpen = !isIslemlerMenuOpen;
+            }
+          "
         >
-          <span class="pr-5 flex-1 flex justify-start">{{
-            aylar.find((x) => x.id == selectedAy)!.ad
-          }}</span>
-          <svg
-            class="size-3"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
+          İşlemler
+          <svg class="size-7 fill-none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path
-              stroke="currentColor"
+              d="M7 10L12 15L17 10"
+              class="stroke-blue-700 group-hover:stroke-white"
+              stroke-width="1.5"
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 4 4 4-4"
             />
           </svg>
         </button>
-
         <div
-          v-if="isAyMenuOpen"
-          class="w-[10rem] absolute z-50 bg-neutral-300 dark:bg-neutral-700 rounded-md"
+          v-if="isIslemlerMenuOpen"
+          class="absolute bg-neutral-50 dark:bg-neutral-800 z-20 rounded-md border border-blue-600"
         >
-          <ul
-            class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200 select-none max-h-[40dvh] overflow-y-auto"
+          <button
+            class="font-semibold text-sm hover:bg-blue-600 hover:text-neutral-100 px-3 py-1 rounded-md"
+            @click="getPusulaPdfler()"
           >
-            <li
-              v-for="ay in aylar"
-              :key="ay.id"
-              @click="
-                () => {
-                  selectedAy = ay.id;
-                  isAyMenuOpen = !isAyMenuOpen;
-                }
-              "
-            >
-              <div
-                class="flex items-center p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600"
-              >
-                {{ ay.ad }}
-              </div>
-            </li>
-          </ul>
+            PDF olarak indir
+          </button>
         </div>
       </div>
     </div>
@@ -271,7 +338,12 @@ watch(selectedAy, () => getAllBordro());
             class="flex justify-between w-4/12 px-4 py-5 rounded-tl-md bg-neutral-200 dark:bg-neutral-800 text-sm font-semibold"
           >
             <div class="flex-1 flex items-center justify-start h-full">
-              <input type="checkbox" class="w-4 h-4" />
+              <input
+                type="checkbox"
+                class="w-4 h-4"
+                v-model="selectAllChecked"
+                @change="selectAll"
+              />
             </div>
             <div class="flex-8 flex justify-start">Adı</div>
             <div class="flex-1 flex justify-end">Durum</div>
@@ -297,9 +369,18 @@ watch(selectedAy, () => getAllBordro());
         >
           <div class="flex justify-between w-4/12 pl-4 py-2 rounded-tl-md text-base font-semibold">
             <div class="flex-1 flex items-center justify-center h-full">
-              <input type="checkbox" class="w-4 h-4" />
+              <input
+                type="checkbox"
+                class="w-4 h-4"
+                :checked="pusulaIdler.includes(maaPusula.personelId)"
+                @change="toggleSinglePusula(maaPusula.personelId)"
+              />
             </div>
-            <div class="flex-10 flex items-center text-sm mx-2 truncate">
+
+            <div
+              class="flex-10 flex items-center text-sm mx-2 truncate"
+              @click="getMaasPusulaPdf(maaPusula.personelId, maaPusula.yil, maaPusula.ay)"
+            >
               <img
                 v-if="maaPusula.avatarUrl"
                 class="size-8 rounded-md object-cover mr-2"
@@ -369,7 +450,7 @@ watch(selectedAy, () => getAllBordro());
             <div
               class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
             >
-              {{ maaPusula.brutUcret.toFixed(2) }}
+              {{ maaPusula.brutUcret }}
             </div>
           </div>
           <!-- Kazançlar end -->
@@ -428,7 +509,7 @@ watch(selectedAy, () => getAllBordro());
             <div
               class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
             >
-              {{ maaPusula.ekOdemeIstisna }}
+              {{ maaPusula.ekOdemeIstisnaToplam }}
             </div>
             <div
               class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
@@ -450,7 +531,7 @@ watch(selectedAy, () => getAllBordro());
             <div
               class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
             >
-              {{ maaPusula.ekOdemeIstisnaToplam }}
+              {{ maaPusula.ekOdemeIstisna }}
             </div>
             <div
               class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"

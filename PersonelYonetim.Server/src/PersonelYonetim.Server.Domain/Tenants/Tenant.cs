@@ -6,6 +6,8 @@ public class Tenant : Entity
     public string Name { get; set; } = default!;       
     public string DisplayName { get; set; } = default!;    
     public string? LogoUrl { get; set; }
+
+
     public string? SGKIsyeri { get; set; }
     public string? SGKNumarasi { get; set; }
     public string? VergiDairesiAdi { get; set; }
@@ -14,23 +16,18 @@ public class Tenant : Entity
     public string? Address { get; set; }
     public string? City { get; set; }
     public string? PostalCode { get; set; }
-    public string? Phone { get; set; }
+    public string? Phone { get; set; } 
     public string? Email { get; set; }
 
-    // Teknik Özelleştirme
-    public string? BrandingSettingsJson { get; set; }   
-    public string? FeatureTogglesJson { get; set; } 
-    public string? CustomFieldsJson { get; set; }
+    //Bordro için gerekli değişkenler
+    public decimal AsgariUcret { get; set; }
+    public decimal SGKPrimIsciKesintiOrani { get; set; }
+    public decimal SGKIssizlikPrimIsciKesintiOrani { get; set; }
+    public decimal SGKPrimIsverenKesintiOrani { get; set; }
+    public decimal SGKIssizlikPrimIsverenKesintiOrani { get; set; }
+    public decimal DamgaVergisiOrani { get; set; }
 
-    // Güvenlik & Rol
-    public int UserLimit { get; set; }   
-    public long StorageQuotaMb { get; set; } 
-
-    // Abonelik & Faturalama
-    public Guid? SubscriptionPlanId { get; set; }
-    public DateTime? NextBillingDate { get; set; }
-    public string? PaymentMethodJson { get; set; }
-
-    // İzleme & Metrikler
-    //public ICollection<TenantUsageMetric> UsageMetrics { get; set; } = new List<TenantUsageMetric>();
+    public decimal FazlaMesaiKatsayi { get;set; }
+    public decimal HaftasonuFazlaMesaiKatsayi { get; set; }
+    public decimal ResmiTatilFazlaMesaiKatsayi { get; set; }
 }

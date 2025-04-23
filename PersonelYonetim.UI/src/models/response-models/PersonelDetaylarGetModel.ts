@@ -14,8 +14,10 @@ export interface PersonelDetaylarGetModel extends EntityDto {
   calismaSekli?: string;
   yoneticiAd?: string;
   yoneticiPozisyon?: string;
-  baslangicTarih?: string; // DateTimeOffset string olarak gelir
-  bitisTarih?: string;
+  iseGirisTarihi?: string; // DateTimeOffset string olarak gelir
+  istenCikisTarihi?: string;
+  pozisyonBaslangicTarih?: string;
+  pozisyonBitisTarih?: string;
 
   // Kimlik Bilgileri
   tckn?: string;

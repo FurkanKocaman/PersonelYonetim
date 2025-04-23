@@ -4,10 +4,7 @@ using PersonelYonetim.Server.Domain.Rols;
 namespace PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
 public static class PozisyonVeRolSeedData
 {
-    public static readonly Guid RolIdBirimYoneticisi = Guid.CreateVersion7();
-    public static readonly Guid RolIdOnayYetkilisi = Guid.CreateVersion7();
-    public static readonly Guid RolIdIkYetkilisi = Guid.CreateVersion7();
-
+     
     public static (List<Pozisyon> Pozisyonlar, List<AppRole> Roller,Pozisyon genelMudur, AppRole yonetici) OlusturDefaultPozisyonVeRoller(Guid tenantId)
     {
         var pozisyonlar = new List<Pozisyon>
@@ -45,50 +42,15 @@ public static class PozisyonVeRolSeedData
         var roller = new List<AppRole>
         {
             // Yapısal Roller
-            new AppRole {
-                Id = RolIdBirimYoneticisi, 
+            new AppRole { 
+                Id = Guid.CreateVersion7(), 
                 Name = "Birim Yöneticisi",
                 Aciklama = "Atandığı kurumsal birimin (Şirket, Şube, Departman vb.) yönetiminden sorumlu rol.",
                 YapisalRolMu = true, 
                 CreatedAt = DateTimeOffset.Now,
                 TenantId = tenantId
             },
-
-            // Onay Rolleri
-            new AppRole {
-                Id = RolIdOnayYetkilisi, 
-                Name = "Onay Yetkilisi (Genel)",
-                Aciklama = "İzin, mesai vb. talepleri onaylama yetkisine sahip genel rol.",
-                YapisalRolMu = false,
-                CreatedAt = DateTimeOffset.Now,
-                TenantId = tenantId
-            },
-             new AppRole {
-                Id = RolIdIkYetkilisi,
-                Name = "İK Yetkilisi",
-                Aciklama = "İnsan Kaynakları süreçlerinde işlem yapma ve onay verme yetkisi.",
-                YapisalRolMu = false,
-                CreatedAt = DateTimeOffset.Now,
-                TenantId = tenantId
-            },
-            new AppRole {
-                Id = Guid.CreateVersion7(),
-                Name = "Finans Onay Yetkilisi",
-                Aciklama = "Finansal talepleri (avans, masraf vb.) onaylama yetkisi.",
-                YapisalRolMu = false,
-                CreatedAt = DateTimeOffset.Now,
-                TenantId = tenantId
-            },
-
-            // Fonksiyonel / Sistem Rolleri
-            new AppRole {
-                Id = Guid.CreateVersion7(),
-                Name = "Proje Lideri",
-                Aciklama = "Atandığı projelerin yönetiminden sorumlu.",
-                YapisalRolMu = false,
-                CreatedAt = DateTimeOffset.Now,
-                TenantId = tenantId
-            },
+           
              new AppRole {
                 Id = Guid.CreateVersion7(),
                 Name = "Sistem Yöneticisi (Admin)",
@@ -105,14 +67,7 @@ public static class PozisyonVeRolSeedData
                 CreatedAt = DateTimeOffset.Now,
                 TenantId = tenantId
             },
-             new AppRole {
-                Id = Guid.CreateVersion7(),
-                Name = "Rapor Görüntüleyici",
-                Aciklama = "Sistemdeki raporları görüntüleme yetkisi.",
-                YapisalRolMu = false,
-                CreatedAt = DateTimeOffset.Now,
-                TenantId = tenantId
-            }
+          
         };
         var yonetici = roller.FirstOrDefault(p => p.Name == "Birim Yöneticisi");
         return (pozisyonlar, roller,genelMudur!,yonetici!);

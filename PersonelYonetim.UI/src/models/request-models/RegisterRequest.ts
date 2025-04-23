@@ -1,15 +1,7 @@
-import type { Adres } from "./entity-models/Adres";
-import type { Iletisim } from "./entity-models/Iletisim";
+import type { KurumsalBirimCreateCommand } from "./KurumsalBirimCreateCommand";
+import type { PersonelCreateCommand } from "./PersonelCreateCommand";
 
 export interface RegisterRequest {
-  ad: string;
-  soyad: string;
-  dogumTarihi: Date;
-  cinsiyet: boolean | undefined;
-  personelIletisim: Iletisim;
-  personelAdres: Adres;
-  sirketAd: string;
-  sirketKurulusTarihi: Date;
-  sirketIletisim: Iletisim;
-  sirketAdres: Adres;
+  kurumsalBirimCreateCommand: KurumsalBirimCreateCommand;
+  personelCreateCommand: PersonelCreateCommand;
 }

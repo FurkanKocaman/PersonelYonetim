@@ -20,7 +20,7 @@ public sealed class PersonelGetAllQueryResponse : EntityDto
     public string? AvatarUrl { get; set; }
     public string? Cinsiyet { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
-    public Adres Adres { get; set; } = default!;
+    public Adres? Adres { get; set; } 
     public string KurumsalBirimAd { get; set; } = string.Empty;
     public string PozisyonAd { get; set; } = string.Empty;
     public string? YoneticiAd { get; set; }

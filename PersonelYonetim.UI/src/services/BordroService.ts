@@ -3,6 +3,7 @@ import type { BordroGetAllModel } from "@/models/response-models/BordroGetAllMod
 import api from "./Axios";
 import type { BordroGetCalisanlarModel } from "@/models/response-models/BordroCalisanlarGetModel";
 import type { BordroGetByPersonelModel } from "@/models/response-models/BordroGetByPersonelModel";
+import { useToastStore } from "@/stores/ToastStore";
 
 class BordroService {
   async bordroCreate(
@@ -18,7 +19,7 @@ class BordroService {
         personelId: personelId,
         tekrarHesapla: tekrarHesapla,
       });
-
+      useToastStore().addToast(res.data.data, "", "success", 5000, true);
       return res.data.data;
     } catch (error) {
       console.error(error);

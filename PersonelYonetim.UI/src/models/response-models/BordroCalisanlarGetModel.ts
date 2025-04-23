@@ -2,7 +2,7 @@ export interface BordroGetCalisanlarModel {
   id: string;
   fullName: string;
   avatarUrl: string | undefined;
-  TCKN: string | undefined;
+  tckn: string | undefined;
   iseBaslangicTarihi: Date | undefined;
   istenCikisTarihi: Date | undefined;
   engelDerecesi: number;

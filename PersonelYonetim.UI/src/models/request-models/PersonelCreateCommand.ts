@@ -12,11 +12,12 @@ export interface PersonelCreateCommand {
 
   kurumsalBirimId: string | undefined;
   pozisyonId: string | undefined;
-  roleId: string | undefined;
+  roleId: string[] | undefined;
   baslangicTarihi: Date;
   bitisTarihi: Date | undefined;
-  birincilGorevMi: boolean | undefined;
+  birincilGorevMi: boolean;
   gorevlendirmeTipiValue: number;
+  calismaSekliValue: number;
   raporlananGorevlendirmeId: string | undefined;
   izinKuralId: string | undefined;
   calismaTakvimId: string | undefined;

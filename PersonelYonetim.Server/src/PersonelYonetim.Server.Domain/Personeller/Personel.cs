@@ -15,10 +15,10 @@ public sealed class Personel : Entity
     public bool? Cinsiyet { get; set; }
     public string? AvatarUrl { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
-    public Adres Adres { get; set; } = default!;
+    public Adres? Adres { get; set; }
     public Guid UserId { get; set; } = default!;
     public AppUser User { get; set; } = default!;
-    public PersonelDetay PersonelDetay { get; set; } = default!;
+    public PersonelDetay? PersonelDetay { get; set; }
     public ICollection<PersonelGorevlendirme> PersonelGorevlendirmeler { get;set; } = new List<PersonelGorevlendirme>();
     public ICollection<PersonelBildirim> PersonelBildirimler { get; set; } = new List<PersonelBildirim>();
     public Guid TenantId { get; set; }

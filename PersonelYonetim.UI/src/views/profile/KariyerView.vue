@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TableLayout from "@/components/TableLayout.vue";
-import type { PersonelAtamaModel } from "@/models/entity-models/PersonelAtamaModel";
+import type { PersonelGorevlendirmeModel } from "@/models/entity-models/PersonelGorevlendirmeModel";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import PersonelService from "@/services/PersonelService";
 import { computed, onMounted, ref, type Ref } from "vue";
@@ -18,40 +18,40 @@ const paginationParams: Ref<PaginationParams> = ref({
   filter: "",
 });
 
-const personelAtamalar: Ref<PersonelAtamaModel[] | undefined> = ref([]);
+const personelGorevlendirmeler: Ref<PersonelGorevlendirmeModel[] | undefined> = ref([]);
 
 onMounted(() => {
   getPersonelAtamalar();
 });
 
 const getPersonelAtamalar = async () => {
-  const res = await PersonelService.getPersonelAtamalar(paginationParams.value);
-  personelAtamalar.value = res?.items;
+  const res = await PersonelService.getPersonelGorevlendirmeler(undefined, paginationParams.value);
+  personelGorevlendirmeler.value = res?.items;
   paginationParams.value.count = res?.count || 0;
 };
 
 const filteredPersonelAtamalar = computed<Record<string, unknown>[]>(() => {
-  return (personelAtamalar.value || []).map(
+  return (personelGorevlendirmeler.value || []).map(
     ({
       id,
-      pozisyonBaslangicTarih,
-      pozisyonBitisTarih,
-      sirketAd,
-      subeAd,
-      departmanAd,
+      pozisyonBaslangicTarihi,
+      pozisyonBitisTarihi,
+      kurumsalBirimAd,
       pozisyonAd,
-      yoneticiAd,
+      raporlananPersonelAd,
       isActive,
+      createdAt,
+      createUserName,
     }) => ({
       id,
-      pozisyonBaslangicTarih: new Date(pozisyonBaslangicTarih),
-      pozisyonBitisTarih: pozisyonBitisTarih != null ? new Date(pozisyonBitisTarih) : null,
-      sirketAd,
-      subeAd,
-      departmanAd,
+      pozisyonBaslangicTarihi: new Date(pozisyonBaslangicTarihi),
+      pozisyonBitisTarihi: pozisyonBitisTarihi != null ? new Date(pozisyonBitisTarihi) : null,
+      kurumsalBirimAd,
       pozisyonAd,
-      yoneticiAd,
+      raporlananPersonelAd,
       isActive: isActive ? "Aktif" : "Pasif",
+      createdAt: new Date(createdAt),
+      createUserName,
     })
   );
 });
@@ -131,14 +131,14 @@ const orderBy = (order: string) => {
       <div class="overflow-x-auto mt-5">
         <TableLayout
           :table-headers="[
-            { key: 'pozisyonBaslangicTarih', value: 'Baslangic', width: 'w-1/8' },
-            { key: 'pozisyonBitisTarih', value: 'Bitis', width: 'w-1/8' },
-            { key: 'sirketAd', value: 'Şirket' },
-            { key: 'subeAd', value: 'Şube' },
-            { key: 'departmanAd', value: 'Departman' },
+            { key: 'pozisyonBaslangicTarihi', value: 'Baslangic', width: 'w-20' },
+            { key: 'pozisyonBitisTarihi', value: 'Bitis', width: 'w-[500px]' },
+            { key: 'kurumsalBirimAd', value: 'Birim' },
             { key: 'pozisyonAd', value: 'Pozisyon' },
-            { key: 'yoneticiAd', value: 'Yonetici' },
+            { key: 'raporlananPersonelAd', value: 'Yonetici' },
             { key: 'isActive', value: 'Durum' },
+            { key: 'createdAt', value: 'Oluşturulma Tarihi' },
+            { key: 'createUserName', value: 'Oluşturan' },
           ]"
           :table-content="filteredPersonelAtamalar"
           :islemler="['detaylar']"

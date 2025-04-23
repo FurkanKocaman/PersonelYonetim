@@ -133,14 +133,18 @@ const handleBirimTipiCreate = async () => {
                     class="block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300"
                     >Yoneticisi olabilir mi?</label
                   >
-                  <input
-                    type="chackbox"
-                    name="ustBirimId"
-                    id="ustBirimId"
-                    v-model="request.yoneticisiOlabilirMi"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-sm block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none dark:placeholder-gray-400 dark:text-white"
-                    placeholder=""
-                  />
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      value=""
+                      class="sr-only peer"
+                      v-model="request.yoneticisiOlabilirMi"
+                      checked
+                    />
+                    <div
+                      class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"
+                    ></div>
+                  </label>
                 </div>
               </div>
             </div>

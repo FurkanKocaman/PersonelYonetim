@@ -16,6 +16,7 @@ using PersonelYonetim.Server.Infrastructure.Options;
 using PersonelYonetim.Server.Infrastructure.Repositories;
 using PersonelYonetim.Server.Infrastructure.Services;
 using Scrutor;
+using PersonelYonetim.Server.Infrastructure.Configurations;
 
 namespace PersonelYonetim.Server.Infrastructure;
 
@@ -42,6 +43,8 @@ public static class InfrastructureRegistrar
         services.AddScoped<Domain.UnitOfWork.IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBildirimService, BildirimService>();
         services.AddScoped<IPDFService, PDFService>();
+
+        services.AddScoped<IRoleValidator<AppRole>, CustomRoleValidator>();
 
         services
             .AddIdentity<AppUser, AppRole>(opt =>

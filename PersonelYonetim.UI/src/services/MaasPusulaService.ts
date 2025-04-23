@@ -15,6 +15,26 @@ class MaasPusulaService {
       throw error;
     }
   }
+  async getMaasPusulaPdf(personelId: string, yil: number, ay: number): Promise<string> {
+    try {
+      const response: {
+        data: { data: string; errorMessages: string[]; isSuccessful: boolean; statusCode: number };
+      } = await api.post(`${import.meta.env.VITE_API_URL}/maas-pusula/pdf`, {
+        personelId: personelId,
+        yil: yil,
+        ay: ay,
+      });
+      console.log("Res", response);
+      if (response.data.isSuccessful) {
+        window.open(`${import.meta.env.VITE_API_URL}${response.data.data}`, "_blank");
+      }
+
+      return response.data.data;
+    } catch (error) {
+      console.error("PDF açılamadı", error);
+      throw error;
+    }
+  }
 }
 
 export default new MaasPusulaService();

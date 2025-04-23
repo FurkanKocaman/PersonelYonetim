@@ -41,9 +41,21 @@ internal sealed class RegisterCommandHandler(
     {
         try
         {
-            Tenant tenant = new() 
-            { 
-                Name=request.KurumsalBirimCreateCommand.Ad,
+            Tenant tenant = new()
+            {
+                DisplayName = request.KurumsalBirimCreateCommand.Ad,
+                Name = request.KurumsalBirimCreateCommand.Ad,
+                AsgariUcret = 22104,
+
+                SGKPrimIsciKesintiOrani = (decimal)0.14,
+                SGKIssizlikPrimIsciKesintiOrani = (decimal)0.01,
+                SGKPrimIsverenKesintiOrani = (decimal)0.2075,
+                SGKIssizlikPrimIsverenKesintiOrani =(decimal)0.02,
+                DamgaVergisiOrani = (decimal)0.00759,
+
+                FazlaMesaiKatsayi = (decimal)1.5,
+                HaftasonuFazlaMesaiKatsayi = (decimal)1.5,
+                ResmiTatilFazlaMesaiKatsayi = (decimal)2,
             };
 
             Guid tenantId = tenant.Id;
@@ -107,7 +119,7 @@ internal sealed class RegisterCommandHandler(
                 {
                     TenantId = tenantId,
                     KurumsalBirimId = result.Data,
-                    RoleId = role.Id,
+                    RoleId = [role.Id],
                     PozisyonId = pozisyon.Id,
                 };
 

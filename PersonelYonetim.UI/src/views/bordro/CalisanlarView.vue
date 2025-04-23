@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { BordroCalisanlarUpdateCommand } from "@/models/request-models/BordroCalisanlarUpdateModel";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { BordroGetCalisanlarModel } from "@/models/response-models/BordroCalisanlarGetModel";
 import type { KurumsalBirimGetModel } from "@/models/response-models/KurumsalBirimGetModel";
 import BordroService from "@/services/BordroService";
 import KurumsalBirimService from "@/services/KurumsalBirimService";
+import { useToastStore } from "@/stores/ToastStore";
 import { onMounted, ref, watch, type Ref } from "vue";
 
 const bordroCalisanlar: Ref<BordroGetCalisanlarModel[] | undefined> = ref([]);
@@ -14,7 +16,10 @@ const selectedBirim = ref<string | undefined>(undefined);
 const birimler: Ref<KurumsalBirimGetModel[] | undefined> = ref([]);
 const personelId = ref([]);
 
+const isLoading = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
+
+const updateRequest: Ref<BordroCalisanlarUpdateCommand[]> = ref([]);
 
 const paginationParams: Ref<PaginationParams> = ref({
   count: 0,
@@ -44,14 +49,29 @@ const getAllBirimler = async () => {
 };
 
 const bordroHesapla = async () => {
-  const today = new Date();
-  const res = await BordroService.bordroCreate(
-    today.getFullYear(),
-    new Date().getMonth() + 1,
-    personelId.value,
-    true
-  );
-  console.log(res);
+  isLoading.value = true;
+  isIslemlerMenuOpen.value = false;
+  if (personelId.value.length != 0) {
+    const today = new Date();
+    const res = await BordroService.bordroCreate(
+      today.getFullYear(),
+      new Date().getMonth() + 1,
+      personelId.value,
+      true
+    );
+
+    if (res) {
+      isLoading.value = false;
+    }
+  } else {
+    useToastStore().addToast(
+      "Bordro hesaplaması için en az 1 personel seçmelisiniz",
+      "",
+      "error",
+      5000,
+      true
+    );
+  }
 };
 
 watch(selectedBirim, () => getAllCalisanlar());
@@ -176,9 +196,12 @@ defineExpose({
             />
           </svg>
         </button>
-        <div v-if="isIslemlerMenuOpen" class="absolute bg-neutral-400 z-20 rounded-md">
+        <div
+          v-if="isIslemlerMenuOpen"
+          class="absolute bg-neutral-50 dark:bg-neutral-800 z-20 rounded-md border border-blue-600"
+        >
           <button
-            class="text-sm hover:bg-neutral-300 px-3 py-1 rounded-md"
+            class="font-semibold text-sm hover:bg-blue-600 hover:text-neutral-100 px-3 py-1 rounded-md"
             @click="bordroHesapla()"
           >
             Bordro Hesapla
@@ -251,7 +274,7 @@ defineExpose({
             <tr
               v-for="calisan in bordroCalisanlar"
               :key="calisan.id"
-              class="bg-neutral-100 dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700"
+              class="bg-neutral-100 dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-600/40"
             >
               <!-- Checkbox -->
               <td class="sticky left-0 bg-neutral-100 dark:bg-neutral-800 px-2 py-2 w-10 z-10">
@@ -298,7 +321,13 @@ defineExpose({
                 </label>
               </td>
 
-              <td class="px-4 py-2 w-40">{{ calisan.TCKN ?? "-" }}</td>
+              <td class="px-4 py-2 w-40">
+                <input
+                  class="border-b-1 text-sm border-neutral-400 w-full px-2 py-1.5 bg-neutral-200 dark:bg-neutral-700 focus:outline-none"
+                  type="text"
+                  :value="calisan.tckn"
+                />
+              </td>
               <td class="px-4 py-2 w-40">
                 {{
                   calisan.iseBaslangicTarihi != null
@@ -328,13 +357,38 @@ defineExpose({
                 }}
               </td>
               <td class="px-4 py-2 w-40">%{{ calisan.engelDerecesi }}</td>
-              <td class="px-4 py-2 w-40">{{ calisan.tabiOlduguKanun ?? "-" }}</td>
-              <td class="px-4 py-2 w-40">{{ calisan.SGKIsyeri ?? "-" }}</td>
-              <td class="px-4 py-2 w-40">{{ calisan.vergiDairesiAdi ?? "-" }}</td>
+              <td class="px-4 py-2 w-40">
+                <input
+                  class="border-b-1 text-sm border-neutral-400 w-full px-1 py-1.5 bg-neutral-200 dark:bg-neutral-700 focus:outline-none"
+                  type="text"
+                  :value="calisan.tabiOlduguKanun"
+                />
+              </td>
+              <td class="px-4 py-2 w-40">
+                <input
+                  class="border-b-1 text-sm border-neutral-400 w-full px-1 py-1.5 bg-neutral-200 dark:bg-neutral-700 focus:outline-none"
+                  type="text"
+                  :value="calisan.SGKIsyeri"
+                />
+              </td>
+              <td class="px-4 py-2 w-40">
+                <input
+                  class="border-b-1 text-sm border-neutral-400 w-full px-2 py-1.5 bg-neutral-200 dark:bg-neutral-700 focus:outline-none"
+                  type="text"
+                  :value="calisan.vergiDairesiAdi"
+                />
+              </td>
+
               <td class="px-4 py-2 w-40">{{ calisan.kumulatifVergiMatrahi }}</td>
               <td class="px-4 py-2 w-40">{{ calisan.birimAdi }}</td>
               <td class="px-4 py-2 w-40">{{ calisan.pozisyonAd }}</td>
-              <td class="px-4 py-2 w-40">{{ calisan.meslekKodu ?? "-" }}</td>
+              <td class="px-4 py-2 w-40">
+                <input
+                  class="border-b-1 text-sm border-neutral-400 w-full px-2 py-1.5 bg-neutral-200 dark:bg-neutral-700 focus:outline-none"
+                  type="text"
+                  :value="calisan.meslekKodu"
+                />
+              </td>
             </tr>
           </tbody>
         </table>

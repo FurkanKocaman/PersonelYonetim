@@ -32,7 +32,7 @@ internal sealed class IzinHakSorgulamaService(
 
         var izinTaleplerToplamGun = await izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id).SumAsync(p => p.ToplamSure, cancellationToken);
 
-        var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.BaslangicTarihi.Year);
+        var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.IseGirisTarihi.Year);
 
         var toplamHak = kidemYil == 1 || kidemYil == 0 ? izinTur.LimitGunSayisi : izinTur.LimitGunSayisi + (4 * kidemYil);
 

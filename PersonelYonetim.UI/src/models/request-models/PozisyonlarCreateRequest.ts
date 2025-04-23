@@ -1,6 +1,7 @@
 export interface PozisyonCreateRequest {
-  id?: string;
+  id: string | undefined;
   ad: string;
-  aciklama: string | null;
-  sirketId: string;
+  kod: string | undefined;
+  aciklama: string | undefined;
+  tenantId: string | undefined;
 }

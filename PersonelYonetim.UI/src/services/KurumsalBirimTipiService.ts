@@ -65,7 +65,6 @@ class KurumsalBirimTipiService {
           },
         }
       );
-      console.log(response);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
