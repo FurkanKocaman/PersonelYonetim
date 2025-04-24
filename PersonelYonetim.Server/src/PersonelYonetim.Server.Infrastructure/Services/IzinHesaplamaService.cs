@@ -33,41 +33,41 @@ internal sealed class IzinHesaplamaService(
         baslangic = baslangic.ToLocalTime();
         bitis = bitis.ToLocalTime();
 
-        DateTimeOffset currentDay = baslangic.Date;
+        DateTimeOffset currentDay = baslangic;
 
-        while(currentDay <= bitis.Date)
+        while(currentDay.Date <= bitis.Date)
         {
            var calismaGun = calismaGunler.FirstOrDefault(g => g.Gun == currentDay.DayOfWeek);
 
             if(calismaGun is not null && calismaGun.IsCalismaGunu)
             {
-                if(currentDay == baslangic.Date && new TimeOnly(baslangic.Hour,baslangic.Minute) >= calismaGun.CalismaBitis)
+                if(currentDay.Date == baslangic.Date && new TimeOnly(baslangic.Hour,baslangic.Minute) >= calismaGun.CalismaBitis)
                 {
                     currentDay = currentDay.AddDays(1);
                     continue;
                 }
 
                 //Mola süresi sonradan çıkarılabilir
-                var toplamMesai = (decimal)(new TimeOnly(calismaGun.CalismaBaslangic!.Value.Hour, calismaGun.CalismaBaslangic.Value.Minute).ToTimeSpan()).TotalHours;
+                var toplamMesai = (decimal)(calismaGun.CalismaBitis!.Value - calismaGun.CalismaBaslangic!.Value).TotalMinutes;
 
                 if (baslangic.Date == bitis.Date)
                 {
                     var start = new TimeOnly(baslangic.TimeOfDay.Hours, baslangic.TimeOfDay.Minutes) <= calismaGun.CalismaBaslangic ? calismaGun.CalismaBaslangic : new TimeOnly(baslangic.TimeOfDay.Hours, baslangic.TimeOfDay.Minutes);
                     var end = new TimeOnly(bitis.TimeOfDay.Hours, bitis.TimeOfDay.Minutes) >= calismaGun.CalismaBitis ? calismaGun.CalismaBitis : new TimeOnly(bitis.TimeOfDay.Hours, bitis.TimeOfDay.Minutes);
 
-                    toplamGun += (decimal)(end - start).Value.Hours / toplamMesai ;
+                    toplamGun += (decimal)(end - start).Value.TotalMinutes / toplamMesai;
                 }
                 else
                 {
                     if(currentDay.Date == baslangic.Date)
                     {
-                        var start = new TimeOnly(currentDay.TimeOfDay.Hours, currentDay.TimeOfDay.Minutes) <= calismaGun.CalismaBaslangic ? calismaGun.CalismaBaslangic : new TimeOnly(currentDay.TimeOfDay.Hours, currentDay.TimeOfDay.Minutes);
-                        toplamGun += (decimal)(calismaGun.CalismaBitis! - start).Value.Hours / toplamMesai;
+                        var start = new TimeOnly(baslangic.TimeOfDay.Hours, baslangic.TimeOfDay.Minutes) <= calismaGun.CalismaBaslangic ? calismaGun.CalismaBaslangic : new TimeOnly(baslangic.TimeOfDay.Hours, baslangic.TimeOfDay.Minutes);
+                        toplamGun += (decimal)(calismaGun.CalismaBitis! - start).Value.TotalMinutes / toplamMesai;
                     }
                     else if(currentDay.Date == bitis.Date)
                     {
                         var end = new TimeOnly(bitis.TimeOfDay.Hours, bitis.TimeOfDay.Minutes) >= calismaGun.CalismaBitis ? calismaGun.CalismaBitis : new TimeOnly(bitis.TimeOfDay.Hours, bitis.TimeOfDay.Minutes);
-                        toplamGun += (decimal)(end - calismaGun.CalismaBaslangic).Value.Hours / toplamMesai;
+                        toplamGun += (decimal)(end - calismaGun.CalismaBaslangic).Value.TotalMinutes / toplamMesai;
                     }
                     else
                     {

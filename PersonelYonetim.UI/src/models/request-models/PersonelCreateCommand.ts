@@ -12,14 +12,19 @@ export interface PersonelCreateCommand {
 
   kurumsalBirimId: string | undefined;
   pozisyonId: string | undefined;
-  roleId: string | undefined;
-  baslangicTarihi: Date;
-  bitisTarihi: Date | undefined;
-  birincilGorevMi: boolean | undefined;
+  roleId: string[] | undefined;
+
+  iseGirisTarihi: Date;
+  istenCikisTarihi: Date | undefined;
+  pozisyonBaslangicTarihi: Date;
+  pozisyonBitisTarihi: Date | undefined;
+
+  birincilGorevMi: boolean;
   gorevlendirmeTipiValue: number;
+  calismaSekliValue: number;
   raporlananGorevlendirmeId: string | undefined;
   izinKuralId: string | undefined;
-  calismaTakvimId: string | undefined;
+  calismaTakvimiId: string | undefined;
   brutUcret: number | undefined;
   tenantId: string | undefined;
 }

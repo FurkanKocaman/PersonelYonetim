@@ -1,3 +1,5 @@
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OData;
@@ -11,6 +13,7 @@ using PersonelYonetim.Server.WebAPI.Modules;
 using Scalar.AspNetCore;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
+using PersonelYonetim.Server.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

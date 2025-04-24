@@ -9,7 +9,7 @@ const router = useRouter();
 const email = ref("");
 const password = ref("");
 const isLoading = ref(false);
-const loginResponse = ref("");
+const loginResponse = ref<{ success: boolean; message: string }>({ success: true, message: "" });
 
 onMounted(() => {});
 
@@ -19,15 +19,14 @@ const handleLogin = async () => {
     const loginData: LoginRequest = { usernameOrEmail: email.value, password: password.value };
     const response = await AuthService.login(loginData);
     if (response.success) {
-      loginResponse.value = response.message;
+      loginResponse.value = response;
       router.push("/");
     } else {
-      loginResponse.value = response.message;
-      console.error(response);
+      loginResponse.value = response;
     }
     isLoading.value = false;
   } catch (error) {
-    console.error("Error", error);
+    console.error(error);
     isLoading.value = false;
   }
 };
@@ -45,6 +44,31 @@ const handleLogin = async () => {
       <form @submit.prevent="handleLogin" class="w-full px-5 md:px-10">
         <div>
           <h1 class="text-2xl font-semibold text-center mb-6">Giriş Sayfası</h1>
+          <div
+            v-if="!loginResponse.success"
+            class="border rounded-md border-red-600 flex items-center"
+          >
+            <svg
+              class="size-8 fill-red-600 ml-2"
+              viewBox="0 0 1024 1024"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M332 663.2c-9.6 9.6-9.6 25.6 0 35.2s25.6 9.6 35.2 0l349.6-356c9.6-9.6 9.6-25.6 0-35.2s-25.6-9.6-35.2 0L332 663.2z"
+                fill=""
+              />
+              <path
+                d="M681.6 698.4c9.6 9.6 25.6 9.6 35.2 0s9.6-25.6 0-35.2L367.2 307.2c-9.6-9.6-25.6-9.6-35.2 0s-9.6 25.6 0 35.2l349.6 356z"
+                fill=""
+              />
+              <path
+                d="M516.8 1014.4c-277.6 0-503.2-225.6-503.2-503.2S239.2 7.2 516.8 7.2s503.2 225.6 503.2 503.2-225.6 504-503.2 504z m0-959.2c-251.2 0-455.2 204.8-455.2 456s204 455.2 455.2 455.2 455.2-204 455.2-455.2-204-456-455.2-456z"
+                fill=""
+              />
+            </svg>
+            <span class="text-sm text-red-500 py-3 px-6">{{ loginResponse.message }}</span>
+          </div>
           <div>
             <label for="email" class="block text-sm/5 font-semibold my-2"
               >Eposta | Kullanıcı adı</label

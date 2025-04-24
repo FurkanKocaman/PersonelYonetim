@@ -21,8 +21,11 @@ public sealed class PersonelGorevlendirme : Entity
     public Guid? PozisyonId { get; set; }
     public Pozisyon? Pozisyon { get; set; }
 
-    public DateTimeOffset BaslangicTarihi { get; set; }
-    public DateTimeOffset? BitisTarihi { get; set; }
+    public DateTimeOffset IseGirisTarihi { get; set; }
+    public DateTimeOffset? IstenCikisTarihi { get; set; }
+
+    public DateTimeOffset PozisyonBaslangicTarihi { get; set; }
+    public DateTimeOffset? PozisyonBitisTarihi { get; set; }
 
     public bool BirincilGorevMi { get; set; } = true;
     public GorevlendirmeTipiEnum? GorevlendirmeTipi { get; set; }
@@ -42,11 +45,14 @@ public sealed class PersonelGorevlendirme : Entity
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal BrutUcret { get; set; }
-    public string? TabiOlduguKanun { get; set; }
     public string? SGKIsyeri { get; set; }
+    public string? SGKNumarasi { get; set; }
     public string? VergiDairesiAdi { get; set; }
+    public string? VergiNumarasi { get; set; }
+    public string? TabiOlduguKanun { get; set; }
     public string? MeslekKodu { get; set; }
-
+    public decimal? BesKesintiOrani { get; set; }
+    public bool BesKesintisiVarMi { get; set; } = false;
     public Guid TenantId { get; set; }
 }
 

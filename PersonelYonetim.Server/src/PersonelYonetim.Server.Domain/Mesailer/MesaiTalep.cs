@@ -11,10 +11,12 @@ public class MesaiTalep : Entity
     public string Aciklama { get; set; } = default!;    
     public DateTimeOffset BaslangicTarihi { get; set; }
     public DateTimeOffset BitisTarihi { get; set; }
-    public decimal ToplamSure { get; set; }
+    public TimeSpan ToplamSure { get; set; }
     public MesaiDegerlendirmeDurumEnum MesaiDegerlendirmeDurum { get; set; } = default!;
     public decimal? Ucret { get; set; }// mesai ücrete çevrilirse
     public decimal? IzinGun { get; set; } // mesai izine çevrilirse
+    public Guid OnaySurecId { get;  set; } // Aktif hale getirildi
+    public OnaySurec? OnaySurec { get; set; } // İlişki
     public ICollection<TalepDegerlendirme> DegerlendirmeAdimlari { get; set; } = new List<TalepDegerlendirme>();
     public Guid TenantId { get; set; }
 }

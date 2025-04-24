@@ -20,17 +20,10 @@ public class CalismaPeriyodu
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid GunlukCalismaId { get; set; }
     public GunlukCalisma GunlukCalisma { get; set; } = default!;
-    public CalismaPeriyoduTipi CalismaPeriyoduTipi { get; set; } = CalismaPeriyoduTipi.Normal;
     public TimeOnly BaslangicSaati { get; set; }
     public TimeOnly BitisSaati { get; set; }
-
     public TimeSpan ToplamCalismaSuresi { get; set; }
     public Guid TenantId { get; set; }
-}
-public enum CalismaPeriyoduTipi
-{
-    Normal,
-    FazlaMesai
 }
 public class MolaPeriyodu
 {

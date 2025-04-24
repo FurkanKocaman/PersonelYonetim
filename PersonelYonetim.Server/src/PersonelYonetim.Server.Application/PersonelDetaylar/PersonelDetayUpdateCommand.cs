@@ -13,24 +13,15 @@ public sealed record PersonelDetayUpdateCommand(
 
     // Kimlik Bilgileri
     string? TCKN,
-    string? NufusIl,
-    string? NufusIlce,
     string? AnaAdi,
     string? BabaAdi,
     string? DogumYeri,
-    DateTime? DogumTarihi,
     string? MedeniHali,
-    string? Cinsiyet,
     string? Uyruk,
 
     // İletişim Bilgileri
-    string? CepTelefonu,
     string? IsTelefonu,
-    string? Eposta,
     string? EpostaIs,
-    string? Adres,
-    string? IkametIl,
-    string? IkametIlce,
     string? PostaKodu,
 
     // Eğitim Bilgileri

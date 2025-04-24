@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, type Ref } from "vue";
 import AuthService from "@/services/AuthService";
 import { useRouter } from "vue-router";
 import type { RegisterRequest } from "@/models/request-models/RegisterRequest";
@@ -13,17 +13,46 @@ const loginResponse = ref("");
 const currentStep = ref(0);
 const isDark = ref(true);
 
-const registerData = ref<RegisterRequest>({
-  ad: "",
-  soyad: "",
-  dogumTarihi: new Date(),
-  cinsiyet: undefined,
-  personelIletisim: { eposta: "", telefon: "" },
-  personelAdres: { ulke: "Türkiye", sehir: "", ilce: "", tamAdres: "" },
-  sirketAd: "",
-  sirketKurulusTarihi: new Date(),
-  sirketIletisim: { eposta: "", telefon: "" },
-  sirketAdres: { ulke: "Türkiye", sehir: "", ilce: "", tamAdres: "" },
+const registerRequest: Ref<RegisterRequest> = ref({
+  kurumsalBirimCreateCommand: {
+    id: undefined,
+    ad: "",
+    kod: undefined,
+    logoUrl: undefined,
+    birimTipiId: "4d9ce5a1-0e0b-478b-8258-ef2343d06254",
+    ustBirimId: undefined,
+    tenantId: undefined,
+  },
+  personelCreateCommand: {
+    ad: "",
+    soyad: "",
+    dogumTarihi: new Date(),
+    cinsiyet: undefined,
+    avatarUrl: undefined,
+    iletisim: {
+      telefon: "",
+      eposta: "",
+    },
+    adres: {
+      ulke: "Türkiye",
+      sehir: "",
+      ilce: "",
+      tamAdres: "",
+    },
+    kurumsalBirimId: undefined,
+    pozisyonId: undefined,
+    roleId: undefined,
+    baslangicTarihi: new Date(),
+    bitisTarihi: undefined,
+    birincilGorevMi: false,
+    gorevlendirmeTipiValue: 1,
+    calismaSekliValue: 0,
+    raporlananGorevlendirmeId: undefined,
+    izinKuralId: undefined,
+    calismaTakvimId: undefined,
+    brutUcret: 0,
+    tenantId: undefined,
+  },
 });
 
 const provinces = ref<{ id: number; name: string }[]>([]);
@@ -40,21 +69,10 @@ const getProvinces = async () => {
 };
 
 const getDistricts = async () => {
-  if (!registerData.value.personelAdres.sehir) return;
+  if (!registerRequest.value.personelCreateCommand.adres?.sehir) return;
   try {
     const response = await axios.get(
-      `https://turkiyeapi.dev/api/v1/provinces?name=${registerData.value.personelAdres.sehir}`
-    );
-    districts.value = response.data.data[0].districts;
-  } catch (error) {
-    console.error("İlçe verileri alınırken hata oluştu:", error);
-  }
-};
-const getDistrictsSirket = async () => {
-  if (!registerData.value.sirketAdres.sehir) return;
-  try {
-    const response = await axios.get(
-      `https://turkiyeapi.dev/api/v1/provinces?name=${registerData.value.sirketAdres.sehir}`
+      `https://turkiyeapi.dev/api/v1/provinces?name=${registerRequest.value.personelCreateCommand.adres?.sehir}`
     );
     districts.value = response.data.data[0].districts;
   } catch (error) {
@@ -75,10 +93,9 @@ const handleRegister = async () => {
       return;
     }
     isLoading.value = true;
-    registerData.value.personelAdres.tamAdres = `${registerData.value.personelAdres.sehir}/${registerData.value.personelAdres.ilce}  ${registerData.value.personelAdres.ulke}`;
-    registerData.value.sirketAdres.tamAdres = `${registerData.value.sirketAdres.sehir}/${registerData.value.sirketAdres.ilce}  ${registerData.value.sirketAdres.ulke}`;
+    registerRequest.value.personelCreateCommand.adres!.tamAdres = `${registerRequest.value.personelCreateCommand.adres?.sehir}/${registerRequest.value.personelCreateCommand.adres?.ilce}  ${registerRequest.value.personelCreateCommand.adres?.ulke}`;
 
-    const response = await AuthService.register(registerData.value);
+    const response = await AuthService.register(registerRequest.value);
     if (response.success) {
       console.log(response);
       loginResponse.value = response.message;
@@ -198,7 +215,7 @@ const handleRegister = async () => {
                 <div>
                   <input
                     id="ad"
-                    v-model="registerData.ad"
+                    v-model="registerRequest.personelCreateCommand.ad"
                     type="text"
                     required
                     class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
@@ -211,7 +228,7 @@ const handleRegister = async () => {
                 <div>
                   <input
                     id="soyad"
-                    v-model="registerData.soyad"
+                    v-model="registerRequest.personelCreateCommand.soyad"
                     type="text"
                     required
                     class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
@@ -226,7 +243,7 @@ const handleRegister = async () => {
               <div>
                 <input
                   id="email"
-                  v-model="registerData.personelIletisim.eposta"
+                  v-model="registerRequest.personelCreateCommand.iletisim.eposta"
                   type="email"
                   required
                   class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
@@ -240,7 +257,7 @@ const handleRegister = async () => {
               <div>
                 <input
                   id="telefon"
-                  v-model="registerData.personelIletisim.telefon"
+                  v-model="registerRequest.personelCreateCommand.iletisim.telefon"
                   type="phone"
                   required
                   class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
@@ -254,7 +271,7 @@ const handleRegister = async () => {
                 <label for="tarih" class="block text-sm/5 font-semibold my-2">Doğum Tarihi</label>
                 <Datepicker
                   id="tarih"
-                  v-model="registerData.dogumTarihi"
+                  v-model="registerRequest.personelCreateCommand.dogumTarihi"
                   locale="tr"
                   :enable-time-picker="false"
                   :format="'dd-MM-yyyy'"
@@ -265,7 +282,7 @@ const handleRegister = async () => {
                 <label for="cinsiyet" class="block text-sm/5 font-semibold my-2">Cinsiyet</label>
                 <select
                   id="cinsiyet"
-                  v-model="registerData.cinsiyet"
+                  v-model="registerRequest.personelCreateCommand.cinsiyet"
                   class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
                 >
                   <option :value="undefined">Cinsiyet Seçin</option>
@@ -279,7 +296,7 @@ const handleRegister = async () => {
               <label for="province" class="block text-sm/5 font-semibold my-2">İl Seçin</label>
               <select
                 id="province"
-                v-model="registerData.personelAdres.sehir"
+                v-model="registerRequest.personelCreateCommand.adres!.sehir"
                 @change="getDistricts"
                 class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
               >
@@ -294,7 +311,7 @@ const handleRegister = async () => {
               <label for="district" class="block text-sm/5 font-semibold my-2">İlçe Seçin</label>
               <select
                 id="district"
-                v-model="registerData.personelAdres.ilce"
+                v-model="registerRequest.personelCreateCommand.adres!.ilce"
                 :disabled="districts.length === 0"
                 class="w-full outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm"
               >
@@ -325,7 +342,7 @@ const handleRegister = async () => {
                 </svg>
                 <input
                   id="sirketAd"
-                  v-model="registerData.sirketAd"
+                  v-model="registerRequest.kurumsalBirimCreateCommand.ad"
                   type="text"
                   required
                   class="w-full outline-1 outline-neutral-300 dark:outline-neutral-800/20 dark:bg-neutral-600/20 focus:shadow-[0px_0px_3px_2px_rgba(59,_130,_246,_0.5)] p-3 rounded text-sm pl-10"
@@ -334,7 +351,7 @@ const handleRegister = async () => {
               </div>
             </div>
             <!-- Email -->
-            <div>
+            <!-- <div>
               <label for="email" class="block text-sm/5 font-semibold my-2">Şirket Mail</label>
               <div>
                 <input
@@ -346,9 +363,9 @@ const handleRegister = async () => {
                   placeholder="info@sirket1.com"
                 />
               </div>
-            </div>
+            </div> -->
             <!-- Telefon -->
-            <div>
+            <!-- <div>
               <label for="telefon" class="block text-sm/5 font-semibold my-2">Şirket Telefon</label>
               <div>
                 <input
@@ -360,9 +377,9 @@ const handleRegister = async () => {
                   placeholder="0850 001 00 00"
                 />
               </div>
-            </div>
+            </div> -->
             <!-- Tarih  -->
-            <div>
+            <!-- <div>
               <label for="tarih" class="block text-sm/5 font-semibold my-2"
                 >Şirket Kuruluş Tarihi</label
               >
@@ -374,9 +391,9 @@ const handleRegister = async () => {
                 :format="'dd-MM-yyyy'"
                 :class="{ 'dark dp__theme_dark': isDark }"
               />
-            </div>
+            </div> -->
             <!-- İl Seçim -->
-            <div>
+            <!-- <div>
               <label for="province" class="block text-sm/5 font-semibold my-2">Şirket İl</label>
               <select
                 id="province"
@@ -389,9 +406,9 @@ const handleRegister = async () => {
                   {{ province.name }}
                 </option>
               </select>
-            </div>
+            </div> -->
             <!-- İlçe Seçim -->
-            <div>
+            <!-- <div>
               <label for="district" class="block text-sm/5 font-semibold my-2">Şirket İlçe</label>
               <select
                 id="district"
@@ -404,7 +421,7 @@ const handleRegister = async () => {
                   {{ district.name }}
                 </option>
               </select>
-            </div>
+            </div> -->
           </div>
           <!-- Şirket bilgileri end -->
 
@@ -413,33 +430,34 @@ const handleRegister = async () => {
             <div class="xl:border-r flex-1">
               <h1>Kişisel Bilgiler</h1>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
-                {{ registerData.ad }} {{ registerData.soyad }}
+                {{ registerRequest.personelCreateCommand.ad }}
+                {{ registerRequest.personelCreateCommand.soyad }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
-                {{ registerData.dogumTarihi.toISOString().split("T")[0] }}
+                {{ registerRequest.personelCreateCommand.dogumTarihi!.toISOString().split("T")[0] }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
                 {{
-                  registerData.cinsiyet == undefined
+                  registerRequest.personelCreateCommand.cinsiyet == undefined
                     ? "Cinsiyet Belirtilmedi"
-                    : registerData.cinsiyet
+                    : registerRequest.personelCreateCommand.cinsiyet
                     ? "Erkek"
                     : "Kadın"
                 }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
-                {{ registerData.personelIletisim.eposta }}
+                {{ registerRequest.personelCreateCommand.iletisim.eposta }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
-                {{ registerData.personelIletisim.telefon }}
+                {{ registerRequest.personelCreateCommand.iletisim.telefon }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
                 {{
-                  registerData.personelAdres.ulke +
+                  registerRequest.personelCreateCommand.adres!.ulke +
                   " " +
-                  registerData.personelAdres.sehir +
+                  registerRequest.personelCreateCommand.adres!.sehir +
                   "/" +
-                  registerData.personelAdres.ilce
+                  registerRequest.personelCreateCommand.adres!.ilce
                 }}
               </div>
             </div>
@@ -447,9 +465,9 @@ const handleRegister = async () => {
             <div class="ml-2 flex-1">
               <h1>Şirket Bilgileri</h1>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
-                {{ registerData.sirketAd }}
+                {{ registerRequest.kurumsalBirimCreateCommand.ad }}
               </div>
-              <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
+              <!-- <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
                 {{ registerData.sirketKurulusTarihi.toISOString().split("T")[0] }}
               </div>
               <div class="dark:bg-neutral-800/30 rounded-md my-2 mr-2 p-2">
@@ -466,7 +484,7 @@ const handleRegister = async () => {
                   "/" +
                   registerData.sirketAdres.ilce
                 }}
-              </div>
+              </div> -->
             </div>
           </div>
           <!-- Onaylama end -->

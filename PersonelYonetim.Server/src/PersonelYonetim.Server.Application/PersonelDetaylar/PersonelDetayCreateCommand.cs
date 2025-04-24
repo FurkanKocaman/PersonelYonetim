@@ -1,99 +1,123 @@
 ﻿using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.PersonelDetaylar;
+using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using TS.Result;
 
 namespace PersonelYonetim.Server.Application.PersonelDetaylar;
-public sealed record PersonelDetayCreateCommand(
-    Guid? PersonelId,
+public sealed record PersonelDetayCreateCommand : IRequest<Result<string>> 
+{
+    public Guid? PersonelId { get; init; }
 
     // Kimlik Bilgileri
-    string? TCKN,
-    string? NufusIl,
-    string? NufusIlce,
-    string? AnaAdi,
-    string? BabaAdi,
-    string? DogumYeri,
-    DateTime? DogumTarihi,
-    string? MedeniHali,
-    string? Cinsiyet,
-    string? Uyruk,
+    public string? TCKN { get; init; }
+    public string? NufusIl { get; init; }
+    public string? NufusIlce { get; init; }
+    public string? AnaAdi { get; init; }
+    public string? BabaAdi { get; init; }
+    public string? DogumYeri { get; init; }
+    public DateTime? DogumTarihi { get; init; }
+    public string? MedeniHali { get; init; }
+    public string? Cinsiyet { get; init; }
+    public string? Uyruk { get; init; }
 
     // İletişim Bilgileri
-    string? CepTelefonu,
-    string? IsTelefonu,
-    string? Eposta,
-    string? EpostaIs,
-    string? Adres,
-    string? IkametIl,
-    string? IkametIlce,
-    string? PostaKodu,
+    public string? CepTelefonu { get; init; }
+    public string? IsTelefonu { get; init; }
+    public string? Eposta { get; init; }
+    public string? EpostaIs { get; init; }
+    public string? Adres { get; init; }
+    public string? IkametIl { get; init; }
+    public string? IkametIlce { get; init; }
+    public string? PostaKodu { get; init; }
 
     // Eğitim Bilgileri
-    string? EgitimDurumu,
-    string? MezuniyetOkulu,
-    string? MezuniyetBolumu,
-    DateTime? MezuniyetTarihi,
+    public string? EgitimDurumu { get; init; }
+    public string? MezuniyetOkulu { get; init; }
+    public string? MezuniyetBolumu { get; init; }
+    public DateTime? MezuniyetTarihi { get; init; }
 
     // Askerlik Bilgileri
-    string? AskerlikDurumu,
-    DateTime? AskerlikTarihi,
+    public string? AskerlikDurumu { get; init; }
+    public DateTime? AskerlikTarihi { get; init; }
 
     // Ehliyet Bilgileri
-    string? EhliyetSinifi,
-    DateTime? EhliyetVerilisTarihi,
+    public string? EhliyetSinifi { get; init; }
+    public DateTime? EhliyetVerilisTarihi { get; init; }
 
     // Sağlık Bilgileri
-    bool? EngelliMi,
-    int? EngelOrani,
-    string? SaglikDurumu,
-    string? KanGrubu,
+    public bool EngelliMi { get; init; }
+    public int? EngelOrani { get; init; }
+    public string? SaglikDurumu { get; init; }
+    public string? KanGrubu { get; init; }
 
     // Acil Durum Bilgileri
-    string? AcilDurumKisiAdi,
-    string? AcilDurumKisiTelefon,
-    string? AcilDurumKisiYakinlik,
+    public string? AcilDurumKisiAdi { get; init; }
+    public string? AcilDurumKisiTelefon { get; init; }
+    public string? AcilDurumKisiYakinlik { get; init; }
 
     // Aile Bilgileri
-    int? CocukSayisi,
-    bool? EsCalisiyorMu,
+    public int? CocukSayisi { get; init; }
+    public bool? EsCalisiyorMu { get; init; }
 
     // Banka Bilgileri
-    string? BankaAdi,
-    string? IBAN,
+    public string? BankaAdi { get; init; }
+    public string? IBAN { get; init; }
 
     // Diğer
-    string? Notlar,
-    Guid? TenantId
-) : IRequest<Result<string>>;
+    public string? Notlar { get; init; }
+    public Guid? TenantId { get; set; }
+}
+
 
 internal sealed class PersonelDetayCreateCommandHandler(
+    ICurrentUserService currentUserService,
+    IPersonelRepository personelRepository,
     IPersonelDetayRepository personelDetayRepository,
-    ICurrentUserService currentUserService ,
-    IUnitOfWork unitOfWork
+     IUnitOfWork unitOfWork
     ) : IRequestHandler<PersonelDetayCreateCommand, Result<string>>
 {
     public async Task<Result<string>> Handle(PersonelDetayCreateCommand request, CancellationToken cancellationToken)
     {
-        var userId = currentUserService.UserId;
-        var tenantId = currentUserService.TenantId;
+        var personelId = Guid.Empty;
+        Guid? tenantId = currentUserService.TenantId;
 
-        if (!userId.HasValue || !tenantId.HasValue)
+        if (!tenantId.HasValue)
             return Result<string>.Failure("Tenant bulunamamdı");
 
-        var isPersonelDetayExist = await personelDetayRepository.AnyAsync(p => p.TenantId == tenantId && p.PersonelId == request.PersonelId);
+        if (request.PersonelId is null)
+        {
+            Guid? userId = currentUserService.UserId;
+            if (!userId.HasValue)
+                return Result<string>.Failure("Personel bulunamadı");
 
-        if (isPersonelDetayExist)
-            return Result<string>.Failure("Zaten personelDetay oluşturulmuş");
+            var personel = await personelRepository.Where(p => p.UserId == userId).Select(p => new { p.Id }).FirstOrDefaultAsync();
+            if (personel is null)
+                return Result<string>.Failure("Personel bulunamadı");
+
+            personelId = personel.Id;
+        }
+        else
+        {
+            personelId = request.PersonelId.Value;
+        }
+
+        if (personelId == Guid.Empty)
+            return Result<string>.Failure("Personel bulunammadı");
+
+        var isExist = await personelDetayRepository.AnyAsync(p => p.PersonelId == personelId);
+        if (isExist)
+            return Result<string>.Failure("Bu personel için zaten detay oluşturulmuş");
 
         PersonelDetay personelDetay = request.Adapt<PersonelDetay>();
-
+        personelDetay.TenantId = tenantId;
         personelDetayRepository.Add(personelDetay);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<string>.Succeed("Başarıyla oluşturuldu");
+        return Result<string>.Succeed("Personel detay başarıyla oluşturuldu");
     }
 }

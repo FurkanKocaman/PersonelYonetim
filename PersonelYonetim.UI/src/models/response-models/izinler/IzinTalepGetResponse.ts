@@ -3,6 +3,7 @@ import type { EntityDto } from "@/models/entity-models/EntityDto";
 export interface IzinTalepGetResponse extends EntityDto {
   personelId: string;
   personelFullName: string;
+  avatarUrl: string | undefined;
   baslangicTarihi: Date;
   bitisTarihi: Date;
   mesaiBaslangicTarihi: Date;
@@ -27,7 +28,9 @@ export interface OnaySureci {
   personelId?: string;
   personelAd?: string;
   avatarUrl?: string;
-  rol?: string;
+  kurumsalBirimAd: string;
+  pozisyonAd: string;
   sira: number;
-  durum: string;
+  onayDurum: string;
+  degerlendirilmeTarihi: Date | undefined;
 }

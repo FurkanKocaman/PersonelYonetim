@@ -36,14 +36,13 @@ internal sealed class UserAddRolesCommandHandler(
         foreach (var role in request.Roles)
         {
             var roleInDb = await roleManager.FindByNameAsync(role.ToString());
-            if(await userRoleRepository.AnyAsync(p => p.UserId == request.Id && p.RoleId == roleInDb!.Id && p.SirketId == request.SirketId))
+            if(await userRoleRepository.AnyAsync(p => p.UserId == request.Id && p.RoleId == roleInDb!.Id))
             {
                 return Result<string>.Failure($"Kullanıcı belirtilen şirkette {role} rolüne sahip");
             }
             AppUserRole appUserRole = new()
             {
                 UserId = request.Id,
-                SirketId = request.SirketId,
                 RoleId = roleInDb!.Id,
             };
             userRoleRepository.Add(appUserRole);

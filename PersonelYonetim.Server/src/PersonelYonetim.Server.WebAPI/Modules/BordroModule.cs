@@ -1,8 +1,5 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Identity;
-using PersonelYonetim.Server.Application.Auth;
 using PersonelYonetim.Server.Application.Bordro;
-using PersonelYonetim.Server.Domain.Users;
 using TS.Result;
 
 namespace PersonelYonetim.Server.WebAPI.Modules;
@@ -14,12 +11,31 @@ public static class BordroModule
         RouteGroupBuilder group = app.MapGroup("/bordro").WithTags("Bordro");
 
         group.MapPost("/create",
-            async (ISender sender, BordroCreateCommand request, CancellationToken cancellationToken, UserManager<AppUser> userManager) =>
+            async (ISender sender, BordroCreateCommand request, CancellationToken cancellationToken) =>
             {
                 var response = await sender.Send(request, cancellationToken);
                 return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-            })
-            .Produces<Result<LoginCommandResponse>>();
+            }).Produces<Result<string>>();
 
+        group.MapPut("/update-calisanlar",
+           async (ISender sender, BordroCalisanlarUpdateCommand request, CancellationToken cancellationToken) =>
+           {
+               var response = await sender.Send(request, cancellationToken);
+               return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+           }).Produces<Result<string>>();
+
+        group.MapPost("/kazanc-ekle",
+           async (ISender sender, BordroKazancEkleCommand request, CancellationToken cancellationToken) =>
+           {
+               var response = await sender.Send(request, cancellationToken);
+               return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+           }).Produces<Result<string>>();
+
+        group.MapPost("/kesinti-ekle",
+        async (ISender sender, BordroKesintiEkleCommand request, CancellationToken cancellationToken) =>
+        {
+            var response = await sender.Send(request, cancellationToken);
+            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
+        }).Produces<Result<string>>();
     }
 }

@@ -1,8 +1,12 @@
 export interface BordroGetAllModel {
   id: string;
+  personelId: string;
   fullName: string;
   durum: string;
+  avatarUrl: string | undefined;
 
+  yil: number;
+  ay: number;
   // Girdiler
   brutUcret: number;
   sgkGun: number;

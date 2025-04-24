@@ -5,6 +5,7 @@ using PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Application.TakvimEtkinlikler;
 using PersonelYonetim.Server.Application.Users;
+using PersonelYonetim.Server.Domain.PersonelDetaylar;
 using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.UnitOfWork;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
@@ -21,17 +22,20 @@ public sealed record PersonelCreateCommand(
     Iletisim Iletisim,
     Adres Adres,
 
-    Guid KurumsalBirimId,
-    Guid PozisyonId,
-    Guid RoleId,
-    DateTimeOffset BaslangicTarihi,
-    DateTimeOffset? BitisTarihi,
+    Guid? KurumsalBirimId,
+    Guid? PozisyonId,
+    List<Guid>? RoleId,
+    DateTimeOffset IseGirisTarihi,
+    DateTimeOffset? IstenCikisTarihi,
+    DateTimeOffset PozisyonBaslangicTarihi,
+    DateTimeOffset? PozisyonBitisTarihi,
+
     bool BirincilGorevMi,
     int GorevlendirmeTipiValue,
     int CalismaSekliValue,
     Guid? RaporlananGorevlendirmeId,
     Guid? IzinKuralId,
-    Guid? CalismaTakvimId,
+    Guid? CalismaTakvimiId,
     decimal BrutUcret,
     Guid? TenantId
     ) : IRequest<Result<string>>;
@@ -44,15 +48,11 @@ public sealed class PersonelCreateCommandValidator : AbstractValidator<PersonelC
         RuleFor(x => x.Soyad).NotEmpty().WithMessage("Soyad boş olamaz").MaximumLength(50);
         RuleFor(x => x.DogumTarihi).NotEmpty().WithMessage("Doğum tarihi boş olamaz");
         RuleFor(x => x.Iletisim.Eposta).NotEmpty().WithMessage("Eposta boş olamaz").EmailAddress();
-        RuleFor(x => x.Iletisim.Telefon).NotEmpty().WithMessage("Telefon boş olamaz");
-        RuleFor(x => x.Adres.Ulke).NotEmpty().WithMessage("Ülke boş olamaz");
-        RuleFor(x => x.Adres.Sehir).NotEmpty().WithMessage("Şehir boş olamaz");
-        RuleFor(x => x.Adres.Ilce).NotEmpty().WithMessage("İlçe boş olamaz");
-        RuleFor(x => x.Adres.TamAdres).NotEmpty().WithMessage("Tam adres boş olamaz");
     }
 }
 internal sealed class PersonelCreateCommandHandler(
     IPersonelRepository personelRepository, 
+    IPersonelDetayRepository personelDetayRepository,
     ICalismaCizelgeRepository calismaCizelgeRepository,
     IGunlukCalismaRepository gunlukCalismaRepository,
     IEmailService emailService,
@@ -98,7 +98,15 @@ internal sealed class PersonelCreateCommandHandler(
                 personelRepository.Add(personel);
                 await unitOfWork.SaveChangesAsync(cancellationToken);
 
-                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.BaslangicTarihi, request.BitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimId, request.BrutUcret, null, null, null, null, tenantId.Value);
+                PersonelDetay personelDetay = new()
+                {
+                    PersonelId = personel.Id,
+                    TenantId = tenantId.Value,
+                };
+
+                personelDetayRepository.Add(personelDetay);
+
+                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.IseGirisTarihi, request.IstenCikisTarihi,request.PozisyonBaslangicTarihi,request.PozisyonBitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimiId, request.BrutUcret, null, null, null, null, tenantId.Value);
 
                 var gorevlendirmeCreateRes = await sender.Send(personelGorevlendirmeCreateCommand);
                 if (!gorevlendirmeCreateRes.IsSuccessful)

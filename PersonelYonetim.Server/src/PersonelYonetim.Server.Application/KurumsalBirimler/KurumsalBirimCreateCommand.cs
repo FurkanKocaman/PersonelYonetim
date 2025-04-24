@@ -61,7 +61,7 @@ internal sealed class KurumslBirimCreateCommandHandler(
                     return Result<Guid>.Failure("Bu isimde bir birim zaten mevcut");
                 }
 
-                var x = kurumsalBirimTipiRepository.GetAll().ToList();
+      
 
 
                 var isBirimTipiExist = await kurumsalBirimTipiRepository.AnyAsync(p => p.Id == request.BirimTipiId && p.TenantId == tenantId);

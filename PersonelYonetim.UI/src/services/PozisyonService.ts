@@ -61,22 +61,11 @@ class PozisyonService {
     return response.data.data;
   }
 
-  // Pozisyon silme metodu
-  async pozisyonlarDelete(id: number): Promise<string> {
+  async pozisyonlarDelete(id: string): Promise<string> {
     const response = await api.delete(`${import.meta.env.VITE_API_URL}/pozisyonlar/delete/${id}`);
-    console.log(response);
+    useToastStore().addToast(response.data.data, "", "success", 5000, true);
 
-    return "a";
-  }
-
-  // Pozisyon detaylarını getirme metodu
-  async pozisyonlarGetById(id: number): Promise<PozisyonModel | undefined> {
-    try {
-      const response = await api.get(`${import.meta.env.VITE_API_URL}/pozisyonlar/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-    }
+    return response.data.data;
   }
 }
 

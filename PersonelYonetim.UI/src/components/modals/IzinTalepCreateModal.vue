@@ -3,7 +3,7 @@ import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCr
 import IzinService from "@/services/IzinService";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Datepicker from "@vuepic/vue-datepicker";
-import { onMounted, reactive, ref, watch, type Ref } from "vue";
+import { onMounted, reactive, ref, type Ref } from "vue";
 import type { IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 
@@ -35,24 +35,12 @@ onMounted(() => {
 
 const getIzinTurler = async () => {
   const response = await IzinService.getIzinTurler(paginationParams.value);
-  console.log(response);
   izinTurler.value = response?.items;
 };
-
-const mesaiBaslangicHesapla = () => {
-  if (!request.baslangicTarihi || !request.bitisTarihi) return;
-
-  const diffTime = request.bitisTarihi.getTime() - request.baslangicTarihi.getTime();
-
-  const diffDays = (diffTime / (1000 * 60 * 60 * 24)).toFixed(2);
-};
-
-watch(() => request.baslangicTarihi, mesaiBaslangicHesapla);
-watch(() => request.bitisTarihi, mesaiBaslangicHesapla);
 </script>
 <template>
   <div
-    class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-10 backdrop-blur-sm bg-black/30 w-full h-full"
+    class="overflow-y-auto overflow-x-hidden fixed flex justify-center items-center top-0 right-0 left-0 z-20 backdrop-blur-sm bg-black/30 w-full h-full"
   >
     <div class="relative p-4 max-w-4xl w-full max-h-full">
       <div class="relative bg-white rounded-lg shadow-sm dark:bg-neutral-800 w-full">

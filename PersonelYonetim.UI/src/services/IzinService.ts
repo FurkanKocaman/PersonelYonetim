@@ -1,16 +1,18 @@
 import api from "./Axios";
-import type { IzinKuralModel, IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
+import type { IzinTurResponse } from "@/models/entity-models/izin/IzinKuralModel";
 import type { IzinTalepCreateCommand } from "@/models/request-models/IzinTalepCreateCommand";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
 import type { IzinTalepGetResponse } from "@/models/response-models/izinler/IzinTalepGetResponse";
 import { useToastStore } from "@/stores/ToastStore";
 import type { IzinlerKalanResponse } from "@/models/response-models/izinler/İzinlerKalanResponse";
+import type { IzinKuralGetResponse } from "@/models/response-models/izinler/IzinKuralGetResponse";
 
 export class IzinService {
   async getIzinKural(
     paginationParams: PaginationParams
   ): Promise<
-    { items: IzinKuralModel[]; count: number; pageSize: number; pageNumber: number } | undefined
+    | { items: IzinKuralGetResponse[]; count: number; pageSize: number; pageNumber: number }
+    | undefined
   > {
     try {
       const { pageNumber, pageSize, orderBy, filter } = paginationParams;
@@ -27,11 +29,10 @@ export class IzinService {
         {
           params: {
             $count: true,
-            $expand: "IzinTurler",
           },
         }
       );
-
+      console.log(response.data.value);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
@@ -119,7 +120,6 @@ export class IzinService {
           },
         }
       );
-      console.log(response.data);
       return {
         items: response.data.value,
         count: response.data["@odata.count"],
@@ -130,11 +130,16 @@ export class IzinService {
       console.error("Error", error);
     }
   }
-  async izinTalepDegerlendir(id: string, onayDurum: number): Promise<string | undefined> {
+  async izinTalepDegerlendir(
+    id: string,
+    degerlendirmeDurum: number,
+    yorum: string | undefined
+  ): Promise<string | undefined> {
     try {
       const response = await api.post(`${import.meta.env.VITE_API_URL}/izin-talep/degerlendir`, {
         id: id,
-        onayDurum: onayDurum,
+        degerlendirmeDurum: degerlendirmeDurum,
+        yorum: yorum,
       });
       useToastStore().addToast(response.data.data, "", "success", 5000, true);
       return response.data;

@@ -92,9 +92,7 @@ const createLeaveRequest = () => {
   router.push({ name: "IzinTalep" });
 };
 
-onMounted(() => {
-  console.log(activeTab.value);
-});
+onMounted(() => {});
 const closeIzinTalep = (res: boolean) => {
   izinTalepCreate.value = res;
 };

@@ -1,13 +1,10 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.KurumsalBirimler;
-using PersonelYonetim.Server.Domain.Personeller;
 using PersonelYonetim.Server.Domain.Users;
-using System.Security.Claims;
 
 namespace PersonelYonetim.Server.Application.KurumsalBirimTipleri;
 public sealed record KurumsalBirimTipiGetAllQuery(
@@ -19,16 +16,20 @@ public sealed class KurumsalBirimTipiGetAllQueryResponse : EntityDto
     public string? Aciklama { get; set; }
     public int HiyerarsiSeviyesi { get; set; }
     public bool YoneticisiOlabilirMi { get; set; } = false;
-    public List<KurumsalBirim> KurumsalBirimler { get; set; } = new List<KurumsalBirim>();
+    public List<KurumsalBirimDto> KurumsalBirimler { get; set; } = new List<KurumsalBirimDto>();
     public int BirimCount { get; set; }
 }
-public sealed class KurumsalBirim
+public sealed class KurumsalBirimDto
 {
+    public Guid Id { get; set; }
     public string Ad { get; set; } = default!;
     public string? Kod { get; set; }
     public Guid BirimTipiId { get; set; }
     public string BirimTipiAd { get; set; } = default!;
+    public Guid? UstBirimId { get;set; }
     public int PersonelCount { get; set; }
+    public bool IsActive { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
 internal sealed class KurumsalBirimTipiGetAllQueryHandler(
@@ -49,7 +50,7 @@ internal sealed class KurumsalBirimTipiGetAllQueryHandler(
 
         var kurumsalBirimler = kurumsalBirimRepository.Where(p => p.TenantId == tenantId && p.IsDeleted == false).Include(p => p.Gorevlendirmeler);
 
-        var response = kurumsalBirimTipiRepository.Where(p => p.TenantId == tenantId).OrderBy(p => p.HiyerarsiSeviyesi)
+        var response = kurumsalBirimTipiRepository.Where(p => p.TenantId == tenantId && !p.IsDeleted).OrderBy(p => p.HiyerarsiSeviyesi)
                  .GroupJoin(userManager.Users,
                     birimTipi => birimTipi.CreateUserId,
                     createUser => createUser.Id,
@@ -70,13 +71,17 @@ internal sealed class KurumsalBirimTipiGetAllQueryHandler(
                         Aciklama = kuu.birimTipi.Aciklama,
                         HiyerarsiSeviyesi = kuu.birimTipi.HiyerarsiSeviyesi,
                         YoneticisiOlabilirMi = kuu.birimTipi.YoneticisiOlabilirMi,
-                        KurumsalBirimler = kurumsalBirimler.Where(p => p.BirimTipiId == kuu.birimTipi.Id).Select(p => new KurumsalBirim
+                        KurumsalBirimler = kurumsalBirimler.Where(p => p.BirimTipiId == kuu.birimTipi.Id).Select(p => new KurumsalBirimDto
                         {
+                            Id = p.Id,
                             Ad = p.Ad,
                             Kod = p.Kod,
                             BirimTipiId = p.BirimTipiId,
                             BirimTipiAd = kuu.birimTipi.Ad,
+                            UstBirimId = p.UstBirimId,
                             PersonelCount = p.Gorevlendirmeler.Count(),
+                            IsActive = p.IsActive,
+                            CreatedAt = p.CreatedAt,
                         }).ToList(),
                         BirimCount = kurumsalBirimler.Where(p => p.BirimTipiId == kuu.birimTipi.Id).Count() ,
                         IsActive = kuu.birimTipi.IsActive,

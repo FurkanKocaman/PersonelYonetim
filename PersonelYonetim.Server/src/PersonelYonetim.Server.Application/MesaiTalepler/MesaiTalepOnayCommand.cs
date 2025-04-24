@@ -1,210 +1,218 @@
-﻿//using MediatR;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.EntityFrameworkCore;
-//using PersonelYonetim.Server.Application.CalismaCizelgeleri;
-//using PersonelYonetim.Server.Domain.Bildirimler;
-//using PersonelYonetim.Server.Domain.Izinler;
-//using PersonelYonetim.Server.Domain.Mesailer;
-//using PersonelYonetim.Server.Domain.OnaySurecleri;
-//using PersonelYonetim.Server.Domain.PersonelAtamalar;
-//using PersonelYonetim.Server.Domain.Personeller;
-//using PersonelYonetim.Server.Domain.Rols;
-//using PersonelYonetim.Server.Domain.UnitOfWork;
-//using PersonelYonetim.Server.Domain.ZamanYonetimler;
-//using System.Security.Claims;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.Services;
+using PersonelYonetim.Server.Domain.Bildirimler;
+using PersonelYonetim.Server.Domain.CalismaTakvimleri;
+using PersonelYonetim.Server.Domain.Izinler;
+using PersonelYonetim.Server.Domain.Mesailer;
+using PersonelYonetim.Server.Domain.OnaySurecleri;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
+using PersonelYonetim.Server.Domain.Personeller;
+using PersonelYonetim.Server.Domain.UnitOfWork;
+using PersonelYonetim.Server.Domain.ZamanYonetimler;
+using TS.Result;
 
 
-//namespace PersonelYonetim.Server.Application.MesaiTalepler;
-//public sealed record MesaiTalepOnayCommand(
-//    Guid Id,
-//    int OnayDurum) : IRequest<Result<string>>;
+namespace PersonelYonetim.Server.Application.MesaiTalepler;
+public sealed record MesaiTalepOnayCommand(
+   Guid Id,
+    int DegerlendirmeDurum,
+    string? Yorum
+    ) : IRequest<Result<string>>;
 
-//internal sealed class MesaiTalepOnayCommandHandler(
-//    IHttpContextAccessor httpContextAccessor,
-//    IPersonelRepository personelRepository,
-//    IMesaiTalepRepository mesaiTalepRepository,
-//    IPersonelAtamaRepository personelAtamaRepository,
-//    ITalepDegerlendirmeRepository talepDegerlendirmeRepository,
-//    IBildirimService bildirimService,
-//    ISender sender,
-//    IUnitOfWork unitOfWork
-//    ) : IRequestHandler<MesaiTalepOnayCommand, Result<string>>
-//{
-//    public async Task<Result<string>> Handle(MesaiTalepOnayCommand request, CancellationToken cancellationToken)
-//    {
-//        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-//        if (string.IsNullOrEmpty(userIdString))
-//        {
-//            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
-//        }
-//        var personel = personelRepository.GetAll()
-//            .Where(p => p.UserId == Guid.Parse(userIdString))
-//            .Select(p => new { p.Id, p.FullName })
-//            .FirstOrDefault();
+internal sealed class MesaiTalepOnayCommandHandler(
+    ICalismaCizelgeRepository calismaCizelgeRepository,
+    ICalismaTakvimRepository calismaTakvimRepository,
+    IFazlaMesaiPeriyotRepository fazlaMesaiPeriyotRepository,
+    IGunlukCalismaRepository gunlukCalismaRepository,
+    IMesaiTalepRepository mesaiTalepRepository,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
+    ICurrentUserService currentUserService,
+    ITalepDegerlendirmeRepository talepDegerlendirmeRepository,
+    IBildirimService bildirimService,
+    IUnitOfWork unitOfWork
+    ) : IRequestHandler<MesaiTalepOnayCommand, Result<string>>
+{
+    public async Task<Result<string>> Handle(MesaiTalepOnayCommand request, CancellationToken cancellationToken)
+    {
+        using (var transaction = unitOfWork.BeginTransaction())
+        {
+            try
+            {
 
-//        if (personel is null)
-//            throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
+                Guid? userId = currentUserService.UserId;
+                Guid? tenantId = currentUserService.TenantId;
 
-//        MesaiTalep? mesaiTalep = await mesaiTalepRepository.Where(p => p.Id == request.Id).Include(p => p.Personel).ThenInclude(p => p!.PersonelAtamalar)
-//            .Include(p => p.DegerlendirmeAdimlari).ThenInclude(p => p.OnaySureciAdimi).FirstOrDefaultAsync(cancellationToken);
+                if (!userId.HasValue || !tenantId.HasValue)
+                    return Result<string>.Failure("User bulunamamdı");
 
-//        if (mesaiTalep is null)
-//            return Result<string>.Failure("Mesai talebi bulunamadı");
+                var talepDegerlendirme = await talepDegerlendirmeRepository.Where(p => p.TalepId == request.Id && p.AtananOnayciPersonel!.UserId == userId).Include(p => p.AtananOnayciPersonel).FirstOrDefaultAsync();
 
-//        PersonelAtama personelAtama = await personelAtamaRepository.FirstOrDefaultAsync(p => p.PersonelId == personel.Id && p.SirketId == mesaiTalep.SirketId && p.IsDeleted == false);
-//        if (personelAtama is null)
-//            return Result<string>.Failure("Personel ataması bulunamadı");
+                if (talepDegerlendirme is null)
+                    return Result<string>.Failure("Talep bulunamamdı");
 
-//        var adimlar = mesaiTalep.DegerlendirmeAdimlari;
+                var res = talepDegerlendirme.DurumuGuncelle(DegerlendirmeDurumEnum.FromValue(request.DegerlendirmeDurum), talepDegerlendirme.AtananOnayciPersonelId, request.Yorum, DateTimeOffset.Now);
 
-//        if (mesaiTalep.Personel is null)
-//            return Result<string>.Failure("Mesai talebi personel bulunamadı");
+                if (!res.IsSuccessful)
+                    return Result<string>.Failure(res.ErrorMessages![0]);
 
-//        var mesaiTalepPersonelAtama = mesaiTalep.Personel!.PersonelAtamalar.Where(pa => pa.IsDeleted == false && pa.SirketId == mesaiTalep.SirketId).FirstOrDefault();
-//        if (mesaiTalepPersonelAtama is null)
-//            return Result<string>.Failure("İzin talep eden personel ataması bulunamadı");
+                talepDegerlendirmeRepository.Update(talepDegerlendirme);
 
-//        foreach (var adim in adimlar)
-//        {
-//            if (adim.OnaySureciAdimi != null)
-//            {
-//                if (!adimlar.Any(a => a.AdimSirasi < adim.AdimSirasi && a.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Beklemede))
-//                {
-//                    if (adim.OnaySureciAdimi.PersonelId != null && adim.OnaySureciAdimi.PersonelId == personel.Id && !adimlar.Any(a => a.AdimSirasi < adim.AdimSirasi && a.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Beklemede))
-//                    {
-//                        adim.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                        adim.DegerlendirilmeTarihi = DateTimeOffset.Now;
-//                        adim.DegerlendirenId = personel.Id;
-//                        talepDegerlendirmeRepository.Update(adim);
+                await unitOfWork.SaveChangesAsync(cancellationToken);
 
-//                        if (!adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi) || DegerlendirmeDurumEnum.FromValue(request.OnayDurum) == DegerlendirmeDurumEnum.Reddedildi)
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                            mesaiTalepRepository.Update(mesaiTalep);
+                var mesaiTalep = await mesaiTalepRepository.Where(p => p.Id == talepDegerlendirme.TalepId).FirstOrDefaultAsync(cancellationToken);
+                if (mesaiTalep is null)
+                    return Result<string>.Failure("izin Talep bulunammadı");
 
-//                            if (request.OnayDurum == MesaiDegerlendirmeDurumEnum.Onaylandi)
-//                            {
-//                                GunlukCalismaPeriyotCreateCommand calismaPeriyotCreateCommand = new(mesaiTalep.PersonelId,null,CalismaPeriyoduTipi.FazlaMesai, new TimeOnly(mesaiTalep.BaslangicTarihi.Hour, mesaiTalep.BaslangicTarihi.Minute), new TimeOnly(mesaiTalep.BitisTarihi.Hour, mesaiTalep.BitisTarihi.Minute));
-//                                await sender.Send(calismaPeriyotCreateCommand);
-//                            }
-//                        }
-//                        if (adim.AdimSirasi == 1 && request.OnayDurum == DegerlendirmeDurumEnum.Onaylandi && adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi))
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.Beklemede;
+                var sonDegerlendirme = await talepDegerlendirmeRepository.Where(p => p.TalepId == request.Id && p.AtananOnayciPersonel!.UserId == userId).Include(p => p.AtananOnayciPersonel).OrderByDescending(p => p.AdimSirasi).FirstOrDefaultAsync();
 
-//                        }
-//                    }
+                if (sonDegerlendirme is null)
+                    return Result<string>.Failure("Son degerlendirme bulunamadı");
 
-//                    if ((adim.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYardimci || adim.OnaySureciAdimi.Rol == RolTipiEnum.DepartmanYonetici) && personelAtama.RolTipi == adim.OnaySureciAdimi.Rol && personelAtama.DepartmanId == mesaiTalepPersonelAtama.DepartmanId)
-//                    {
-//                        adim.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                        adim.DegerlendirilmeTarihi = DateTimeOffset.Now;
-//                        adim.DegerlendirenId = personel.Id;
-//                        talepDegerlendirmeRepository.Update(adim);
+                if (sonDegerlendirme.DegerlendirmeDurumu != DegerlendirmeDurumEnum.Beklemede)
+                {
+                    Bildirim bildirim = new()
+                    {
+                        Baslik = $"Mesai talebi {sonDegerlendirme.DegerlendirmeDurumu.Name}",
+                        Aciklama = $"{talepDegerlendirme.AtananOnayciPersonel!.FullName} tarafından mesai talebiniz {sonDegerlendirme.DegerlendirmeDurumu.Name}",
+                        CreatedAt = DateTimeOffset.Now,
+                        BildirimTipi = BildirimTipiEnum.Onay,
+                        AliciTipi = AliciTipiEnum.Personel,
+                        AliciId = mesaiTalep.PersonelId,
+                        TenantId = tenantId.Value,
+                    };
 
-//                        if (!adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi) || DegerlendirmeDurumEnum.FromValue(request.OnayDurum) == DegerlendirmeDurumEnum.Reddedildi)
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                            mesaiTalepRepository.Update(mesaiTalep);
+                    await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, mesaiTalep.PersonelId);
 
-//                            if (request.OnayDurum == MesaiDegerlendirmeDurumEnum.Onaylandi)
-//                            {
-//                                GunlukCalismaPeriyotCreateCommand calismaPeriyotCreateCommand = new(mesaiTalep.PersonelId, null, CalismaPeriyoduTipi.FazlaMesai, new TimeOnly(mesaiTalep.BaslangicTarihi.Hour, mesaiTalep.BaslangicTarihi.Minute), new TimeOnly(mesaiTalep.BitisTarihi.Hour, mesaiTalep.BitisTarihi.Minute));
-//                                await sender.Send(calismaPeriyotCreateCommand);
-//                            }
-//                        }
-//                        if (adim.AdimSirasi == 1 && request.OnayDurum == DegerlendirmeDurumEnum.Onaylandi && adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi))
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.Beklemede;
+                    if (sonDegerlendirme.DegerlendirmeDurumu == DegerlendirmeDurumEnum.Onaylandi)
+                    {
+                        var personelGorevlendirme = await personelGorevlendirmeRepository.Where(p => p.PersonelId == mesaiTalep.PersonelId && !p.IsDeleted && p.TenantId == tenantId).Include(p => p.CalismaTakvimi).ThenInclude(p => p!.CalismaGunler).FirstOrDefaultAsync(cancellationToken);
 
-//                        }
-//                    }
-//                    if ((adim.OnaySureciAdimi.Rol == RolTipiEnum.SubeYardimci || adim.OnaySureciAdimi.Rol == RolTipiEnum.SubeYonetici) && personelAtama.RolTipi == adim.OnaySureciAdimi.Rol && personelAtama.SubeId == mesaiTalepPersonelAtama.SubeId)
-//                    {
-//                        adim.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                        adim.DegerlendirilmeTarihi = DateTimeOffset.Now;
-//                        adim.DegerlendirenId = personel.Id;
-//                        talepDegerlendirmeRepository.Update(adim);
+                        if (personelGorevlendirme is null)
+                            return Result<string>.Failure("Çalışma takvimi bulunamamdı");
 
-//                        if (!adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi) || DegerlendirmeDurumEnum.FromValue(request.OnayDurum) == DegerlendirmeDurumEnum.Reddedildi)
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                            mesaiTalepRepository.Update(mesaiTalep);
+                        var cizelge = await calismaCizelgeRepository.Where(p => p.PersonelId == mesaiTalep.PersonelId && p.Yil == mesaiTalep.BaslangicTarihi.Year && p.Ay == mesaiTalep.BaslangicTarihi.Month).Include(p => p.GunlukCalismalar).FirstOrDefaultAsync();
+                        if (cizelge is null)
+                        {
+                            CalismaCizelge calismaCizelge = new()
+                            {
+                                PersonelId = mesaiTalep.PersonelId,
+                                Yil = mesaiTalep.BaslangicTarihi.Year,
+                                Ay = mesaiTalep.BaslangicTarihi.Month,
+                                TenantId = tenantId.Value,
+                            };
+                            cizelge = calismaCizelge;
+                            calismaCizelgeRepository.Add(calismaCizelge);
+
+                            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                            var ilkGun = DateTimeOffset.Now;
+
+                            DateTimeOffset firstDayOfThisMonth = new DateTimeOffset(ilkGun.Year, ilkGun.Month, 1, 0, 0, 0, ilkGun.Offset);
+
+                            ilkGun = firstDayOfThisMonth;
+
+                            if (personelGorevlendirme.IseGirisTarihi > firstDayOfThisMonth)
+                            {
+                                ilkGun = new DateTimeOffset(personelGorevlendirme.IseGirisTarihi.Year, personelGorevlendirme.IseGirisTarihi.Month, personelGorevlendirme.IseGirisTarihi.Day, 0, 0, 0, personelGorevlendirme.IseGirisTarihi.Offset);
+                            }
+                            DateTimeOffset sonGun = new DateTimeOffset(ilkGun.Year, ilkGun.Month, DateTime.DaysInMonth(ilkGun.Year, ilkGun.Month), 0, 0, 0, ilkGun.Offset);
+
+                            while (ilkGun <= sonGun)
+                            {
+                                if (!await gunlukCalismaRepository.AnyAsync(p => p.Tarih == ilkGun))
+                                {
+                                    GunlukCalisma gunlukCalisma = new()
+                                    {
+                                        CalismaCizelgesiId = calismaCizelge.Id,
+                                        Tarih = ilkGun,
+                                        PersonelId = mesaiTalep.PersonelId,
+                                        TenantId = tenantId.Value,
+                                    };
+
+                                    gunlukCalismaRepository.Add(gunlukCalisma);
+                                }
+                                ilkGun = ilkGun.AddDays(1);
+                            }
+                            await unitOfWork.SaveChangesAsync(cancellationToken);
+                        }
+                        var cizelgeNew = await calismaCizelgeRepository.Where(p => p.PersonelId == mesaiTalep.PersonelId && p.Yil == mesaiTalep.BaslangicTarihi.Year && p.Ay == mesaiTalep.BaslangicTarihi.Month).Include(p => p.GunlukCalismalar).FirstOrDefaultAsync();
+
+                        var calismaTakvim = await calismaTakvimRepository.Where(p => p.Id == personelGorevlendirme.CalismaTakvimId).Include(p => p.CalismaGunler).FirstOrDefaultAsync();
+                        var calismaGunler = calismaTakvim!.CalismaGunler;
+
+                        var gunlukCalismalar = cizelgeNew!.GunlukCalismalar;
+
+                        DateTimeOffset baslangic = mesaiTalep.BaslangicTarihi.ToLocalTime();
+                        DateTimeOffset bitis = mesaiTalep.BitisTarihi.ToLocalTime();
+
+                        while (baslangic < bitis)
+                        {
+                            var bugun = baslangic.Date;
+                            var sonrakiGun = bugun.AddDays(1);
+
+                            var gunlukCalisma = gunlukCalismalar.FirstOrDefault(p => p.Tarih == bugun);
+
+                            if (gunlukCalisma != null)
+                            {
+                                if (baslangic.Date == bitis.Date)
+                                {
+                                    FazlaMesaiPeriyodu fazlaMesaiPeriyodu = new()
+                                    {
+                                        GunlukCalismaId = gunlukCalisma.Id,
+                                        BaslangicSaati = new TimeOnly(baslangic.Hour, baslangic.Minute),
+                                        BitisSaati = new TimeOnly(bitis.Hour, bitis.Minute),
+                                        ToplamFazlaMesaiSuresi = bitis - baslangic,
+                                        TenantId = tenantId.Value
+                                    };
+                                    fazlaMesaiPeriyotRepository.Add(fazlaMesaiPeriyodu);
+                                }
+                                else
+                                {
+                                    FazlaMesaiPeriyodu fazlaMesaiPeriyoduIlkGun = new()
+                                    {
+                                        GunlukCalismaId = gunlukCalisma.Id,
+                                        BaslangicSaati = new TimeOnly(baslangic.Hour, baslangic.Minute),
+                                        BitisSaati = new TimeOnly(23, 59),
+                                        ToplamFazlaMesaiSuresi = new DateTimeOffset(bugun.AddDays(1).AddTicks(-1)) - baslangic,
+                                        TenantId = tenantId.Value
+                                    };
+                                    fazlaMesaiPeriyotRepository.Add(fazlaMesaiPeriyoduIlkGun);
+
+                                    FazlaMesaiPeriyodu fazlaMesaiPeriyoduIkinciGun = new()
+                                    {
+                                        GunlukCalismaId = gunlukCalisma.Id,
+                                        BaslangicSaati = new TimeOnly(0, 0), 
+                                        BitisSaati = new TimeOnly(bitis.Hour, bitis.Minute),
+                                        ToplamFazlaMesaiSuresi = bitis - new DateTimeOffset(bugun.AddDays(1)),
+                                        TenantId = tenantId.Value
+                                    };
+                                    fazlaMesaiPeriyotRepository.Add(fazlaMesaiPeriyoduIkinciGun);
+                                }
+                            }
+
+                            baslangic = sonrakiGun; 
+                        }
+
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+                    }
+
+                }
+                await unitOfWork.CommitTransactionAsync(transaction);
+                return Result<string>.Succeed("İzin talebi başarıyla değerlendirildi");
+
+            }
+            catch (Exception ex)
+            {
+                await unitOfWork.RollbackTransactionAsync(transaction);
+                return Result<string>.Failure("Hata oluştu: " + ex.Message);
+            }
 
 
-//                            if (request.OnayDurum == MesaiDegerlendirmeDurumEnum.Onaylandi)
-//                            {
-//                                GunlukCalismaPeriyotCreateCommand calismaPeriyotCreateCommand = new(mesaiTalep.PersonelId, null, CalismaPeriyoduTipi.FazlaMesai, new TimeOnly(mesaiTalep.BaslangicTarihi.Hour, mesaiTalep.BaslangicTarihi.Minute), new TimeOnly(mesaiTalep.BitisTarihi.Hour, mesaiTalep.BitisTarihi.Minute));
-//                                await sender.Send(calismaPeriyotCreateCommand);
-//                            }
-//                        }
-//                        if (adim.AdimSirasi == 1 && request.OnayDurum == DegerlendirmeDurumEnum.Onaylandi && adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi))
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.Beklemede;
-
-//                        }
-//                    }
-//                    if ((adim.OnaySureciAdimi.Rol == RolTipiEnum.SirketYardimci || adim.OnaySureciAdimi.Rol == RolTipiEnum.SirketYonetici) && personelAtama.RolTipi == adim.OnaySureciAdimi.Rol && personelAtama.SirketId == mesaiTalepPersonelAtama.SirketId)
-//                    {
-//                        adim.DegerlendirmeDurumu = DegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                        adim.DegerlendirilmeTarihi = DateTimeOffset.Now;
-//                        adim.DegerlendirenId = personel.Id;
-//                        talepDegerlendirmeRepository.Update(adim);
-
-//                        if (!adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi) || DegerlendirmeDurumEnum.FromValue(request.OnayDurum) == DegerlendirmeDurumEnum.Reddedildi)
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.FromValue(request.OnayDurum);
-//                            mesaiTalepRepository.Update(mesaiTalep);
+        }
 
 
-//                            if (request.OnayDurum == MesaiDegerlendirmeDurumEnum.Onaylandi)
-//                            {
-//                                GunlukCalismaPeriyotCreateCommand calismaPeriyotCreateCommand = new(mesaiTalep.PersonelId, null, CalismaPeriyoduTipi.FazlaMesai, new TimeOnly(mesaiTalep.BaslangicTarihi.Hour, mesaiTalep.BaslangicTarihi.Minute), new TimeOnly(mesaiTalep.BitisTarihi.Hour, mesaiTalep.BitisTarihi.Minute));
-//                                await sender.Send(calismaPeriyotCreateCommand);
-//                            }
-//                        }
-//                        if (adim.AdimSirasi == 1 && request.OnayDurum == DegerlendirmeDurumEnum.Onaylandi && adimlar.Any(p => p.AdimSirasi > adim.AdimSirasi))
-//                        {
-//                            mesaiTalep.MesaiDegerlendirmeDurum = MesaiDegerlendirmeDurumEnum.Beklemede;
-
-//                        }
-//                    }
-//                }
-//                else
-//                {
-//                    return Result<string>.Failure("Mesai talebi degerlendirilemedi çünkü önceki adımlar hala değerlendirilmemiş.");
-//                }
-
-//            }
-
-//        }
-//        var affectedColumns = await unitOfWork.SaveChangesAsync();
-
-
-//        Bildirim bildirim = new()
-//        {
-//            Baslik = "Mesai talebi değerlendirildi",
-//            Aciklama = $"{personel.FullName} tarafından, {mesaiTalep.ToplamSure} saatlik mesai talebiniz {DegerlendirmeDurumEnum.FromValue(request.OnayDurum)}.",
-//            CreatedAt = DateTimeOffset.Now,
-//            BildirimTipi = BildirimTipiEnum.Bilgilendirme,
-//            AliciTipi = AliciTipiEnum.Personel,
-//            AliciId = mesaiTalep.PersonelId,
-//        };
-
-//        await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, mesaiTalep.PersonelId);
-
-//        if (affectedColumns != 0)
-//        {
-//            if (request.OnayDurum == 0)
-//                return Result<string>.Succeed("Mesai talebi onaylandı.");
-//            if (request.OnayDurum == 1)
-//                return Result<string>.Succeed("Mesai talebi reddedildi");
-//        }
-//        else
-//        {
-//            return Result<string>.Failure("Mesai talebi değerlendirilemedi");
-//        }
-//        return Result<string>.Succeed("Mesai talebi onay durumu değerlendirildi");
-//    }
-//}
+    }
+}
 

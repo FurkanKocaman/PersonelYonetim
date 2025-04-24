@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { PersonelItem } from "@/models/PersonelModels";
 import PersonelService from "@/services/PersonelService";
-
+import dayjs from "dayjs";
+import "dayjs/locale/tr";
 import { onMounted, reactive, ref } from "vue";
 
+dayjs.locale("tr");
 const apiUrl = ref(import.meta.env.VITE_API_URL);
 
 const personel: PersonelItem = reactive({
@@ -93,14 +95,7 @@ onMounted(async () => {
             >
               <span class="text-sm text-neutral-500 dark:text-neutral-400">İse Baslama Tarihi</span>
               <span class="mr-10 text-sm text-neutral-700 dark:text-neutral-200">{{
-                new Date(personel.createdAt).toLocaleString("tr-TR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })
+                dayjs(personel.baslangicTarih).format("D MMMM YYYY ")
               }}</span>
             </div>
           </div>

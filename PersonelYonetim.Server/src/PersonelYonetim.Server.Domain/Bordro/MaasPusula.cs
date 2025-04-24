@@ -10,6 +10,8 @@ public class MaasPusula  :Entity
     public Guid BordroDonemId { get; set; }
     public BordroDonem? BordroDonem { get; set; }
     public MaasPusulaDurumEnum Durum { get; set; } = MaasPusulaDurumEnum.Beklemede;
+    public int Yil { get; set; }
+    public int Ay { get; set; }
 
     public string? TabiKanunKodu { get; set; } // Örn: "5510"
     public string? TesvikKodu { get; set; }    // Örn: "6111", null olabilir
@@ -46,11 +48,21 @@ public class MaasPusula  :Entity
     public decimal ToplamIsverenMaliyeti { get; set; } // ToplamBrutKazanc + Y + Z
     public int SGKGunSayisi { get; set; } // MUHSGK için gerekli
     public List<EksikGun> EksikGunler { get; set; } = new List<EksikGun>(); // MUHSGK için gerekli
+    public int FiiliCalismaGunu { get; set; }
     public bool BesKesintisiVarMi { get; set; }
     public decimal BesKesintiTutari { get; set; }
 
     public  ICollection<KazancBilesen> KazancBilesenleri { get; set; } = new List<KazancBilesen>();
     public  ICollection<KesintiBilesen> KesintiBilesenleri { get; set; } = new List<KesintiBilesen>();
+
+    // Kullanıcı tarafından girilebilecek oranlar (null olabilir)
+    public decimal? SGKPrimiIsciOrani { get; set; } // Örn: 0.14m
+    public decimal? SGKPrimiIsverenOrani { get; set; } // Örn: 0.2075m
+    public decimal? IssizlikPrimiIsciOrani { get; set; } // Örn: 0.01m
+    public decimal? IssizlikPrimiIsverenOrani { get; set; } // Örn: 0.02m
+    public decimal? GelirVergisiOrani { get; set; } // Örn: 0.15m
+    public decimal? DamgaVergisiOrani { get; set; } // Örn: 0.00759m
+    public decimal? BesKesintiOrani { get; set; } //Örn:0.05
 
     public Guid TenantId { get; set; }
 }

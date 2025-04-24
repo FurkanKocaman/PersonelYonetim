@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bordro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <div class="flex flex-col mx-10 my-3">
+      <div class="flex justify-between">
+        <h3 class="text-neutral-900 font-semibold">Ücret Pusulası</h3>
+        <h3 class="text-base text-neutral-500">{{YIL_AY}}</h3>
+        <img class="size-10 rounded-md" src="{{TENANT_LOGO}}" alt="Şirket Logo" />
+      </div>
+      <div class="flex mt-10 divide-x divide-neutral-400">
+        <div class="flex flex-col flex-1 px-3 divide-y divide-neutral-400">
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Adı Soyadı</h4>
+            <p class="text-base font-semibold">{{ADSOYAD}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">TC Kimlik No</h4>
+            <p class="text-base font-semibold">{{TCKN}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">İşe Giriş Tarihi</h4>
+            <p class="text-base font-semibold">{{ISE_GIRIS_TARIHI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">İşten Çıkış Tarihi</h4>
+            <p class="text-base font-semibold">{{ISTEN_CIKIS_TARIHI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Ücret Tipi</h4>
+            <p class="text-base font-semibold">Aylık</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Brut Ücret</h4>
+            <p class="text-base font-semibold">
+              <span class="text-base text-neutral-500">₺</span> {{BRUT_UCRET}}<span
+                class="text-neutral-600 text-sm"
+                >,00 (Net)</span
+              >
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col flex-1 px-3 divide-y divide-neutral-400">
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">İşyeri Unvanı</h4>
+            <p class="text-base font-semibold">{{ISYERI_ADI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">SGK İşyeri Adı</h4>
+            <p class="text-base font-semibold">{{SGK_ISYERI_ADI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">SGK Numarası</h4>
+            <p class="text-base font-semibold">{{SGK_NUMARASI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Vergi Dairesi</h4>
+            <p class="text-base font-semibold">{{VERGI_DAIRESI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Vergi Numarası</h4>
+            <p class="text-base font-semibold">{{VERGI_NUMARASI}}</p>
+          </div>
+          <div class="flex justify-between py-2">
+            <h4 class="text-neutral-700">Tabi Olduğu Kanun</h4>
+            <p class="text-base font-semibold">{{TABI_OLDUGU_KANUN}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kazançlar, Kesintiler -->
+      <div class="flex mt-10 rounded-md border border-neutral-300">
+        <div class="flex flex-col flex-1 rounded-md">
+          <h1 class="py-4 px-5 bg-neutral-200 rounded-tl-md font-bold text-neutral-700">
+            KAZANÇLAR
+          </h1>
+          <div class="border-l-4 border-green-600/80">
+            <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+              <h4 class="text-neutral-700">Normal Kazanç</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{NORMAL_KAZANC}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+              <h4 class="text-neutral-700">Fazla Çalışma</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{FAZLA_CALISMA}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between p-2">
+              <h4 class="text-neutral-700">Ek Ödemeler</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{EK_ODEMELER}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between py-4 px-2 bg-green-100/80">
+              <h4 class="text-neutral-700 font-semibold">Tüm Gelirler Toplamı</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{TUM_GELIRLER}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col flex-1 rounded-md">
+          <h1
+            class="py-4 px-5 bg-neutral-200 rounded-tr-md border-l-4 border-neutral-400 font-bold text-neutral-700"
+          >
+            KESİNTİLER
+          </h1>
+
+          <div class="border-l-4 border-red-600/80">
+            <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+              <h4 class="text-neutral-700">Yasal Kesintiler</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{YASAL_KESINTILER}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+              <h4 class="text-neutral-700">Ayni Yardım Kesintileri</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{AYNI_YARDIM_KESINTILER}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between mx-2 py-2">
+              <h4 class="text-neutral-700">Özel Kesintiler</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{OZEL_KESINTILER}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+            <div class="flex justify-between py-4 px-2 bg-red-100/80">
+              <h4 class="text-neutral-700 font-semibold">Kesintiler Toplamı</h4>
+              <p class="text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{KESINTILER_TOPLAM}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SGK -->
+      <div class="flex flex-col mt-20 rounded-md border border-neutral-300">
+        <div>
+          <h1 class="py-4 px-5 bg-neutral-200 rounded-tr-md font-bold text-neutral-700">SGK</h1>
+        </div>
+        <div class="flex flex-1">
+          <div class="flex flex-col flex-1 rounded-md">
+            <div class="border-l-4 border-slate-600/80">
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Fiili Çalışma Günü</h4>
+                <p class="text-base font-semibold">{{FIILI_CALISMA_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Ücretli İzin</h4>
+                <p class="text-base font-semibold">{{UCRETLI_IZIN_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Raporlu</h4>
+                <p class="text-base font-semibold">{{RAPORLU_IZIN_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Hafta Tatili</h4>
+                <p class="text-base font-semibold">{{HAFTA_TATILI_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Resmi Tatil</h4>
+                <p class="text-base font-semibold">{{RESMI_TATIL_GUN}}</p>
+              </div>
+
+              <div class="flex justify-between py-4 px-2 bg-slate-300/80">
+                <h4 class="text-neutral-700 font-semibold">SGK Günü</h4>
+                <p class="text-base font-semibold">{{SGK_GUN}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col flex-1 rounded-md">
+            <div class="border-l-4 border-yellow-600/80">
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Ücretsiz İzin</h4>
+                <p class="text-base font-semibold">{{UCRETSIZ_IZIN_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Diğer Eksik Gün</h4>
+                <p class="text-base font-semibold">{{DIGER_EKSIK_GUN}}</p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">SGK Aylık Matrah</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span> {{SGK_AYLIK_MATRAH}}<span
+                    class="text-neutral-600 text-sm"
+                    >,00</span
+                  >
+                </p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">SGK Primi</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span> {{SGK_PRIMI}}<span
+                    class="text-neutral-600 text-sm"
+                    >,00</span
+                  >
+                </p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">SGK İşsizlik Sigortası Primi</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span> {{SGK_ISSIZLIK_PRIMI}}
+                  <span class="text-neutral-600 text-sm">,00</span>
+                </p>
+              </div>
+              <div class="flex justify-between py-4 px-2 bg-yellow-100/80">
+                <h4 class="text-neutral-700 font-semibold">Çalışan SGK Toplamı</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span> {{SGK_PRIM_TOPLAM}}
+                  <span class="text-neutral-600 text-sm">,00</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Gelir Vergisi, Damga Vergisi -->
+      <div class="flex flex-col mt-40 rounded-md border border-neutral-300">
+        <div class="flex flex-1">
+          <div class="flex flex-col flex-1 rounded-md">
+            <h1 class="py-4 px-5 bg-neutral-200 rounded-tl-md font-bold text-neutral-700">
+              GELİR VERGİSİ
+            </h1>
+            <div class="">
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">Kümülatif Gelir Vergisi Matrahı</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span>
+                  {{KUMULATIF_GELIR_VERGISI_MATRAHI}}
+                  <span class="text-neutral-600 text-sm">,00</span>
+                </p>
+              </div>
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">GV Aylık Matrah</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span>
+                  {{AYLIK_GELIR_VERGISI_MATRAHI}}<span class="text-neutral-600 text-sm">,00</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col flex-1 rounded-md h-full">
+            <h1
+              class="py-4 px-5 bg-neutral-200 rounded-tr-md border-l-4 border-neutral-400 font-bold text-neutral-700"
+            >
+              DAMGA VERGİSİ
+            </h1>
+
+            <div class="">
+              <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+                <h4 class="text-neutral-700">DV Aylık Matrah</h4>
+                <p class="text-base font-semibold">
+                  <span class="text-base text-neutral-500">₺</span> {{DAMGA_VERGISI_MATRAHI}}<span
+                    class="text-neutral-600 text-sm"
+                    >,00</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 flex">
+          <div
+            class="flex-1 flex justify-between py-4 px-2 bg-yellow-700/30 border-l-4 border-yellow-700/80"
+          >
+            <h4 class="text-neutral-700 font-semibold">Gelir Vergisi</h4>
+            <p class="text-base font-semibold">
+              <span class="text-base text-neutral-500">₺</span> {{GELIR_VERGISI}}<span
+                class="text-neutral-600 text-sm"
+                >,00</span
+              >
+            </p>
+          </div>
+          <div
+            class="flex-1 flex justify-between py-4 px-2 bg-pink-200/50 border-l-4 border-pink-800/50"
+          >
+            <h4 class="text-neutral-700 font-semibold">Damga Vergisi</h4>
+            <p class="text-base font-semibold">
+              <span class="text-base text-neutral-500">₺</span> {{DAMGA_VERGISI}}<span
+                class="text-neutral-600 text-sm"
+                >,00</span
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Ele Geçen Ücret -->
+      <div class="flex flex-col mt-10 rounded-md border border-neutral-300">
+        <div class="flex flex-1">
+          <div class="flex flex-col flex-1 rounded-md">
+            <div class="flex items-center bg-green-200/60 border-b-4 border-green-600/80">
+              <h1 class="flex-1 py-4 px-5 rounded-t-md font-bold text-neutral-700">
+                Ele Geçen Ücret
+              </h1>
+              <div class="mx-3 text-base font-semibold">
+                <span class="text-base text-neutral-500">₺</span> {{ELE_GECEN_UCRET}}<span
+                  class="text-neutral-600 text-sm"
+                  >,00</span
+                >
+              </div>
+            </div>
+
+            <div class="flex justify-between mx-2 py-2 border-b border-neutral-300">
+              <p class="flex-1 text-sm mx-5 my-5 text-neutral-700">
+                İşe başladığım günden itibaren {{YIL_AY}} ayının sonuna kadar tüm maaş, fazla
+                çalışma, izin ve sosyal haklarımı aldım.
+              </p>
+              <div class="flex-1 border rounded-md border-neutral-400 text-sm">
+                <span class="ml-2 pt-2 text-neutral-500">İmza</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Genel Tablo -->
+      <div class="flex flex-col mt-10 rounded-md border border-neutral-300"></div>
+    </div>
+  </body>
+</html>

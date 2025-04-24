@@ -7,24 +7,30 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using PersonelYonetim.Server.Domain.PersonelGorevlendirmeler;
+using Microsoft.EntityFrameworkCore;
 
 namespace PersonelYonetim.Server.Infrastructure.Service;
 
 internal sealed class JwtProvider(
     IOptions<JwtOptions> options,
+    IPersonelGorevlendirmeRepository personelGorevlendirmeRepository,
     UserManager<AppUser> userManager) : IJwtProvider
 {
     public Task<string> CreateTokenAsync(AppUser user, CancellationToken cancellationToken = default)
     {
+        var gorevlendirme = personelGorevlendirmeRepository.Where(p => p.Personel.UserId == user.Id && !p.IsDeleted).Include(p => p.Personel).Include(p => p.GorevlendirmeRolleri).FirstOrDefault();
+        var roller = gorevlendirme!.GorevlendirmeRolleri;
+
         var roles =  userManager.GetRolesAsync(user).Result;
         List<Claim> claims = new()
         {
             new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
             new Claim("tenant_id", user.TenantId.ToString()),
         };
-        foreach(var role in roles)
+        foreach(var role in roller)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim(ClaimTypes.Role, role.RolId.ToString()));
         }
 
         var expires = DateTime.Now.AddDays(1);

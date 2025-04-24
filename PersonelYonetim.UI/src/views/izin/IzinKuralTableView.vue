@@ -2,10 +2,10 @@
 import { computed, onMounted, ref, type Ref } from "vue";
 import TableLayout from "../../components/TableLayout.vue";
 import IzinService from "@/services/IzinService";
-import type { IzinKuralModel } from "@/models/entity-models/izin/IzinKuralModel";
 import type { PaginationParams } from "@/models/request-models/PaginationParams";
+import type { IzinKuralGetResponse } from "@/models/response-models/izinler/IzinKuralGetResponse";
 
-const izinKurallar: Ref<IzinKuralModel[] | undefined> = ref([]);
+const izinKurallar: Ref<IzinKuralGetResponse[] | undefined> = ref([]);
 
 const paginationParams: Ref<PaginationParams> = ref({
   count: 0,
@@ -31,10 +31,12 @@ const getIzinKurallar = async () => {
 
 const filteredIzinKurallar = computed<Record<string, unknown>[]>(() => {
   return (izinKurallar.value || []).map(
-    ({ ad, izinTurler, aciklama, createUserName, createdAt, isActive }) => ({
+    ({ id, ad, izinTurler, aciklama, personelCount, createUserName, createdAt, isActive }) => ({
+      id,
       ad,
       izinTur: izinTurler.length,
       aciklama,
+      personelCount,
       createUserName,
       createdAt: new Date(createdAt),
       isActive: isActive ? "Aktif" : "Pasif",
@@ -45,6 +47,10 @@ const filteredIzinKurallar = computed<Record<string, unknown>[]>(() => {
 //   paginationParams.value.orderBy = order;
 //   getIzinKurallar();
 // };
+
+const kuralDetay = (izinKural: IzinKuralGetResponse) => {
+  console.log(izinKural);
+};
 </script>
 
 <template>
@@ -55,12 +61,14 @@ const filteredIzinKurallar = computed<Record<string, unknown>[]>(() => {
           { key: 'ad', value: 'Ad' },
           { key: 'izinTur', value: 'Izin Türleri' },
           { key: 'aciklama', value: 'Açıklama' },
-          { key: 'createUserName', value: 'Oluşturan' },
+          { key: 'personelCount', value: 'Personel' },
+          // { key: 'createUserName', value: 'Oluşturan' },
           { key: 'createdAt', value: 'Oluşturma Tarihi' },
           { key: 'isActive', value: 'Durum' },
         ]"
         :table-content="filteredIzinKurallar"
         :islemler="['detaylar']"
+        @detail-click="kuralDetay"
         :page-count="
           Math.ceil(paginationParams.count / paginationParams.pageSize) == 0
             ? 1

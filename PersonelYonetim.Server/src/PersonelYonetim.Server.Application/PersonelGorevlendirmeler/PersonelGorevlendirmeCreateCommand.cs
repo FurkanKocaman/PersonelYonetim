@@ -12,11 +12,13 @@ using TS.Result;
 namespace PersonelYonetim.Server.Application.PersonelGorevlendirmeler;
 public sealed record PersonelGorevlendirmeCreateCommand(
     Guid PersonelId,
-    Guid KurumsalBirimId,
-    Guid PozisyonId,
-    Guid RoleId,
-    DateTimeOffset BaslangicTarihi,
-    DateTimeOffset? BitisTarihi,
+    Guid? KurumsalBirimId,
+    Guid? PozisyonId,
+    List<Guid>? RoleIdler,
+    DateTimeOffset IseGirisTarihi,
+    DateTimeOffset? IstenCikisTarihi,
+    DateTimeOffset PozisyonBaslangicTarihi,
+    DateTimeOffset? PozisyonBitisTarihi,
     bool BirincilGorevMi,
     int GorevlendirmeTipiValue,
     int CalismaSekliValue,
@@ -91,7 +93,7 @@ internal sealed class PersonelGorevlendirmeCreateCommandHandler(
 
             if(request.RaporlananPersonelId is not null)
             {
-                var raporlananGorevlendirme = personelGorevlendirmeRepository.Where(p => p.PersonelId == request.RaporlananPersonelId && p.TenantId == request.TenantId && p.IsDeleted == false).FirstOrDefault();
+                var raporlananGorevlendirme = personelGorevlendirmeRepository.Where(p => p.Id == request.RaporlananPersonelId && p.TenantId == request.TenantId && p.IsDeleted == false).FirstOrDefault();
                 if (raporlananGorevlendirme is null)
                     return Result<string>.Failure("Raporlanacak gorevlendirme bulunamadı");
 
@@ -103,13 +105,20 @@ internal sealed class PersonelGorevlendirmeCreateCommandHandler(
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            GorevlendirmeRolu gorevlendirmeRolu = new()
+          if(request.RoleIdler is not null)
             {
-                PersonelGorevlendirmeId = personelGorevlendirme.Id,
-                RolId = request.RoleId
-            };
+                foreach(var roleId in request.RoleIdler)
+                {
+                    GorevlendirmeRolu gorevlendirmeRolu = new()
+                    {
+                        PersonelGorevlendirmeId = personelGorevlendirme.Id,
+                        RolId = roleId,
+                    };
 
-            gorevlendirmeRoluRepository.Add(gorevlendirmeRolu);
+                    gorevlendirmeRoluRepository.Add(gorevlendirmeRolu);
+                }
+               
+            }
 
             if(request.IzinKuralId is null)
             {

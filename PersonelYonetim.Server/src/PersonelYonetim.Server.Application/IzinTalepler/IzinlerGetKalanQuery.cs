@@ -53,13 +53,13 @@ internal sealed class IzinlerGetKalanQueryHandler(
         if (izinTur is null)
             throw new UnauthorizedAccessException("İzin türü bulunamadı.");
 
-        decimal izinTaleplerToplamGun = izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id).Sum(p => p.ToplamSure);
+        decimal izinTaleplerToplamGun = izinTalepRepository.Where(p => p.IzinTurId == izinTur.Id && p.PersonelId == personelId).Sum(p => p.ToplamSure);
 
-        var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.BaslangicTarihi.Year);
+        var kidemYil = (DateTimeOffset.Now.Year - personelGorevlendirme.IseGirisTarihi.Year);
 
         var toplamHak = kidemYil == 1 || kidemYil == 0 ? izinTur.LimitGunSayisi : izinTur.LimitGunSayisi + (4 * kidemYil);
 
-        var donemBaslangic = new DateTimeOffset(DateTimeOffset.Now.Year, personelGorevlendirme.BaslangicTarihi.Month, personelGorevlendirme.BaslangicTarihi.Day, 0, 0, 0, DateTimeOffset.Now.Offset);
+        var donemBaslangic = new DateTimeOffset(DateTimeOffset.Now.Year, personelGorevlendirme.IseGirisTarihi.Month, personelGorevlendirme.IseGirisTarihi.Day, 0, 0, 0, DateTimeOffset.Now.Offset);
         if (DateTimeOffset.Now < donemBaslangic)
             donemBaslangic = donemBaslangic.AddYears(-1);
 

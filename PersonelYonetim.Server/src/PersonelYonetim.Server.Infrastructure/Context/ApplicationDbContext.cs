@@ -18,7 +18,6 @@ using PersonelYonetim.Server.Domain.Pozisyonlar;
 using PersonelYonetim.Server.Domain.Roller;
 using PersonelYonetim.Server.Domain.Rols;
 using PersonelYonetim.Server.Domain.TakvimEtkinlikler;
-using PersonelYonetim.Server.Domain.Tenants;
 using PersonelYonetim.Server.Domain.Tokenler;
 using PersonelYonetim.Server.Domain.Users;
 using PersonelYonetim.Server.Domain.ZamanYonetimler;
@@ -76,6 +75,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
         modelBuilder.Ignore<IdentityUserClaim<Guid>>();
         modelBuilder.Ignore<IdentityUserLogin<Guid>>();
         modelBuilder.Ignore<IdentityUserToken<Guid>>();
+        modelBuilder.Ignore<IdentityUserRole<Guid>>();
 
         modelBuilder.Entity<PersonelDetay>()
             .HasOne(p => p.Personel)
@@ -198,7 +198,7 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<AppUserRole>()
-            .HasKey(p => new {p.UserId, p.RoleId, p.SirketId});
+            .HasKey(p => new {p.UserId, p.RoleId});
 
         modelBuilder.Entity<TalepDegerlendirme>()
             .HasOne(p => p.Degerlendiren)
@@ -217,6 +217,10 @@ internal sealed class ApplicationDbContext: IdentityDbContext<AppUser, AppRole, 
             .WithMany()
             .HasForeignKey(p => p.IzinTurId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<IzinTalep>()
+            .Navigation(e => e.DegerlendirmeAdimlari)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         modelBuilder.Entity<Personel>()
             .HasOne(p => p.User)

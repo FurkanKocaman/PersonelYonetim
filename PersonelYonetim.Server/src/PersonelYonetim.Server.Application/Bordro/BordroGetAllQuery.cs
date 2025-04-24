@@ -12,8 +12,13 @@ public sealed record BordroGetAllQuery(
 public sealed class BordroGetAllQueryResponse
 {
     public Guid Id { get; set; }
+    public Guid PersonelId { get; set; }
     public string FullName { get; set; } = default!;
     public string Durum { get; set; } = default!;
+    public string? AvatarUrl { get; set; }
+
+    public int Yil { get; set; }
+    public int Ay { get; set; }
 
     //Girdiler
     public decimal BrutUcret { get; set; }
@@ -55,19 +60,6 @@ public sealed class BordroGetAllQueryResponse
     public decimal TesvikliMaliyet {get; set; }
 }
 
-//public class Girdiler
-//{
-//    public decimal BrutUcret { get; set; }
-//    public int SGKGun { get; set; }
-//    public decimal EkOdemelerToplam { get; set; }
-//}
-//public class Kazanclar
-//{
-//    public decimal GunlukUcret { get; set; }
-//    public int OdemeyeEsasGun {  get; set; }
-//    public decimal BrutUcret { get; set; }
-//}
-
 internal sealed class BordroGetAllQueryHandler(
     IBordroDonemRepository bordroDonemRepository,
     ICurrentUserService currentUserService
@@ -86,22 +78,28 @@ internal sealed class BordroGetAllQueryHandler(
             return Task.FromResult(Enumerable.Empty<BordroGetAllQueryResponse>().AsQueryable());
 
         var response = bordroDonem.MaasPusulalar
+                .Where(p => !p.IsDeleted)
                 .Select(p => new BordroGetAllQueryResponse
                 {
                     Id = p.Id,
+                    PersonelId = p.PersonelId,
                     FullName = p.Personel!.Ad + " " + p.Personel.Soyad,
                     Durum = p.Durum.Name,
+                    AvatarUrl = p.Personel.AvatarUrl,
+
+                    Yil = p.Yil,
+                    Ay = p.Ay,
 
                     BrutUcret = p.BrutUcret,
-                    SGKGun = 30,
-                    EkOdemelerToplam = 0,
-                    KesintilerToplam = 0,
+                    SGKGun = p.SGKGunSayisi,
+                    EkOdemelerToplam = p.EkKazancToplam,
+                    KesintilerToplam = p.DigerKesintilerToplam,
 
-                    GunlukUcret = p.BrutUcret/30,
-                    OdemeyeEsasGunSayisi = 30,
+                    GunlukUcret = p.BrutUcret/p.SGKGunSayisi,
+                    OdemeyeEsasGunSayisi = p.SGKGunSayisi,
                     FazlaCalismaUcretToplam = 0,
 
-                    FiiliCalisma = 22,
+                    FiiliCalisma = p.FiiliCalismaGunu,
                     UcretliIzin = 0,
                     Raporlu = 0,
                     UcretsizIzin = 0,
@@ -113,11 +111,11 @@ internal sealed class BordroGetAllQueryHandler(
                     GVOdemesi = p.OdenecekGelirVergisi,
                     
                     EkOdemeIstisna = p.DamgaVergisiIstisnasiUygulanan,
-                    DVAylikMatrah = p.BrutUcret - 22003,//Toplam ucret - asgari ücret
+                    DVAylikMatrah = p.ToplamBrutKazanc,//Toplam ucret - asgari ücret
                     DVOdemesi = p.OdenecekDamgaVergisi,
 
-                    YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci,
-                    OzelKesintiler = 0,
+                    YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci+ p.SGKPrimiIsci,
+                    OzelKesintiler = p.DigerKesintilerToplam,
                     TumKesintiler = p.ToplamKesinti,
                     
                     EleGecenUcret = p.NetMaas,

@@ -7,8 +7,10 @@ internal sealed class PersonelGorevlendirmeConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<PersonelGorevlendirme> builder)
     {
-        builder.Property(p => p.BaslangicTarihi).HasColumnType("datetimeoffset").IsRequired();
-        builder.Property(p => p.BitisTarihi).HasColumnType("datetimeoffset");
+        builder.Property(p => p.IseGirisTarihi).HasColumnType("datetimeoffset").IsRequired();
+        builder.Property(p => p.PozisyonBaslangicTarihi).HasColumnType("datetimeoffset").IsRequired();
+        builder.Property(p => p.PozisyonBitisTarihi).HasColumnType("datetimeoffset");
+        builder.Property(p => p.IstenCikisTarihi).HasColumnType("datetimeoffset");
         builder.Property(p => p.GorevlendirmeTipi).HasConversion<string>();
         builder.Property(p => p.CalismaSekli).HasConversion<string>();
         builder.Property(p => p.BrutUcret).HasColumnType("decimal(18,2)");

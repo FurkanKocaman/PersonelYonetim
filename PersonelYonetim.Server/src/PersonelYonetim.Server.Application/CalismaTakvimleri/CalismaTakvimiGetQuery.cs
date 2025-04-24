@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using PersonelYonetim.Server.Application.Services;
 using PersonelYonetim.Server.Domain.Abstractions;
 using PersonelYonetim.Server.Domain.CalismaTakvimleri;
 using PersonelYonetim.Server.Domain.Dtos;
@@ -23,30 +24,29 @@ public sealed class CalismaTakvimiGetQueryResponse : EntityDto
 
 internal sealed class CalismaTakvimiGetQueryHandler(
     UserManager<AppUser> userManager,
-     IHttpContextAccessor httpContextAccessor,
+     ICurrentUserService currentUserService,
      ICalismaTakvimRepository calismaTakvimRepository,
      IPersonelRepository personelRepository,
      IPersonelGorevlendirmeRepository personelGorevlendirmeRepository) : IRequestHandler<CalismaTakvimiGetQuery, IQueryable<CalismaTakvimiGetQueryResponse>>
 {
     public Task<IQueryable<CalismaTakvimiGetQueryResponse>> Handle(CalismaTakvimiGetQuery request, CancellationToken cancellationToken)
     {
-        var userIdString = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdString))
-        {
-            throw new UnauthorizedAccessException("Kullanıcı kimliği bulunamadı.");
-        }
+        Guid? userId = currentUserService.UserId;
+        Guid? tenantId = currentUserService.TenantId;
+
+        if (!userId.HasValue || !tenantId.HasValue)
+            return Task.FromResult(Enumerable.Empty<CalismaTakvimiGetQueryResponse>().AsQueryable());
 
         var personel = personelRepository.GetAll()
-            .Where(p => p.UserId == Guid.Parse(userIdString) && !p.IsDeleted)
+            .Where(p => p.UserId == userId&& !p.IsDeleted)
             .Select(p => new { p.Id })
             .FirstOrDefault();
 
         if (personel is null)
             throw new UnauthorizedAccessException("Personel bilgisi bulunamadı.");
 
-        var takvimler = calismaTakvimRepository.GetAll().Where(p => !p.IsDeleted);
         var response = calismaTakvimRepository.GetAll()
-            .Where(t => personelGorevlendirmeRepository.GetAll()
+            .Where(t => t.TenantId == tenantId && personelGorevlendirmeRepository.GetAll()
                 .Any(p =>p.PersonelId == personel.Id))
             .Include(t => t.CalismaGunler) 
             .Select(takvim => new CalismaTakvimiGetQueryResponse

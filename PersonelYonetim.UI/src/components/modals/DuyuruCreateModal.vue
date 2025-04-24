@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { defineProps, reactive, type PropType, onMounted, type Ref, ref } from "vue";
-import type { SirketModel } from "@/models/entity-models/SirketModel";
+import { defineProps, reactive, type PropType, onMounted } from "vue";
 import type { DuyuruCreateRequest } from "@/models/request-models/DuyuruCreateRequest";
 import type { DuyuruModel } from "@/models/entity-models/DuyuruModel";
 import DuyuruService from "@/services/DuyuruService";
-import SirketService from "@/services/SirketService";
 
 const props = defineProps({
   duyuru: {
@@ -12,8 +10,6 @@ const props = defineProps({
     default: null,
   },
 });
-const sirketler: Ref<SirketModel[] | undefined> = ref([]);
-
 const emit = defineEmits(["closeModal", "duyuruCreated", "duyuruUpdated"]);
 
 const request: DuyuruCreateRequest = reactive(
@@ -22,16 +18,14 @@ const request: DuyuruCreateRequest = reactive(
     : {
         baslik: "",
         aciklama: "",
-        sirketId: "",
+        tenantId: undefined,
         aliciTipiValue: 5,
         aliciId: undefined,
         aliciIdler: [],
       }
 );
 
-onMounted(() => {
-  getSirketler();
-});
+onMounted(() => {});
 
 const handleSubmit = async () => {
   try {
@@ -46,15 +40,6 @@ const handleSubmit = async () => {
     emit("closeModal", false);
   } catch (error) {
     console.error(error);
-  }
-};
-const getSirketler = async () => {
-  try {
-    const res = await SirketService.sirketlerGet();
-    sirketler.value = res?.items;
-    request.sirketId = sirketler.value![0].id;
-  } catch (error) {
-    console.error("Veri çekme hatası:", error);
   }
 };
 </script>
@@ -118,21 +103,6 @@ const getSirketler = async () => {
 
             <div>
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Şirket</label
-              >
-              <select
-                v-model="request.sirketId"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
-              >
-                <option disabled value="">Şirket seçiniz</option>
-                <option v-for="sirket in sirketler" :key="sirket.id" :value="sirket.id">
-                  {{ sirket.ad }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Alıcı Tipi</label
               >
               <select
@@ -140,15 +110,13 @@ const getSirketler = async () => {
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
               >
                 <option :value="0">Personel</option>
-                <option :value="1">Departman</option>
-                <option :value="2">Şube</option>
-                <option :value="3">Şirket</option>
+                <option :value="1">Birim</option>
                 <option :value="4">Personeller</option>
                 <option :value="5">Herkes</option>
               </select>
             </div>
 
-            <div v-if="request.aliciTipiValue === 1">
+            <div v-if="request.aliciTipiValue === 0">
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Alıcı (ID)</label
               >
@@ -160,7 +128,7 @@ const getSirketler = async () => {
               />
             </div>
 
-            <div v-if="request.aliciTipiValue === 2">
+            <div v-if="request.aliciTipiValue === 4">
               <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Alıcılar (ID)</label
               >
