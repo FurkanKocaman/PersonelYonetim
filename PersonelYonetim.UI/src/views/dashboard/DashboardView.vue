@@ -5,33 +5,19 @@ import QuickAccessButtons from "../../components/dashboard/QuickAccessButtons.vu
 // import StatisticsCard from "@/components/dashboard/StatisticsCard.vue";
 import DuyuruService from "@/services/DuyuruService";
 import type { DuyuruModel } from "@/models/entity-models/DuyuruModel";
-import PersonelService from "@/services/PersonelService";
-import { useUserStore } from "@/stores/user";
+
 import IzinBilgilerimCard from "@/components/dashboard/IzinBilgilerimCard.vue";
 import PersonelCard from "@/components/dashboard/PersonelCard.vue";
 
 const duyurular: Ref<DuyuruModel[]> = ref([]);
-const personelCount = ref(0);
 
 onMounted(() => {
   getDuyurular();
-  getPersoneller();
 });
 
 const getDuyurular = async () => {
   const res = await DuyuruService.getDuyurular();
   duyurular.value = res!.items;
-};
-
-const getPersoneller = async () => {
-  const response = await PersonelService.getPersonelList(
-    useUserStore().user.sirketId,
-    undefined,
-    undefined
-  );
-  if (response) {
-    personelCount.value = response.count;
-  }
 };
 
 // const stats = computed(() => [

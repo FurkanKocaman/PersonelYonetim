@@ -93,7 +93,7 @@ internal sealed class PersonelGorevlendirmeCreateCommandHandler(
 
             if(request.RaporlananPersonelId is not null)
             {
-                var raporlananGorevlendirme = personelGorevlendirmeRepository.Where(p => p.PersonelId == request.RaporlananPersonelId && p.TenantId == request.TenantId && p.IsDeleted == false).FirstOrDefault();
+                var raporlananGorevlendirme = personelGorevlendirmeRepository.Where(p => p.Id == request.RaporlananPersonelId && p.TenantId == request.TenantId && p.IsDeleted == false).FirstOrDefault();
                 if (raporlananGorevlendirme is null)
                     return Result<string>.Failure("Raporlanacak gorevlendirme bulunamadı");
 

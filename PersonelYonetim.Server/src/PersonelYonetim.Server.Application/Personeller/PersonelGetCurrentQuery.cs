@@ -18,7 +18,7 @@ public sealed class PersonelGetCurrentQueryResponse : EntityDto
     public string Soyad { get; set; } = default!;
     public DateTimeOffset DogumTarihi { get; set; }
     public string? AvatarUrl { get; set; }
-    public string? Cinsiyet { get; set; }
+    public bool? Cinsiyet { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
     public Adres? Adres { get; set; }
     public string KurumsalBirimAd { get; set; } = string.Empty;
@@ -86,7 +86,7 @@ public sealed class PersonelGetCurrentQueryHandler(
                 Soyad = personel.Soyad,
                 DogumTarihi = personel.DogumTarihi,
                 AvatarUrl = personel.AvatarUrl,
-                Cinsiyet = personel.Cinsiyet != null ? personel.Cinsiyet.Value ? "Erkek" : "Kadın" : "Bilinmiyor",
+                Cinsiyet = personel.Cinsiyet != null ? personel.Cinsiyet.Value : null,
                 Adres = personel.Adres,
                 Iletisim = personel.Iletisim,
                 IseGirisTarihi = gorevlendirme.IseGirisTarihi,

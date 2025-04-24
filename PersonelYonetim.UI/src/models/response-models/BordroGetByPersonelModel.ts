@@ -1,5 +1,6 @@
 export interface BordroGetByPersonelModel {
   id: string;
+  personelId: string;
   fullName: string;
   durum: string;
   yil: number;

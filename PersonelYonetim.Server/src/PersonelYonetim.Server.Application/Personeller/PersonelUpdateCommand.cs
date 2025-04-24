@@ -138,7 +138,6 @@ internal sealed class PersonelUpdateCommandHandler(
                 var eklenecekRoller = gelenRolIdler.Except(ortakRoller).ToList();
                 var silinecekRoller = mevcutRolIdler.Except(ortakRoller).ToList();
 
-                // 🔹 Ekleme işlemleri
                 foreach (var roleId in eklenecekRoller)
                 {
                     var yeniRol = new GorevlendirmeRolu
@@ -151,7 +150,6 @@ internal sealed class PersonelUpdateCommandHandler(
                     await gorevlendirmeRoluRepository.AddAsync(yeniRol);
                 }
 
-                // 🔹 Silme işlemi: Eğer silinmek istenen roller varsa VE bazı roller hala kalıyorsa
                 if (silinecekRoller.Count < mevcutRolIdler.Count && silinecekRoller.Any())
                 {
                     var silinecekEntities = gorevlendirmeRoller
@@ -165,10 +163,17 @@ internal sealed class PersonelUpdateCommandHandler(
             personelGorevlendirme.BirincilGorevMi = request.BirincilGorevMi;
             personelGorevlendirme.GorevlendirmeTipi = GorevlendirmeTipiEnum.FromValue(request.GorevlendirmeTipiValue);
             personelGorevlendirme.CalismaSekli = CalismaSekliEnum.FromValue(request.CalismaSekliValue);
-            personelGorevlendirme.RaporlananGorevlendirmeId = request.RaporlananPersonelId;
-            personelGorevlendirme.GorevlendirmeIzinKurali!.IzinKuralId = request.IzinKuralId!.Value;
-            personelGorevlendirme.CalismaTakvimId = request.CalismaTakvimId!.Value;
+
+
+            if (request.RaporlananPersonelId.HasValue)
+                personelGorevlendirme.RaporlananGorevlendirmeId = request.RaporlananPersonelId;
+            if(request.IzinKuralId.HasValue)
+                personelGorevlendirme.GorevlendirmeIzinKurali!.IzinKuralId = request.IzinKuralId!.Value;
+            if (request.CalismaTakvimId.HasValue)
+                personelGorevlendirme.CalismaTakvimId = request.CalismaTakvimId!.Value;
+
             personelGorevlendirme.BrutUcret = request.BrutUcret;
+
             personelGorevlendirme.TabiOlduguKanun = request.TabiOlduguKanun;
             personelGorevlendirme.SGKIsyeri = request.SGKIsYeri;
             personelGorevlendirme.VergiDairesiAdi = request.VergiDairesiAdi;

@@ -104,7 +104,7 @@ const deletePozisyon = async (id: string) => {
             type="text"
             id="ad"
             v-model="request.ad"
-            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
             placeholder="Yönetici"
           />
         </div>
@@ -116,7 +116,7 @@ const deletePozisyon = async (id: string) => {
             type="text"
             id="kod"
             v-model="request.kod"
-            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
             placeholder="YNTC"
           />
         </div>
@@ -129,7 +129,7 @@ const deletePozisyon = async (id: string) => {
             type="text"
             id="aciklama"
             v-model="request.aciklama"
-            class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
             placeholder=""
           />
         </div>
@@ -236,19 +236,19 @@ const deletePozisyon = async (id: string) => {
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
+                    class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
                   >
                     Oluşturulma Tarihi
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
+                    class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
                   >
                     Oluşturan
                   </th>
                   <th
                     scope="col"
-                    class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
+                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase dark:text-neutral-500"
                   >
                     İşlemler
                   </th>
@@ -292,10 +292,10 @@ const deletePozisyon = async (id: string) => {
                   >
                     {{ pozisyon.createUserName }}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                  <td class="px-6 text-center py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       type="button"
-                      class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:text-red-800 focus:outline-hidden focus:text-red-800 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:text-red-400 dark:focus:text-red-400"
+                      class="text-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:text-red-800 focus:outline-hidden focus:text-red-800 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:text-red-400 dark:focus:text-red-400"
                       @click="deletePozisyon(pozisyon.id)"
                     >
                       Sil

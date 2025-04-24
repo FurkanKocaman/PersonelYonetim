@@ -138,8 +138,14 @@ const toggleSinglePusula = (pusulaId: string) => {
   } else {
     pusulaIdler.value.push(pusulaId);
   }
-  // Hepsi seçiliyse üst checkbox'ı da işaretli yap
   selectAllChecked.value = bordro.value?.every((x) => pusulaIdler.value.includes(x.id)) ?? false;
+};
+
+const getPusulaPdfler = async () => {
+  const bordrolar = bordro.value.filter((p) => pusulaIdler.value.includes(p.id));
+  for (const bordro of bordrolar) {
+    await MaasPusulaService.getMaasPusulaPdf(bordro.personelId, bordro.yil, bordro.ay);
+  }
 };
 
 watch(selectedYil, () => getAllBordro());
@@ -277,6 +283,7 @@ watch(selectedYil, () => getAllBordro());
         >
           <button
             class="font-semibold text-sm hover:bg-blue-600 hover:text-neutral-100 px-3 py-1 rounded-md"
+            @click="getPusulaPdfler()"
           >
             PDF olarak indir
           </button>

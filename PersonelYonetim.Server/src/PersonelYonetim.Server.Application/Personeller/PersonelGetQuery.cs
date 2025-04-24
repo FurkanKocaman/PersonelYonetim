@@ -15,7 +15,7 @@ public sealed class PersonelGetQueryResponse : EntityDto
     public DateTimeOffset DogumTarihi { get; set; }
     public DateTimeOffset IseGirisTarihi { get; set; }
     public string? ProfilResimUrl { get; set; }
-    public string? Cinsiyet { get; set; }
+    public bool? Cinsiyet { get; set; }
     public string DepartmanAd { get; set; } = default!;
     public string PozisyonAd { get; set; } = default!;
     public string Eposta { get; set; } = default!;
@@ -43,7 +43,7 @@ internal sealed class PersonelGetQueryHandler(
                         {
                             Id = entity.Id,
                             FullName = entity.FullName,
-                            Cinsiyet = entity.Cinsiyet == null ? null : entity.Cinsiyet == true ? "Erkek" : "Kadın",
+                            Cinsiyet = entity.Cinsiyet == null ? null : entity.Cinsiyet ,
                             Eposta = entity.Iletisim.Eposta,
                             Telefon = entity.Iletisim.Telefon,
                             DogumTarihi = entity.DogumTarihi,

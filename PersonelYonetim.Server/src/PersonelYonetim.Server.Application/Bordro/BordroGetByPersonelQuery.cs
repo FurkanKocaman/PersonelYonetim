@@ -11,6 +11,7 @@ public sealed record BordroGetByPersonelQuery(
 public class BordroGetByPersonelQueryResponse
 {
     public Guid Id { get; set; }
+    public Guid PersonelId { get; set; }
     public string FullName { get; set; } = default!;
     public int Yil { get; set; }
     public int Ay { get; set; }
@@ -79,6 +80,7 @@ internal sealed class BordroGetByPersonelQueryHandler(
                 .Select(p => new BordroGetByPersonelQueryResponse
                 {
                     Id = p.Id,
+                    PersonelId = p.PersonelId,
                     FullName = p.Personel!.Ad + " " + p.Personel.Soyad,
                     Durum = p.Durum.Name,
                     Yil = p.BordroDonem?.Yil ?? 0,

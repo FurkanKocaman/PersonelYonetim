@@ -39,11 +39,5 @@ public static class AuthModule
             return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
         })
             .Produces<Result<string>>();
-        group.MapPost("add-claim", async (ISender sender, RoleAddClaimsCommand request, CancellationToken cancellationToken) =>
-        {
-            var response = await sender.Send(request, cancellationToken);
-            return response.IsSuccessful ? Results.Ok(response) : Results.InternalServerError(response);
-        })
-           .Produces<Result<string>>();
     }
 }

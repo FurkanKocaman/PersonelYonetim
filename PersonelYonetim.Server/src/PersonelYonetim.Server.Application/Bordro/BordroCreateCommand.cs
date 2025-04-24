@@ -26,6 +26,8 @@ internal sealed class BordroCreateCommandHandler(
     ICalismaTakvimRepository calismaTakvimRepository,
     IBordroDonemRepository bordroDonemRepository,
     IMaasPusulaRepository maasPusulaRepository,
+    IKazancBilesenRepository kazancBilesenRepository,
+    IKesintiBilesenRepository kesintiBilesenRepository,
     IBildirimService bildirimService,
     ITenantRepository tenantRepository,
     IUnitOfWork unitOfWork,
@@ -95,51 +97,80 @@ internal sealed class BordroCreateCommandHandler(
                     if (!calismaGunler.Any())
                         return Result<string>.Failure("Çalışma günleri bulunamamdı");
 
-                    var maasPusula = await maasPusulaRepository.FirstOrDefaultAsync(p => p.BordroDonemId == bordroDonem.Id && p.PersonelId == personelGorevlendirme.PersonelId && !p.IsDeleted);
+                    var maasPusula = await maasPusulaRepository.Where(p => p.BordroDonemId == bordroDonem.Id && p.PersonelId == personelGorevlendirme.PersonelId && !p.IsDeleted).Include(p => p.KazancBilesenleri).Include(p => p.KesintiBilesenleri).FirstOrDefaultAsync();
+                    decimal toplamKazanc = 0m;
+                    decimal toplamKesinti = 0m;
+
+                    var kazancBilesenleri = maasPusula?.KazancBilesenleri;
+                    var kesintiBilesenleri = maasPusula?.KesintiBilesenleri;
+
                     if (maasPusula is null || request.tekrarHesapla)
                     {
                         if (maasPusula is not null)
                         {
+                            if(kazancBilesenleri is not null && kazancBilesenleri.Count() > 0)
+                            {
+                                foreach(var kazancBilesen in kazancBilesenleri)
+                                {
+                                    toplamKazanc += kazancBilesen.Tutar;
+                                }
+                            }
+
+                            if (kesintiBilesenleri is not null && kesintiBilesenleri.Count() > 0)
+                            {
+                                foreach (var kesintiBilesen in kesintiBilesenleri)
+                                {
+                                    toplamKesinti += kesintiBilesen.Tutar;
+                                }
+                            }
+
+                            maasPusula.IsDeleted = true;
+                            maasPusula.IsActive = false;
+                            maasPusulaRepository.Update(maasPusula);
+
                             maasPusula.IsDeleted = true;
                             maasPusulaRepository.Update(maasPusula);
-                            if (maasPusula.SGKPrimiIsciOrani != null)
-                                sgkIsciOrani = maasPusula.SGKPrimiIsciOrani.Value;
-                            else
-                                sgkIsciOrani = tenant.SGKPrimIsciKesintiOrani;
-                            if (maasPusula.IssizlikPrimiIsciOrani != null)
-                                issizlikIsciOrani = maasPusula.IssizlikPrimiIsciOrani.Value;
-                            else
-                                issizlikIsciOrani = tenant.SGKIssizlikPrimIsciKesintiOrani;
 
-                            if (maasPusula.SGKPrimiIsverenOrani != null)
-                                sgkIsverenOrani = maasPusula.SGKPrimiIsverenOrani.Value;
-                            else
-                                sgkIsverenOrani = tenant.SGKPrimIsverenKesintiOrani;
-                            if (maasPusula.IssizlikPrimiIsverenOrani != null)
-                                issizlikIsverenOrani = maasPusula.IssizlikPrimiIsverenOrani.Value;
-                            else
-                                issizlikIsverenOrani = tenant.SGKIssizlikPrimIsverenKesintiOrani;
+                            //if (maasPusula.SGKPrimiIsciOrani != null)
+                            //    sgkIsciOrani = maasPusula.SGKPrimiIsciOrani.Value;
+                            //else
+                            //    sgkIsciOrani = tenant.SGKPrimIsciKesintiOrani;
+                            //if (maasPusula.IssizlikPrimiIsciOrani != null)
+                            //    issizlikIsciOrani = maasPusula.IssizlikPrimiIsciOrani.Value;
+                            //else
+                            //    issizlikIsciOrani = tenant.SGKIssizlikPrimIsciKesintiOrani;
 
-                            if (maasPusula.DamgaVergisiOrani != null)
-                                damgaVergisiOrani = maasPusula.DamgaVergisiOrani.Value;
-                            else
-                                damgaVergisiOrani = tenant.DamgaVergisiOrani;
+                            //if (maasPusula.SGKPrimiIsverenOrani != null)
+                            //    sgkIsverenOrani = maasPusula.SGKPrimiIsverenOrani.Value;
+                            //else
+                            //    sgkIsverenOrani = tenant.SGKPrimIsverenKesintiOrani;
+                            //if (maasPusula.IssizlikPrimiIsverenOrani != null)
+                            //    issizlikIsverenOrani = maasPusula.IssizlikPrimiIsverenOrani.Value;
+                            //else
+                            //    issizlikIsverenOrani = tenant.SGKIssizlikPrimIsverenKesintiOrani;
 
-                            if (maasPusula.GelirVergisiOrani != null)
-                                gelirVergisiOrani = maasPusula.GelirVergisiOrani;
+                            //if (maasPusula.DamgaVergisiOrani != null)
+                            //    damgaVergisiOrani = maasPusula.DamgaVergisiOrani.Value;
+                            //else
+                            //    damgaVergisiOrani = tenant.DamgaVergisiOrani;
+
+                            //if (maasPusula.GelirVergisiOrani != null)
+                            //    gelirVergisiOrani = maasPusula.GelirVergisiOrani;
 
                             await unitOfWork.SaveChangesAsync(cancellationToken);
                         }
 
                         if (maasPusula is null)
                         {
-                            isReCalculated = false;
-                            sgkIsciOrani = tenant.SGKPrimIsciKesintiOrani;
-                            issizlikIsciOrani = tenant.SGKIssizlikPrimIsciKesintiOrani;
-                            sgkIsverenOrani = tenant.SGKPrimIsverenKesintiOrani;
-                            issizlikIsverenOrani = tenant.SGKIssizlikPrimIsverenKesintiOrani;
-                            damgaVergisiOrani = tenant.DamgaVergisiOrani;
                         }
+
+
+                        isReCalculated = false;
+                        sgkIsciOrani = tenant.SGKPrimIsciKesintiOrani;
+                        issizlikIsciOrani = tenant.SGKIssizlikPrimIsciKesintiOrani;
+                        sgkIsverenOrani = tenant.SGKPrimIsverenKesintiOrani;
+                        issizlikIsverenOrani = tenant.SGKIssizlikPrimIsverenKesintiOrani;
+                        damgaVergisiOrani = tenant.DamgaVergisiOrani;
 
                         int SGKGunSayisi;
 
@@ -159,7 +190,7 @@ internal sealed class BordroCreateCommandHandler(
                         decimal AsgariUcret = tenant.AsgariUcret;
 
                         decimal BrutUcret = (personelGorevlendirme.BrutUcret / 30m) * SGKGunSayisi;
-                        decimal EkKazancToplam = 0;
+                        decimal EkKazancToplam = toplamKazanc;//KazancBilesenleri eklenecek
                         decimal ToplamBrutKazanc = BrutUcret + EkKazancToplam;
 
                         decimal SGKPrimiIsci = ToplamBrutKazanc * sgkIsciOrani!.Value;
@@ -180,7 +211,7 @@ internal sealed class BordroCreateCommandHandler(
 
                         decimal OdenecekGelirvergisi = (HesaplananGelirVergisi - GelirVergisiIstisnasiUygulanan) < 0 ? 0 : (HesaplananGelirVergisi - GelirVergisiIstisnasiUygulanan);
                         decimal OdenecekDamgaVergisi = (HesaplananDamgaVergisi - DamgaVergisiIstisnasiUygulanan) < 0 ? 0 : (HesaplananDamgaVergisi - DamgaVergisiIstisnasiUygulanan);
-                        decimal DigerKesintilerToplam = 0;
+                        decimal DigerKesintilerToplam = toplamKesinti; // KesintiBilesenleri eklenebilir
                         decimal Toplamkesinti = SGKPrimiIsci + IssizlikPrimiIsci + OdenecekGelirvergisi + OdenecekDamgaVergisi + DigerKesintilerToplam;
                         decimal NetMaas = ToplamBrutKazanc - Toplamkesinti;
 
@@ -246,12 +277,31 @@ internal sealed class BordroCreateCommandHandler(
                             GelirVergisiOrani  = HesaplaGelirVergisiOrani(KumulatifGelirVergisiMatrahiDonemSonu),
                             DamgaVergisiOrani = damgaVergisiOrani,
 
-
                             TenantId = tenantId!.Value
                             };
-                    
                         maasPusulaRepository.Add(maasPusula);
                         pusulaIdler.Add(maasPusula.Id);
+
+                        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+                        if (kazancBilesenleri is not null && kazancBilesenleri.Count() > 0)
+                        {
+                            foreach (var kazancBilesen in kazancBilesenleri)
+                            {
+                                kazancBilesen.MaasPusulaId = maasPusula.Id;
+                                kazancBilesenRepository.Update(kazancBilesen);
+                            }
+                        }
+
+                        if (kesintiBilesenleri is not null && kesintiBilesenleri.Count() > 0)
+                        {
+                            foreach (var kesintiBilesen in kesintiBilesenleri)
+                            {
+                                kesintiBilesen.MaasPusulaId = maasPusula.Id;
+                                kesintiBilesenRepository.Update(kesintiBilesen);
+                            }
+                        }
+                        await unitOfWork.SaveChangesAsync();
 
                         if (isReCalculated)
                         {
@@ -283,12 +333,8 @@ internal sealed class BordroCreateCommandHandler(
 
                             await bildirimService.KullaniciyaBildirimGonderAsync(bildirim, maasPusula.PersonelId);
                         }
-                       
-
                     }
                 }
-                await unitOfWork.SaveChangesAsync();
-
                if(pusulaIdler.Count > 0)
                 {
                     foreach(var pusulaId in pusulaIdler)

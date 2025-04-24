@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { BordroKazancEkleRequest } from "@/models/request-models/BordroKazancEkleRequest";
+import type { BordroKesintiEkleRequest } from "@/models/request-models/BordroKesintiEkleRequest";
 import type { BordroGetAllModel } from "@/models/response-models/BordroGetAllModel";
 import BordroService from "@/services/BordroService";
 import MaasPusulaService from "@/services/MaasPusulaService";
@@ -8,9 +10,32 @@ const isYilMenuOpen = ref(false);
 const isAyMenuOpen = ref(false);
 
 const isIslemlerMenuOpen = ref(false);
+const isKazancEkleModalOpen = ref(false);
+const isKesintiEkleModalOpen = ref(false);
+
+const selectedPusulaId: Ref<string> = ref("");
 
 const bordro: Ref<BordroGetAllModel[] | undefined> = ref([]);
 const bordroCount = ref(0);
+
+const kazancEkleRequest: Ref<BordroKazancEkleRequest> = ref({
+  maasPusulaId: "",
+  kazancTuru: "",
+  aciklama: undefined,
+  tutar: 0,
+  sgkMatrahinaDahil: true,
+  gelirVergisiMatrahinaDahil: true,
+  damgaVergisiMatrahinaDahil: true,
+});
+const kesintiEkleRequest: Ref<BordroKesintiEkleRequest> = ref({
+  maasPusulaId: "",
+  kesintiTuru: "",
+  aciklama: undefined,
+  tutar: 0,
+  sgkMatrahinaDahil: true,
+  gelirVergisiMatrahinaDahil: true,
+  damgaVergisiMatrahinaDahil: true,
+});
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -148,6 +173,22 @@ const toggleSinglePusula = (pusulaId: string) => {
 const getPusulaPdfler = async () => {
   for (const personelId of pusulaIdler.value) {
     await MaasPusulaService.getMaasPusulaPdf(personelId, selectedYil.value, selectedAy.value);
+  }
+};
+
+const kazancEkle = async () => {
+  kazancEkleRequest.value.maasPusulaId = selectedPusulaId.value;
+  const res = await BordroService.bordroKazancEkle(kazancEkleRequest.value);
+  if (res) {
+    isKazancEkleModalOpen.value = false;
+  }
+};
+
+const kesintiEkle = async () => {
+  kesintiEkleRequest.value.maasPusulaId = selectedPusulaId.value;
+  const res = await BordroService.bordroKesintiEkle(kesintiEkleRequest.value);
+  if (res) {
+    isKesintiEkleModalOpen.value = false;
   }
 };
 
@@ -416,19 +457,68 @@ watch(selectedAy, () => getAllBordro());
               {{ maaPusula.brutUcret.toFixed(2) }}
             </div>
             <div
-              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
+              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-end text-sm font-semibold"
             >
               {{ maaPusula.sgkGun }}
             </div>
             <div
-              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
+              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-end text-sm font-semibold group hover:bg-neutral-800/20 dark:hover:bg-neutral-100/30 cursor-pointer"
+              @click="
+                () => {
+                  selectedPusulaId = maaPusula.id;
+                  isKazancEkleModalOpen = true;
+                }
+              "
             >
               {{ maaPusula.ekOdemelerToplam }}
+
+              <svg
+                class="size-5 ml-3"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22 10.5V12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2H13.5"
+                  class="stroke-neutral-600 dark:stroke-neutral-200"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M16.652 3.45506L17.3009 2.80624C18.3759 1.73125 20.1188 1.73125 21.1938 2.80624C22.2687 3.88124 22.2687 5.62415 21.1938 6.69914L20.5449 7.34795M16.652 3.45506C16.652 3.45506 16.7331 4.83379 17.9497 6.05032C19.1662 7.26685 20.5449 7.34795 20.5449 7.34795M16.652 3.45506L10.6872 9.41993C10.2832 9.82394 10.0812 10.0259 9.90743 10.2487C9.70249 10.5114 9.52679 10.7957 9.38344 11.0965C9.26191 11.3515 9.17157 11.6225 8.99089 12.1646L8.41242 13.9M20.5449 7.34795L14.5801 13.3128C14.1761 13.7168 13.9741 13.9188 13.7513 14.0926C13.4886 14.2975 13.2043 14.4732 12.9035 14.6166C12.6485 14.7381 12.3775 14.8284 11.8354 15.0091L10.1 15.5876M10.1 15.5876L8.97709 15.9619C8.71035 16.0508 8.41626 15.9814 8.21744 15.7826C8.01862 15.5837 7.9492 15.2897 8.03811 15.0229L8.41242 13.9M10.1 15.5876L8.41242 13.9"
+                  class="stroke-neutral-600 dark:stroke-neutral-200"
+                  stroke-width="1.5"
+                />
+              </svg>
             </div>
             <div
-              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-start text-sm font-semibold"
+              class="border-r flex-1 border-neutral-300 dark:border-neutral-600 flex items-center px-5 justify-end text-sm font-semibold group hover:bg-neutral-800/20 dark:hover:bg-neutral-100/30 cursor-pointer"
+              @click="
+                () => {
+                  selectedPusulaId = maaPusula.id;
+                  isKesintiEkleModalOpen = true;
+                }
+              "
             >
               {{ maaPusula.ozelKesintiler }}
+              <svg
+                class="size-5 ml-3"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22 10.5V12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2H13.5"
+                  class="stroke-neutral-600 dark:stroke-neutral-200"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M16.652 3.45506L17.3009 2.80624C18.3759 1.73125 20.1188 1.73125 21.1938 2.80624C22.2687 3.88124 22.2687 5.62415 21.1938 6.69914L20.5449 7.34795M16.652 3.45506C16.652 3.45506 16.7331 4.83379 17.9497 6.05032C19.1662 7.26685 20.5449 7.34795 20.5449 7.34795M16.652 3.45506L10.6872 9.41993C10.2832 9.82394 10.0812 10.0259 9.90743 10.2487C9.70249 10.5114 9.52679 10.7957 9.38344 11.0965C9.26191 11.3515 9.17157 11.6225 8.99089 12.1646L8.41242 13.9M20.5449 7.34795L14.5801 13.3128C14.1761 13.7168 13.9741 13.9188 13.7513 14.0926C13.4886 14.2975 13.2043 14.4732 12.9035 14.6166C12.6485 14.7381 12.3775 14.8284 11.8354 15.0091L10.1 15.5876M10.1 15.5876L8.97709 15.9619C8.71035 16.0508 8.41626 15.9814 8.21744 15.7826C8.01862 15.5837 7.9492 15.2897 8.03811 15.0229L8.41242 13.9M10.1 15.5876L8.41242 13.9"
+                  class="stroke-neutral-600 dark:stroke-neutral-200"
+                  stroke-width="1.5"
+                />
+              </svg>
             </div>
           </div>
           <!-- Girdiler End -->
@@ -599,4 +689,200 @@ watch(selectedAy, () => getAllBordro());
       </div>
     </div>
   </div>
+  <!-- Modal start -->
+  <div
+    v-if="isKazancEkleModalOpen"
+    id="hs-focus-management-modal"
+    class="size-full fixed top-0 start-0 z-50 overflow-x-hidden overflow-y-auto flex justify-center items-center backdrop-blur-xl"
+  >
+    <div
+      class="-open:mt-7 -open:opacity-100 -open:duration-500 mt-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto"
+    >
+      <div
+        class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl pointer-events-auto dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-neutral-700/70"
+      >
+        <div
+          class="flex justify-between items-center py-3 px-4 border-b border-gray-200 dark:border-neutral-700"
+        >
+          <h3 id="hs-focus-management-modal-label" class="font-bold text-gray-800 dark:text-white">
+            Kazanç Ekle
+          </h3>
+          <button
+            type="button"
+            class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-400 dark:focus:bg-neutral-600 cursor-pointer"
+            @click="isKazancEkleModalOpen = false"
+          >
+            <span class="sr-only">Close</span>
+            <svg
+              class="shrink-0 size-4"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-y-auto">
+          <label for="ad" class="block text-sm font-medium mb-2 dark:text-white">Kazanç Türü</label>
+          <input
+            type="text"
+            id="ad"
+            v-model="kazancEkleRequest.kazancTuru"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder="Prim"
+          />
+        </div>
+        <div class="p-4 overflow-y-auto">
+          <label for="kod" class="block text-sm font-medium mb-2 dark:text-white">Tutar</label>
+          <input
+            type="number"
+            id="kod"
+            step="any"
+            v-model="kazancEkleRequest.tutar"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder="1000"
+          />
+        </div>
+
+        <div class="p-4 overflow-y-auto">
+          <label for="aciklama" class="block text-sm font-medium mb-2 dark:text-white"
+            >Aciklama<span class="dark:text-neutral-400 text-neutral-500">(Opsiyonel)</span>
+          </label>
+          <input
+            type="text"
+            id="aciklama"
+            v-model="kazancEkleRequest.aciklama"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder=""
+          />
+        </div>
+        <div
+          class="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700"
+        >
+          <button
+            type="button"
+            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+            @click="isKazancEkleModalOpen = false"
+          >
+            İptal
+          </button>
+          <button
+            type="button"
+            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+            @click="kazancEkle()"
+          >
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal end -->
+  <!-- Modal start -->
+  <div
+    v-if="isKesintiEkleModalOpen"
+    id="hs-focus-management-modal"
+    class="size-full fixed top-0 start-0 z-50 overflow-x-hidden overflow-y-auto flex justify-center items-center backdrop-blur-xl"
+  >
+    <div
+      class="-open:mt-7 -open:opacity-100 -open:duration-500 mt-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto"
+    >
+      <div
+        class="flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl pointer-events-auto dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-neutral-700/70"
+      >
+        <div
+          class="flex justify-between items-center py-3 px-4 border-b border-gray-200 dark:border-neutral-700"
+        >
+          <h3 id="hs-focus-management-modal-label" class="font-bold text-gray-800 dark:text-white">
+            Kesinti Ekle
+          </h3>
+          <button
+            type="button"
+            class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200 focus:outline-hidden focus:bg-gray-200 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-neutral-400 dark:focus:bg-neutral-600 cursor-pointer"
+            @click="isKesintiEkleModalOpen = false"
+          >
+            <span class="sr-only">Close</span>
+            <svg
+              class="shrink-0 size-4"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-y-auto">
+          <label for="ad" class="block text-sm font-medium mb-2 dark:text-white"
+            >Kesinti Türü</label
+          >
+          <input
+            type="text"
+            id="ad"
+            v-model="kesintiEkleRequest.kesintiTuru"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder="Avans"
+          />
+        </div>
+        <div class="p-4 overflow-y-auto">
+          <label for="kod" class="block text-sm font-medium mb-2 dark:text-white">Tutar</label>
+          <input
+            type="number"
+            id="kod"
+            step="any"
+            v-model="kesintiEkleRequest.tutar"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder="1000"
+          />
+        </div>
+
+        <div class="p-4 overflow-y-auto">
+          <label for="aciklama" class="block text-sm font-medium mb-2 dark:text-white"
+            >Aciklama<span class="dark:text-neutral-400 text-neutral-500">(Opsiyonel)</span>
+          </label>
+          <input
+            type="text"
+            id="aciklama"
+            v-model="kesintiEkleRequest.aciklama"
+            class="py-3 px-4 block w-full border border-neutral-400 rounded-lg text-sm focus:outline-none focus:border-blue-600 dark:bg-neutral-900 dark:border-neutral-700 dark:placeholder-neutral-500 dark:text-neutral-200"
+            placeholder=""
+          />
+        </div>
+        <div
+          class="flex justify-end items-center gap-x-2 py-3 px-4 border-t border-gray-200 dark:border-neutral-700"
+        >
+          <button
+            type="button"
+            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700"
+            @click="isKesintiEkleModalOpen = false"
+          >
+            İptal
+          </button>
+          <button
+            type="button"
+            class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
+            @click="kesintiEkle()"
+          >
+            Kaydet
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal end -->
 </template>

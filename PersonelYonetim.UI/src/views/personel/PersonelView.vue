@@ -75,6 +75,7 @@ const filteredPersoneller = computed<Record<string, unknown>[]>(() => {
 
 const openEditModal = (personel: PersonelItem) => {
   selectedPersonel.value = personeller.value?.find((p) => p.id == personel.id);
+  console.log(selectedPersonel.value);
   // selectedPersonel.value!.role = personel.role;
   showPersonelModal.value = true;
 };

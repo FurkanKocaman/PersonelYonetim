@@ -4,6 +4,8 @@ import api from "./Axios";
 import type { BordroGetCalisanlarModel } from "@/models/response-models/BordroCalisanlarGetModel";
 import type { BordroGetByPersonelModel } from "@/models/response-models/BordroGetByPersonelModel";
 import { useToastStore } from "@/stores/ToastStore";
+import type { BordroKazancEkleRequest } from "@/models/request-models/BordroKazancEkleRequest";
+import type { BordroKesintiEkleRequest } from "@/models/request-models/BordroKesintiEkleRequest";
 
 class BordroService {
   async bordroCreate(
@@ -140,6 +142,18 @@ class BordroService {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async bordroKazancEkle(request: BordroKazancEkleRequest): Promise<string> {
+    const res = await api.post(`${import.meta.env.VITE_API_URL}/bordro/kazanc-ekle`, request);
+    useToastStore().addToast(res.data.data, "", "success", 5000, true);
+    return res.data.data;
+  }
+
+  async bordroKesintiEkle(request: BordroKesintiEkleRequest): Promise<string> {
+    const res = await api.post(`${import.meta.env.VITE_API_URL}/bordro/kesinti-ekle`, request);
+    useToastStore().addToast(res.data.data, "", "success", 5000, true);
+    return res.data.data;
   }
 }
 

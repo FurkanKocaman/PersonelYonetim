@@ -23,5 +23,6 @@ public static class RouteRegistrar
         app.RegisterMaasPusulaRoutes();
         app.RegisterKurumsalBirimTipiRoutes();
         app.RegisterTenantRoutes();
+        app.RegisterRoleRoutes();
     }
 }

@@ -271,5 +271,13 @@ public class AppODataController(
         return response;
     }
 
+    [HttpGet("claims")]
+    [Authorize()]
+    public async Task<List<ClaimsGetAllQueryResponse>> GetClaims(CancellationToken cancellationToken)
+    {
+        var response = await sender.Send(new ClaimsGetAllQuery(), cancellationToken);
+        return response;
+    }
+
 }
 

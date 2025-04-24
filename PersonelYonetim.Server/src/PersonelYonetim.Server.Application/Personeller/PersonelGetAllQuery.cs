@@ -14,18 +14,39 @@ public sealed record PersonelGetAllQuery(
 
 public sealed class PersonelGetAllQueryResponse : EntityDto
 {
+    public Guid? PersonelGorevlendirmeId { get; set; }
     public string Ad { get; set; } = default!;
     public string Soyad { get; set; } = default!;
     public DateTimeOffset DogumTarihi { get; set; }
     public string? AvatarUrl { get; set; }
-    public string? Cinsiyet { get; set; }
+    public bool? Cinsiyet { get; set; }
     public Iletisim Iletisim { get; set; } = default!;
-    public Adres? Adres { get; set; } 
-    public string KurumsalBirimAd { get; set; } = string.Empty;
-    public string PozisyonAd { get; set; } = string.Empty;
+    public Adres? Adres { get; set; }
+
+    public DateTimeOffset IseGirisTarihi { get; set; }
+    public DateTimeOffset? IstenCikisTarihi { get; set; }
+    public DateTimeOffset PozisyonBaslangicTarihi { get; set; }
+    public DateTimeOffset? PozisyonBitisTarihi { get; set; }
+
+    public Guid? RaporlananGorevlendirmeId { get; set; }
     public string? YoneticiAd { get; set; }
     public string? YoneticiPozisyon { get; set; }
+
+    public Guid? KurumsalBirimId { get; set; }
+    public string? KurumsalBirimAd { get; set; } 
+
+    public Guid? PozisyonId { get; set; }
+    public string? PozisyonAd { get; set; }
+
+    public decimal BrutUcret { get; set; }
+    
+    public Guid CalismaTakvimiId { get; set; }
+
+    public int? GorevlendirmeTipiValue { get; set; }
+    public int? CalismaSekliValue { get; set; }
+
     public string?[] Roller { get; set; } = default!;
+
 }
 
 internal sealed class PersonelGetAllQueryHandler(
@@ -74,18 +95,40 @@ internal sealed class PersonelGetAllQueryHandler(
                     (ppuu, updateUser) => new PersonelGetAllQueryResponse
                     {
                         Id = ppuu.personel.Id,
+                        PersonelGorevlendirmeId = ppuu.personelGorevlendirme.Id,
+
                         Ad = ppuu.personel.Ad,
                         Soyad = ppuu.personel.Soyad,
                         DogumTarihi = ppuu.personel.DogumTarihi,
                         AvatarUrl = ppuu.personel.AvatarUrl,
-                        Cinsiyet = ppuu.personel.Cinsiyet != null ? ppuu.personel.Cinsiyet.Value ? "Erkek" : "Kadın" : "Bilinmiyor",
+                        Cinsiyet = ppuu.personel.Cinsiyet != null ? ppuu.personel.Cinsiyet.Value : null,
                         Iletisim = ppuu.personel.Iletisim,
                         Adres = ppuu.personel.Adres,
-                        KurumsalBirimAd = ppuu.personelGorevlendirme.KurumsalBirim != null ? ppuu.personelGorevlendirme.KurumsalBirim.Ad : "Bilinmiyor",
-                        PozisyonAd = ppuu.personelGorevlendirme.Pozisyon != null ? ppuu.personelGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
+
+                        IseGirisTarihi = ppuu.personelGorevlendirme.IseGirisTarihi,
+                        IstenCikisTarihi = ppuu.personelGorevlendirme.IstenCikisTarihi,
+                        PozisyonBaslangicTarihi = ppuu.personelGorevlendirme.PozisyonBaslangicTarihi,
+                        PozisyonBitisTarihi = ppuu.personelGorevlendirme.PozisyonBitisTarihi,
+
+                        RaporlananGorevlendirmeId = ppuu.personelGorevlendirme.RaporlananGorevlendirmeId,
                         YoneticiAd = ppuu.personelGorevlendirme.RaporlananGorevlendirme != null ? ppuu.personelGorevlendirme.RaporlananGorevlendirme.Personel.FullName : "Bilinmiyor",
                         YoneticiPozisyon = ppuu.personelGorevlendirme.RaporlananGorevlendirme != null ? ppuu.personelGorevlendirme.RaporlananGorevlendirme.Pozisyon!.Ad : "Bilinmiyor",
+
+                        KurumsalBirimId = ppuu.personelGorevlendirme.KurumsalBirimId != null ? ppuu.personelGorevlendirme.KurumsalBirimId : null,
+                        KurumsalBirimAd = ppuu.personelGorevlendirme.KurumsalBirim != null ? ppuu.personelGorevlendirme.KurumsalBirim.Ad : "Bilinmiyor",
+
+                        PozisyonId = ppuu.personelGorevlendirme.PozisyonId,
+                        PozisyonAd = ppuu.personelGorevlendirme.Pozisyon != null ? ppuu.personelGorevlendirme.Pozisyon.Ad : "Bilinmiyor",
+                        
                         Roller = ppuu.personelGorevlendirme.GorevlendirmeRolleri.Select(r => r.Rol.Name).ToArray(),
+
+                        BrutUcret = ppuu.personelGorevlendirme.BrutUcret,
+
+                        CalismaTakvimiId = ppuu.personelGorevlendirme.CalismaTakvimId,
+
+                        CalismaSekliValue = ppuu.personelGorevlendirme.CalismaSekli != null ? ppuu.personelGorevlendirme.CalismaSekli.Value : null,
+                        GorevlendirmeTipiValue = ppuu.personelGorevlendirme.GorevlendirmeTipi != null ? ppuu.personelGorevlendirme.GorevlendirmeTipi.Value : null,
+
                         IsActive = ppuu.personel.IsActive,
                         CreatedAt = ppuu.personel.CreatedAt,
                         CreateUserId = ppuu.createUser != null ? ppuu.createUser.Id : Guid.Empty,

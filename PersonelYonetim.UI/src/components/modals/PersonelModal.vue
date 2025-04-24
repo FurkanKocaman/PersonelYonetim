@@ -16,7 +16,6 @@ import type { PozisyonModel } from "@/models/entity-models/PozisyonModel";
 import PozisyonService from "@/services/PozisyonService";
 import RoleService from "@/services/RoleService";
 import type { RoleModel } from "@/models/response-models/RoleModel";
-import type { PersonelUpdateCommand } from "@/models/request-models/PersonelUpdateCommand";
 
 const currentStep = ref(0);
 
@@ -66,8 +65,11 @@ const request: PersonelCreateCommand = reactive(
         kurumsalBirimId: undefined,
         pozisyonId: undefined,
         roleId: [],
-        baslangicTarihi: new Date(),
-        bitisTarihi: undefined,
+        iseGirisTarihi: new Date(),
+        istenCikisTarihi: undefined,
+        pozisyonBaslangicTarihi: new Date(),
+        pozisyonBitisTarihi: undefined,
+
         birincilGorevMi: true,
         gorevlendirmeTipiValue: undefined,
         calismaSekliValue: 0,
@@ -79,43 +81,44 @@ const request: PersonelCreateCommand = reactive(
       }
 );
 
-const updateRequest: Ref<PersonelUpdateCommand> = ref({
-  id: "",
-  ad: "",
-  soyad: "",
-  dogumTarihi: new Date(),
-  cinsiyet: undefined,
-  profilResimUrl: "",
-  iletisim: {
-    eposta: "",
-    telefon: "",
-  },
-  adres: {
-    ulke: "",
-    sehir: "",
-    ilce: "",
-    tamAdres: "",
-  },
+// const updateRequest: Ref<PersonelUpdateCommand> = ref({
+//   id: "",
+//   ad: "",
+//   soyad: "",
+//   dogumTarihi: new Date(),
+//   cinsiyet: undefined,
+//   profilResimUrl: "",
+//   iletisim: {
+//     eposta: "",
+//     telefon: "",
+//   },
+//   adres: {
+//     ulke: "",
+//     sehir: "",
+//     ilce: "",
+//     tamAdres: "",
+//   },
 
-  kurumsalBirimId: undefined,
-  pozisyonId: undefined,
-  roleIdler: [],
-  baslangicTarihi: "",
-  bitisTarihi: undefined,
-  birincilGorevMi: false,
-  gorevlendirmeTipiValue: 0,
-  calismaSekliValue: 0,
-  raporlananPersonelId: undefined,
-  izinKuralId: undefined,
-  calismaTakvimId: undefined,
-  brutUcret: 0,
-  tabiOlduguKanun: "",
-  sgkIsYeri: "",
-  vergiDairesiAdi: "",
-  meslekKodu: "",
-});
+//   kurumsalBirimId: undefined,
+//   pozisyonId: undefined,
+//   roleIdler: [],
+//   baslangicTarihi: "",
+//   bitisTarihi: undefined,
+//   birincilGorevMi: false,
+//   gorevlendirmeTipiValue: 0,
+//   calismaSekliValue: 0,
+//   raporlananPersonelId: undefined,
+//   izinKuralId: undefined,
+//   calismaTakvimId: undefined,
+//   brutUcret: 0,
+//   tabiOlduguKanun: "",
+//   sgkIsYeri: "",
+//   vergiDairesiAdi: "",
+//   meslekKodu: "",
+// });
 
 onMounted(() => {
+  console.log(props.personel);
   getKurumsalBirimler();
   getPersoneller();
   getCalismaTakvimler();
@@ -132,8 +135,8 @@ const handlePersonel = async () => {
       : undefined;
   request.avatarUrl = imageResponse;
   if (props.personel) {
-    request.baslangicTarihi = new Date();
-    const response = await PersonelService.updatePersonel(updateRequest.value);
+    request.pozisyonBaslangicTarihi = new Date();
+    const response = await PersonelService.updatePersonel(request);
     console.log(response);
 
     emit("closeModal", false);
@@ -476,7 +479,7 @@ function onRoleChange() {
                   >
                   <Datepicker
                     id="isebaslamatarih"
-                    v-model="request.baslangicTarihi"
+                    v-model="request.iseGirisTarihi"
                     locale="TR"
                     :enable-time-picker="true"
                     :format="'dd-MM-yyyy'"
@@ -654,7 +657,7 @@ function onRoleChange() {
                     >
                     <Datepicker
                       id="tarih"
-                      v-model="request.bitisTarihi"
+                      v-model="request.istenCikisTarihi"
                       locale="tr"
                       :enable-time-picker="false"
                       :format="'dd-MM-yyyy'"
@@ -670,7 +673,7 @@ function onRoleChange() {
                   <select
                     id="calisma"
                     class="bg-gray-50 border border-gray-300 text-neutral-900 text-sm rounded-lg block w-full p-2.5 dark:bg-neutral-700 dark:border-neutral-600 dark:placeholder-gray-400 dark:text-white focus:shadow-[0px_0px_5px_3px_rgba(_15,_122,_195,_0.3)] outline-none"
-                    v-model="request.calismaTakvimId"
+                    v-model="request.calismaTakvimiId"
                   >
                     <option
                       class="text-neutral-800 dark:text-neutral-200"
@@ -710,7 +713,7 @@ function onRoleChange() {
                     <option
                       v-for="personel in personeller"
                       :key="personel.id"
-                      :value="personel.id"
+                      :value="personel.personelGorevlendirmeId"
                       class="text-neutral-800 dark:text-neutral-200"
                     >
                       {{ personel.ad + " " + personel.soyad }}

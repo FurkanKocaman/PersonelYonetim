@@ -34,11 +34,11 @@ internal sealed class PDFService(
             .Replace("{{TABI_OLDUGU_KANUN}}", personelGorevlendirme.TabiOlduguKanun ?? tenant.TabiOlduguKanun)
 
             .Replace("{{NORMAL_KAZANC}}", maasPusula.BrutUcret.ToString())
-            .Replace("{{FAZLA_CALISMA}}", maasPusula.EkKazancToplam.ToString())
+            .Replace("{{FAZLA_CALISMA}}", "0")
             .Replace("{{EK_ODEMELER}}", maasPusula.EkKazancToplam.ToString())
             .Replace("{{TUM_GELIRLER}}", maasPusula.ToplamBrutKazanc.ToString())
 
-            .Replace("{{YASAL_KESINTILER}}", maasPusula.ToplamKesinti.ToString())
+            .Replace("{{YASAL_KESINTILER}}", (maasPusula.SGKPrimiIsci + maasPusula.IssizlikPrimiIsci + maasPusula.OdenecekDamgaVergisi+ maasPusula.OdenecekGelirVergisi).ToString())
             .Replace("{{AYNI_YARDIM_KESINTILER}}", "0")
             .Replace("{{OZEL_KESINTILER}}", maasPusula.DigerKesintilerToplam.ToString())
             .Replace("{{KESINTILER_TOPLAM}}", maasPusula.ToplamKesinti.ToString())

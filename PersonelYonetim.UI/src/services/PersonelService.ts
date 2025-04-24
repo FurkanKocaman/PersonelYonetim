@@ -5,7 +5,6 @@ import type { PaginationParams } from "@/models/request-models/PaginationParams"
 import type { PersonelCreateCommand } from "@/models/request-models/PersonelCreateCommand";
 import type { PersonelDetaylarGetModel } from "@/models/response-models/PersonelDetaylarGetModel";
 import type { PersonelDetayUpdateModel } from "@/models/request-models/PersonelDetayUpdateModel";
-import type { PersonelUpdateCommand } from "@/models/request-models/PersonelUpdateCommand";
 import type { PersonelGorevlendirmeModel } from "@/models/entity-models/PersonelGorevlendirmeModel";
 
 class PersonelService {
@@ -55,7 +54,7 @@ class PersonelService {
         request
       );
       if (response.status == 200) {
-        useToastStore().addToast(response.data.data, "", "success", 5000, true);
+        useToastStore().addToast("Personel oluşturuldu", "", "success", 5000, true);
         return response.data.data;
       }
       return response.data;
@@ -64,7 +63,7 @@ class PersonelService {
       throw error;
     }
   }
-  async updatePersonel(request: PersonelUpdateCommand): Promise<string> {
+  async updatePersonel(request: PersonelCreateCommand): Promise<string> {
     try {
       const response = await api.put(`${import.meta.env.VITE_API_URL}/personeller/update`, request);
       if (response.status == 200) {

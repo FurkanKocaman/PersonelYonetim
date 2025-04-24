@@ -92,8 +92,8 @@ internal sealed class BordroGetAllQueryHandler(
 
                     BrutUcret = p.BrutUcret,
                     SGKGun = p.SGKGunSayisi,
-                    EkOdemelerToplam = 0,
-                    KesintilerToplam = 0,
+                    EkOdemelerToplam = p.EkKazancToplam,
+                    KesintilerToplam = p.DigerKesintilerToplam,
 
                     GunlukUcret = p.BrutUcret/p.SGKGunSayisi,
                     OdemeyeEsasGunSayisi = p.SGKGunSayisi,
@@ -115,7 +115,7 @@ internal sealed class BordroGetAllQueryHandler(
                     DVOdemesi = p.OdenecekDamgaVergisi,
 
                     YasalKesintiler = p.OdenecekGelirVergisi + p.OdenecekDamgaVergisi + p.IssizlikPrimiIsci+ p.SGKPrimiIsci,
-                    OzelKesintiler = 0,
+                    OzelKesintiler = p.DigerKesintilerToplam,
                     TumKesintiler = p.ToplamKesinti,
                     
                     EleGecenUcret = p.NetMaas,

@@ -29,12 +29,13 @@ public sealed record PersonelCreateCommand(
     DateTimeOffset? IstenCikisTarihi,
     DateTimeOffset PozisyonBaslangicTarihi,
     DateTimeOffset? PozisyonBitisTarihi,
+
     bool BirincilGorevMi,
     int GorevlendirmeTipiValue,
     int CalismaSekliValue,
     Guid? RaporlananGorevlendirmeId,
     Guid? IzinKuralId,
-    Guid? CalismaTakvimId,
+    Guid? CalismaTakvimiId,
     decimal BrutUcret,
     Guid? TenantId
     ) : IRequest<Result<string>>;
@@ -105,7 +106,7 @@ internal sealed class PersonelCreateCommandHandler(
 
                 personelDetayRepository.Add(personelDetay);
 
-                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.IseGirisTarihi, request.IstenCikisTarihi,request.PozisyonBaslangicTarihi,request.PozisyonBitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimId, request.BrutUcret, null, null, null, null, tenantId.Value);
+                PersonelGorevlendirmeCreateCommand personelGorevlendirmeCreateCommand = new(personel.Id, request.KurumsalBirimId, request.PozisyonId, request.RoleId, request.IseGirisTarihi, request.IstenCikisTarihi,request.PozisyonBaslangicTarihi,request.PozisyonBitisTarihi, request.BirincilGorevMi, request.GorevlendirmeTipiValue, request.CalismaSekliValue, request.RaporlananGorevlendirmeId, request.IzinKuralId, request.CalismaTakvimiId, request.BrutUcret, null, null, null, null, tenantId.Value);
 
                 var gorevlendirmeCreateRes = await sender.Send(personelGorevlendirmeCreateCommand);
                 if (!gorevlendirmeCreateRes.IsSuccessful)
